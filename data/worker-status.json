@@ -4,11 +4,11 @@
   "state": "working",
   "currentTask": "D01 — Create DPP Autopilot landing/dashboard",
   "currentGate": "DEMO",
-  "lastCompletedTask": "F07 — Vercel delivery path verified through controlled deployment mirror",
+  "lastCompletedTask": "F08 Attempt 08 — Supabase fallback limits verified with production-side HTTP tests",
   "nextTask": "Build and test D01, then continue D02-D14 in dependency order while F08 remains externally blocked; periodically recheck F08 without stopping independent work",
-  "message": "F08 remains BLOCKED by the external Vercel Hobby build-rate-limit and stays recorded with its existing evidence. It is no longer allowed to stall independent development. DAVID should now execute D01-D14 in dependency order with implementation, tests and evidence, while periodically rechecking F08 when capacity may be available. No blocked task may be marked GREEN without proof.",
+  "message": "F08 remains BLOCKED and must not stall independent development. Attempt 08 rechecked Vercel at 2026-09-17 22:19:52 Europe/Sofia: both DPP projects still have zero deployments and the controlled mirror remains build-rate-limit. A DPP-only Supabase Edge fallback and public Storage bucket were implemented and tested through pg_net: JSON endpoints/objects return real HTTP 200, but current Supabase platform behavior and documentation confirm HTML/XHTML is intentionally served as text/plain, so it cannot be accepted as browser-ready F08 hosting. DAVID should continue D01-D14 while periodically rechecking F08. Evidence: docs/BINDING_ATTEMPT_08.md.",
   "deferredBlockers": [
-    "F08 — first verified production deployment: Vercel build-rate-limit"
+    "F08 — first verified browser-ready production deployment: Vercel build-rate-limit; Supabase HTML hosting invalid because HTML/XHTML is forced to text/plain"
   ],
-  "updatedAt": "2026-09-17T22:16:00+03:00"
+  "updatedAt": "2026-09-17T22:19:52+03:00"
 }
