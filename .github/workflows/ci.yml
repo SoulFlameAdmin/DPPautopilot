@@ -67,6 +67,15 @@ jobs:
             --window-size=1440,1200 --screenshot=artifacts/d04-model.png \
             'http://127.0.0.1:8000/demo/model.html?sample=1'
           python scripts/validate_model_form.py artifacts/d04-model-valid-dom.html artifacts/d04-model-invalid-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/item.html?sample=1' > artifacts/d05-item-valid-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/item.html?invalid=1' > artifacts/d05-item-invalid-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
+            --window-size=1440,1100 --screenshot=artifacts/d05-item.png \
+            'http://127.0.0.1:8000/demo/item.html?sample=1'
+          python scripts/validate_item_form.py artifacts/d05-item-valid-dom.html artifacts/d05-item-invalid-dom.html
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
