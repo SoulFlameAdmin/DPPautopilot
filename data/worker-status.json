@@ -2,10 +2,10 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "blocked",
-  "currentTask": "F07 — Connect DPPautopilot repository to Vercel project",
+  "currentTask": "F07 — Bind correct Vercel project to SoulFlameAdmin/DPPautopilot",
   "currentGate": "FOUNDATION",
-  "lastCompletedTask": "F12 — Evidence rules: GREEN only after test",
-  "nextTask": "F08 — Verify first production deployment",
-  "message": "GitHub build foundation is ready. The connected Vercel account currently has no DPPautopilot project, and the available Vercel connector can inspect/deploy existing projects but cannot import this new GitHub repository. One Vercel import/deploy action is required; after that DAVID can verify production and continue with D01.",
-  "updatedAt": "2026-09-17T20:35:00+03:00"
+  "lastCompletedTask": "F14 — Baseline repository security hygiene",
+  "nextTask": "F08 — Verify first production deployment after F07 is resolved",
+  "message": "Canonical plan v2.1, CI, environment policy, regulatory traceability baseline and repository security hygiene are implemented and evidenced. Current external blockers: no Vercel project is linked to SoulFlameAdmin/DPPautopilot, and no Supabase project is verified as DPP Autopilot. Existing Vercel project dpp points to SoulFlameAdmin/dpp and existing Supabase project soulflame-twins must not be reused by assumption.",
+  "updatedAt": "2026-09-17T21:38:10+03:00"
 }
