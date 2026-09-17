@@ -1,11 +1,11 @@
 {
   "worker": "DAVID",
   "mode": "BUILD",
-  "state": "working",
+  "state": "blocked",
   "currentTask": "F07 — Connect DPPautopilot repository to Vercel project",
   "currentGate": "FOUNDATION",
   "lastCompletedTask": "F12 — Evidence rules: GREEN only after test",
   "nextTask": "F08 — Verify first production deployment",
-  "message": "Repository and master-plan tracker are initialized. Vercel project connection is the current blocker before deployment verification.",
-  "updatedAt": "2026-09-17T20:20:00+03:00"
+  "message": "GitHub build foundation is ready. The connected Vercel account currently has no DPPautopilot project, and the available Vercel connector can inspect/deploy existing projects but cannot import this new GitHub repository. One Vercel import/deploy action is required; after that DAVID can verify production and continue with D01.",
+  "updatedAt": "2026-09-17T20:35:00+03:00"
 }
