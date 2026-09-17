@@ -1,7 +1,7 @@
 # DPP Autopilot — MASTER AUTOPILOT PLAN
 
 **Source of truth:** this file.  
-**Plan version:** 2.1  
+**Plan version:** 2.2  
 **Frozen:** 2026-09-17  
 **Target:** evidence-backed production readiness, not percentage-by-assumption.
 
@@ -19,12 +19,12 @@
 | System | Verified object | State | Evidence / decision |
 |---|---|---|---|
 | GitHub | `SoulFlameAdmin/DPPautopilot`, branch `main` | VERIFIED | Repository exists and connected GitHub account has write/admin access. |
-| Vercel | No project linked to `SoulFlameAdmin/DPPautopilot` | BLOCKED | Existing Vercel project `dpp` is linked to a different repository: `SoulFlameAdmin/dpp`; it must not be treated as this project. |
-| Supabase | No verified project binding | BLOCKED | Connected account currently exposes `soulflame-twins`; there is no evidence that it belongs to DPP Autopilot. Do not write DPP data there without an explicit verified binding. |
+| Vercel | No project linked to `SoulFlameAdmin/DPPautopilot` | BLOCKED | Existing Vercel project `dpp` is linked to different repo `SoulFlameAdmin/dpp`. Attempt 02 confirmed the exposed connector has no callable create/update/git-connect action; direct deploy invocation fails connector validation because required `target/name/files` arguments are not exposed. Prior Attempt 01 also recorded exhausted Hobby API deployment quota until 2026-09-18 21:42:41 Europe/Sofia. |
+| Supabase | Project `soulflame-twins` used as shared infrastructure with isolated `dpp_` namespace | VERIFIED | Migration `bind_dpp_autopilot_namespace` created `public.dpp_app_binding`; RLS enabled, anon/authenticated privileges revoked, binding row verified for `SoulFlameAdmin/DPPautopilot`. Existing non-DPP tables remain out of scope. |
 
 ## Current implementation audit
 
-At freeze time the repository was a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. During this execution cycle the repository gained a canonical master plan, environment policy, requirements traceability baseline, security baseline, repository validator, security hygiene validator, `.gitignore`, and GitHub Actions CI. It still has no application backend, authenticated users, verified DPP database binding, migrations, production API layer, or verified DPPautopilot Vercel deployment.
+At freeze time the repository was a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. During execution the repository gained a canonical master plan, environment policy, requirements traceability baseline, security baseline, repository validator, security hygiene validator, `.gitignore`, GitHub Actions CI, blocker evidence documents, and a verified Supabase DPP binding marker. It still has no application backend, authenticated DPP users, production DPP data model, production API layer, or verified DPPautopilot Vercel deployment.
 
 ## Product scope
 
@@ -32,7 +32,7 @@ DPP Autopilot is a Battery Digital Product Passport automation platform. The pro
 
 ## Architecture target
 
-Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage (only after verified DPP project binding). Vercel hosts preview/production deployments once the correct GitHub repo is imported. Database changes are migration-driven. Tenant isolation is enforced server-side and with database RLS. Public passport reads are explicitly separated from authenticated/private access. CI gates merge/deploy on validation and automated tests.
+Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The current database architecture uses the existing `soulflame-twins` Supabase project as shared infrastructure with an explicitly isolated DPP namespace: DPP-owned tables must use the `dpp_` prefix, use migrations, enable RLS, and must not depend on or modify unrelated SoulFlame/DAVID/Zorbas/Enchev data except through separately reviewed integrations. Vercel hosts preview/production deployments once the correct GitHub repo is linked. Tenant isolation is enforced server-side and with database RLS. Public passport reads are explicitly separated from authenticated/private access. CI gates merge/deploy on validation and automated tests.
 
 ---
 
@@ -52,7 +52,7 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage (only afte
 | F10 | Define dev/preview/production environment policy | F03 | Environment ownership, secrets, promotion and rollback rules documented | `docs/ENVIRONMENT_POLICY.md` + PASS on commit `eb40704890ececa3df3e2f519962e82d0570c39e` | GREEN |
 | F11 | Requirements traceability matrix | F03 | Product/compliance fields map to authoritative requirement/source and implementation | `docs/REQUIREMENTS_TRACEABILITY.md`; field-level implementation mapping still incomplete | YELLOW |
 | F12 | Enforce GREEN evidence rule | F03 | Validator rejects GREEN tasks with empty evidence | `scripts/validate_repo.py` + passing GitHub Actions checks | GREEN |
-| F13 | Bind dedicated Supabase project | F06 | Project identity verified as DPP Autopilot; URL/keys available to correct environments | Supabase project metadata | BLOCKED |
+| F13 | Bind verified Supabase DPP data namespace | F06 | A concrete Supabase project is explicitly bound to the app; DPP namespace boundary is recorded; client access is deny-by-default until task-specific policies exist | Migration history + verified binding row + RLS/privilege check | GREEN |
 | F14 | Baseline repository security hygiene | F03 | No committed secrets; `.gitignore`/secret policy in place; dependency strategy defined | `.gitignore`, `scripts/security_hygiene.py`, `docs/SECURITY_BASELINE.md`, PASS on commit `5747153bc6b94589a6e805e9d8790dd6e304654c` | GREEN |
 
 # DEMO PRODUCT
@@ -199,10 +199,10 @@ Append evidence here only after verification.
 | 2026-09-17 | F02 | Root inventory verified static prototype files only at audit start | PASS |
 | 2026-09-17 | F03 | Canonical plan created at `docs/MASTER_AUTOPILOT_PLAN.md` | PASS |
 | 2026-09-17 | F05 | `scripts/validate_repo.py` validated worker status contract in GitHub Actions | PASS |
-| 2026-09-17 | F07 | Vercel inventory contains no project linked to `SoulFlameAdmin/DPPautopilot`; project `dpp` links to different repo `SoulFlameAdmin/dpp` | BLOCKED |
+| 2026-09-17 | F07 | Vercel inventory contains no project linked to `SoulFlameAdmin/DPPautopilot`; project `dpp` links to different repo `SoulFlameAdmin/dpp`; Attempt 02 confirmed no callable create/update/git-connect action in exposed connector and direct deploy invocation fails input validation | BLOCKED |
 | 2026-09-17 | F09 | GitHub Actions `validate` completed successfully for commit `9f3892b26176da8a9aac8063f3f528906840d18c` | PASS |
 | 2026-09-17 | F10 | `docs/ENVIRONMENT_POLICY.md` committed; CI PASS on `eb40704890ececa3df3e2f519962e82d0570c39e` | PASS |
 | 2026-09-17 | F11 | Requirements baseline committed with Article 77/78, Annex XIII and Registry traceability; implementation/schema crosswalk incomplete | PARTIAL |
 | 2026-09-17 | F12 | CI validator enforces non-empty concrete evidence text for GREEN tasks | PASS |
-| 2026-09-17 | F13 | Supabase inventory exposes `soulflame-twins`; no verified DPP Autopilot binding | BLOCKED |
+| 2026-09-17 | F13 | Migration `bind_dpp_autopilot_namespace` applied to Supabase project `frhletkiuupgksmgxoxc`; `public.dpp_app_binding` verified with one DPP binding row, RLS enabled, anon/authenticated privileges revoked | PASS |
 | 2026-09-17 | F14 | `.gitignore`, security hygiene scanner and security baseline committed; CI PASS on `5747153bc6b94589a6e805e9d8790dd6e304654c` | PASS |
