@@ -1,11 +1,14 @@
 {
   "worker": "DAVID",
   "mode": "BUILD",
-  "state": "blocked",
-  "currentTask": "F08 — Obtain first verified production deployment",
-  "currentGate": "FOUNDATION",
-  "lastCompletedTask": "Attempt 07 revalidated Vercel quota state and tested remaining safe hosting alternatives",
-  "nextTask": "Use an authorized connected public host (Netlify if connected) or retry Vercel when Hobby deployment capacity returns; then verify a real production URL plus HTTP 200 for index and data JSON",
-  "message": "Attempt 07 rechecked Vercel at 2026-09-17 22:11:27 Europe/Sofia: both dpp and dpp-autopilot still have zero deployments, and controlled mirror commit 748806ae42aa5e958a993137695818036b1022b6 still reports Vercel failure targeting upgradeToPro=build-rate-limit. Netlify remains available but installed:false. A zero-setup CDN-over-public-GitHub fallback was reviewed, but exact DPP endpoints could not be independently HTTP-verified by the authorized toolset, so it was not accepted as F08 evidence. No JWT/auth policy was weakened. Evidence: docs/BINDING_ATTEMPT_07.md.",
-  "updatedAt": "2026-09-17T22:11:27+03:00"
+  "state": "working",
+  "currentTask": "D01 — Create DPP Autopilot landing/dashboard",
+  "currentGate": "DEMO",
+  "lastCompletedTask": "F07 — Vercel delivery path verified through controlled deployment mirror",
+  "nextTask": "Build and test D01, then continue D02-D14 in dependency order while F08 remains externally blocked; periodically recheck F08 without stopping independent work",
+  "message": "F08 remains BLOCKED by the external Vercel Hobby build-rate-limit and stays recorded with its existing evidence. It is no longer allowed to stall independent development. DAVID should now execute D01-D14 in dependency order with implementation, tests and evidence, while periodically rechecking F08 when capacity may be available. No blocked task may be marked GREEN without proof.",
+  "deferredBlockers": [
+    "F08 — first verified production deployment: Vercel build-rate-limit"
+  ],
+  "updatedAt": "2026-09-17T22:16:00+03:00"
 }
