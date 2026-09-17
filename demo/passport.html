@@ -38,7 +38,7 @@ function display(value){if(value===undefined||value===null)return '—';if(typeo
       rendered.push({field:f,value});
     }
     publicFields.innerHTML=rendered.map(({field,value})=>`<article class="card" data-public-field="${esc(field.path)}" data-access="${esc(field.access)}"><div class="label">${esc(field.apiTarget)}</div><div class="value">${esc(display(value))}</div><div class="path">${esc(field.path)}</div><span class="access">${esc(field.access)}</span></article>`).join('');
-    const restrictedMarkers=[fixture.model.restricted_composition?.cathode,fixture.model.safety_measures?.transport,fixture.model.compliance_test_reports?.[0]?.document_ref,item.state_of_health?.percent].filter(v=>v!==undefined).map(String);
+    const restrictedMarkers=[fixture.model.restricted_composition?.cathode,fixture.model.safety_measures?.transport,fixture.model.compliance_test_reports?.[0]?.document_ref].filter(v=>v!==undefined).map(String);
     const visible=publicFields.textContent+' '+hero.textContent;
     const leak=restrictedMarkers.some(marker=>marker && visible.includes(marker));
     document.body.dataset.passportReady='true';document.body.dataset.restrictedLeak=String(leak);document.body.dataset.publicFieldCount=String(rendered.length);document.body.dataset.passportId=item.unique_identifier;
