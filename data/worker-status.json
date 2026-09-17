@@ -2,10 +2,10 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "blocked",
-  "currentTask": "F07 — Bind correct Vercel project to SoulFlameAdmin/DPPautopilot",
+  "currentTask": "F07/F13 — External platform bindings, attempt 01",
   "currentGate": "FOUNDATION",
-  "lastCompletedTask": "F14 — Baseline repository security hygiene",
-  "nextTask": "F08 — Verify first production deployment after F07 is resolved",
-  "message": "Canonical plan v2.1, CI, environment policy, regulatory traceability baseline and repository security hygiene are implemented and evidenced. Current external blockers: no Vercel project is linked to SoulFlameAdmin/DPPautopilot, and no Supabase project is verified as DPP Autopilot. Existing Vercel project dpp points to SoulFlameAdmin/dpp and existing Supabase project soulflame-twins must not be reused by assumption.",
-  "updatedAt": "2026-09-17T21:38:10+03:00"
+  "lastCompletedTask": "Binding attempt 01 evidence recorded",
+  "nextTask": "Retry Vercel after quota reset; create dedicated Supabase project after explicit cost/org confirmation",
+  "message": "Attempt 01 completed safely. Vercel project inventory still has no SoulFlameAdmin/DPPautopilot binding. A preview deployment probe reached Vercel but failed with HTTP 402 because the Hobby API deployment quota is 100/100 with remaining 0; reset timestamp 1789756961224 (2026-09-18 21:42:41 Europe/Sofia). Supabase still exposes only soulflame-twins; it was not reused. Creating a dedicated Supabase project requires explicit organization selection and cost confirmation before the connector permits create_project. Evidence: docs/BINDING_ATTEMPT_01.md.",
+  "updatedAt": "2026-09-17T21:46:00+03:00"
 }
