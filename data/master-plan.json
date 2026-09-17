@@ -1,8 +1,8 @@
 {
   "project": "DPP Autopilot",
-  "version": "MASTER PLAN v2.1",
+  "version": "MASTER PLAN v2.2",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-17T21:38:10+03:00",
+  "updatedAt": "2026-09-17T21:52:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -18,17 +18,17 @@
       "tasks": [
         {"id":"F01","title":"Verify canonical GitHub repository","status":"green","evidence":"GitHub connector verified SoulFlameAdmin/DPPautopilot, main, with admin/write access."},
         {"id":"F02","title":"Inventory current code and configuration","status":"green","evidence":"Initial repository tree audited and recorded in docs/MASTER_AUTOPILOT_PLAN.md."},
-        {"id":"F03","title":"Freeze canonical master plan","status":"green","evidence":"docs/MASTER_AUTOPILOT_PLAN.md v2.1 is the declared source of truth."},
+        {"id":"F03","title":"Freeze canonical master plan","status":"green","evidence":"docs/MASTER_AUTOPILOT_PLAN.md v2.2 is the declared source of truth."},
         {"id":"F04","title":"Keep machine-readable progress dashboard","status":"yellow","evidence":"data/master-plan.json is CI-validated; browser/dashboard smoke test still required."},
         {"id":"F05","title":"Keep DAVID worker status contract","status":"green","evidence":"scripts/validate_repo.py validates required worker fields; GitHub Actions PASS."},
         {"id":"F06","title":"Define product scope and target architecture","status":"green","evidence":"Scope and architecture are documented in the canonical master plan."},
-        {"id":"F07","title":"Bind correct Vercel project","status":"blocked","evidence":"No Vercel project is linked to SoulFlameAdmin/DPPautopilot; existing project dpp links to SoulFlameAdmin/dpp."},
+        {"id":"F07","title":"Bind correct Vercel project","status":"blocked","evidence":"Attempt 02 verified no Vercel project links to SoulFlameAdmin/DPPautopilot; existing dpp links to SoulFlameAdmin/dpp. Exposed connector has no callable project create/update/git-connect operation, and deploy invocation cannot supply its required target/name/files arguments. Attempt 01 also recorded exhausted Hobby API deployment quota until 2026-09-18 21:42:41 Europe/Sofia."},
         {"id":"F08","title":"Verify first production deployment","status":"red","evidence":"Depends on F07; no DPPautopilot production deployment is verified."},
         {"id":"F09","title":"Add CI baseline","status":"green","evidence":"GitHub Actions validate check PASS on commit 9f3892b26176da8a9aac8063f3f528906840d18c."},
         {"id":"F10","title":"Define dev / preview / production environment policy","status":"green","evidence":"docs/ENVIRONMENT_POLICY.md committed; CI PASS on eb40704890ececa3df3e2f519962e82d0570c39e."},
         {"id":"F11","title":"Requirements traceability matrix","status":"yellow","evidence":"docs/REQUIREMENTS_TRACEABILITY.md maps Article 77/78 and Annex XIII baseline; concrete schema/API field crosswalk is not implemented yet."},
         {"id":"F12","title":"Enforce GREEN evidence rule","status":"green","evidence":"scripts/validate_repo.py rejects GREEN tasks without concrete evidence; passing GitHub Actions checks."},
-        {"id":"F13","title":"Bind dedicated Supabase project","status":"blocked","evidence":"Only soulflame-twins is visible; no verified DPP Autopilot Supabase binding exists."},
+        {"id":"F13","title":"Bind verified Supabase DPP data namespace","status":"green","evidence":"Migration bind_dpp_autopilot_namespace applied to Supabase project frhletkiuupgksmgxoxc; public.dpp_app_binding verified with one SoulFlameAdmin/DPPautopilot binding row, RLS enabled, and anon/authenticated privileges revoked."},
         {"id":"F14","title":"Baseline repository security hygiene","status":"green","evidence":".gitignore, scripts/security_hygiene.py and docs/SECURITY_BASELINE.md committed; CI PASS on 5747153bc6b94589a6e805e9d8790dd6e304654c."}
       ]
     },
@@ -38,7 +38,7 @@
       "purpose": "A polished, believable product demonstration that explains the value in minutes.",
       "exitCriteria": "A prospect can create/import a sample battery, view a passport, scan a QR code and understand missing compliance data.",
       "tasks": [
-        {"id":"D01","title":"Create DPP Autopilot landing/dashboard","status":"red","evidence":"Not started under v2.1 acceptance criteria."},
+        {"id":"D01","title":"Create DPP Autopilot landing/dashboard","status":"red","evidence":"Not started under v2.2 acceptance criteria."},
         {"id":"D02","title":"Create sample battery dataset","status":"red","evidence":"Not started."},
         {"id":"D03","title":"CSV/Excel-style import demo","status":"red","evidence":"Not started."},
         {"id":"D04","title":"Battery model form","status":"red","evidence":"Not started."},
@@ -60,10 +60,10 @@
       "purpose": "Pilot-ready system using real customer data in a controlled environment.",
       "exitCriteria": "A pilot customer can onboard, import real battery data, validate it, manage passports, control access and produce an auditable registry-ready record.",
       "tasks": [
-        {"id":"M01","title":"Add authenticated organisations and users","status":"red","evidence":"Depends on verified Supabase binding."},
+        {"id":"M01","title":"Add authenticated organisations and users","status":"red","evidence":"Not started; verified Supabase namespace is now available."},
         {"id":"M02","title":"Multi-organisation data isolation","status":"red","evidence":"Not started."},
         {"id":"M03","title":"Role-based access control","status":"red","evidence":"Not started."},
-        {"id":"M04","title":"Persistent database schema for models/items/passports","status":"red","evidence":"Depends on F13 and F11."},
+        {"id":"M04","title":"Persistent database schema for models/items/passports","status":"red","evidence":"Depends on F13 and F11; F13 is resolved, F11 remains partial."},
         {"id":"M05","title":"Import CSV with mapping wizard","status":"red","evidence":"Not started."},
         {"id":"M06","title":"Import validation and row-level errors","status":"red","evidence":"Not started."},
         {"id":"M07","title":"Annex XIII data model mapping","status":"red","evidence":"Requirements baseline exists; implementation not started."},
@@ -109,7 +109,7 @@
         {"id":"R03","title":"TLS/security headers and secure defaults","status":"red","evidence":"Requires production deployment."},
         {"id":"R04","title":"Tenant isolation security tests","status":"red","evidence":"Not started."},
         {"id":"R05","title":"Rate limiting and abuse controls","status":"red","evidence":"Not started."},
-        {"id":"R06","title":"Backup and restore procedure tested","status":"red","evidence":"Requires verified database."},
+        {"id":"R06","title":"Backup and restore procedure tested","status":"red","evidence":"Requires verified production database behavior and restore exercise."},
         {"id":"R07","title":"Monitoring / alerting / error tracking","status":"red","evidence":"Not started."},
         {"id":"R08","title":"Availability and incident-response runbook","status":"red","evidence":"Not started."},
         {"id":"R09","title":"GDPR/privacy data inventory","status":"red","evidence":"Not started."},
