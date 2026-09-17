@@ -21,6 +21,8 @@ jobs:
           python-version: '3.12'
       - name: Validate repository contracts
         run: python scripts/validate_repo.py
+      - name: Validate DPP field traceability catalog
+        run: python scripts/validate_field_catalog.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
       - name: Browser smoke test DPP dashboard
