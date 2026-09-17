@@ -1,0 +1,168 @@
+{
+  "fixtureVersion": "1.0.0",
+  "synthetic": true,
+  "disclaimer": "Synthetic demo data only. It does not describe a real manufacturer, battery, conformity assessment, test report, sourcing claim, carbon footprint declaration, or Registry record.",
+  "model": {
+    "identification": {
+      "manufacturer": {
+        "name": "Northstar Demo Cells (Synthetic)",
+        "postal_address": "100 Demo Park, Test City 00000, EU (Synthetic)",
+        "contact": "demo@example.invalid"
+      },
+      "category": "electric_vehicle",
+      "model_id": "NSD-EV-82-DEMO",
+      "place_of_manufacture": "Test City, EU (Synthetic)",
+      "date_of_manufacture": "2026-08"
+    },
+    "physical": {
+      "weight_kg": 468.4
+    },
+    "rated_capacity_ah": 230,
+    "composition": {
+      "chemistry": "Lithium-ion NMC 811 (Synthetic)",
+      "hazardous_substances": [
+        {"name": "Synthetic electrolyte component", "cas": "DEMO-0001", "concentration_percent": 2.1}
+      ],
+      "critical_raw_materials": [
+        {"material": "Lithium", "share_percent": 2.8},
+        {"material": "Cobalt", "share_percent": 4.2},
+        {"material": "Natural graphite", "share_percent": 11.5}
+      ]
+    },
+    "safety": {
+      "usable_extinguishing_agent": "Large quantities of water for cooling — synthetic demo statement"
+    },
+    "carbon_footprint": {
+      "total_kg_co2e_per_kwh": 54.7,
+      "method": "Synthetic demonstration value; not a verified declaration",
+      "study_reference": "DEMO-CF-2026-001"
+    },
+    "responsible_sourcing": {
+      "policy_reference": "DEMO-RS-001",
+      "third_party_verification": false,
+      "note": "Synthetic sourcing evidence for UI demonstration only"
+    },
+    "recycled_content": {
+      "cobalt_percent": 16,
+      "lithium_percent": 7,
+      "nickel_percent": 10,
+      "lead_percent": 0
+    },
+    "renewable_content_share": 42,
+    "voltage": {
+      "minimum_v": 280,
+      "nominal_v": 355,
+      "maximum_v": 403,
+      "operating_temperature_min_c": -20,
+      "operating_temperature_max_c": 55
+    },
+    "power_capability": {
+      "original_kw": 250,
+      "continuous_kw": 180,
+      "temperature_min_c": -10,
+      "temperature_max_c": 45
+    },
+    "expected_lifetime": {
+      "cycles": 1800,
+      "reference_test": "DEMO-CYCLE-TEST-01"
+    },
+    "exhaustion_capacity_threshold": 70,
+    "storage_temperature": {
+      "minimum_c": -30,
+      "maximum_c": 45,
+      "reference_test": "DEMO-STORAGE-01"
+    },
+    "warranty_calendar_life": "8 years / 160000 km (Synthetic)",
+    "energy_efficiency": {
+      "initial_percent": 94.5,
+      "at_50_percent_cycle_life_percent": 91.2
+    },
+    "internal_resistance": {
+      "cell_milliohm": 1.9,
+      "pack_milliohm": 47.5
+    },
+    "c_rate_test": 1.0,
+    "markings": {
+      "ce": true,
+      "separate_collection_symbol": true,
+      "qr_placeholder": "DEMO-QR-NOT-A-REAL-DATA-CARRIER"
+    },
+    "eu_declaration_of_conformity": {
+      "document_ref": "DEMO-EU-DOC-001",
+      "synthetic": true
+    },
+    "waste_information": {
+      "collection": "Return to an authorised collection point — synthetic demo text",
+      "handling": "Follow applicable local battery waste rules",
+      "safety": "Do not crush, puncture or expose to fire"
+    },
+    "restricted_composition": {
+      "cathode": "Synthetic NMC formulation",
+      "anode": "Synthetic graphite/silicon formulation",
+      "electrolyte": "Synthetic electrolyte formulation"
+    },
+    "spares": [
+      {"part_number": "DEMO-CMU-001", "description": "Cell monitoring unit", "source_contact": "parts@example.invalid"}
+    ],
+    "disassembly": {
+      "exploded_diagram_ref": "DEMO-DIAGRAM-001",
+      "sequence": ["Isolate high voltage", "Remove service disconnect", "Unfasten enclosure"],
+      "fasteners": ["Synthetic M8 flange bolt", "Synthetic bonded seal"],
+      "tools": ["Insulated torque wrench", "HV-rated PPE"],
+      "warnings": ["Synthetic demo: verify zero-energy state before service"],
+      "cell_layout": {"modules": 12, "cells_per_module": 24}
+    },
+    "safety_measures": {
+      "transport": "Synthetic demo transport procedure",
+      "service": "Synthetic demo isolation procedure"
+    },
+    "compliance_test_reports": [
+      {"document_ref": "DEMO-TEST-REPORT-001", "synthetic": true, "result": "DEMO-PASS-NOT-A-REAL-CONFORMITY-RESULT"}
+    ]
+  },
+  "items": [
+    {
+      "unique_identifier": "urn:dpp:demo:battery:NSD-EV-82-DEMO:000001",
+      "performance_history": [
+        {"at": "2026-08-15T10:00:00Z", "event": "market_placement", "capacity_ah": 230, "power_kw": 250}
+      ],
+      "state_of_health": {"percent": 100, "measured_at": "2026-08-15T10:00:00Z"},
+      "lifecycle_status": "original",
+      "usage": {
+        "cycles": 0,
+        "events": []
+      },
+      "telemetry": {
+        "environment": [
+          {"at": "2026-08-15T10:00:00Z", "temperature_c": 24, "humidity_percent": 43}
+        ],
+        "state_of_charge": [
+          {"at": "2026-08-15T10:00:00Z", "percent": 62}
+        ]
+      }
+    },
+    {
+      "unique_identifier": "urn:dpp:demo:battery:NSD-EV-82-DEMO:000002",
+      "performance_history": [
+        {"at": "2026-08-16T10:00:00Z", "event": "market_placement", "capacity_ah": 230, "power_kw": 250},
+        {"at": "2026-09-10T10:00:00Z", "event": "demo_status_update", "capacity_ah": 228.7, "power_kw": 248}
+      ],
+      "state_of_health": {"percent": 99.4, "measured_at": "2026-09-10T10:00:00Z"},
+      "lifecycle_status": "original",
+      "usage": {
+        "cycles": 34,
+        "events": [
+          {"at": "2026-09-02T14:20:00Z", "type": "demo_warning", "description": "Synthetic temperature warning used to exercise the UI"}
+        ]
+      },
+      "telemetry": {
+        "environment": [
+          {"at": "2026-09-10T10:00:00Z", "temperature_c": 29, "humidity_percent": 38}
+        ],
+        "state_of_charge": [
+          {"at": "2026-09-10T10:00:00Z", "percent": 71}
+        ]
+      }
+    }
+  ]
+}
