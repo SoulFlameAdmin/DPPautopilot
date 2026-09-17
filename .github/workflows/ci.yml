@@ -21,3 +21,5 @@ jobs:
           python-version: '3.12'
       - name: Validate repository contracts
         run: python scripts/validate_repo.py
+      - name: Check repository security hygiene
+        run: python scripts/security_hygiene.py
