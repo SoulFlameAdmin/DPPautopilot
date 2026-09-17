@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DPP Autopilot · CSV Import Demo</title>
+  <style>
+    :root{--bg:#07090d;--panel:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--blue:#69a7ff;--green:#39d98a;--red:#ff5c6c}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:1180px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}.top a{color:#cbd7e5;text-decoration:none}.badge{font-size:11px;color:var(--blue);font-weight:800;letter-spacing:.14em;text-transform:uppercase}.card{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:18px;margin-bottom:16px}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#111722;color:var(--text);padding:10px 13px;border-radius:10px;cursor:pointer}.btn.primary{background:#eef3f8;color:#090c11;font-weight:800}.hint{color:var(--muted);font-size:12px}.status{margin-top:12px;font-size:12px;color:var(--muted)}.status.ok{color:var(--green)}.status.error{color:var(--red)}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:14px}table{border-collapse:collapse;width:100%;min-width:900px}th,td{padding:10px;border-bottom:1px solid #1a2330;border-right:1px solid #1a2330;text-align:left;vertical-align:top}th{background:#0a0e14;font-size:12px;color:#9fb0c5}td{font-size:12px}.mapping{display:grid;grid-template-columns:1fr 1.5fr;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #171f2a}.mapping:last-child{border:0}select{width:100%;background:#090d13;color:var(--text);border:1px solid #263244;padding:9px;border-radius:9px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:#0a0e14}.metric strong{font-size:24px;display:block}.synthetic{padding:10px 12px;border:1px solid #5a4930;background:#151108;border-radius:10px;color:#e8c982;margin:14px 0}@media(max-width:700px){.summary{grid-template-columns:1fr}.mapping{grid-template-columns:1fr}.shell{padding:14px}}
+  </style>
+</head>
+<body data-import-loaded="false">
+  <main class="shell">
+    <div class="top"><div><div class="badge">DPP Autopilot · Demo</div><h1>CSV import и mapping</h1></div><a href="/">← Dashboard</a></div>
+    <div class="synthetic">Тази страница работи само със synthetic demo данни. Няма backend write и не променя production данни.</div>
+    <section class="card">
+      <h2>1. Зареди CSV</h2>
+      <div class="actions"><input id="fileInput" type="file" accept=".csv,text/csv" /><button class="btn primary" id="loadSample" type="button">Зареди synthetic sample</button></div>
+      <div id="loadStatus" class="status">Няма зареден файл.</div>
+    </section>
+    <section class="card" id="mappingCard" hidden>
+      <h2>2. Map-ни колоните</h2><p class="hint">Всяка CSV колона може да се свърже с canonical DPP field. Нищо не се записва към backend.</p>
+      <div id="mappings"></div>
+    </section>
+    <section class="card" id="previewCard" hidden>
+      <h2>3. Preview</h2>
+      <div class="summary"><div class="metric"><strong id="columnCount">0</strong>колони</div><div class="metric"><strong id="rowCount">0</strong>реда</div><div class="metric"><strong id="mappedCount">0</strong>mapped</div></div>
+      <div class="table-wrap"><table><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table></div>
+    </section>
+  </main>
+<script>
+const FIELD_OPTIONS=[
+  ['','— Ignore —'],
+  ['model.identification.manufacturer.name','Manufacturer name'],
+  ['model.identification.model_id','Model ID'],
+  ['model.identification.category','Category'],
+  ['model.rated_capacity_ah','Rated capacity (Ah)'],
+  ['model.composition.chemistry','Chemistry'],
+  ['item.unique_identifier','Unique identifier'],
+  ['item.lifecycle_status','Lifecycle status'],
+  ['item.state_of_health.percent','State of health (%)']
+];
+const DEFAULT_MAP={manufacturer_name:'model.identification.manufacturer.name',model_id:'model.identification.model_id',category:'model.identification.category',rated_capacity_ah:'model.rated_capacity_ah',chemistry:'model.composition.chemistry',unique_identifier:'item.unique_identifier',lifecycle_status:'item.lifecycle_status',state_of_health_percent:'item.state_of_health.percent'};
+let state={headers:[],rows:[],mapping:{}};
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function parseCSV(text){
+  const rows=[];let row=[],cell='',quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(ch==='"'){
+      if(quoted&&text[i+1]==='"'){cell+='"';i++;}else quoted=!quoted;
+    }else if(ch===','&&!quoted){row.push(cell);cell='';}
+    else if((ch==='\n'||ch==='\r')&&!quoted){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(cell);cell='';if(row.some(v=>v!==''))rows.push(row);row=[];}
+    else cell+=ch;
+  }
+  if(cell!==''||row.length){row.push(cell);if(row.some(v=>v!==''))rows.push(row)}
+  if(rows.length<2)throw new Error('CSV трябва да има header и поне един data row.');
+  const headers=rows[0].map(v=>v.trim());
+  if(headers.some(v=>!v))throw new Error('CSV има празно име на колона.');
+  if(new Set(headers).size!==headers.length)throw new Error('CSV има дублирани имена на колони.');
+  return {headers,rows:rows.slice(1).map(r=>headers.map((_,i)=>r[i]??''))};
+}
+function render(){
+  const {headers,rows}=state;mappingCard.hidden=false;previewCard.hidden=false;
+  mappings.innerHTML=headers.map((h,i)=>{
+    const options=FIELD_OPTIONS.map(([v,l])=>`<option value="${escapeHtml(v)}" ${state.mapping[h]===v?'selected':''}>${escapeHtml(l)}</option>`).join('');
+    return `<div class="mapping"><code>${escapeHtml(h)}</code><select data-column="${escapeHtml(h)}" aria-label="Map ${escapeHtml(h)}">${options}</select></div>`;
+  }).join('');
+  previewHead.innerHTML='<tr>'+headers.map(h=>`<th>${escapeHtml(h)}</th>`).join('')+'</tr>';
+  previewBody.innerHTML=rows.slice(0,5).map(r=>'<tr>'+r.map(v=>`<td>${escapeHtml(v)}</td>`).join('')+'</tr>').join('');
+  columnCount.textContent=headers.length;rowCount.textContent=rows.length;updateMapped();
+  document.body.dataset.importLoaded='true';
+}
+function updateMapped(){mappedCount.textContent=Object.values(state.mapping).filter(Boolean).length;document.body.dataset.mappedCount=mappedCount.textContent}
+async function loadText(text,label){
+  try{const parsed=parseCSV(text);state.headers=parsed.headers;state.rows=parsed.rows;state.mapping=Object.fromEntries(parsed.headers.map(h=>[h,DEFAULT_MAP[h]||'']));render();loadStatus.className='status ok';loadStatus.textContent=`Заредено: ${label} · ${parsed.rows.length} rows`;}
+  catch(e){document.body.dataset.importLoaded='false';loadStatus.className='status error';loadStatus.textContent=e.message;mappingCard.hidden=true;previewCard.hidden=true;}
+}
+fileInput.addEventListener('change',async e=>{const f=e.target.files?.[0];if(f)await loadText(await f.text(),f.name)});
+loadSample.addEventListener('click',async()=>{const r=await fetch('/data/sample-import.csv',{cache:'no-store'});if(!r.ok)throw new Error('sample '+r.status);await loadText(await r.text(),'sample-import.csv')});
+mappings.addEventListener('change',e=>{if(!e.target.matches('select[data-column]'))return;state.mapping[e.target.dataset.column]=e.target.value;updateMapped()});
+if(new URLSearchParams(location.search).get('sample')==='1')loadSample.click();
+</script>
+</body>
+</html>
