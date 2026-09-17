@@ -1,7 +1,7 @@
 # DPP Autopilot — MASTER AUTOPILOT PLAN
 
 **Source of truth:** this file.  
-**Plan version:** 2.0  
+**Plan version:** 2.1  
 **Frozen:** 2026-09-17  
 **Target:** evidence-backed production readiness, not percentage-by-assumption.
 
@@ -24,7 +24,7 @@
 
 ## Current implementation audit
 
-The current repository is a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. It has a visible progress dashboard, but no application backend, no authenticated users, no verified database binding, no migrations, no API layer, no automated test suite, and no CI workflow at the time this plan was frozen.
+At freeze time the repository was a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. During this execution cycle the repository gained a canonical master plan, environment policy, requirements traceability baseline, security baseline, repository validator, security hygiene validator, `.gitignore`, and GitHub Actions CI. It still has no application backend, authenticated users, verified DPP database binding, migrations, production API layer, or verified DPPautopilot Vercel deployment.
 
 ## Product scope
 
@@ -44,16 +44,16 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage (only afte
 | F02 | Inventory current code/config | F01 | Root tree and implemented surfaces documented | Audit section in this file | GREEN |
 | F03 | Freeze canonical master plan | F01,F02 | This file exists with stable IDs, dependencies, acceptance and evidence rules | `docs/MASTER_AUTOPILOT_PLAN.md` commit | GREEN |
 | F04 | Keep machine-readable progress view | F03 | `data/master-plan.json` remains parseable and dashboard can render it | CI validator + dashboard smoke test | YELLOW |
-| F05 | Keep DAVID worker status contract | F03 | Worker JSON parseable with required fields/status | CI validator | YELLOW |
+| F05 | Keep DAVID worker status contract | F03 | Worker JSON parseable with required fields/status | Passing CI validator | GREEN |
 | F06 | Define product scope and target architecture | F03 | Scope + architecture recorded and reviewed against implementation | This file | GREEN |
 | F07 | Bind correct Vercel project | F01 | Vercel project is linked to `SoulFlameAdmin/DPPautopilot` | Vercel project metadata | BLOCKED |
 | F08 | Verify first production deployment | F07 | Production deployment READY; app and data JSON return 200 | Deployment metadata + HTTP verification | RED |
-| F09 | Add CI baseline | F03 | CI validates JSON, stable IDs, required repo files and HTML data references | Passing GitHub Actions run | RED |
-| F10 | Define dev/preview/production environment policy | F03 | Environment ownership, secrets, promotion and rollback rules documented | `docs/ENVIRONMENT_POLICY.md` | RED |
-| F11 | Requirements traceability matrix | F03 | Product/compliance fields map to authoritative requirement/source and implementation | `docs/REQUIREMENTS_TRACEABILITY.md` | RED |
-| F12 | Enforce GREEN evidence rule | F03 | Validator rejects GREEN tasks with empty evidence | Automated validator test | RED |
+| F09 | Add CI baseline | F03 | CI validates JSON, stable IDs, required repo files and HTML data references | GitHub Actions check `validate` PASS on commit `9f3892b26176da8a9aac8063f3f528906840d18c` | GREEN |
+| F10 | Define dev/preview/production environment policy | F03 | Environment ownership, secrets, promotion and rollback rules documented | `docs/ENVIRONMENT_POLICY.md` + PASS on commit `eb40704890ececa3df3e2f519962e82d0570c39e` | GREEN |
+| F11 | Requirements traceability matrix | F03 | Product/compliance fields map to authoritative requirement/source and implementation | `docs/REQUIREMENTS_TRACEABILITY.md`; field-level implementation mapping still incomplete | YELLOW |
+| F12 | Enforce GREEN evidence rule | F03 | Validator rejects GREEN tasks with empty evidence | `scripts/validate_repo.py` + passing GitHub Actions checks | GREEN |
 | F13 | Bind dedicated Supabase project | F06 | Project identity verified as DPP Autopilot; URL/keys available to correct environments | Supabase project metadata | BLOCKED |
-| F14 | Baseline repository security hygiene | F03 | No committed secrets; `.gitignore`/secret policy in place; dependency strategy defined | CI/security check | RED |
+| F14 | Baseline repository security hygiene | F03 | No committed secrets; `.gitignore`/secret policy in place; dependency strategy defined | `.gitignore`, `scripts/security_hygiene.py`, `docs/SECURITY_BASELINE.md`, PASS on commit `5747153bc6b94589a6e805e9d8790dd6e304654c` | GREEN |
 
 # DEMO PRODUCT
 
@@ -196,7 +196,13 @@ Append evidence here only after verification.
 | Date | Task | Evidence | Result |
 |---|---|---|---|
 | 2026-09-17 | F01 | GitHub connector verified `SoulFlameAdmin/DPPautopilot`, default branch `main`, admin/write permissions | PASS |
-| 2026-09-17 | F02 | Root inventory verified static prototype files only | PASS |
+| 2026-09-17 | F02 | Root inventory verified static prototype files only at audit start | PASS |
 | 2026-09-17 | F03 | Canonical plan created at `docs/MASTER_AUTOPILOT_PLAN.md` | PASS |
-| 2026-09-17 | F07 | Vercel project inventory contains no project linked to `SoulFlameAdmin/DPPautopilot`; project `dpp` links to different repo `SoulFlameAdmin/dpp` | BLOCKED |
+| 2026-09-17 | F05 | `scripts/validate_repo.py` validated worker status contract in GitHub Actions | PASS |
+| 2026-09-17 | F07 | Vercel inventory contains no project linked to `SoulFlameAdmin/DPPautopilot`; project `dpp` links to different repo `SoulFlameAdmin/dpp` | BLOCKED |
+| 2026-09-17 | F09 | GitHub Actions `validate` completed successfully for commit `9f3892b26176da8a9aac8063f3f528906840d18c` | PASS |
+| 2026-09-17 | F10 | `docs/ENVIRONMENT_POLICY.md` committed; CI PASS on `eb40704890ececa3df3e2f519962e82d0570c39e` | PASS |
+| 2026-09-17 | F11 | Requirements baseline committed with Article 77/78, Annex XIII and Registry traceability; implementation/schema crosswalk incomplete | PARTIAL |
+| 2026-09-17 | F12 | CI validator enforces non-empty concrete evidence text for GREEN tasks | PASS |
 | 2026-09-17 | F13 | Supabase inventory exposes `soulflame-twins`; no verified DPP Autopilot binding | BLOCKED |
+| 2026-09-17 | F14 | `.gitignore`, security hygiene scanner and security baseline committed; CI PASS on `5747153bc6b94589a6e805e9d8790dd6e304654c` | PASS |
