@@ -1,7 +1,7 @@
 # DPP Autopilot — MASTER AUTOPILOT PLAN
 
 **Source of truth:** this file.  
-**Plan version:** 2.3  
+**Plan version:** 2.4  
 **Frozen:** 2026-09-17  
 **Target:** evidence-backed production readiness, not percentage-by-assumption.
 
@@ -24,7 +24,7 @@
 
 ## Current implementation audit
 
-At freeze time the repository was a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. During execution the repository gained a canonical master plan, environment policy, requirements traceability baseline, security baseline, repository validator, security hygiene validator, `.gitignore`, GitHub Actions CI, blocker evidence documents, a verified Supabase DPP binding marker, and a documented Vercel deployment-mirror path. It still has no application backend, authenticated DPP users, production DPP data model, production API layer, or successful DPP Autopilot Vercel deployment.
+At freeze time the repository was a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. During execution the repository gained a canonical master plan, environment policy, requirements traceability contract, machine-readable field catalog, security baseline, repository/field/security validators, `.gitignore`, GitHub Actions CI, browser-rendered dashboard smoke tests with screenshot artifacts, blocker evidence documents, a verified Supabase DPP binding marker, and a documented Vercel deployment-mirror path. D01 now provides the tested dashboard/navigation shell and visible stage boundaries. The project still has no authenticated DPP users, production DPP database schema/API layer, or successful DPP Autopilot Vercel production deployment.
 
 ## Product scope
 
@@ -43,14 +43,14 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | F01 | Verify canonical GitHub repository | — | Repo identity/default branch/write access verified | Connector result naming exact repo | GREEN |
 | F02 | Inventory current code/config | F01 | Root tree and implemented surfaces documented | Audit section in this file | GREEN |
 | F03 | Freeze canonical master plan | F01,F02 | This file exists with stable IDs, dependencies, acceptance and evidence rules | `docs/MASTER_AUTOPILOT_PLAN.md` commit | GREEN |
-| F04 | Keep machine-readable progress view | F03 | `data/master-plan.json` remains parseable and dashboard can render it | CI validator + dashboard smoke test | YELLOW |
+| F04 | Keep machine-readable progress view | F03 | `data/master-plan.json` remains parseable and dashboard can render it | CI validator + dashboard smoke test | GREEN |
 | F05 | Keep DAVID worker status contract | F03 | Worker JSON parseable with required fields/status | Passing CI validator | GREEN |
 | F06 | Define product scope and target architecture | F03 | Scope + architecture recorded and reviewed against implementation | This file | GREEN |
 | F07 | Bind Vercel delivery path | F01 | A Vercel project is connected either directly to canonical repo or to a documented deployment-only mirror synchronized from canonical; a Vercel commit/deployment status proves the integration receives the expected commit | Vercel project metadata + GitHub/Vercel status evidence + mirror policy when applicable | GREEN |
 | F08 | Verify first production deployment | F07 | Production deployment READY; app and data JSON return 200 | Deployment metadata + HTTP verification | BLOCKED |
 | F09 | Add CI baseline | F03 | CI validates JSON, stable IDs, required repo files and HTML data references | GitHub Actions check `validate` PASS on commit `9f3892b26176da8a9aac8063f3f528906840d18c` | GREEN |
 | F10 | Define dev/preview/production environment policy | F03 | Environment ownership, secrets, promotion and rollback rules documented | `docs/ENVIRONMENT_POLICY.md` + PASS on commit `eb40704890ececa3df3e2f519962e82d0570c39e` | GREEN |
-| F11 | Requirements traceability matrix | F03 | Product/compliance fields map to authoritative requirement/source and implementation | `docs/REQUIREMENTS_TRACEABILITY.md`; field-level implementation mapping still incomplete | YELLOW |
+| F11 | Requirements traceability matrix | F03 | Product/compliance fields map to authoritative requirement/source and implementation | `docs/REQUIREMENTS_TRACEABILITY.md` + `data/dpp-field-catalog.json` + CI coverage validator | GREEN |
 | F12 | Enforce GREEN evidence rule | F03 | Validator rejects GREEN tasks with empty evidence | `scripts/validate_repo.py` + passing GitHub Actions checks | GREEN |
 | F13 | Bind verified Supabase DPP data namespace | F06 | A concrete Supabase project is explicitly bound to the app; DPP namespace boundary is recorded; client access is deny-by-default until task-specific policies exist | Migration history + verified binding row + RLS/privilege check | GREEN |
 | F14 | Baseline repository security hygiene | F03 | No committed secrets; `.gitignore`/secret policy in place; dependency strategy defined | `.gitignore`, `scripts/security_hygiene.py`, `docs/SECURITY_BASELINE.md`, PASS on commit `5747153bc6b94589a6e805e9d8790dd6e304654c` | GREEN |
@@ -59,7 +59,7 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 
 | ID | Task | Depends on | Acceptance criteria | Evidence required | Status |
 |---|---|---|---|---|---|
-| D01 | Product dashboard / navigation | F09 | Dashboard usable with clear Demo/MVP/Production boundaries | UI smoke test + screenshots | RED |
+| D01 | Product dashboard / navigation | F09 | Dashboard usable with clear Demo/MVP/Production boundaries | UI smoke test + screenshots | GREEN |
 | D02 | Realistic sample battery dataset | F11 | Sample model/items cover required demo fields and are explicitly synthetic | Fixture validation test | RED |
 | D03 | CSV import demo | D02 | File can be loaded, columns previewed and mapped without backend | Browser test fixture | RED |
 | D04 | Battery model form | D02 | Required model fields validate and errors are visible | Form tests | RED |
@@ -198,12 +198,14 @@ Append evidence here only after verification.
 | 2026-09-17 | F01 | GitHub connector verified `SoulFlameAdmin/DPPautopilot`, default branch `main`, admin/write permissions | PASS |
 | 2026-09-17 | F02 | Root inventory verified static prototype files only at audit start | PASS |
 | 2026-09-17 | F03 | Canonical plan created at `docs/MASTER_AUTOPILOT_PLAN.md` | PASS |
+| 2026-09-17 | F04 | GitHub Actions run `35265447807` on commit `a3d408f5b5dac9b34ffc0d9e85d68e5e95ef3a65`: repository contract PASS + headless Chrome dashboard render PASS; screenshot artifact `d01-dashboard-smoke` id `10516670805` | PASS |
 | 2026-09-17 | F05 | `scripts/validate_repo.py` validated worker status contract in GitHub Actions | PASS |
 | 2026-09-17 | F07 | Controlled mirror `SoulFlameAdmin/dpp` synchronized from canonical; Vercel project `dpp` is linked to mirror; exact mirror commit `748806ae42aa5e958a993137695818036b1022b6` received Vercel status, proving Git integration. See `docs/BINDING_ATTEMPT_03.md` | PASS |
 | 2026-09-17 | F08 | Vercel status on mirror commit failed with target containing `upgradeToPro=build-rate-limit`; no deployment object was created | BLOCKED |
 | 2026-09-17 | F09 | GitHub Actions `validate` completed successfully for commit `9f3892b26176da8a9aac8063f3f528906840d18c` | PASS |
 | 2026-09-17 | F10 | `docs/ENVIRONMENT_POLICY.md` committed; CI PASS on `eb40704890ececa3df3e2f519962e82d0570c39e` | PASS |
-| 2026-09-17 | F11 | Requirements baseline committed with Article 77/78, Annex XIII and Registry traceability; implementation/schema crosswalk incomplete | PARTIAL |
+| 2026-09-17 | F11 | `docs/REQUIREMENTS_TRACEABILITY.md` completed explicit Annex VI/Annex XIII mapping; `data/dpp-field-catalog.json` maps requirement/source/access/type to DB/API/UI targets; `scripts/validate_field_catalog.py` PASS in run `35265447807` | PASS |
 | 2026-09-17 | F12 | CI validator enforces non-empty concrete evidence text for GREEN tasks | PASS |
 | 2026-09-17 | F13 | Migration `bind_dpp_autopilot_namespace` applied to Supabase project `frhletkiuupgksmgxoxc`; `public.dpp_app_binding` verified with one DPP binding row, RLS enabled, anon/authenticated privileges revoked | PASS |
 | 2026-09-17 | F14 | `.gitignore`, security hygiene scanner and security baseline committed; CI PASS on `5747153bc6b94589a6e805e9d8790dd6e304654c` | PASS |
+| 2026-09-17 | D01 | Bulgarian burger menu with `Етапи`, full-screen plan, DAVID status and five visible product boundaries implemented in `index.html`; browser smoke PASS and screenshot artifact `10516670805` in run `35265447807` | PASS |
