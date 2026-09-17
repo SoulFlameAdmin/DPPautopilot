@@ -1,7 +1,7 @@
 # DPP Autopilot — MASTER AUTOPILOT PLAN
 
 **Source of truth:** this file.  
-**Plan version:** 2.2  
+**Plan version:** 2.3  
 **Frozen:** 2026-09-17  
 **Target:** evidence-backed production readiness, not percentage-by-assumption.
 
@@ -19,12 +19,12 @@
 | System | Verified object | State | Evidence / decision |
 |---|---|---|---|
 | GitHub | `SoulFlameAdmin/DPPautopilot`, branch `main` | VERIFIED | Repository exists and connected GitHub account has write/admin access. |
-| Vercel | No project linked to `SoulFlameAdmin/DPPautopilot` | BLOCKED | Existing Vercel project `dpp` is linked to different repo `SoulFlameAdmin/dpp`. Attempt 02 confirmed the exposed connector has no callable create/update/git-connect action; direct deploy invocation fails connector validation because required `target/name/files` arguments are not exposed. Prior Attempt 01 also recorded exhausted Hobby API deployment quota until 2026-09-18 21:42:41 Europe/Sofia. |
+| Vercel | Project `dpp` linked to controlled mirror `SoulFlameAdmin/dpp` | VERIFIED BINDING / BUILD BLOCKED | `SoulFlameAdmin/dpp` is documented as a deployment-only mirror of canonical `SoulFlameAdmin/DPPautopilot`. Mirror commit `748806ae42aa5e958a993137695818036b1022b6` received a Vercel commit status, proving the Git integration path. The status failed with `build-rate-limit`, so F07 is resolved but F08 remains blocked. Dedicated unlinked Vercel project `dpp-autopilot` also exists with no deployments. |
 | Supabase | Project `soulflame-twins` used as shared infrastructure with isolated `dpp_` namespace | VERIFIED | Migration `bind_dpp_autopilot_namespace` created `public.dpp_app_binding`; RLS enabled, anon/authenticated privileges revoked, binding row verified for `SoulFlameAdmin/DPPautopilot`. Existing non-DPP tables remain out of scope. |
 
 ## Current implementation audit
 
-At freeze time the repository was a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. During execution the repository gained a canonical master plan, environment policy, requirements traceability baseline, security baseline, repository validator, security hygiene validator, `.gitignore`, GitHub Actions CI, blocker evidence documents, and a verified Supabase DPP binding marker. It still has no application backend, authenticated DPP users, production DPP data model, production API layer, or verified DPPautopilot Vercel deployment.
+At freeze time the repository was a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. During execution the repository gained a canonical master plan, environment policy, requirements traceability baseline, security baseline, repository validator, security hygiene validator, `.gitignore`, GitHub Actions CI, blocker evidence documents, a verified Supabase DPP binding marker, and a documented Vercel deployment-mirror path. It still has no application backend, authenticated DPP users, production DPP data model, production API layer, or successful DPP Autopilot Vercel deployment.
 
 ## Product scope
 
@@ -32,7 +32,7 @@ DPP Autopilot is a Battery Digital Product Passport automation platform. The pro
 
 ## Architecture target
 
-Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The current database architecture uses the existing `soulflame-twins` Supabase project as shared infrastructure with an explicitly isolated DPP namespace: DPP-owned tables must use the `dpp_` prefix, use migrations, enable RLS, and must not depend on or modify unrelated SoulFlame/DAVID/Zorbas/Enchev data except through separately reviewed integrations. Vercel hosts preview/production deployments once the correct GitHub repo is linked. Tenant isolation is enforced server-side and with database RLS. Public passport reads are explicitly separated from authenticated/private access. CI gates merge/deploy on validation and automated tests.
+Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The current database architecture uses the existing `soulflame-twins` Supabase project as shared infrastructure with an explicitly isolated DPP namespace: DPP-owned tables must use the `dpp_` prefix, use migrations, enable RLS, and must not depend on or modify unrelated SoulFlame/DAVID/Zorbas/Enchev data except through separately reviewed integrations. Canonical development remains in `SoulFlameAdmin/DPPautopilot`; Vercel delivery currently uses the controlled deployment mirror `SoulFlameAdmin/dpp`, which must contain synchronized deployment-facing files and must not develop divergent product logic. Tenant isolation is enforced server-side and with database RLS. Public passport reads are explicitly separated from authenticated/private access. CI gates merge/deploy on validation and automated tests.
 
 ---
 
@@ -46,8 +46,8 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | F04 | Keep machine-readable progress view | F03 | `data/master-plan.json` remains parseable and dashboard can render it | CI validator + dashboard smoke test | YELLOW |
 | F05 | Keep DAVID worker status contract | F03 | Worker JSON parseable with required fields/status | Passing CI validator | GREEN |
 | F06 | Define product scope and target architecture | F03 | Scope + architecture recorded and reviewed against implementation | This file | GREEN |
-| F07 | Bind correct Vercel project | F01 | Vercel project is linked to `SoulFlameAdmin/DPPautopilot` | Vercel project metadata | BLOCKED |
-| F08 | Verify first production deployment | F07 | Production deployment READY; app and data JSON return 200 | Deployment metadata + HTTP verification | RED |
+| F07 | Bind Vercel delivery path | F01 | A Vercel project is connected either directly to canonical repo or to a documented deployment-only mirror synchronized from canonical; a Vercel commit/deployment status proves the integration receives the expected commit | Vercel project metadata + GitHub/Vercel status evidence + mirror policy when applicable | GREEN |
+| F08 | Verify first production deployment | F07 | Production deployment READY; app and data JSON return 200 | Deployment metadata + HTTP verification | BLOCKED |
 | F09 | Add CI baseline | F03 | CI validates JSON, stable IDs, required repo files and HTML data references | GitHub Actions check `validate` PASS on commit `9f3892b26176da8a9aac8063f3f528906840d18c` | GREEN |
 | F10 | Define dev/preview/production environment policy | F03 | Environment ownership, secrets, promotion and rollback rules documented | `docs/ENVIRONMENT_POLICY.md` + PASS on commit `eb40704890ececa3df3e2f519962e82d0570c39e` | GREEN |
 | F11 | Requirements traceability matrix | F03 | Product/compliance fields map to authoritative requirement/source and implementation | `docs/REQUIREMENTS_TRACEABILITY.md`; field-level implementation mapping still incomplete | YELLOW |
@@ -199,7 +199,8 @@ Append evidence here only after verification.
 | 2026-09-17 | F02 | Root inventory verified static prototype files only at audit start | PASS |
 | 2026-09-17 | F03 | Canonical plan created at `docs/MASTER_AUTOPILOT_PLAN.md` | PASS |
 | 2026-09-17 | F05 | `scripts/validate_repo.py` validated worker status contract in GitHub Actions | PASS |
-| 2026-09-17 | F07 | Vercel inventory contains no project linked to `SoulFlameAdmin/DPPautopilot`; project `dpp` links to different repo `SoulFlameAdmin/dpp`; Attempt 02 confirmed no callable create/update/git-connect action in exposed connector and direct deploy invocation fails input validation | BLOCKED |
+| 2026-09-17 | F07 | Controlled mirror `SoulFlameAdmin/dpp` synchronized from canonical; Vercel project `dpp` is linked to mirror; exact mirror commit `748806ae42aa5e958a993137695818036b1022b6` received Vercel status, proving Git integration. See `docs/BINDING_ATTEMPT_03.md` | PASS |
+| 2026-09-17 | F08 | Vercel status on mirror commit failed with target containing `upgradeToPro=build-rate-limit`; no deployment object was created | BLOCKED |
 | 2026-09-17 | F09 | GitHub Actions `validate` completed successfully for commit `9f3892b26176da8a9aac8063f3f528906840d18c` | PASS |
 | 2026-09-17 | F10 | `docs/ENVIRONMENT_POLICY.md` committed; CI PASS on `eb40704890ececa3df3e2f519962e82d0570c39e` | PASS |
 | 2026-09-17 | F11 | Requirements baseline committed with Article 77/78, Annex XIII and Registry traceability; implementation/schema crosswalk incomplete | PARTIAL |
