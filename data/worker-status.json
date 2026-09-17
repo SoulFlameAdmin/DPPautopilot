@@ -4,8 +4,8 @@
   "state": "blocked",
   "currentTask": "F08 — Obtain first verified production deployment",
   "currentGate": "FOUNDATION",
-  "lastCompletedTask": "Attempt 05 verified GitHub Pages enablement permission blocker",
-  "nextTask": "Retry Vercel only after quota capacity is available, or enable an authorized public host with sufficient connector permissions, then verify HTTP 200 for index and data JSON",
-  "message": "Attempt 05 rechecked both Vercel projects: dpp and dpp-autopilot still have zero deployments at 2026-09-17 22:03 Europe/Sofia, before the previously recorded Hobby quota reset. GitHub Pages fallback was retried with actions/configure-pages@v5 and enablement:true. GitHub attempted to create the Pages site but returned Resource not accessible by integration, proving the remaining Pages blocker is connector permission rather than workflow syntax. The temporary failing workflow was removed. Evidence: docs/BINDING_ATTEMPT_05.md.",
-  "updatedAt": "2026-09-17T22:03:01+03:00"
+  "lastCompletedTask": "Attempt 06 revalidated Vercel project/config state and exhausted safe connector-level fallbacks",
+  "nextTask": "Use Netlify after user connects the available deployment integration, or retry Vercel when Hobby deployment capacity returns; then verify a real production URL plus HTTP 200 for index and data JSON",
+  "message": "Attempt 06 directly rechecked both Vercel DPP projects. dpp remains live:false with latestDeployment:null and no domains; dpp-autopilot also has latestDeployment:null and no domains. The controlled mirror commit still has Vercel failure status targeting upgradeToPro=build-rate-limit. vercel.json has no cron/custom build configuration that explains the rejection. Supabase supports public Edge Functions in this shared project, but no unrelated function was repurposed and no new unauthenticated DPP function was created because that would require an explicit public-auth decision. Plugin discovery found Netlify as a viable static deployment alternative, but it is not connected, so deployment cannot be executed until the user installs/connects it. Evidence: docs/BINDING_ATTEMPT_06.md.",
+  "updatedAt": "2026-09-17T22:05:00+03:00"
 }
