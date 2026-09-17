@@ -2,10 +2,10 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "blocked",
-  "currentTask": "F07 — Bind Vercel project to SoulFlameAdmin/DPPautopilot",
+  "currentTask": "F08 — Obtain first successful Vercel production deployment",
   "currentGate": "FOUNDATION",
-  "lastCompletedTask": "F13 — Supabase binding resolved via isolated shared-project namespace",
-  "nextTask": "Retry Vercel binding/deploy when a callable create/update/git-connect capability or quota is available",
-  "message": "Attempt 02 resolved the Supabase blocker safely. Migration bind_dpp_autopilot_namespace created public.dpp_app_binding in project soulflame-twins with RLS enabled, anon/authenticated privileges revoked, and an explicit binding to SoulFlameAdmin/DPPautopilot using shared_project_isolated_namespace. The remaining blocker is Vercel: no project is linked to SoulFlameAdmin/DPPautopilot, the existing dpp project points to SoulFlameAdmin/dpp, and the available Vercel connector exposes no callable create/update/git-connect operation. A second deploy call also failed at connector validation because required target/name/files arguments are not exposed by the callable schema. Evidence: docs/BINDING_ATTEMPT_02.md.",
-  "updatedAt": "2026-09-17T21:49:00+03:00"
+  "lastCompletedTask": "F07 — Vercel delivery path verified through controlled deployment mirror",
+  "nextTask": "Retry the Git-triggered deployment when Vercel build capacity is available, then verify READY plus HTTP 200 for app and data JSON",
+  "message": "Attempt 03 resolved F07. SoulFlameAdmin/dpp is now the documented deployment-only mirror of canonical SoulFlameAdmin/DPPautopilot. Mirror commit 748806ae42aa5e958a993137695818036b1022b6 received a Vercel status, proving the linked Vercel Git integration path. The Vercel status failed before creating a deployment because the Hobby team is at build-rate-limit. F08 therefore remains blocked until another build is permitted or an authorized plan/limit change is made. Evidence: docs/BINDING_ATTEMPT_03.md.",
+  "updatedAt": "2026-09-17T22:06:00+03:00"
 }
