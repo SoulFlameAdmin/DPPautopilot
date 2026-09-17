@@ -1,8 +1,8 @@
 {
   "project": "DPP Autopilot",
-  "version": "MASTER PLAN v2.2",
+  "version": "MASTER PLAN v2.3",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-17T21:52:00+03:00",
+  "updatedAt": "2026-09-17T22:05:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -18,12 +18,12 @@
       "tasks": [
         {"id":"F01","title":"Verify canonical GitHub repository","status":"green","evidence":"GitHub connector verified SoulFlameAdmin/DPPautopilot, main, with admin/write access."},
         {"id":"F02","title":"Inventory current code and configuration","status":"green","evidence":"Initial repository tree audited and recorded in docs/MASTER_AUTOPILOT_PLAN.md."},
-        {"id":"F03","title":"Freeze canonical master plan","status":"green","evidence":"docs/MASTER_AUTOPILOT_PLAN.md v2.2 is the declared source of truth."},
+        {"id":"F03","title":"Freeze canonical master plan","status":"green","evidence":"docs/MASTER_AUTOPILOT_PLAN.md v2.3 is the declared source of truth."},
         {"id":"F04","title":"Keep machine-readable progress dashboard","status":"yellow","evidence":"data/master-plan.json is CI-validated; browser/dashboard smoke test still required."},
         {"id":"F05","title":"Keep DAVID worker status contract","status":"green","evidence":"scripts/validate_repo.py validates required worker fields; GitHub Actions PASS."},
         {"id":"F06","title":"Define product scope and target architecture","status":"green","evidence":"Scope and architecture are documented in the canonical master plan."},
-        {"id":"F07","title":"Bind correct Vercel project","status":"blocked","evidence":"Attempt 02 verified no Vercel project links to SoulFlameAdmin/DPPautopilot; existing dpp links to SoulFlameAdmin/dpp. Exposed connector has no callable project create/update/git-connect operation, and deploy invocation cannot supply its required target/name/files arguments. Attempt 01 also recorded exhausted Hobby API deployment quota until 2026-09-18 21:42:41 Europe/Sofia."},
-        {"id":"F08","title":"Verify first production deployment","status":"red","evidence":"Depends on F07; no DPPautopilot production deployment is verified."},
+        {"id":"F07","title":"Bind Vercel delivery path","status":"green","evidence":"Controlled deployment mirror SoulFlameAdmin/dpp is linked to Vercel project dpp. Mirror commit 748806ae42aa5e958a993137695818036b1022b6 received a Vercel commit status, proving the integration receives the expected commit. See docs/BINDING_ATTEMPT_03.md."},
+        {"id":"F08","title":"Verify first production deployment","status":"blocked","evidence":"Vercel status on mirror commit 748806ae42aa5e958a993137695818036b1022b6 failed with build-rate-limit before a deployment object was created."},
         {"id":"F09","title":"Add CI baseline","status":"green","evidence":"GitHub Actions validate check PASS on commit 9f3892b26176da8a9aac8063f3f528906840d18c."},
         {"id":"F10","title":"Define dev / preview / production environment policy","status":"green","evidence":"docs/ENVIRONMENT_POLICY.md committed; CI PASS on eb40704890ececa3df3e2f519962e82d0570c39e."},
         {"id":"F11","title":"Requirements traceability matrix","status":"yellow","evidence":"docs/REQUIREMENTS_TRACEABILITY.md maps Article 77/78 and Annex XIII baseline; concrete schema/API field crosswalk is not implemented yet."},
@@ -38,7 +38,7 @@
       "purpose": "A polished, believable product demonstration that explains the value in minutes.",
       "exitCriteria": "A prospect can create/import a sample battery, view a passport, scan a QR code and understand missing compliance data.",
       "tasks": [
-        {"id":"D01","title":"Create DPP Autopilot landing/dashboard","status":"red","evidence":"Not started under v2.2 acceptance criteria."},
+        {"id":"D01","title":"Create DPP Autopilot landing/dashboard","status":"red","evidence":"Not started under v2.3 acceptance criteria."},
         {"id":"D02","title":"Create sample battery dataset","status":"red","evidence":"Not started."},
         {"id":"D03","title":"CSV/Excel-style import demo","status":"red","evidence":"Not started."},
         {"id":"D04","title":"Battery model form","status":"red","evidence":"Not started."},
