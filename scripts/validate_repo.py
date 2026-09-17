@@ -61,7 +61,8 @@ def main():
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     require("data/master-plan.json" in html, "index.html must load data/master-plan.json")
     require("data/worker-status.json" in html, "index.html must load data/worker-status.json")
-    require("MASTER PLAN" in html, "index.html must expose master plan UI")
+    require("MASTER PLAN" in html or "Етапи" in html, "index.html must expose master plan/stages UI")
+    require('id="menuToggle"' in html and 'id="stagesButton"' in html, "index.html must expose burger menu and stages control")
 
     canonical = (ROOT / "docs/MASTER_AUTOPILOT_PLAN.md").read_text(encoding="utf-8")
     require("Source of truth" in canonical, "canonical master plan must declare itself source of truth")
