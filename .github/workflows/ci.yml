@@ -27,7 +27,7 @@ jobs:
         run: python scripts/validate_sample_fixture.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
-      - name: Browser smoke test DPP dashboard and CSV import
+      - name: Browser smoke test demo surfaces
         shell: bash
         run: |
           set -euo pipefail
@@ -44,6 +44,7 @@ jobs:
             echo "Chrome/Chromium is required for the UI smoke test" >&2
             exit 1
           fi
+
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
             --dump-dom 'http://127.0.0.1:8000/?plan=open' > artifacts/d01-dom.html
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
@@ -57,6 +58,15 @@ jobs:
             --window-size=1440,1000 --screenshot=artifacts/d03-import.png \
             'http://127.0.0.1:8000/demo/import.html?sample=1'
           python scripts/validate_import_demo.py artifacts/d03-import-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/model.html?sample=1' > artifacts/d04-model-valid-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/model.html?invalid=1' > artifacts/d04-model-invalid-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
+            --window-size=1440,1200 --screenshot=artifacts/d04-model.png \
+            'http://127.0.0.1:8000/demo/model.html?sample=1'
+          python scripts/validate_model_form.py artifacts/d04-model-valid-dom.html artifacts/d04-model-invalid-dom.html
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
