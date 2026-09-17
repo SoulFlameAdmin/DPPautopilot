@@ -76,6 +76,15 @@ jobs:
             --window-size=1440,1100 --screenshot=artifacts/d05-item.png \
             'http://127.0.0.1:8000/demo/item.html?sample=1'
           python scripts/validate_item_form.py artifacts/d05-item-valid-dom.html artifacts/d05-item-invalid-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001' > artifacts/d06-passport-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3Amissing' > artifacts/d06-passport-missing-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
+            --window-size=1440,1200 --screenshot=artifacts/d06-passport.png \
+            'http://127.0.0.1:8000/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001'
+          python scripts/validate_public_passport.py artifacts/d06-passport-dom.html artifacts/d06-passport-missing-dom.html
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
