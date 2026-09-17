@@ -2,10 +2,10 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "blocked",
-  "currentTask": "F07/F13 — External platform bindings, attempt 01",
+  "currentTask": "F07 — Bind Vercel project to SoulFlameAdmin/DPPautopilot",
   "currentGate": "FOUNDATION",
-  "lastCompletedTask": "Binding attempt 01 evidence recorded",
-  "nextTask": "Retry Vercel after quota reset; create dedicated Supabase project after explicit cost/org confirmation",
-  "message": "Attempt 01 completed safely. Vercel project inventory still has no SoulFlameAdmin/DPPautopilot binding. A preview deployment probe reached Vercel but failed with HTTP 402 because the Hobby API deployment quota is 100/100 with remaining 0; reset timestamp 1789756961224 (2026-09-18 21:42:41 Europe/Sofia). Supabase still exposes only soulflame-twins; it was not reused. Creating a dedicated Supabase project requires explicit organization selection and cost confirmation before the connector permits create_project. Evidence: docs/BINDING_ATTEMPT_01.md.",
-  "updatedAt": "2026-09-17T21:46:00+03:00"
+  "lastCompletedTask": "F13 — Supabase binding resolved via isolated shared-project namespace",
+  "nextTask": "Retry Vercel binding/deploy when a callable create/update/git-connect capability or quota is available",
+  "message": "Attempt 02 resolved the Supabase blocker safely. Migration bind_dpp_autopilot_namespace created public.dpp_app_binding in project soulflame-twins with RLS enabled, anon/authenticated privileges revoked, and an explicit binding to SoulFlameAdmin/DPPautopilot using shared_project_isolated_namespace. The remaining blocker is Vercel: no project is linked to SoulFlameAdmin/DPPautopilot, the existing dpp project points to SoulFlameAdmin/dpp, and the available Vercel connector exposes no callable create/update/git-connect operation. A second deploy call also failed at connector validation because required target/name/files arguments are not exposed by the callable schema. Evidence: docs/BINDING_ATTEMPT_02.md.",
+  "updatedAt": "2026-09-17T21:49:00+03:00"
 }
