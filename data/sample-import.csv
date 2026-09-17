@@ -1,0 +1,3 @@
+manufacturer_name,model_id,category,rated_capacity_ah,chemistry,unique_identifier,lifecycle_status,state_of_health_percent
+Northstar Demo Cells (Synthetic),NSD-EV-82-DEMO,electric_vehicle,230,Lithium-ion NMC 811 (Synthetic),urn:dpp:demo:battery:NSD-EV-82-DEMO:000001,original,100
+Northstar Demo Cells (Synthetic),NSD-EV-82-DEMO,electric_vehicle,230,Lithium-ion NMC 811 (Synthetic),urn:dpp:demo:battery:NSD-EV-82-DEMO:000002,original,99.4
