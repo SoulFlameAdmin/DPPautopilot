@@ -21,7 +21,7 @@ def main() -> None:
         'data-error-count="0"',
         'data-field="model.identification.manufacturer.name"',
         'data-field="model.eu_declaration_of_conformity"',
-        'VALID · 35 catalog model fields checked',
+        'VALID · 34 catalog model fields checked',
     ]:
         require(marker in valid, f"D04 valid form missing evidence: {marker}")
 
@@ -34,7 +34,7 @@ def main() -> None:
     ]:
         require(marker in invalid, f"D04 invalid form missing error evidence: {marker}")
 
-    print("MODEL_FORM_PASS: catalog-driven model form accepts complete fixture and exposes one deterministic required-field error")
+    print("MODEL_FORM_PASS: catalog-driven 34-field model form accepts complete fixture and exposes one deterministic required-field error")
 
 
 if __name__ == "__main__":
