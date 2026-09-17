@@ -11,7 +11,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,3 +23,33 @@ jobs:
         run: python scripts/validate_repo.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
+      - name: Browser smoke test DPP dashboard
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          python -m http.server 8000 > /tmp/dpp-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8000/data/master-plan.json >/dev/null; then break; fi
+            sleep 0.25
+          done
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then
+            echo "Chrome/Chromium is required for the UI smoke test" >&2
+            exit 1
+          fi
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
+            --dump-dom 'http://127.0.0.1:8000/?plan=open' > artifacts/d01-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
+            --window-size=1440,1000 --screenshot=artifacts/d01-dashboard.png \
+            'http://127.0.0.1:8000/?plan=open'
+          python scripts/ui_smoke.py artifacts/d01-dom.html artifacts/d01-dashboard.png
+      - name: Upload D01 UI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d01-dashboard-smoke
+          path: artifacts/
+          if-no-files-found: warn
