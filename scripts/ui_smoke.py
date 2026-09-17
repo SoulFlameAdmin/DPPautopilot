@@ -42,13 +42,15 @@ def main() -> None:
         if marker not in dom:
             fail(f"missing rendered marker for {label}: {marker}")
 
-    forbidden = [
-        "Master plan could not be loaded",
-        "Worker status unavailable",
+    # Chrome --dump-dom includes the page's <script> source. Check actual rendered
+    # element state rather than generic error strings that also exist in handlers.
+    rendered_error_markers = [
+        'id="planContent"><div class="error">',
+        'id="currentTask">Worker status unavailable<',
     ]
-    for marker in forbidden:
+    for marker in rendered_error_markers:
         if marker in dom:
-            fail(f"rendered dashboard contains error marker: {marker}")
+            fail(f"rendered dashboard contains runtime error state: {marker}")
 
     if screenshot_size < 10_000:
         fail(f"screenshot is unexpectedly small: {screenshot_size} bytes")
