@@ -1,5 +1,5 @@
 {
-  "fixtureVersion": "1.0.0",
+  "fixtureVersion": "1.0.1",
   "synthetic": true,
   "disclaimer": "Synthetic demo data only. It does not describe a real manufacturer, battery, conformity assessment, test report, sourcing claim, carbon footprint declaration, or Registry record.",
   "model": {
@@ -87,10 +87,7 @@
       "separate_collection_symbol": true,
       "qr_placeholder": "DEMO-QR-NOT-A-REAL-DATA-CARRIER"
     },
-    "eu_declaration_of_conformity": {
-      "document_ref": "DEMO-EU-DOC-001",
-      "synthetic": true
-    },
+    "eu_declaration_of_conformity": "DEMO-EU-DOC-001-SYNTHETIC",
     "waste_information": {
       "collection": "Return to an authorised collection point — synthetic demo text",
       "handling": "Follow applicable local battery waste rules",
