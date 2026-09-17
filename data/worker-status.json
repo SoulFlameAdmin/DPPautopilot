@@ -4,8 +4,8 @@
   "state": "blocked",
   "currentTask": "F08 — Obtain first verified production deployment",
   "currentGate": "FOUNDATION",
-  "lastCompletedTask": "Attempt 04 exhausted safe deployment fallbacks and preserved evidence",
-  "nextTask": "Retry Vercel after the recorded Hobby quota reset; if unavailable, enable an authorized public fallback host and verify HTTP 200 for index plus data JSON",
-  "message": "Attempt 04 rechecked Vercel and tested safe alternatives. Vercel project dpp still has zero deployments; direct deploy remains unusable because the connector wrapper does not expose required target/name/files arguments; the Git-triggered path remains blocked by Hobby build-rate-limit before the recorded 2026-09-18 21:42:41 Europe/Sofia reset. A GitHub Pages fallback probe created a deployment object but failed at Configure Pages because Pages is not enabled/configured for the repository; the temporary workflow was removed to avoid permanent red checks. A public Supabase Edge Function fallback was not deployed because doing so would require disabling JWT without explicit authorization. Evidence: docs/BINDING_ATTEMPT_04.md.",
-  "updatedAt": "2026-09-17T22:01:50+03:00"
+  "lastCompletedTask": "Attempt 05 verified GitHub Pages enablement permission blocker",
+  "nextTask": "Retry Vercel only after quota capacity is available, or enable an authorized public host with sufficient connector permissions, then verify HTTP 200 for index and data JSON",
+  "message": "Attempt 05 rechecked both Vercel projects: dpp and dpp-autopilot still have zero deployments at 2026-09-17 22:03 Europe/Sofia, before the previously recorded Hobby quota reset. GitHub Pages fallback was retried with actions/configure-pages@v5 and enablement:true. GitHub attempted to create the Pages site but returned Resource not accessible by integration, proving the remaining Pages blocker is connector permission rather than workflow syntax. The temporary failing workflow was removed. Evidence: docs/BINDING_ATTEMPT_05.md.",
+  "updatedAt": "2026-09-17T22:03:01+03:00"
 }
