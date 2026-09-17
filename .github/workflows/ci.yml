@@ -27,7 +27,7 @@ jobs:
         run: python scripts/validate_sample_fixture.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
-      - name: Browser smoke test DPP dashboard
+      - name: Browser smoke test DPP dashboard and CSV import
         shell: bash
         run: |
           set -euo pipefail
@@ -50,10 +50,17 @@ jobs:
             --window-size=1440,1000 --screenshot=artifacts/d01-dashboard.png \
             'http://127.0.0.1:8000/?plan=open'
           python scripts/ui_smoke.py artifacts/d01-dom.html artifacts/d01-dashboard.png
-      - name: Upload D01 UI evidence
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
+            --dump-dom 'http://127.0.0.1:8000/demo/import.html?sample=1' > artifacts/d03-import-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
+            --window-size=1440,1000 --screenshot=artifacts/d03-import.png \
+            'http://127.0.0.1:8000/demo/import.html?sample=1'
+          python scripts/validate_import_demo.py artifacts/d03-import-dom.html
+      - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: d01-dashboard-smoke
+          name: demo-ui-smoke
           path: artifacts/
           if-no-files-found: warn
