@@ -20,9 +20,9 @@ def main() -> None:
         'data-item-valid="true"',
         'data-model-linked="true"',
         'data-error-count="0"',
+        'data-field="model_link"',
         'data-field="item.unique_identifier"',
         'data-field="item.lifecycle_status"',
-        'value="NSD-EV-82-DEMO"',
         'VALID · model linked + 8 item groups checked',
     ]:
         require(marker in valid, f"D05 valid item form missing evidence: {marker}")
@@ -36,7 +36,7 @@ def main() -> None:
     ]:
         require(marker in invalid, f"D05 invalid item form missing evidence: {marker}")
 
-    print("ITEM_FORM_PASS: item links to model, all 8 item field groups validate, and malformed identifier is rejected visibly")
+    print("ITEM_FORM_PASS: runtime state proves model linkage, all 8 item field groups validate, and malformed identifier is rejected visibly")
 
 
 if __name__ == "__main__":
