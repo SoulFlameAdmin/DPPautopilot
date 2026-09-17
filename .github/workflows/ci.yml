@@ -25,6 +25,8 @@ jobs:
         run: python scripts/validate_field_catalog.py
       - name: Validate D02 synthetic sample fixture
         run: python scripts/validate_sample_fixture.py
+      - name: Validate D07 deterministic identifiers
+        run: python scripts/validate_identifiers.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
       - name: Browser smoke test demo surfaces
