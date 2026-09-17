@@ -1,0 +1,149 @@
+{
+  "project": "DPP Autopilot",
+  "version": "MASTER PLAN v1.0",
+  "updatedAt": "2026-09-17T20:20:00+03:00",
+  "statusMeaning": {
+    "green": "Implemented and evidenced",
+    "yellow": "In progress / partial / awaiting verification",
+    "red": "Not started or failed",
+    "blocked": "Needs external access, decision, legal sign-off or customer data"
+  },
+  "gates": [
+    {
+      "id": "FOUNDATION",
+      "label": "FOUNDATION",
+      "purpose": "Build the engineering and compliance base before product features.",
+      "exitCriteria": "Repository, live deployment, status tracking, CI and authoritative requirement map exist.",
+      "tasks": [
+        {"id":"F01","title":"Initialize GitHub repository","status":"green","evidence":"Repository initialized with README and project structure."},
+        {"id":"F02","title":"Capture official EU regulatory anchors","status":"green","evidence":"Article 77 / Annex XIII and EU DPP Registry milestones documented."},
+        {"id":"F03","title":"Freeze MASTER PLAN v1.0 structure","status":"green","evidence":"Five product gates plus foundation defined in data/master-plan.json."},
+        {"id":"F04","title":"Create visible gate/progress dashboard","status":"green","evidence":"Dashboard implementation added to index.html."},
+        {"id":"F05","title":"Create DAVID Worker status contract","status":"green","evidence":"Worker status JSON schema created."},
+        {"id":"F06","title":"Create deployable static application shell","status":"green","evidence":"Root index.html + Vercel routing config added."},
+        {"id":"F07","title":"Connect DPPautopilot repository to Vercel project","status":"red","evidence":"No linked Vercel project exists yet."},
+        {"id":"F08","title":"Verify first production deployment","status":"red","evidence":"Awaiting Vercel project connection."},
+        {"id":"F09","title":"Add CI checks for JSON/schema and frontend","status":"red","evidence":"Not started."},
+        {"id":"F10","title":"Define dev / preview / production environment policy","status":"red","evidence":"Not started."},
+        {"id":"F11","title":"Create requirements traceability matrix","status":"red","evidence":"Map every product field to legal/technical source."},
+        {"id":"F12","title":"Define evidence rules: GREEN only after test","status":"green","evidence":"Status semantics embedded in plan and dashboard."}
+      ]
+    },
+    {
+      "id": "DEMO",
+      "label": "DEMO",
+      "purpose": "A polished, believable product demonstration that explains the value in minutes.",
+      "exitCriteria": "A prospect can create/import a sample battery, view a passport, scan a QR code and understand missing compliance data.",
+      "tasks": [
+        {"id":"D01","title":"Create DPP Autopilot landing/dashboard","status":"red","evidence":"Not started."},
+        {"id":"D02","title":"Create sample battery dataset","status":"red","evidence":"Not started."},
+        {"id":"D03","title":"CSV/Excel-style import demo","status":"red","evidence":"Not started."},
+        {"id":"D04","title":"Battery model form","status":"red","evidence":"Not started."},
+        {"id":"D05","title":"Individual battery instance form","status":"red","evidence":"Not started."},
+        {"id":"D06","title":"Public battery passport page","status":"red","evidence":"Not started."},
+        {"id":"D07","title":"Generate unique product/battery identifier","status":"red","evidence":"Not started."},
+        {"id":"D08","title":"Generate QR/data carrier linking to passport","status":"red","evidence":"Not started."},
+        {"id":"D09","title":"Show data completeness score","status":"red","evidence":"Not started."},
+        {"id":"D10","title":"Show missing-field warnings","status":"red","evidence":"Not started."},
+        {"id":"D11","title":"Show model-level vs item-level data separation","status":"red","evidence":"Not started."},
+        {"id":"D12","title":"Responsive phone/tablet/desktop demo","status":"red","evidence":"Not started."},
+        {"id":"D13","title":"Demo reset / sample replay flow","status":"red","evidence":"Not started."},
+        {"id":"D14","title":"Demo acceptance test and screenshots","status":"red","evidence":"Not started."}
+      ]
+    },
+    {
+      "id": "MVP",
+      "label": "MVP",
+      "purpose": "Pilot-ready system using real customer data in a controlled environment.",
+      "exitCriteria": "A pilot customer can onboard, import real battery data, validate it, manage passports, control access and produce an auditable registry-ready record.",
+      "tasks": [
+        {"id":"M01","title":"Add authenticated organisations and users","status":"red","evidence":"Not started."},
+        {"id":"M02","title":"Multi-organisation data isolation","status":"red","evidence":"Not started."},
+        {"id":"M03","title":"Role-based access control","status":"red","evidence":"Not started."},
+        {"id":"M04","title":"Persistent database schema for models/items/passports","status":"red","evidence":"Not started."},
+        {"id":"M05","title":"Import CSV with mapping wizard","status":"red","evidence":"Not started."},
+        {"id":"M06","title":"Import validation and row-level errors","status":"red","evidence":"Not started."},
+        {"id":"M07","title":"Annex XIII data model mapping","status":"red","evidence":"Not started."},
+        {"id":"M08","title":"Access-right categories for passport data","status":"red","evidence":"Not started."},
+        {"id":"M09","title":"Version history for passport changes","status":"red","evidence":"Not started."},
+        {"id":"M10","title":"Immutable audit log for critical actions","status":"red","evidence":"Not started."},
+        {"id":"M11","title":"Document/evidence attachments","status":"red","evidence":"Not started."},
+        {"id":"M12","title":"Unique identifiers and lifecycle status","status":"red","evidence":"Not started."},
+        {"id":"M13","title":"DPP Registry test-environment workflow","status":"red","evidence":"Not started."},
+        {"id":"M14","title":"Registry registration status tracking","status":"red","evidence":"Not started."},
+        {"id":"M15","title":"API endpoints for battery/passport CRUD","status":"red","evidence":"Not started."},
+        {"id":"M16","title":"Export customer data and evidence package","status":"red","evidence":"Not started."},
+        {"id":"M17","title":"Pilot onboarding checklist","status":"red","evidence":"Not started."},
+        {"id":"M18","title":"MVP end-to-end acceptance test","status":"red","evidence":"Not started."}
+      ]
+    },
+    {
+      "id": "PROPOSAL",
+      "label": "PROPOSAL READY",
+      "purpose": "Everything needed to sell a controlled pilot without overstating compliance.",
+      "exitCriteria": "Sales demo, scope, pricing, onboarding, security answers and pilot success criteria are ready.",
+      "tasks": [
+        {"id":"P01","title":"Create 10-minute customer demo flow","status":"red","evidence":"Not started."},
+        {"id":"P02","title":"Create pilot scope template","status":"red","evidence":"Not started."},
+        {"id":"P03","title":"Define setup + recurring pricing model","status":"red","evidence":"Not started."},
+        {"id":"P04","title":"Create customer data requirements sheet","status":"red","evidence":"Not started."},
+        {"id":"P05","title":"Create security and data-hosting FAQ","status":"red","evidence":"Not started."},
+        {"id":"P06","title":"Create compliance disclaimer and responsibility matrix","status":"red","evidence":"Not started."},
+        {"id":"P07","title":"Create pilot success metrics","status":"red","evidence":"Not started."},
+        {"id":"P08","title":"Create sample proposal PDF/content","status":"red","evidence":"Not started."},
+        {"id":"P09","title":"Create prospect onboarding questionnaire","status":"red","evidence":"Not started."},
+        {"id":"P10","title":"Proposal-ready review: no unsupported claims","status":"red","evidence":"Not started."}
+      ]
+    },
+    {
+      "id": "PRODUCTION",
+      "label": "PRODUCTION COMPLETE",
+      "purpose": "A secure, reliable system appropriate for real commercial operation.",
+      "exitCriteria": "Security, privacy, monitoring, backups, registry workflows, load tests and operational procedures are verified for production.",
+      "tasks": [
+        {"id":"R01","title":"Production database and migration workflow","status":"red","evidence":"Not started."},
+        {"id":"R02","title":"Secret/environment variable management","status":"red","evidence":"Not started."},
+        {"id":"R03","title":"TLS/security headers and secure defaults","status":"red","evidence":"Not started."},
+        {"id":"R04","title":"Tenant isolation security tests","status":"red","evidence":"Not started."},
+        {"id":"R05","title":"Rate limiting and abuse controls","status":"red","evidence":"Not started."},
+        {"id":"R06","title":"Backup and restore procedure tested","status":"red","evidence":"Not started."},
+        {"id":"R07","title":"Monitoring / alerting / error tracking","status":"red","evidence":"Not started."},
+        {"id":"R08","title":"Availability and incident-response runbook","status":"red","evidence":"Not started."},
+        {"id":"R09","title":"GDPR/privacy data inventory","status":"red","evidence":"Not started."},
+        {"id":"R10","title":"Data retention/deletion workflow","status":"red","evidence":"Not started."},
+        {"id":"R11","title":"Accessibility and cross-browser testing","status":"red","evidence":"Not started."},
+        {"id":"R12","title":"Performance/load testing","status":"red","evidence":"Not started."},
+        {"id":"R13","title":"Registry live integration verification","status":"red","evidence":"Requires operator credentials and current technical documentation."},
+        {"id":"R14","title":"Independent legal/compliance review","status":"blocked","evidence":"Requires qualified legal/compliance sign-off."},
+        {"id":"R15","title":"Customer UAT with real battery data","status":"blocked","evidence":"Requires pilot customer."},
+        {"id":"R16","title":"Production go-live checklist","status":"red","evidence":"Not started."},
+        {"id":"R17","title":"Disaster recovery exercise","status":"red","evidence":"Not started."},
+        {"id":"R18","title":"Production release evidence pack","status":"red","evidence":"Not started."}
+      ]
+    },
+    {
+      "id": "EXPANDED",
+      "label": "EXPANDED",
+      "purpose": "Scale beyond one pilot into an automation platform and additional product sectors.",
+      "exitCriteria": "The platform supports high-volume customers, connectors and configurable DPP schemas beyond batteries.",
+      "tasks": [
+        {"id":"X01","title":"ERP connector framework","status":"red","evidence":"Not started."},
+        {"id":"X02","title":"SAP integration connector","status":"red","evidence":"Not started."},
+        {"id":"X03","title":"BMS/telemetry ingestion connector","status":"red","evidence":"Not started."},
+        {"id":"X04","title":"Supplier portal and evidence requests","status":"red","evidence":"Not started."},
+        {"id":"X05","title":"Automated missing-data reminders","status":"red","evidence":"Not started."},
+        {"id":"X06","title":"AI-assisted mapping from customer schemas","status":"red","evidence":"Not started."},
+        {"id":"X07","title":"Bulk passport generation at manufacturing scale","status":"red","evidence":"Not started."},
+        {"id":"X08","title":"Webhook/event integration framework","status":"red","evidence":"Not started."},
+        {"id":"X09","title":"Customer analytics and compliance operations dashboard","status":"red","evidence":"Not started."},
+        {"id":"X10","title":"Configurable DPP schema engine","status":"red","evidence":"Not started."},
+        {"id":"X11","title":"Iron/steel DPP module when final rules apply","status":"red","evidence":"Future sector module."},
+        {"id":"X12","title":"Construction-products DPP module when final rules apply","status":"red","evidence":"Future sector module."},
+        {"id":"X13","title":"Partner/reseller administration","status":"red","evidence":"Not started."},
+        {"id":"X14","title":"Enterprise SSO / SCIM","status":"red","evidence":"Not started."},
+        {"id":"X15","title":"High-availability and regional deployment options","status":"red","evidence":"Not started."},
+        {"id":"X16","title":"Expanded-platform release evidence pack","status":"red","evidence":"Not started."}
+      ]
+    }
+  ]
+}
