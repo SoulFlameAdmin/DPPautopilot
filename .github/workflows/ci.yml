@@ -60,6 +60,8 @@ jobs:
         run: python scripts/validate_backup_policy.py
       - name: Validate R14 supply-chain policy
         run: python scripts/validate_supply_chain.py
+      - name: Validate T08 reliability matrix
+        run: python scripts/validate_reliability_matrix.py
       - name: Validate X06 mapping assistant evaluation
         run: python scripts/validate_mapping_assistant.py
       - name: Audit Python CI dependencies
