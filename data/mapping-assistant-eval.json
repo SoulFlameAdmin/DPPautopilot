@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "header": "manufacturer_name",
+      "expected": "model.identification.manufacturer.name"
+    },
+    {
+      "header": "Maker",
+      "expected": "model.identification.manufacturer.name"
+    },
+    {
+      "header": "battery model",
+      "expected": "model.identification.model_id"
+    },
+    {
+      "header": "MODEL_ID",
+      "expected": "model.identification.model_id"
+    },
+    {
+      "header": "Battery Category",
+      "expected": "model.identification.category"
+    },
+    {
+      "header": "Capacity Ah",
+      "expected": "model.rated_capacity_ah"
+    },
+    {
+      "header": "cell-chemistry",
+      "expected": "model.composition.chemistry"
+    },
+    {
+      "header": "Serial Number",
+      "expected": "item.unique_identifier"
+    },
+    {
+      "header": "life_cycle_status",
+      "expected": "item.lifecycle_status"
+    },
+    {
+      "header": "SOH %",
+      "expected": "item.state_of_health"
+    },
+    {
+      "header": "mystery_custom_column",
+      "expected": null
+    },
+    {
+      "header": "free text notes",
+      "expected": null
+    }
+  ]
+}
