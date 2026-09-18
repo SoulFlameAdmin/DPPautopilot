@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M22 — API validation/error contract precursor",
+  "currentTask": "M23 — API conflict/idempotency precursor",
   "currentGate": "MVP",
-  "lastCompletedTask": "M21 partial export/evidence precursor — CI 35405402646 SUCCESS + bound Supabase M21_EXPORT_BUNDLE_SUBSET_PASS",
-  "nextTask": "Extend stable machine-readable API error contract across M17-M21 without marking M22 GREEN until M17-M20 dependencies are fully accepted.",
-  "message": "D01-D14 remain GREEN. M17-M19 and M21 now have evidence-backed API precursors; M20 is GREEN. F08/M01 remain deferred. No Vercel action attempted.",
+  "lastCompletedTask": "M22 partial shared API error contract — CI 35405864781 SUCCESS",
+  "nextTask": "Add explicit M17-M19 API conflict/idempotency regression coverage and reconcile reliability matrix; keep M23 RED until M17-M20 dependencies are fully accepted.",
+  "message": "D01-D14 remain GREEN. M17-M19/M21 have API precursors, M20 is GREEN, M22 shared error contract is evidence-backed. F08/M01 remain deferred. No Vercel action attempted.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T02:25:00+03:00"
+  "updatedAt": "2026-09-19T02:38:00+03:00"
 }
