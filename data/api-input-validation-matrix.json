@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "task": "R03",
+  "status": "partial",
+  "max_body_bytes": 1048576,
+  "scenarios": [
+    {
+      "id": "oversize_parsed_model_body",
+      "surface": "/api/models",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "oversize_parsed_item_body",
+      "surface": "/api/items",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "oversize_parsed_passport_body",
+      "surface": "/api/passport",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "oversize_string_body",
+      "surface": "shared request parser",
+      "expected": "413 PAYLOAD_TOO_LARGE"
+    },
+    {
+      "id": "oversize_buffer_body",
+      "surface": "shared request parser",
+      "expected": "413 PAYLOAD_TOO_LARGE"
+    },
+    {
+      "id": "malformed_json",
+      "surface": "M17-M19",
+      "expected": "400 INVALID_JSON before upstream"
+    },
+    {
+      "id": "invalid_model_fields",
+      "surface": "/api/models",
+      "expected": "400/422 validation error"
+    },
+    {
+      "id": "invalid_item_fields",
+      "surface": "/api/items",
+      "expected": "400/422 validation error"
+    },
+    {
+      "id": "invalid_passport_fields",
+      "surface": "/api/passport",
+      "expected": "400/422 validation error"
+    },
+    {
+      "id": "evidence_file_policy",
+      "surface": "M13 policy",
+      "expected": "10 MiB/type/path/hash metadata policy remains versioned"
+    }
+  ],
+  "evidence_files": [
+    "tests/api/input-validation.test.cjs",
+    "tests/db/test_input_validation_security_subset.sql",
+    "data/evidence-file-policy.json"
+  ],
+  "remaining": [
+    "M13 real storage upload/download validation and M20 HTTP import payload/file boundary still await their dependent production surfaces."
+  ]
+}
