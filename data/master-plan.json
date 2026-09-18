@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T02:49:00+03:00",
+  "updatedAt": "2026-09-19T02:56:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -613,7 +613,7 @@
           "acceptanceCriteria": "Server rejects malformed/oversize/disallowed payloads",
           "evidenceRequired": "Negative tests",
           "status": "red",
-          "evidence": "PARTIAL dependency-safe negative input validation for GREEN M20: bound Supabase rollback suite returned `R03_M20_INPUT_VALIDATION_SUBSET_PASS`, rejecting negative counters, invalid row numbers/JSON shapes, disallowed category/lifecycle values and oversize model/item identifiers. Full CI `35398725407` on `d6b6b3b491862db0f7e763f160e0afc4e0383ece` SUCCESS including clean PostgreSQL replay, R03 gate and browser smoke; artifact `10569002388`. R03 remains RED until M13 and M17-M20 server/file/API validation are complete. — PARTIAL PASS"
+          "evidence": "PARTIAL DB + API input validation: M20 DB negatives remain green; shared api/_request.js now enforces 1 MiB limits on string/Buffer/parsed-object bodies and typed 413 PAYLOAD_TOO_LARGE, malformed JSON 400, plus M17-M19 field/shape/ID negatives before upstream. data/api-input-validation-matrix.json versions 10 scenarios. CI 35407365035 on 146c2d90f3ca9f1fcc4f6b0b1c6ad9184c00b6ea SUCCESS including R03 validator/API negative suite, M20 DB negative suite, clean replay/security/browser gates. R03 remains RED pending M13 real storage validation and M17-M20 full acceptance. — PARTIAL PASS"
         },
         {
           "id": "R04",
