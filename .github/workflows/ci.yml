@@ -133,6 +133,37 @@ jobs:
             --window-size=1000,900 --screenshot=artifacts/d11-separation.png \
             'http://127.0.0.1:8000/demo/separation.html'
           python scripts/validate_separation_ui.py artifacts/d11-separation-dom.html
+
+          # D12 responsive evidence: render the core demo journey at phone/tablet/desktop widths.
+          for SPEC in 'phone:390,844' 'tablet:768,1024' 'desktop:1440,1000'; do
+            NAME="${SPEC%%:*}"
+            SIZE="${SPEC#*:}"
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --window-size="$SIZE" --screenshot="artifacts/d12-${NAME}-dashboard.png" \
+              'http://127.0.0.1:8000/'
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --window-size="$SIZE" --screenshot="artifacts/d12-${NAME}-import.png" \
+              'http://127.0.0.1:8000/demo/import.html?sample=1'
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --window-size="$SIZE" --screenshot="artifacts/d12-${NAME}-model.png" \
+              'http://127.0.0.1:8000/demo/model.html?sample=1'
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --window-size="$SIZE" --screenshot="artifacts/d12-${NAME}-item.png" \
+              'http://127.0.0.1:8000/demo/item.html?sample=1'
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --window-size="$SIZE" --screenshot="artifacts/d12-${NAME}-passport.png" \
+              'http://127.0.0.1:8000/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001'
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --window-size="$SIZE" --screenshot="artifacts/d12-${NAME}-qr.png" \
+              'http://127.0.0.1:8000/demo/qr.html'
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --window-size="$SIZE" --screenshot="artifacts/d12-${NAME}-completeness.png" \
+              'http://127.0.0.1:8000/demo/completeness.html'
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --window-size="$SIZE" --screenshot="artifacts/d12-${NAME}-separation.png" \
+              'http://127.0.0.1:8000/demo/separation.html'
+          done
+          python scripts/validate_responsive_artifacts.py artifacts
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
