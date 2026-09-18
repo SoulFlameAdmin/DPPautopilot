@@ -285,6 +285,13 @@ jobs:
             --window-size=1000,1000 --screenshot=artifacts/m07-mapping.png \
             'http://127.0.0.1:8000/demo/mapping.html'
           python scripts/validate_mapping_wizard.py artifacts/m07-mapping-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/import-validation.html' > artifacts/m08-import-validation-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --window-size=1100,1000 --screenshot=artifacts/m08-import-validation.png \
+            'http://127.0.0.1:8000/demo/import-validation.html'
+          python scripts/validate_import_validation_ui.py artifacts/m08-import-validation-dom.html
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
