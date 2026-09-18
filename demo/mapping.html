@@ -15,7 +15,7 @@ const canonical={
  chemistry:'model.composition.chemistry',
  unique_identifier:'item.unique_identifier',
  lifecycle_status:'item.lifecycle_status',
- state_of_health_percent:'item.state_of_health.percent'
+ state_of_health_percent:'item.state_of_health'
 };
 let headers=[],catalog=[];
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
