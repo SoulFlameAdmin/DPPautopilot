@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M19 — passport API precursor",
+  "currentTask": "M21 — export data/evidence precursor analysis",
   "currentGate": "MVP",
-  "lastCompletedTask": "M18 partial battery-item API precursor — CI 35403480117 SUCCESS + bound Supabase M18_ITEMS_RPC_SUBSET_PASS",
-  "nextTask": "Build public/private passport read and controlled write precursor with API/security tests; keep M19 RED until M03/M10 dependencies and deployed E2E acceptance are fully satisfied.",
-  "message": "M17 and M18 now have evidence-backed HTTP+DB precursors and bound Supabase runtime evidence. F08/M01 remain deferred; no Vercel action attempted.",
+  "lastCompletedTask": "M19 partial passport API precursor — CI 35404209335 SUCCESS + bound Supabase M19_PASSPORT_API_SUBSET_PASS",
+  "nextTask": "Build an independent tenant-scoped export/evidence manifest precursor without marking M21 GREEN until M10-M13 dependencies are fully satisfied.",
+  "message": "M17-M19 now have evidence-backed API precursors with bound Supabase runtime tests. No dependency-safe RED task is fully eligible; continuing independent hardening while F08/M01 remain deferred. No Vercel action attempted.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T01:56:00+03:00"
+  "updatedAt": "2026-09-19T02:08:00+03:00"
 }
