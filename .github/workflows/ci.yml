@@ -185,6 +185,16 @@ jobs:
           \i tests/db/test_tenant_rls_subset.sql
           rollback;
           SQL
+      - name: Run M02 M03 tenant RBAC subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_tenant_context_rbac_subset.sql
+          rollback;
+          SQL
       - name: Run M13 evidence metadata subset
         env:
           PGPASSWORD: postgres
