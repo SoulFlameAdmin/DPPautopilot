@@ -32,6 +32,16 @@ function validObject(value) {
   return value == null || (!Array.isArray(value) && typeof value === 'object');
 }
 
+function sanitizePublicPassport(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+  const allowed = ['passport_id','unique_identifier','status','public_payload','updated_at'];
+  const out = {};
+  for (const key of allowed) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) out[key] = value[key];
+  }
+  return out;
+}
+
 function mapDatabaseError(data) {
   const mapped = mapSharedDatabaseError('passport', data);
   return [mapped.status, mapped.code, mapped.message];
@@ -94,7 +104,7 @@ async function handler(req, res) {
           return send(res, 400, { error: { code: 'INVALID_IDENTIFIER', message: 'identifier must contain 1..300 characters' } });
         }
         const passport = await rpc('dpp_api_passport_public', { p_unique_identifier: identifier.trim() }, null);
-        return send(res, 200, { data: passport });
+        return send(res, 200, { data: sanitizePublicPassport(passport) });
       }
 
       if (!validUuid(id)) {
@@ -167,4 +177,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validObject, mapDatabaseError, rpc };
+module.exports._test = { bearer, parseBody, validUuid, validObject, sanitizePublicPassport, mapDatabaseError, rpc };
