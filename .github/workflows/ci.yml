@@ -28,16 +28,16 @@ jobs:
           --health-retries 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
       - name: Install D08 QR scanner dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y zbar-tools postgresql-client
-          python -m pip install --disable-pip-version-check 'qrcode[pil]==8.2'
+          python -m pip install --disable-pip-version-check -r requirements-ci.txt
       - name: Validate repository contracts
         run: python scripts/validate_repo.py
       - name: Validate DPP field traceability catalog
@@ -54,6 +54,12 @@ jobs:
         run: python scripts/validate_transactional_import_contract.py
       - name: Validate R01 environment and secret management
         run: python scripts/validate_env_secret_management.py
+      - name: Validate R11 backup policy
+        run: python scripts/validate_backup_policy.py
+      - name: Validate R14 supply-chain policy
+        run: python scripts/validate_supply_chain.py
+      - name: Audit Python CI dependencies
+        run: python -m pip_audit -r requirements-ci.txt
       - name: Validate D02 synthetic sample fixture
         run: python scripts/validate_sample_fixture.py
       - name: Validate D07 deterministic identifiers
@@ -298,7 +304,7 @@ jobs:
           python scripts/validate_import_validation_ui.py artifacts/m08-import-validation-dom.html
       - name: Upload demo UI evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: demo-ui-smoke
           path: artifacts/
