@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M23 — API conflict/idempotency precursor",
-  "currentGate": "MVP",
-  "lastCompletedTask": "M22 partial shared API error contract — CI 35405864781 SUCCESS",
-  "nextTask": "Add explicit M17-M19 API conflict/idempotency regression coverage and reconcile reliability matrix; keep M23 RED until M17-M20 dependencies are fully accepted.",
-  "message": "D01-D14 remain GREEN. M17-M19/M21 have API precursors, M20 is GREEN, M22 shared error contract is evidence-backed. F08/M01 remain deferred. No Vercel action attempted.",
+  "currentTask": "R03 — API payload validation hardening",
+  "currentGate": "SECURITY",
+  "lastCompletedTask": "R04 partial API tenant-isolation hardening — CI 35406978527 SUCCESS",
+  "nextTask": "Close object-body oversize gap across M17-M19 serverless APIs and add malformed/oversize negative tests; keep R03 RED until M13/M17-M20 are fully accepted and file/upload E2E exists.",
+  "message": "D01-D14 remain GREEN. R04 now has DB + API attack coverage. F08/M01 remain deferred; no Vercel action attempted.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T02:38:00+03:00"
+  "updatedAt": "2026-09-19T02:49:00+03:00"
 }
