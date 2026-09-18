@@ -2,587 +2,1092 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T01:16:00+03:00",
+  "updatedAt": "2026-09-19T01:30:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
-    "red": "Not started or failed",
-    "blocked": "Needs external access, decision, legal sign-off, customer data or verified binding"
+    "red": "Not implemented or failed",
+    "blocked": "External access, legal sign-off, customer data, vendor credentials, or another dependency prevents completion"
   },
   "gates": [
     {
       "id": "FOUNDATION",
       "label": "FOUNDATION",
-      "purpose": "Build the engineering and compliance base before product features.",
-      "exitCriteria": "Repository, deployment binding, CI, environment policy, traceability and data platform bindings are verified.",
+      "purpose": "Engineering, delivery, traceability and platform foundations.",
+      "exitCriteria": "Repository, source-of-truth, CI, environment policy, traceability and verified platform bindings are evidenced.",
       "tasks": [
         {
           "id": "F01",
           "title": "Verify canonical GitHub repository",
+          "dependsOn": "—",
+          "acceptanceCriteria": "Repo identity/default branch/write access verified",
+          "evidenceRequired": "Connector result naming exact repo",
           "status": "green",
-          "evidence": "GitHub connector verified SoulFlameAdmin/DPPautopilot, main, with admin/write access."
+          "evidence": "GitHub connector verified `SoulFlameAdmin/DPPautopilot`, default branch `main`, admin/write permissions — PASS"
         },
         {
           "id": "F02",
-          "title": "Inventory current code and configuration",
+          "title": "Inventory current code/config",
+          "dependsOn": "F01",
+          "acceptanceCriteria": "Root tree and implemented surfaces documented",
+          "evidenceRequired": "Audit section in this file",
           "status": "green",
-          "evidence": "Initial repository tree audited and recorded in docs/MASTER_AUTOPILOT_PLAN.md."
+          "evidence": "Root inventory verified static prototype files only at audit start — PASS"
         },
         {
           "id": "F03",
           "title": "Freeze canonical master plan",
+          "dependsOn": "F01,F02",
+          "acceptanceCriteria": "This file exists with stable IDs, dependencies, acceptance and evidence rules",
+          "evidenceRequired": "`docs/MASTER_AUTOPILOT_PLAN.md` commit",
           "status": "green",
-          "evidence": "docs/MASTER_AUTOPILOT_PLAN.md v2.3 is the declared source of truth."
+          "evidence": "Canonical plan created at `docs/MASTER_AUTOPILOT_PLAN.md` — PASS"
         },
         {
           "id": "F04",
-          "title": "Keep machine-readable progress dashboard",
+          "title": "Keep machine-readable progress view",
+          "dependsOn": "F03",
+          "acceptanceCriteria": "`data/master-plan.json` remains parseable and dashboard can render it",
+          "evidenceRequired": "CI validator + dashboard smoke test",
           "status": "green",
-          "evidence": "data/master-plan.json is CI-validated and dashboard/browser smoke PASS; canonical markdown source-of-truth is v2.5."
+          "evidence": "GitHub Actions run `35265447807` on commit `a3d408f5b5dac9b34ffc0d9e85d68e5e95ef3a65`: repository contract PASS + headless Chrome dashboard render PASS; screenshot artifact `d01-dashboard-smoke` id `10516670805` — PASS"
         },
         {
           "id": "F05",
           "title": "Keep DAVID worker status contract",
+          "dependsOn": "F03",
+          "acceptanceCriteria": "Worker JSON parseable with required fields/status",
+          "evidenceRequired": "Passing CI validator",
           "status": "green",
-          "evidence": "scripts/validate_repo.py validates required worker fields; GitHub Actions PASS."
+          "evidence": "`scripts/validate_repo.py` validated worker status contract in GitHub Actions — PASS"
         },
         {
           "id": "F06",
           "title": "Define product scope and target architecture",
+          "dependsOn": "F03",
+          "acceptanceCriteria": "Scope + architecture recorded and reviewed against implementation",
+          "evidenceRequired": "This file",
           "status": "green",
           "evidence": "Scope and architecture are documented in the canonical master plan."
         },
         {
           "id": "F07",
           "title": "Bind Vercel delivery path",
+          "dependsOn": "F01",
+          "acceptanceCriteria": "A Vercel project is connected either directly to canonical repo or to a documented deployment-only mirror synchronized from canonical; a Vercel commit/deployment status proves the integration receives the expected commit",
+          "evidenceRequired": "Vercel project metadata + GitHub/Vercel status evidence + mirror policy when applicable",
           "status": "green",
-          "evidence": "Controlled deployment mirror SoulFlameAdmin/dpp is linked to Vercel project dpp. Mirror commit 748806ae42aa5e958a993137695818036b1022b6 received a Vercel commit status, proving the integration receives the expected commit. See docs/BINDING_ATTEMPT_03.md."
+          "evidence": "Controlled mirror `SoulFlameAdmin/dpp` synchronized from canonical; Vercel project `dpp` is linked to mirror; exact mirror commit `748806ae42aa5e958a993137695818036b1022b6` received Vercel status, proving Git integration. See `docs/BINDING_ATTEMPT_03.md` — PASS"
         },
         {
           "id": "F08",
           "title": "Verify first production deployment",
+          "dependsOn": "F07",
+          "acceptanceCriteria": "Production deployment READY; app and data JSON return 200",
+          "evidenceRequired": "Deployment metadata + HTTP verification",
           "status": "blocked",
-          "evidence": "Post-quota mirror trigger commit d573b6ebc9072dbce41a0253f33730433d2c1897 produced no GitHub Vercel status and Vercel project prj_K0RSGrEkEr3XDouCTA3tdasbqH55 still reports zero deployments. Blocker is inactive/missing Git→Vercel deployment hook/integration, not the earlier daily quota."
+          "evidence": "After the documented quota-reset window passed, mirror-only trigger commit `d573b6ebc9072dbce41a0253f33730433d2c1897` was created in `SoulFlameAdmin/dpp`. Repeated verification still showed zero Vercel deployments for project `prj_K0RSGrEkEr3XDouCTA3tdasbqH55` and no GitHub commit status, so the current blocker is an inactive/missing Git→Vercel deployment integration/hook rather than the earlier daily build quota. No further trigger commits were spammed. — BLOCKED"
         },
         {
           "id": "F09",
           "title": "Add CI baseline",
+          "dependsOn": "F03",
+          "acceptanceCriteria": "CI validates JSON, stable IDs, required repo files and HTML data references",
+          "evidenceRequired": "GitHub Actions check `validate` PASS on commit `9f3892b26176da8a9aac8063f3f528906840d18c`",
           "status": "green",
-          "evidence": "GitHub Actions validate check PASS on commit 9f3892b26176da8a9aac8063f3f528906840d18c."
+          "evidence": "GitHub Actions `validate` completed successfully for commit `9f3892b26176da8a9aac8063f3f528906840d18c` — PASS"
         },
         {
           "id": "F10",
-          "title": "Define dev / preview / production environment policy",
+          "title": "Define dev/preview/production environment policy",
+          "dependsOn": "F03",
+          "acceptanceCriteria": "Environment ownership, secrets, promotion and rollback rules documented",
+          "evidenceRequired": "`docs/ENVIRONMENT_POLICY.md` + PASS on commit `eb40704890ececa3df3e2f519962e82d0570c39e`",
           "status": "green",
-          "evidence": "docs/ENVIRONMENT_POLICY.md committed; CI PASS on eb40704890ececa3df3e2f519962e82d0570c39e."
+          "evidence": "`docs/ENVIRONMENT_POLICY.md` committed; CI PASS on `eb40704890ececa3df3e2f519962e82d0570c39e` — PASS"
         },
         {
           "id": "F11",
           "title": "Requirements traceability matrix",
+          "dependsOn": "F03",
+          "acceptanceCriteria": "Product/compliance fields map to authoritative requirement/source and implementation",
+          "evidenceRequired": "`docs/REQUIREMENTS_TRACEABILITY.md` + `data/dpp-field-catalog.json` + CI coverage validator",
           "status": "green",
-          "evidence": "docs/REQUIREMENTS_TRACEABILITY.md + data/dpp-field-catalog.json + CI coverage validator map requirements to schema/API/UI targets."
+          "evidence": "`docs/REQUIREMENTS_TRACEABILITY.md` completed explicit Annex VI/Annex XIII mapping; `data/dpp-field-catalog.json` maps requirement/source/access/type to DB/API/UI targets; `scripts/validate_field_catalog.py` PASS in run `35265447807` — PASS"
         },
         {
           "id": "F12",
           "title": "Enforce GREEN evidence rule",
+          "dependsOn": "F03",
+          "acceptanceCriteria": "Validator rejects GREEN tasks with empty evidence",
+          "evidenceRequired": "`scripts/validate_repo.py` + passing GitHub Actions checks",
           "status": "green",
-          "evidence": "scripts/validate_repo.py rejects GREEN tasks without concrete evidence; passing GitHub Actions checks."
+          "evidence": "CI validator enforces non-empty concrete evidence text for GREEN tasks — PASS"
         },
         {
           "id": "F13",
           "title": "Bind verified Supabase DPP data namespace",
+          "dependsOn": "F06",
+          "acceptanceCriteria": "A concrete Supabase project is explicitly bound to the app; DPP namespace boundary is recorded; client access is deny-by-default until task-specific policies exist",
+          "evidenceRequired": "Migration history + verified binding row + RLS/privilege check",
           "status": "green",
-          "evidence": "Migration bind_dpp_autopilot_namespace applied to Supabase project frhletkiuupgksmgxoxc; public.dpp_app_binding verified with one SoulFlameAdmin/DPPautopilot binding row, RLS enabled, and anon/authenticated privileges revoked."
+          "evidence": "Migration `bind_dpp_autopilot_namespace` applied to Supabase project `frhletkiuupgksmgxoxc`; `public.dpp_app_binding` verified with one DPP binding row, RLS enabled, anon/authenticated privileges revoked — PASS"
         },
         {
           "id": "F14",
           "title": "Baseline repository security hygiene",
+          "dependsOn": "F03",
+          "acceptanceCriteria": "No committed secrets; `.gitignore`/secret policy in place; dependency strategy defined",
+          "evidenceRequired": "`.gitignore`, `scripts/security_hygiene.py`, `docs/SECURITY_BASELINE.md`, PASS on commit `5747153bc6b94589a6e805e9d8790dd6e304654c`",
           "status": "green",
-          "evidence": ".gitignore, scripts/security_hygiene.py and docs/SECURITY_BASELINE.md committed; CI PASS on 5747153bc6b94589a6e805e9d8790dd6e304654c."
+          "evidence": "`.gitignore`, security hygiene scanner and security baseline committed; CI PASS on `5747153bc6b94589a6e805e9d8790dd6e304654c` — PASS"
         }
       ]
     },
     {
       "id": "DEMO",
-      "label": "DEMO",
-      "purpose": "A polished, believable product demonstration that explains the value in minutes.",
-      "exitCriteria": "A prospect can create/import a sample battery, view a passport, scan a QR code and understand missing compliance data.",
+      "label": "DEMO PRODUCT",
+      "purpose": "Tested synthetic end-to-end product demonstration.",
+      "exitCriteria": "D01-D14 complete the create/import → validate → passport → QR demo journey with responsive evidence.",
       "tasks": [
         {
           "id": "D01",
-          "title": "Create DPP Autopilot landing/dashboard",
+          "title": "Product dashboard / navigation",
+          "dependsOn": "F09",
+          "acceptanceCriteria": "Dashboard usable with clear Demo/MVP/Production boundaries",
+          "evidenceRequired": "UI smoke test + screenshots",
           "status": "green",
-          "evidence": "Bulgarian dashboard/navigation browser smoke PASS with screenshot evidence."
+          "evidence": "Bulgarian burger menu with `Етапи`, full-screen plan, DAVID status and five visible product boundaries implemented in `index.html`; browser smoke PASS and screenshot artifact `10516670805` in run `35265447807` — PASS"
         },
         {
           "id": "D02",
-          "title": "Create sample battery dataset",
+          "title": "Realistic sample battery dataset",
+          "dependsOn": "F11",
+          "acceptanceCriteria": "Sample model/items cover required demo fields and are explicitly synthetic",
+          "evidenceRequired": "Fixture validation test",
           "status": "green",
-          "evidence": "Synthetic battery fixture validation PASS in run 35267233610."
+          "evidence": "`data/sample-battery.json` synthetic fixture validation PASS in GitHub Actions run `35267233610`, commit `5ea7209b88e22cd806c027f50e276f7cc41aad4d` — PASS"
         },
         {
           "id": "D03",
-          "title": "CSV/Excel-style import demo",
+          "title": "CSV import demo",
+          "dependsOn": "D02",
+          "acceptanceCriteria": "File can be loaded, columns previewed and mapped without backend",
+          "evidenceRequired": "Browser test fixture",
           "status": "green",
-          "evidence": "CSV import preview and mapping browser test PASS in run 35267233610, artifact 10517128357."
+          "evidence": "CSV import preview/mapping browser assertions PASS in run `35267233610`; UI evidence artifact `10517128357` — PASS"
         },
         {
           "id": "D04",
           "title": "Battery model form",
+          "dependsOn": "D02",
+          "acceptanceCriteria": "Required model fields validate and errors are visible",
+          "evidenceRequired": "Form tests",
           "status": "green",
-          "evidence": "Catalog-driven model form positive/negative validation PASS in run 35267233610."
+          "evidence": "Catalog-driven battery model form positive/negative browser validation PASS in run `35267233610`; artifact `10517128357` — PASS"
         },
         {
           "id": "D05",
-          "title": "Individual battery instance form",
+          "title": "Battery instance form",
+          "dependsOn": "D04",
+          "acceptanceCriteria": "Item fields link to model and validate identifiers/status",
+          "evidenceRequired": "Form tests",
           "status": "green",
-          "evidence": "Item form linkage/identifier/lifecycle validation PASS in run 35267233610."
+          "evidence": "Individual item form model-link/identifier/lifecycle browser validation PASS in run `35267233610`; artifact `10517128357` — PASS"
         },
         {
           "id": "D06",
-          "title": "Public battery passport page",
+          "title": "Public passport view",
+          "dependsOn": "D04,D05",
+          "acceptanceCriteria": "Stable route renders public-safe passport fields",
+          "evidenceRequired": "E2E route test",
           "status": "green",
-          "evidence": "Public-safe passport route/privacy browser test PASS in run 35267233610."
+          "evidence": "Public passport browser route/privacy assertions PASS in run `35267233610`; restricted markers excluded and missing identifier deterministic — PASS"
         },
         {
           "id": "D07",
-          "title": "Generate unique product/battery identifier",
+          "title": "Unique identifier generation",
+          "dependsOn": "D05",
+          "acceptanceCriteria": "IDs are deterministic/unique per defined strategy and collision tested",
+          "evidenceRequired": "Unit tests",
           "status": "green",
-          "evidence": "Identifier determinism/round-trip/10,000 collision test PASS in run 35267233610."
+          "evidence": "Deterministic identifier tests PASS in run `35267233610`: fixture match, round-trip, 10,000 IDs with zero collisions, invalid inputs rejected — PASS"
         },
         {
           "id": "D08",
-          "title": "Generate QR/data carrier linking to passport",
+          "title": "QR/data carrier",
+          "dependsOn": "D06,D07",
+          "acceptanceCriteria": "QR resolves to exact passport URL and is scannable",
+          "evidenceRequired": "E2E + scan evidence",
           "status": "green",
-          "evidence": "Generated and embedded QR both scan to exact passport URL; route HTTP 200 PASS in run 35388892927, artifact 10564414632."
+          "evidence": "Real QR generation + `zbarimg` scan of generated and embedded UI carrier + exact URL comparison + HTTP 200 route PASS in run `35388892927`, artifact `10564414632` — PASS"
         },
         {
           "id": "D09",
-          "title": "Show data completeness score",
+          "title": "Completeness score",
+          "dependsOn": "D04,D05,F11",
+          "acceptanceCriteria": "Score derives from defined field requirements",
+          "evidenceRequired": "Unit tests",
           "status": "green",
-          "evidence": "Catalog-driven completeness unit/browser tests PASS in run 35389607402."
+          "evidence": "Catalog-driven completeness unit/browser tests PASS in run `35389607402`: complete fixture = 100%, deterministic required-field removal lowers score — PASS"
         },
         {
           "id": "D10",
-          "title": "Show missing-field warnings",
+          "title": "Missing-field warnings",
+          "dependsOn": "D09",
+          "acceptanceCriteria": "Missing/invalid fields show actionable messages",
+          "evidenceRequired": "UI tests",
           "status": "green",
-          "evidence": "Actionable missing-field warnings browser test PASS in run 35389607402."
+          "evidence": "Missing-field browser warning PASS in run `35389607402`: exact field path, regulatory source and actionable UI target rendered — PASS"
         },
         {
           "id": "D11",
-          "title": "Show model-level vs item-level data separation",
+          "title": "Model vs item data separation",
+          "dependsOn": "D04,D05",
+          "acceptanceCriteria": "UI and data structures clearly separate shared/model and instance data",
+          "evidenceRequired": "Unit/UI tests",
           "status": "green",
-          "evidence": "Model/item path separation browser test PASS in run 35389607402."
+          "evidence": "Model/item separation browser assertions PASS in run `35389607402`: canonical model/item path sets are disjoint with zero cross-level leakage — PASS"
         },
         {
           "id": "D12",
-          "title": "Responsive phone/tablet/desktop demo",
+          "title": "Responsive demo",
+          "dependsOn": "D01-D11",
+          "acceptanceCriteria": "Core flows pass phone/tablet/desktop viewports",
+          "evidenceRequired": "Responsive E2E screenshots",
           "status": "green",
-          "evidence": "24 responsive screenshots across phone/tablet/desktop PASS in run 35389607402, artifact 10565675779."
+          "evidence": "Phone/tablet/desktop screenshot matrix for 8 core demo surfaces PASS in run `35389607402`; artifact `10565675779` contains 24 responsive screenshots — PASS"
         },
         {
           "id": "D13",
-          "title": "Demo reset / sample replay flow",
+          "title": "Demo reset/replay",
+          "dependsOn": "D02-D12",
+          "acceptanceCriteria": "Reset returns app to known fixture state",
+          "evidenceRequired": "E2E test",
           "status": "green",
-          "evidence": "Mutate/reset replay browser test PASS in run 35389607402."
+          "evidence": "Browser mutate→reset replay PASS in run `35389607402`: mutation detected and reset returns to exact known synthetic fixture state — PASS"
         },
         {
           "id": "D14",
-          "title": "Demo acceptance test and screenshots",
+          "title": "Demo acceptance",
+          "dependsOn": "D01-D13",
+          "acceptanceCriteria": "Create/import -> validate -> passport -> QR completes without console/runtime error",
+          "evidenceRequired": "Recorded E2E evidence",
           "status": "green",
-          "evidence": "Full import→validate→passport→QR acceptance, 4/4, zero runtime errors PASS in run 35389607402, artifact 10565675779."
+          "evidence": "Full browser demo acceptance PASS in run `35389607402`, commit `9d0c20c2bcce06848cdfe263caeb13730c355df4`: import→validate→passport→QR, 4/4 steps, zero runtime errors; artifact `10565675779` — PASS"
         }
       ]
     },
     {
       "id": "MVP",
-      "label": "MVP",
-      "purpose": "Pilot-ready system using real customer data in a controlled environment.",
-      "exitCriteria": "A pilot customer can onboard, import real battery data, validate it, manage passports, control access and produce an auditable registry-ready record.",
+      "label": "MVP / DATA / AUTH / API",
+      "purpose": "Authenticated tenant-safe production data model and API capability.",
+      "exitCriteria": "M01-M25 satisfy authenticated pilot acceptance with database, API, access, audit and evidence controls.",
       "tasks": [
         {
           "id": "M01",
-          "title": "Add authenticated organisations and users",
+          "title": "Authentication",
+          "dependsOn": "F13",
+          "acceptanceCriteria": "Sign-up/in/out/reset/session handling works",
+          "evidenceRequired": "Auth integration tests",
           "status": "blocked",
-          "evidence": "Normal Auth flow proved confirmation, authenticated user session, refresh, logout invalidation, recovery request/email; recovery-completion PATCH page contract/browser-safe state PASS in full CI run 35394545987. Remaining acceptance gap: actual runtime password update through recovery redirect cannot be exercised while F08 deployment is unavailable; direct recovery-token forwarding is safety-blocked."
+          "evidence": "Normal Supabase Auth acceptance advanced without admin bypass: email confirmation completed for an isolated test identity, authenticated `/auth/v1/user` returned HTTP 200, refresh-token flow returned new bearer tokens, logout returned 204 and the old session then returned 403 `session_not_found`; recovery request returned 200 and the recovery email arrived. Recovery-completion page now implements authenticated `PATCH /auth/v1/user` with fragment-only token/no persistence; contract + browser-safe default state passed full CI run `35394545987` on `d843dd7f432475ee53a85028846bb8663d9c32f1`. Final runtime password-update completion remains unproven because the DPP recovery redirect is not deployable while F08 is blocked and direct recovery-token forwarding is blocked by safety controls. — BLOCKED"
         },
         {
           "id": "M02",
-          "title": "Multi-organisation data isolation",
+          "title": "Organisations / tenants",
+          "dependsOn": "M01",
+          "acceptanceCriteria": "Users belong to organisations and active tenant is explicit",
+          "evidenceRequired": "DB + integration tests",
           "status": "red",
-          "evidence": "PARTIAL: explicit active tenant context with membership FK; bound Supabase M02/M03 matrix PASS and full CI 35400537746 SUCCESS. Remains RED until M01 auth acceptance + app/API consumption."
+          "evidence": "PARTIAL explicit active-tenant precursor: migration `20260919010000_dpp_tenant_context_rbac.sql` adds membership-backed `dpp_user_tenant_context` and `dpp_set_active_organization()`; non-member selection and missing auth fail closed. Bound Supabase rollback matrix returned `M02_M03_TENANT_RBAC_SUBSET_PASS`; full CI `35400537746` on `f6d7a964d6f2482f1701c86d36f54262455dbdb7` SUCCESS with clean PostgreSQL replay + browser smoke; artifact `10569034799`. M02 remains RED until M01 auth acceptance is complete and app/API consumes active-tenant context. — PARTIAL PASS"
         },
         {
           "id": "M03",
-          "title": "Role-based access control",
+          "title": "RBAC",
+          "dependsOn": "M01,M02",
+          "acceptanceCriteria": "Owner/admin/editor/viewer permissions enforced server-side",
+          "evidenceRequired": "Authorization test matrix",
           "status": "red",
-          "evidence": "PARTIAL: server-side owner/admin/editor/viewer role assertion over active tenant; bound Supabase matrix PASS and full CI 35400537746 SUCCESS. Remains RED until M01/M02 accepted end-to-end."
+          "evidence": "PARTIAL server-side RBAC precursor: `dpp_require_active_role(text[])` enforces owner/admin/editor/viewer against the explicit active tenant; bound Supabase matrix proved owner/admin/editor/viewer positive and insufficient-role/cross-tenant/missing-auth negative cases. Full CI `35400537746` SUCCESS; artifact `10569034799`. M03 remains RED until M01/M02 are fully accepted and authenticated app/API authorization is exercised end-to-end. — PARTIAL PASS"
         },
         {
           "id": "M04",
-          "title": "Persistent database schema for models/items/passports",
+          "title": "Core database schema",
+          "dependsOn": "F13,F11",
+          "acceptanceCriteria": "Models/items/passports/orgs/users represented with PK/FK/check constraints",
+          "evidenceRequired": "Migration + schema diff",
           "status": "green",
-          "evidence": "Supabase migration dpp_core_schema applied to frhletkiuupgksmgxoxc; 5 DPP core tables with PK/FK/check/unique constraints, RLS and deny-by-default client grants verified. Canonical migration in repo; CI run 35390158548 SUCCESS on 575d5a7e08895aa217ff8749d2764a3533bf0954."
+          "evidence": "Supabase migration `dpp_core_schema` applied to project `frhletkiuupgksmgxoxc`; runtime verification confirmed 5 DPP-only core tables, PK/FK/check/unique constraints, tenant-safe composite FKs, RLS enabled, and no `anon`/`authenticated` table grants. Canonical migration `supabase/migrations/20260918231500_dpp_core_schema.sql`; GitHub Actions run `35390158548` on commit `575d5a7e08895aa217ff8749d2764a3533bf0954` SUCCESS including `M04_SCHEMA_CONTRACT_PASS`. — PASS"
         },
         {
           "id": "M05",
-          "title": "Import CSV with mapping wizard",
+          "title": "Row Level Security",
+          "dependsOn": "M02,M03,M04",
+          "acceptanceCriteria": "Cross-tenant reads/writes are denied by database policy",
+          "evidenceRequired": "Negative security tests",
           "status": "red",
-          "evidence": "PARTIAL: tenant/RBAC policies applied on bound Supabase with production table grants still revoked. Runtime rollback matrix M05_RLS_POLICY_SUBSET_PASS; clean full CI 35399659669 SUCCESS. Remains RED pending M02/M03 and real authenticated app/API enforcement."
+          "evidence": "PARTIAL tenant/RBAC RLS precursor: policies applied to bound Supabase while direct `anon`/`authenticated` table grants remain revoked. Real rollback security matrix returned `M05_RLS_POLICY_SUBSET_PASS` with owner own-tenant visibility, cross-tenant read/write denial, viewer read-only behavior and other-tenant isolation; synthetic auth users rolled back to zero. Clean PostgreSQL full CI `35399659669` on `c2514191a5558a06b8332b61c81c54b293d9d093` SUCCESS after fixing test transaction semantics; artifact `10569033696`. M05 remains RED until M02/M03 are GREEN and policies are exercised through real authenticated app/API paths. — PARTIAL PASS"
         },
         {
           "id": "M06",
-          "title": "Import validation and row-level errors",
+          "title": "Migration workflow",
+          "dependsOn": "M04",
+          "acceptanceCriteria": "Reproducible ordered migrations from clean database",
+          "evidenceRequired": "Migration replay test",
           "status": "green",
-          "evidence": "Ordered canonical DPP migrations replay cleanly on PostgreSQL 17 with RLS/grant assertions; run 35390995153 SUCCESS."
+          "evidence": "Canonical ordered migrations include F13 binding and all DPP migrations; clean PostgreSQL 17 replay with `ON_ERROR_STOP=1`, DPP table existence, RLS and client-grant assertions PASS in GitHub Actions run `35390995153` on `3a47aaa64a31560316cfdfa4ca8953560430a1a0`. — PASS"
         },
         {
           "id": "M07",
-          "title": "Annex XIII data model mapping",
+          "title": "CSV mapping wizard",
+          "dependsOn": "M04",
+          "acceptanceCriteria": "Customer columns map to canonical fields with saved mapping",
+          "evidenceRequired": "Integration/E2E test",
           "status": "green",
-          "evidence": "Supabase saved-mapping runtime test PASS; 8/8 browser mapping wizard PASS in run 35392126077, artifact 10566174421."
+          "evidence": "Tenant-scoped saved CSV mapping schema `dpp_import_mappings` applied in Supabase; runtime transaction proved 8-field mapping persistence and revision 1→2 on material update. Browser wizard auto-maps 8/8 sample CSV columns to canonical catalog fields. Full GitHub Actions run `35392126077` on commit `95cfbb1b7337bc368a103a8a5cd6d0f1fe2b65e9` SUCCESS; artifact `10566174421`. — PASS"
         },
         {
           "id": "M08",
-          "title": "Access-right categories for passport data",
+          "title": "Import validation / row errors",
+          "dependsOn": "M07,F11",
+          "acceptanceCriteria": "Invalid rows do not silently pass; errors are downloadable/actionable",
+          "evidenceRequired": "Unit/integration tests",
           "status": "green",
-          "evidence": "Actionable row-error browser validation and downloadable JSON report PASS in run 35392126077, artifact 10566174421."
+          "evidence": "Invalid CSV fixture/browser validator blocks invalid rows, exposes stable row/column/canonical-field error codes and downloadable JSON error report. Full GitHub Actions run `35392126077` SUCCESS; artifact `10566174421`. — PASS"
         },
         {
           "id": "M09",
-          "title": "Version history for passport changes",
+          "title": "Annex/requirement data model mapping",
+          "dependsOn": "F11,M04",
+          "acceptanceCriteria": "Canonical schema traces to requirement matrix",
+          "evidenceRequired": "Traceability review",
           "status": "green",
-          "evidence": "42 catalog fields map to real M04 typed columns or exact canonical_data JSON paths; run 35391493185 SUCCESS."
+          "evidence": "`data/dpp-field-catalog.json` DB targets aligned to real M04 typed columns / exact `canonical_data` JSON paths; `M09_SCHEMA_TRACEABILITY_PASS` in run `35391493185` on `c122ce724b979b80446c5ca788c70a3175054229`. — PASS"
         },
         {
           "id": "M10",
-          "title": "Immutable audit log for critical actions",
+          "title": "Public/private access categories",
+          "dependsOn": "M03,M09",
+          "acceptanceCriteria": "Every passport field has explicit access class; API enforces it",
+          "evidenceRequired": "API/security tests",
           "status": "red",
-          "evidence": "PARTIAL: four-class access policy + public projection leakage tests PASS in CI 35399171822. M10 remains RED until M03 and real API enforcement exist."
+          "evidence": "PARTIAL public/private access precursor: versioned four-class policy + reusable public projection; 42/42 fields have one valid class, public/restricted classes are disjoint, and restricted sample values are proven absent from public projection. M10 validator + unit tests PASS in full CI `35399171822`, artifact `10569812847`. M10 remains RED until M03 and real API enforcement exist. — PARTIAL PASS"
         },
         {
           "id": "M11",
-          "title": "Document/evidence attachments",
+          "title": "Version history",
+          "dependsOn": "M04",
+          "acceptanceCriteria": "Material passport changes create immutable version records",
+          "evidenceRequired": "DB integration tests",
           "status": "green",
-          "evidence": "Immutable passport version history applied and runtime-tested in Supabase; contract/clean replay run 35391493185 SUCCESS."
+          "evidence": "Migration `dpp_passport_version_history` applied in Supabase; runtime transaction proved versions 1→2 on material update and blocked history tampering; contract + clean replay PASS in run `35391493185`. — PASS"
         },
         {
           "id": "M12",
-          "title": "Unique identifiers and lifecycle status",
+          "title": "Critical audit log",
+          "dependsOn": "M03,M04",
+          "acceptanceCriteria": "Actor/action/time/target/before-after metadata captured; app cannot alter past entries",
+          "evidenceRequired": "DB policy tests",
           "status": "red",
-          "evidence": "PARTIAL: immutable audit DB infrastructure runtime-tested in bound Supabase and CI 35399171822. M12 remains RED until M03/app actor authorization is proven."
+          "evidence": "PARTIAL immutable audit precursor: bound Supabase exposes `dpp_audit_log` + capture/guard functions; rollback test returned `M12_AUDIT_LOG_SUBSET_PASS`; clean replay CI step `Run M12 audit log subset` PASS in full run `35399171822`, artifact `10569812847`. M12 remains RED until M03 RBAC and app/API actor authorization are proven. — PARTIAL PASS"
         },
         {
           "id": "M13",
-          "title": "DPP Registry test-environment workflow",
+          "title": "Evidence attachments",
+          "dependsOn": "M03,M04",
+          "acceptanceCriteria": "Allowed files upload/download under tenant policy; type/size limits enforced",
+          "evidenceRequired": "Storage tests",
           "status": "red",
-          "evidence": "PARTIAL: tenant-scoped evidence metadata + MIME/size/path/target rules PASS in bound Supabase rollback suite and full CI 35399987261. Direct production table grants remain revoked. M13 remains RED pending M03 and real storage/API upload/download enforcement."
+          "evidence": "PARTIAL evidence attachment metadata/file-policy precursor: bound Supabase table/policies already applied by concurrent worker; runtime transaction/rollback test returned `M13_EVIDENCE_METADATA_SUBSET_PASS`, proving tenant isolation, cross-target denial, viewer read-only behavior, MIME allowlist, 10 MiB limit, organization-prefixed paths and audit capture while direct `anon`/`authenticated` table grants remained 0. Full CI `35399987261` on `53b6bbe813bb4c06283b0cb1618ffbcdf145d301` SUCCESS including file-policy validator, clean DB subset and browser smoke; artifact `10570149074`. M13 remains RED until M03 and real object-storage/API upload/download enforcement exist. — PARTIAL PASS"
         },
         {
           "id": "M14",
-          "title": "Registry registration status tracking",
+          "title": "Identifier/lifecycle service",
+          "dependsOn": "M04,D07",
+          "acceptanceCriteria": "Identifier uniqueness and lifecycle transitions enforced",
+          "evidenceRequired": "Unit/integration tests",
           "status": "green",
-          "evidence": "Identifier uniqueness/lifecycle transition rules applied and runtime-tested in Supabase; contract/clean replay run 35391493185 SUCCESS."
+          "evidence": "Lifecycle migration applied in Supabase; runtime transaction allowed `original→second_life`, rejected `second_life→original`, and rejected duplicate identifier; contract + clean replay PASS in run `35391493185`. — PASS"
         },
         {
           "id": "M15",
-          "title": "API endpoints for battery/passport CRUD",
+          "title": "Registry test workflow abstraction",
+          "dependsOn": "F11,M14",
+          "acceptanceCriteria": "Registry payload/status model exists without unsupported live claims",
+          "evidenceRequired": "Contract tests",
           "status": "green",
-          "evidence": "Provider-neutral registry test workflow schema applied; runtime/contract/clean replay evidence PASS in run 35391493185."
+          "evidence": "Provider-neutral registry workflow abstraction migration applied in Supabase with explicit no-live-connectivity claim; contract and clean replay PASS in run `35391493185`. — PASS"
         },
         {
           "id": "M16",
-          "title": "Export customer data and evidence package",
+          "title": "Registry status tracking",
+          "dependsOn": "M15",
+          "acceptanceCriteria": "Submission/accepted/rejected/retry states persisted with timestamps",
+          "evidenceRequired": "Integration tests",
           "status": "green",
-          "evidence": "Registry status graph/timestamps/attempt_count runtime test PASS; run 35391493185 SUCCESS."
+          "evidence": "Supabase runtime transaction proved `draft→queued→submitted→accepted`, automatic timestamps/attempt_count and rejected invalid `accepted→draft`; contract + clean replay PASS in run `35391493185`. — PASS"
         },
         {
           "id": "M17",
-          "title": "Pilot onboarding checklist",
+          "title": "API: models",
+          "dependsOn": "M03,M04",
+          "acceptanceCriteria": "Authenticated CRUD with validation/tenant enforcement",
+          "evidenceRequired": "API tests",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M03,M04."
         },
         {
           "id": "M18",
-          "title": "MVP end-to-end acceptance test",
+          "title": "API: battery items",
+          "dependsOn": "M03,M04",
+          "acceptanceCriteria": "Authenticated CRUD with model linkage/tenant enforcement",
+          "evidenceRequired": "API tests",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M03,M04."
+        },
+        {
+          "id": "M19",
+          "title": "API: passports",
+          "dependsOn": "M03,M04,M10",
+          "acceptanceCriteria": "Public/private read and controlled write endpoints",
+          "evidenceRequired": "API/security tests",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M03,M04,M10."
+        },
+        {
+          "id": "M20",
+          "title": "API: imports",
+          "dependsOn": "M07,M08",
+          "acceptanceCriteria": "Create/validate/commit import flow is transactional",
+          "evidenceRequired": "Integration tests",
+          "status": "green",
+          "evidence": "Supabase migration `dpp_transactional_imports` applied; runtime transaction proved valid 2-row commit, invalid-import rejection, and forced second-row duplicate rollback with zero partial models/items. Contract + clean PostgreSQL replay + full regression PASS in GitHub Actions run `35393276568` on `05952f87eef171364d7f6237b3748332b01562ae`. — PASS"
+        },
+        {
+          "id": "M21",
+          "title": "Export data/evidence",
+          "dependsOn": "M10-M13",
+          "acceptanceCriteria": "Tenant-scoped export includes required records/history/evidence manifest",
+          "evidenceRequired": "Integration/E2E test",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M10-M13."
+        },
+        {
+          "id": "M22",
+          "title": "Validation/error contract",
+          "dependsOn": "M17-M20",
+          "acceptanceCriteria": "API returns stable machine-readable error codes/messages",
+          "evidenceRequired": "Contract tests",
+          "status": "red",
+          "evidence": "PARTIAL stable error contract for GREEN M20: custom SQLSTATE `DP001`-`DP008` implemented and versioned in `data/import-error-contract.json`; bound Supabase negative suite returned `M22_IMPORT_ERROR_CONTRACT_SUBSET_PASS`; static validator + clean replay DB suite PASS in full CI `35397635051`. M22 remains RED until M17-M19 expose these semantics through the API. — PARTIAL PASS"
+        },
+        {
+          "id": "M23",
+          "title": "Idempotency/concurrency rules",
+          "dependsOn": "M17-M20",
+          "acceptanceCriteria": "Duplicate import/submission and conflicting writes are safely handled",
+          "evidenceRequired": "Concurrency tests",
+          "status": "red",
+          "evidence": "PARTIAL registry-submission idempotency: pre-fix duplicate submissions were possible. Migration `20260919004000_dpp_registry_submission_idempotency.sql` adds scoped idempotency keys + safe create function. Bound Supabase sequential test returned `M23_REGISTRY_IDEMPOTENCY_SUBSET_PASS`; real two-session parallel create returned one shared submission id (one new + one existing), exact count=1, differing-payload key reuse rejected. Full CI `35397635051` on `055cbba9d44296f4653bf28f5e90f55186c221ab` SUCCESS, artifact `10569016076`. M23 remains RED until M17-M19 API-level conflict handling exists. — PARTIAL PASS"
+        },
+        {
+          "id": "M24",
+          "title": "Pilot onboarding flow",
+          "dependsOn": "M01-M22",
+          "acceptanceCriteria": "New org -> users -> import -> validate -> passport works end-to-end",
+          "evidenceRequired": "E2E acceptance",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M01-M22."
+        },
+        {
+          "id": "M25",
+          "title": "MVP acceptance",
+          "dependsOn": "M01-M24",
+          "acceptanceCriteria": "Mandatory MVP tests all pass on preview with no P0/P1 defect",
+          "evidenceRequired": "Test report + preview evidence",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M01-M24."
         }
       ]
     },
     {
-      "id": "PROPOSAL",
-      "label": "PROPOSAL READY",
-      "purpose": "Everything needed to sell a controlled pilot without overstating compliance.",
-      "exitCriteria": "Sales demo, scope, pricing, onboarding, security answers and pilot success criteria are ready.",
+      "id": "UX",
+      "label": "FRONTEND / UX / ACCESSIBILITY",
+      "purpose": "Production information architecture, resilient UX, responsiveness and accessibility.",
+      "exitCriteria": "Core production flows meet navigation, state, responsive, accessibility, cross-browser and visual-baseline acceptance.",
       "tasks": [
         {
-          "id": "P01",
-          "title": "Create 10-minute customer demo flow",
+          "id": "U01",
+          "title": "Application information architecture",
+          "dependsOn": "D14,M24",
+          "acceptanceCriteria": "Navigation supports dashboard, models, items, imports, passports, settings",
+          "evidenceRequired": "E2E navigation tests",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: D14,M24."
         },
         {
-          "id": "P02",
-          "title": "Create pilot scope template",
+          "id": "U02",
+          "title": "Loading/empty/error states",
+          "dependsOn": "U01",
+          "acceptanceCriteria": "Every async core view has deterministic loading, empty, success and failure states",
+          "evidenceRequired": "Component/E2E tests",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: U01."
         },
         {
-          "id": "P03",
-          "title": "Define setup + recurring pricing model",
+          "id": "U03",
+          "title": "Form validation UX",
+          "dependsOn": "D04,D05,M22",
+          "acceptanceCriteria": "Field and form errors are accessible and preserve user input",
+          "evidenceRequired": "UI tests",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "PARTIAL form validation UX: model/item forms now expose label-for associations, aria-describedby, aria-invalid, live status/error regions and explicit non-destructive input-preservation evidence. Browser validators PASS in full CI `35398504301`; artifact `10569167076`. U03 remains RED because M22 is still RED. — PARTIAL PASS"
         },
         {
-          "id": "P04",
-          "title": "Create customer data requirements sheet",
+          "id": "U04",
+          "title": "Responsive production UX",
+          "dependsOn": "U01-U03",
+          "acceptanceCriteria": "Core workflows pass mobile/tablet/desktop without overflow/blockers",
+          "evidenceRequired": "Visual tests",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: U01-U03."
         },
         {
-          "id": "P05",
-          "title": "Create security and data-hosting FAQ",
+          "id": "U05",
+          "title": "Accessibility",
+          "dependsOn": "U01-U04",
+          "acceptanceCriteria": "Keyboard flow, labels, landmarks, focus, contrast and critical axe rules pass",
+          "evidenceRequired": "Automated + manual evidence",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: U01-U04."
         },
         {
-          "id": "P06",
-          "title": "Create compliance disclaimer and responsibility matrix",
+          "id": "U06",
+          "title": "Cross-browser compatibility",
+          "dependsOn": "U04",
+          "acceptanceCriteria": "Latest stable Chromium/Firefox/WebKit core flows pass",
+          "evidenceRequired": "Cross-browser E2E report",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: U04."
         },
         {
-          "id": "P07",
-          "title": "Create pilot success metrics",
+          "id": "U07",
+          "title": "Visual regression baseline",
+          "dependsOn": "U04",
+          "acceptanceCriteria": "Key routes have approved deterministic screenshots",
+          "evidenceRequired": "Visual snapshot report",
           "status": "red",
-          "evidence": "Not started."
-        },
-        {
-          "id": "P08",
-          "title": "Create sample proposal PDF/content",
-          "status": "red",
-          "evidence": "Not started."
-        },
-        {
-          "id": "P09",
-          "title": "Create prospect onboarding questionnaire",
-          "status": "red",
-          "evidence": "Not started."
-        },
-        {
-          "id": "P10",
-          "title": "Proposal-ready review: no unsupported claims",
-          "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: U04."
         }
       ]
     },
     {
-      "id": "PRODUCTION",
-      "label": "PRODUCTION COMPLETE",
-      "purpose": "A secure, reliable system appropriate for real commercial operation.",
-      "exitCriteria": "Security, privacy, monitoring, backups, registry workflows, load tests and operational procedures are verified for production.",
+      "id": "SECURITY",
+      "label": "SECURITY / PRIVACY / OPERATIONS",
+      "purpose": "Security, privacy, observability, backup and incident-readiness controls.",
+      "exitCriteria": "Security/privacy/operations controls are tested against real production-capable surfaces and documented.",
       "tasks": [
         {
           "id": "R01",
-          "title": "Production database and migration workflow",
+          "title": "Environment/secret management",
+          "dependsOn": "F10,F13",
+          "acceptanceCriteria": "No service-role secrets client-side; env scope documented and verified",
+          "evidenceRequired": "Config inspection",
           "status": "green",
-          "evidence": "Environment/secret classification + client secret scan + placeholders PASS in run 35393276568."
+          "evidence": "Public-vs-secret classification documented; stale environment binding state corrected; client/static scan confirms only Supabase URL + publishable key are client-side and no service-role/database/registry/signing secret material is present. `.env.example` placeholders + CI validator PASS in run `35393276568`. — PASS"
         },
         {
           "id": "R02",
-          "title": "Secret/environment variable management",
+          "title": "Security headers / TLS",
+          "dependsOn": "F08",
+          "acceptanceCriteria": "Production serves TLS and required headers; unsafe defaults removed",
+          "evidenceRequired": "HTTP header test",
           "status": "red",
-          "evidence": "Policy exists; production binding/config not available."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: F08."
         },
         {
           "id": "R03",
-          "title": "TLS/security headers and secure defaults",
+          "title": "Input/file validation",
+          "dependsOn": "M13,M17-M20",
+          "acceptanceCriteria": "Server rejects malformed/oversize/disallowed payloads",
+          "evidenceRequired": "Negative tests",
           "status": "red",
-          "evidence": "PARTIAL: M20 DB boundary negative validation PASS in bound Supabase rollback suite and full CI 35398725407; rejects malformed JSON shapes, invalid counters/row numbers, disallowed category/lifecycle, and oversize identifiers. R03 remains RED pending M13 and M17-M20 server/file/API coverage."
+          "evidence": "PARTIAL dependency-safe negative input validation for GREEN M20: bound Supabase rollback suite returned `R03_M20_INPUT_VALIDATION_SUBSET_PASS`, rejecting negative counters, invalid row numbers/JSON shapes, disallowed category/lifecycle values and oversize model/item identifiers. Full CI `35398725407` on `d6b6b3b491862db0f7e763f160e0afc4e0383ece` SUCCESS including clean PostgreSQL replay, R03 gate and browser smoke; artifact `10569002388`. R03 remains RED until M13 and M17-M20 server/file/API validation are complete. — PARTIAL PASS"
         },
         {
           "id": "R04",
-          "title": "Tenant isolation security tests",
+          "title": "Tenant isolation security suite",
+          "dependsOn": "M05,M17-M21",
+          "acceptanceCriteria": "Cross-tenant attack cases consistently deny access",
+          "evidenceRequired": "Security test report",
           "status": "red",
-          "evidence": "PARTIAL: DB attack matrix PASS in bound Supabase rollback suite and full CI 35400349613; cross-tenant reads/writes/ID-guessing/forged tenant/evidence/audit role boundaries covered. Remains RED pending M17-M21 API/export attack coverage."
+          "evidence": "PARTIAL DB-boundary tenant isolation security suite: bound Supabase rollback attack matrix returned `R04_DB_TENANT_ISOLATION_SUBSET_PASS`, covering cross-tenant enumeration, guessed-ID update/delete, forged tenant inserts, evidence metadata forgery, viewer mutation denial and tenant-scoped audit visibility. Full CI `35400349613` on `6d77ddc65660a92d657514dc01b02b51854adb0f` SUCCESS including clean replay R04 gate and browser smoke; artifact `10568949488`. R04 remains RED until M17-M21 API/export surfaces exist and equivalent attacks are exercised through them. — PARTIAL PASS"
         },
         {
           "id": "R05",
-          "title": "Rate limiting and abuse controls",
+          "title": "Rate limiting / abuse controls",
+          "dependsOn": "M17-M20",
+          "acceptanceCriteria": "Sensitive/public endpoints have documented limits and 429 behavior",
+          "evidenceRequired": "Load/abuse tests",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M17-M20."
         },
         {
           "id": "R06",
-          "title": "Backup and restore procedure tested",
+          "title": "Auth security review",
+          "dependsOn": "M01,M03",
+          "acceptanceCriteria": "Session/cookie/redirect/reset flows use secure defaults",
+          "evidenceRequired": "Security review evidence",
           "status": "red",
-          "evidence": "Requires verified production database behavior and restore exercise."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M01,M03."
         },
         {
           "id": "R07",
-          "title": "Monitoring / alerting / error tracking",
+          "title": "Privacy data inventory",
+          "dependsOn": "M01-M13",
+          "acceptanceCriteria": "Personal/business data, purpose, location, processor and retention recorded",
+          "evidenceRequired": "`docs/PRIVACY_DATA_INVENTORY.md`",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M01-M13."
         },
         {
           "id": "R08",
-          "title": "Availability and incident-response runbook",
+          "title": "Retention/deletion/export",
+          "dependsOn": "R07",
+          "acceptanceCriteria": "User/org deletion and export follow defined policy with audit-safe exceptions",
+          "evidenceRequired": "Integration tests",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: R07."
         },
         {
           "id": "R09",
-          "title": "GDPR/privacy data inventory",
+          "title": "Logging/observability",
+          "dependsOn": "F08,M17-M20",
+          "acceptanceCriteria": "Structured errors and request correlation available without leaking secrets",
+          "evidenceRequired": "Runtime log evidence",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: F08,M17-M20."
         },
         {
           "id": "R10",
-          "title": "Data retention/deletion workflow",
+          "title": "Monitoring/alerting",
+          "dependsOn": "R09",
+          "acceptanceCriteria": "Critical availability/error signals have thresholds and owners",
+          "evidenceRequired": "Alert test evidence",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: R09."
         },
         {
           "id": "R11",
-          "title": "Accessibility and cross-browser testing",
+          "title": "Backup policy",
+          "dependsOn": "F13,M04",
+          "acceptanceCriteria": "Backup scope/RPO/RTO documented against actual Supabase plan/features",
+          "evidenceRequired": "Backup config evidence",
           "status": "green",
-          "evidence": "Actual Supabase Free plan documented with backup scope, RPO/RTO and production backup requirements; CI PASS run 35393276568."
+          "evidence": "Supabase org `touhddzpjdlrzmykcywf` verified on Free plan; backup scope, production paid/manual backup requirement, target RPO <=24h, target RTO <=8h, Storage-object separation and PITR non-claim documented. R11 validator PASS in run `35393276568`. — PASS"
         },
         {
           "id": "R12",
-          "title": "Performance/load testing",
+          "title": "Restore test",
+          "dependsOn": "R11",
+          "acceptanceCriteria": "Restore to isolated environment succeeds and integrity checks pass",
+          "evidenceRequired": "Restore drill report",
           "status": "green",
-          "evidence": "PostgreSQL 17 logical backup restored to isolated DB with integrity/RLS/binding checks; run 35393276568 PASS."
+          "evidence": "CI created synthetic DPP data, produced PostgreSQL 17 custom-format logical backup, restored into isolated `dpp_restore` database, and verified row/link integrity, binding row and RLS. `R12_RESTORE_DRILL_PASS` in full run `35393276568`. — PASS"
         },
         {
           "id": "R13",
-          "title": "Registry live integration verification",
+          "title": "Incident runbook",
+          "dependsOn": "R09-R12",
+          "acceptanceCriteria": "Severity, triage, comms, rollback, data incident steps documented",
+          "evidenceRequired": "`docs/INCIDENT_RUNBOOK.md`",
           "status": "red",
-          "evidence": "Requires operator credentials and current Registry technical workflow."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: R09-R12."
         },
         {
           "id": "R14",
-          "title": "Independent legal/compliance review",
+          "title": "Dependency/supply-chain checks",
+          "dependsOn": "F09",
+          "acceptanceCriteria": "CI checks vulnerable dependencies/actions and pins critical workflow actions",
+          "evidenceRequired": "Passing security CI",
           "status": "green",
-          "evidence": "Immutable action SHA pins + exact Python dependency pins + pip-audit PASS in run 35393276568."
-        },
-        {
-          "id": "R15",
-          "title": "Customer UAT with real battery data",
-          "status": "blocked",
-          "evidence": "Requires pilot customer."
-        },
-        {
-          "id": "R16",
-          "title": "Production go-live checklist",
-          "status": "red",
-          "evidence": "Not started."
-        },
-        {
-          "id": "R17",
-          "title": "Disaster recovery exercise",
-          "status": "red",
-          "evidence": "Not started."
-        },
-        {
-          "id": "R18",
-          "title": "Production release evidence pack",
-          "status": "red",
-          "evidence": "Not started."
+          "evidence": "All GitHub Actions pinned to immutable official commit SHAs; CI Python dependencies exact-version pinned; `pip-audit==2.10.1` audit PASS and supply-chain validator PASS in run `35393276568`. — PASS"
         }
       ]
     },
     {
-      "id": "EXPANDED",
-      "label": "EXPANDED",
-      "purpose": "Scale beyond one pilot into an automation platform and additional product sectors.",
-      "exitCriteria": "The platform supports high-volume customers, connectors and configurable DPP schemas beyond batteries.",
+      "id": "TESTING",
+      "label": "TESTING / RELIABILITY / PERFORMANCE",
+      "purpose": "Automated quality, reliability, browser, accessibility and performance gates.",
+      "exitCriteria": "Mandatory test suites pass from a clean checkout and cover production-critical flows.",
+      "tasks": [
+        {
+          "id": "T01",
+          "title": "Unit test suite",
+          "dependsOn": "D07,D09,M22",
+          "acceptanceCriteria": "Deterministic business-rule tests cover identifiers, scoring, validation, errors",
+          "evidenceRequired": "Coverage/test report",
+          "status": "red",
+          "evidence": "PARTIAL extension: `scripts/import_error_contract.py` maps DP001-DP008 to stable semantic code/message/HTTP status; unit tests verify exact mappings, mutation isolation and unknown-code fail-safe behavior. T01 unit suite PASS in full CI `35398504301` on `54fe4db25b2f65309874e3fa41a284c3bd835c7e`. T01 remains RED while M22 is RED. — PARTIAL PASS"
+        },
+        {
+          "id": "T02",
+          "title": "Database integration suite",
+          "dependsOn": "M04-M16",
+          "acceptanceCriteria": "Schema/RLS/audit/versioning/import behaviors pass against test DB",
+          "evidenceRequired": "Integration report",
+          "status": "red",
+          "evidence": "PARTIAL dependency-safe coverage only: GREEN DB subset (M04/M06/M07/M11/M14/M15/M16/M20 + deny-by-default grants) passes in GitHub Actions run `35395443843` on `78d8de7e344ca175f9b74f758c3b395ace972c6e` and against bound Supabase `frhletkiuupgksmgxoxc` inside rollback transaction with result `T02_GREEN_DB_SUBSET_PASS`. T02 remains RED until M05/M10/M12/M13 are implemented and added. — PARTIAL PASS"
+        },
+        {
+          "id": "T03",
+          "title": "API integration suite",
+          "dependsOn": "M17-M23",
+          "acceptanceCriteria": "Positive/negative API flows pass",
+          "evidenceRequired": "API test report",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M17-M23."
+        },
+        {
+          "id": "T04",
+          "title": "E2E suite",
+          "dependsOn": "M24,U01-U04",
+          "acceptanceCriteria": "Critical user journeys pass from browser to DB",
+          "evidenceRequired": "E2E report",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M24,U01-U04."
+        },
+        {
+          "id": "T05",
+          "title": "Visual/responsive suite",
+          "dependsOn": "U04,U07",
+          "acceptanceCriteria": "Key screens pass approved viewport baselines",
+          "evidenceRequired": "Screenshot diff report",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: U04,U07."
+        },
+        {
+          "id": "T06",
+          "title": "Cross-browser suite",
+          "dependsOn": "U06",
+          "acceptanceCriteria": "Critical E2E passes Chromium/Firefox/WebKit",
+          "evidenceRequired": "Browser matrix",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: U06."
+        },
+        {
+          "id": "T07",
+          "title": "Load test",
+          "dependsOn": "M17-M21",
+          "acceptanceCriteria": "Agreed concurrency/data-volume targets pass within latency/error budgets",
+          "evidenceRequired": "Load report",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M17-M21."
+        },
+        {
+          "id": "T08",
+          "title": "Reliability/retry test",
+          "dependsOn": "M15,M16,M23",
+          "acceptanceCriteria": "Retries/timeouts/idempotency survive injected failures",
+          "evidenceRequired": "Reliability report",
+          "status": "red",
+          "evidence": "PARTIAL reliability matrix: `data/reliability-test-matrix.json` versions retry/timeout, import idempotency and registry idempotency scenarios; CI validator confirms all three executable DB tests and PASS markers remain wired. PASS in full CI `35398504301`. T08 remains RED while M23 is RED. — PARTIAL PASS"
+        },
+        {
+          "id": "T09",
+          "title": "Accessibility test gate",
+          "dependsOn": "U05",
+          "acceptanceCriteria": "Automated accessibility checks block regressions",
+          "evidenceRequired": "CI report",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: U05."
+        },
+        {
+          "id": "T10",
+          "title": "Full regression gate",
+          "dependsOn": "T01-T09",
+          "acceptanceCriteria": "All mandatory suites pass from clean checkout",
+          "evidenceRequired": "CI release run",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: T01-T09."
+        }
+      ]
+    },
+    {
+      "id": "RELEASE",
+      "label": "CI/CD / RELEASE / PRODUCTION ACCEPTANCE",
+      "purpose": "Controlled preview, promotion, rollback and production acceptance.",
+      "exitCriteria": "Release gates, production smoke/security/privacy evidence, sign-offs and final evidence pack satisfy C01-C15.",
+      "tasks": [
+        {
+          "id": "C01",
+          "title": "Pull-request CI",
+          "dependsOn": "F09,T01-T04",
+          "acceptanceCriteria": "Validation/tests required before merge",
+          "evidenceRequired": "Branch/rules evidence + passing run",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: F09,T01-T04."
+        },
+        {
+          "id": "C02",
+          "title": "Preview deployment verification",
+          "dependsOn": "F07,C01",
+          "acceptanceCriteria": "Each releasable change gets preview and automated smoke test",
+          "evidenceRequired": "Vercel deployment + test",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: F07,C01."
+        },
+        {
+          "id": "C03",
+          "title": "Production promotion policy",
+          "dependsOn": "F10,C02",
+          "acceptanceCriteria": "Production only from defined branch/release condition",
+          "evidenceRequired": "Config/document evidence",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: F10,C02."
+        },
+        {
+          "id": "C04",
+          "title": "Database migration deployment gate",
+          "dependsOn": "M06,C03",
+          "acceptanceCriteria": "Migration applied/verified before incompatible app release",
+          "evidenceRequired": "Deployment log",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M06,C03."
+        },
+        {
+          "id": "C05",
+          "title": "Rollback procedure",
+          "dependsOn": "C03,C04",
+          "acceptanceCriteria": "App rollback tested; DB rollback/forward-fix strategy documented",
+          "evidenceRequired": "Drill evidence",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: C03,C04."
+        },
+        {
+          "id": "C06",
+          "title": "Staging acceptance",
+          "dependsOn": "T10,C02",
+          "acceptanceCriteria": "Full mandatory suite passes on staging/preview with production-like config",
+          "evidenceRequired": "Acceptance report",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: T10,C02."
+        },
+        {
+          "id": "C07",
+          "title": "Production smoke tests",
+          "dependsOn": "C03,C06,F08",
+          "acceptanceCriteria": "Home/auth/core API/public passport endpoints verified after deploy",
+          "evidenceRequired": "Timestamped smoke report",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: C03,C06,F08."
+        },
+        {
+          "id": "C08",
+          "title": "Runtime error review",
+          "dependsOn": "C07,R09",
+          "acceptanceCriteria": "No unresolved P0/P1 runtime error clusters during acceptance window",
+          "evidenceRequired": "Vercel runtime evidence",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: C07,R09."
+        },
+        {
+          "id": "C09",
+          "title": "Performance acceptance",
+          "dependsOn": "T07,C07",
+          "acceptanceCriteria": "Production-like latency/error budgets satisfied",
+          "evidenceRequired": "Performance report",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: T07,C07."
+        },
+        {
+          "id": "C10",
+          "title": "Security acceptance",
+          "dependsOn": "R01-R14,C07",
+          "acceptanceCriteria": "Security checklist/tests pass; no known critical/high issue accepted silently",
+          "evidenceRequired": "Security report",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: R01-R14,C07."
+        },
+        {
+          "id": "C11",
+          "title": "Privacy/compliance acceptance",
+          "dependsOn": "F11,R07,R08",
+          "acceptanceCriteria": "Traceability/privacy artifacts complete; unsupported compliance claims removed",
+          "evidenceRequired": "Review evidence",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: F11,R07,R08."
+        },
+        {
+          "id": "C12",
+          "title": "Legal/compliance sign-off",
+          "dependsOn": "C11",
+          "acceptanceCriteria": "Qualified reviewer signs current production scope",
+          "evidenceRequired": "External sign-off",
+          "status": "blocked",
+          "evidence": "BLOCKED in canonical source-of-truth; dependencies: C11."
+        },
+        {
+          "id": "C13",
+          "title": "Pilot customer UAT",
+          "dependsOn": "M25,C06",
+          "acceptanceCriteria": "Real pilot completes agreed scenarios and signs acceptance",
+          "evidenceRequired": "UAT record",
+          "status": "blocked",
+          "evidence": "BLOCKED in canonical source-of-truth; dependencies: M25,C06."
+        },
+        {
+          "id": "C14",
+          "title": "Final production evidence pack",
+          "dependsOn": "C07-C13",
+          "acceptanceCriteria": "Links to commits, migrations, tests, deployments, backups, runbooks and sign-offs collected",
+          "evidenceRequired": "`docs/PRODUCTION_EVIDENCE.md`",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: C07-C13."
+        },
+        {
+          "id": "C15",
+          "title": "100% final acceptance",
+          "dependsOn": "C14",
+          "acceptanceCriteria": "Every required task GREEN; no mandatory test failing; production verified",
+          "evidenceRequired": "Final audit + evidence pack",
+          "status": "red",
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: C14."
+        }
+      ]
+    },
+    {
+      "id": "EXPANSION",
+      "label": "EXPANSION",
+      "purpose": "Post-production integrations and enterprise expansion.",
+      "exitCriteria": "Optional expansion work proceeds only after its declared dependencies and production acceptance.",
       "tasks": [
         {
           "id": "X01",
           "title": "ERP connector framework",
+          "dependsOn": "C15",
+          "acceptanceCriteria": "Versioned connector interface and sandbox test harness",
+          "evidenceRequired": "Integration tests",
           "status": "red",
           "evidence": "Post-production scope."
         },
         {
           "id": "X02",
-          "title": "SAP integration connector",
+          "title": "SAP connector",
+          "dependsOn": "X01",
+          "acceptanceCriteria": "Contracted SAP workflow passes sandbox/pilot",
+          "evidenceRequired": "Connector evidence",
           "status": "red",
-          "evidence": "Post-production scope."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: X01."
         },
         {
           "id": "X03",
-          "title": "BMS/telemetry ingestion connector",
+          "title": "BMS/telemetry ingestion",
+          "dependsOn": "X01",
+          "acceptanceCriteria": "Authenticated ingestion with validation/idempotency",
+          "evidenceRequired": "Load/integration tests",
           "status": "red",
-          "evidence": "Post-production scope."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: X01."
         },
         {
           "id": "X04",
-          "title": "Supplier portal and evidence requests",
+          "title": "Supplier portal",
+          "dependsOn": "C15",
+          "acceptanceCriteria": "Scoped supplier access and evidence requests",
+          "evidenceRequired": "RBAC/E2E tests",
           "status": "red",
-          "evidence": "Post-production scope."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: C15."
         },
         {
           "id": "X05",
-          "title": "Automated missing-data reminders",
+          "title": "Missing-data automation",
+          "dependsOn": "X04",
+          "acceptanceCriteria": "Rules create deduplicated reminders with audit trail",
+          "evidenceRequired": "Integration tests",
           "status": "red",
-          "evidence": "Post-production scope."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: X04."
         },
         {
           "id": "X06",
-          "title": "AI-assisted mapping from customer schemas",
+          "title": "AI mapping assistant",
+          "dependsOn": "M07",
+          "acceptanceCriteria": "Suggestions are reviewable, non-destructive and confidence/evidence aware",
+          "evidenceRequired": "Evaluation set",
           "status": "green",
-          "evidence": "Evaluation + browser review PASS in run 35393690587, artifact 10566727334; 10 positive correct, 2 unknown untouched, 0 false positives/misses, default applied-count=0."
+          "evidence": "Deterministic mapping assistant evaluated on 12-case held-out set: 10/10 positive mappings correct, 2/2 unknown columns left unsuggested, 0 false positives/misses. Browser review UI proves suggestions begin unapplied, expose confidence/evidence and require explicit Apply. Full CI run `35393690587` on `c3e7ca504eaf5ee7ae36f6cfe134404f0910b8bc` SUCCESS; artifact `10566727334`. — PASS"
         },
         {
           "id": "X07",
-          "title": "Bulk passport generation at manufacturing scale",
+          "title": "Manufacturing-scale bulk generation",
+          "dependsOn": "T07",
+          "acceptanceCriteria": "Contracted throughput target met",
+          "evidenceRequired": "Load report",
           "status": "red",
-          "evidence": "Post-production scope."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: T07."
         },
         {
           "id": "X08",
-          "title": "Webhook/event integration framework",
+          "title": "Webhooks/events",
+          "dependsOn": "M17-M23",
+          "acceptanceCriteria": "Signed/retryable/idempotent events",
+          "evidenceRequired": "Contract/reliability tests",
           "status": "red",
-          "evidence": "Post-production scope."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M17-M23."
         },
         {
           "id": "X09",
-          "title": "Customer analytics and compliance operations dashboard",
+          "title": "Analytics",
+          "dependsOn": "C15",
+          "acceptanceCriteria": "Tenant-safe operational metrics without leaking restricted data",
+          "evidenceRequired": "Security/data tests",
           "status": "red",
-          "evidence": "Post-production scope."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: C15."
         },
         {
           "id": "X10",
           "title": "Configurable DPP schema engine",
+          "dependsOn": "F11,C15",
+          "acceptanceCriteria": "Versioned schemas and migration rules validated",
+          "evidenceRequired": "Schema tests",
           "status": "red",
           "evidence": "Post-production scope."
         },
         {
           "id": "X11",
-          "title": "Additional regulated-sector modules",
+          "title": "Additional sector modules",
+          "dependsOn": "X10",
+          "acceptanceCriteria": "Each module begins only after applicable final rules are traced",
+          "evidenceRequired": "Separate evidence pack",
           "status": "blocked",
-          "evidence": "Requires applicable final sector rules and separate traceability."
+          "evidence": "BLOCKED in canonical source-of-truth; dependencies: X10."
         },
         {
           "id": "X12",
           "title": "Partner/reseller administration",
+          "dependsOn": "C15",
+          "acceptanceCriteria": "Delegated administration has explicit tenant boundaries",
+          "evidenceRequired": "RBAC tests",
           "status": "red",
           "evidence": "Post-production scope."
         },
         {
           "id": "X13",
-          "title": "Enterprise SSO / SCIM",
+          "title": "Enterprise SSO/SCIM",
+          "dependsOn": "M03,C15",
+          "acceptanceCriteria": "SSO/SCIM lifecycle passes enterprise test tenant",
+          "evidenceRequired": "Integration tests",
           "status": "red",
-          "evidence": "Post-production scope."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: M03,C15."
         },
         {
           "id": "X14",
-          "title": "High-availability and regional deployment options",
+          "title": "HA/regional options",
+          "dependsOn": "C15",
+          "acceptanceCriteria": "Contracted availability/data-region requirements are tested",
+          "evidenceRequired": "DR/availability report",
           "status": "red",
-          "evidence": "Post-production scope."
+          "evidence": "Unfinished in canonical source-of-truth; dependencies: C15."
         }
       ]
     }
