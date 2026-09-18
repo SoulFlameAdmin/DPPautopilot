@@ -23,6 +23,8 @@ def main() -> None:
 
     dom = dom_path.read_text(encoding="utf-8", errors="replace")
     screenshot_size = screenshot_path.stat().st_size
+    plan = json.loads(Path("data/master-plan.json").read_text(encoding="utf-8"))
+    worker = json.loads(Path("data/worker-status.json").read_text(encoding="utf-8"))
 
     required_dom = {
         "burger menu": 'id="menuToggle"',
@@ -30,17 +32,30 @@ def main() -> None:
         "Bulgarian stages label": "Етапи",
         "open plan overlay": 'id="planOverlay" aria-hidden="false"',
         "DAVID current task": 'id="currentTask"',
-        "Demo gate": 'data-stage="DEMO"',
-        "MVP gate": 'data-stage="MVP"',
-        "Proposal gate": 'data-stage="PROPOSAL"',
-        "Production gate": 'data-stage="PRODUCTION"',
-        "Expanded gate": 'data-stage="EXPANDED"',
         "Foundation plan phase": 'data-phase="FOUNDATION"',
         "D01 plan task": "D01",
     }
     for label, marker in required_dom.items():
         if marker not in dom:
             fail(f"missing rendered marker for {label}: {marker}")
+
+    gate_ids = [gate.get("id") for gate in plan.get("gates", []) if gate.get("id")]
+    if "FOUNDATION" not in gate_ids:
+        fail("master plan FOUNDATION gate missing")
+
+    # The dashboard intentionally hides FOUNDATION from the visible product-boundary
+    # cards but renders every other canonical gate. Derive expectations from the
+    # machine plan instead of maintaining a second hardcoded gate list.
+    product_gate_ids = [gate_id for gate_id in gate_ids if gate_id != "FOUNDATION"]
+    for gate_id in product_gate_ids:
+        marker = f'data-stage="{gate_id}"'
+        if marker not in dom:
+            fail(f"missing rendered marker for canonical gate {gate_id}: {marker}")
+
+    for gate_id in gate_ids:
+        marker = f'data-phase="{gate_id}"'
+        if marker not in dom:
+            fail(f"missing rendered plan phase for canonical gate {gate_id}: {marker}")
 
     # Chrome --dump-dom includes the page's <script> source. Check actual rendered
     # element state rather than generic error strings that also exist in handlers.
@@ -55,20 +70,14 @@ def main() -> None:
     if screenshot_size < 10_000:
         fail(f"screenshot is unexpectedly small: {screenshot_size} bytes")
 
-    plan = json.loads(Path("data/master-plan.json").read_text(encoding="utf-8"))
-    worker = json.loads(Path("data/worker-status.json").read_text(encoding="utf-8"))
-    gate_ids = [gate.get("id") for gate in plan.get("gates", [])]
-    for gate_id in ["FOUNDATION", "DEMO", "MVP", "PROPOSAL", "PRODUCTION", "EXPANDED"]:
-        if gate_id not in gate_ids:
-            fail(f"master plan gate missing: {gate_id}")
-
     for key in ["currentTask", "currentGate", "lastCompletedTask", "nextTask", "state"]:
         if not worker.get(key):
             fail(f"worker field empty: {key}")
 
     print(
-        "UI_SMOKE_PASS: browser rendered dashboard, stages overlay, five product boundaries, "
-        f"DAVID status, and screenshot ({screenshot_size} bytes)"
+        "UI_SMOKE_PASS: browser rendered dashboard, stages overlay, "
+        f"{len(product_gate_ids)} canonical product boundaries, DAVID status, "
+        f"and screenshot ({screenshot_size} bytes)"
     )
 
 
