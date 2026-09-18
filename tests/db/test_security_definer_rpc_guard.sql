@@ -59,6 +59,10 @@ begin
     and has_function_privilege('authenticated',p.oid,'EXECUTE')
     and p.oid::regprocedure::text not in (
       'dpp_active_organization_id()',
+      'dpp_api_models_create(text,text,text,jsonb)',
+      'dpp_api_models_delete(uuid)',
+      'dpp_api_models_list()',
+      'dpp_api_models_update(uuid,text,text,text,jsonb)',
       'dpp_has_org_role(uuid,text[])',
       'dpp_request_user_id()',
       'dpp_require_active_role(text[])',
@@ -72,6 +76,10 @@ begin
   with required(signature) as (
     values
       ('dpp_active_organization_id()'),
+      ('dpp_api_models_create(text,text,text,jsonb)'),
+      ('dpp_api_models_delete(uuid)'),
+      ('dpp_api_models_list()'),
+      ('dpp_api_models_update(uuid,text,text,text,jsonb)'),
       ('dpp_has_org_role(uuid,text[])'),
       ('dpp_request_user_id()'),
       ('dpp_require_active_role(text[])'),
