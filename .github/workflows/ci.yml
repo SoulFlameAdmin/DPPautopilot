@@ -32,6 +32,8 @@ jobs:
         run: python scripts/validate_sample_fixture.py
       - name: Validate D07 deterministic identifiers
         run: python scripts/validate_identifiers.py
+      - name: Validate D09 completeness and D10 warnings
+        run: python scripts/validate_completeness.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
       - name: Browser smoke test demo surfaces
@@ -115,6 +117,15 @@ jobs:
           PY
           zbarimg --quiet --raw artifacts/d08-ui-qr.png > artifacts/d08-ui-decoded.txt
           python scripts/validate_qr.py artifacts/d08-generated-decoded.txt artifacts/d08-ui-decoded.txt "$EXPECTED_QR_URL" artifacts/d08-qr-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/completeness.html' > artifacts/d09-complete-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/completeness.html?missing=manufacturerContact' > artifacts/d10-missing-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --window-size=900,1000 --screenshot=artifacts/d09-completeness.png \
+            'http://127.0.0.1:8000/demo/completeness.html'
+          python scripts/validate_completeness_ui.py artifacts/d09-complete-dom.html artifacts/d10-missing-dom.html
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
