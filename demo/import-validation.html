@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="bg">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DPP Autopilot · Import validation</title>
+<style>:root{--bg:#07090d;--p:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--green:#39d98a;--red:#ff6677;--amber:#ffbd52}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:1100px;margin:auto;padding:24px}.card{border:1px solid var(--line);background:var(--p);border-radius:16px;padding:18px;margin:14px 0}.ok{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}.muted{color:var(--muted)}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-top:1px solid var(--line);vertical-align:top}code{color:#cbd8e8}a.button{display:inline-block;padding:10px 14px;border:1px solid var(--line);border-radius:10px;color:var(--text);text-decoration:none}@media(max-width:720px){.shell{padding:14px}.scroll{overflow:auto}}</style></head>
+<body data-validation-ready="false" data-row-count="0" data-valid-row-count="0" data-error-count="0" data-download-ready="false">
+<main class="shell"><a href="/">← Dashboard</a><h1>M08 · Import validation / row errors</h1><p class="muted">Invalid rows are blocked and every error carries row, source column, canonical field, stable code and actionable message.</p>
+<section class="card"><div id="summary">Loading…</div><p><a id="download" class="button" download="dpp-import-errors.json">Download error report</a></p></section>
+<section class="card scroll"><table><thead><tr><th>Row</th><th>Column</th><th>Canonical field</th><th>Code</th><th>Message</th></tr></thead><tbody id="errors"></tbody></table></section>
+</main>
+<script>
+const fieldMap={
+ manufacturer_name:'model.identification.manufacturer.name',
+ model_id:'model.identification.model_id',
+ category:'model.identification.category',
+ rated_capacity_ah:'model.rated_capacity_ah',
+ chemistry:'model.composition.chemistry',
+ unique_identifier:'item.unique_identifier',
+ lifecycle_status:'item.lifecycle_status',
+ state_of_health_percent:'item.state_of_health.percent'
+};
+const categories=new Set(['portable','light_means_of_transport','starting_lighting_ignition','industrial','electric_vehicle','other']);
+const statuses=new Set(['original','repurposed','remanufactured','second_life','waste','retired']);
+const uid=/^urn:dpp:demo:battery:[A-Za-z0-9][A-Za-z0-9._-]{0,63}:[0-9]{6,12}$/;
+const model=/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function add(list,row,column,code,message){list.push({row,column,canonicalField:fieldMap[column],code,message})}
+function validate(rows,headers){
+ const out=[],seen=new Set();
+ rows.forEach((cells,i)=>{
+   const row=i+2,obj=Object.fromEntries(headers.map((h,j)=>[h,(cells[j]??'').trim()]));
+   if(!obj.manufacturer_name)add(out,row,'manufacturer_name','REQUIRED','Manufacturer name is required.');
+   if(!model.test(obj.model_id))add(out,row,'model_id','MODEL_ID_FORMAT','Use letters, digits, dot, underscore or hyphen; max 64 chars.');
+   if(!categories.has(obj.category))add(out,row,'category','CATEGORY_INVALID','Choose a supported battery category.');
+   if(obj.rated_capacity_ah==='')add(out,row,'rated_capacity_ah','REQUIRED','Rated capacity is required.');
+   else if(!Number.isFinite(Number(obj.rated_capacity_ah)))add(out,row,'rated_capacity_ah','NUMBER_INVALID','Enter a numeric Ah value.');
+   else if(Number(obj.rated_capacity_ah)<=0)add(out,row,'rated_capacity_ah','NUMBER_POSITIVE','Rated capacity must be greater than zero.');
+   if(!obj.chemistry)add(out,row,'chemistry','REQUIRED','Battery chemistry is required.');
+   if(!uid.test(obj.unique_identifier))add(out,row,'unique_identifier','IDENTIFIER_INVALID','Use the defined synthetic demo identifier format.');
+   else if(seen.has(obj.unique_identifier))add(out,row,'unique_identifier','IDENTIFIER_DUPLICATE','Unique identifier already appears in this import.');
+   else seen.add(obj.unique_identifier);
+   if(!statuses.has(obj.lifecycle_status))add(out,row,'lifecycle_status','STATUS_INVALID','Choose a supported lifecycle status.');
+   const soh=Number(obj.state_of_health_percent);
+   if(obj.state_of_health_percent===''||!Number.isFinite(soh)||soh<0||soh>100)add(out,row,'state_of_health_percent','RANGE_0_100','State of health must be between 0 and 100.');
+ });
+ return out;
+}
+(async()=>{try{
+ const r=await fetch('/data/sample-import-invalid.csv',{cache:'no-store'});if(!r.ok)throw new Error('invalid fixture unavailable');
+ const lines=(await r.text()).trim().split(/\r?\n/),headers=lines[0].split(',').map(x=>x.trim()),rows=lines.slice(1).map(x=>x.split(','));
+ const report=validate(rows,headers),invalidRows=new Set(report.map(x=>x.row)),validRows=rows.length-invalidRows.size;
+ errors.innerHTML=report.map(e=>`<tr data-error-code="${esc(e.code)}" data-error-row="${e.row}"><td>${e.row}</td><td>${esc(e.column)}</td><td><code>${esc(e.canonicalField)}</code></td><td><code>${esc(e.code)}</code></td><td>${esc(e.message)}</td></tr>`).join('');
+ summary.innerHTML=`<strong class="${report.length?'bad':'ok'}">${report.length} validation errors</strong> · ${validRows}/${rows.length} rows can proceed; invalid rows are blocked.`;
+ const json=JSON.stringify({version:1,rowCount:rows.length,validRowCount:validRows,errorCount:report.length,errors:report},null,2);
+ download.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+ document.body.dataset.validationReady='true';document.body.dataset.rowCount=String(rows.length);document.body.dataset.validRowCount=String(validRows);document.body.dataset.errorCount=String(report.length);document.body.dataset.downloadReady='true';
+}catch(e){summary.textContent=e.message}})();
+</script></body></html>
