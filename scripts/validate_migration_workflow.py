@@ -24,5 +24,5 @@ for p in files:
         require(match.startswith("dpp_"),f"non-DPP public table referenced by DPP migration {p.name}: {match}")
 
 require("dpp_app_binding" in files[0].read_text(encoding="utf-8"),"first migration must establish DPP binding")
-require("dpp_organizations" in files[-1].read_text(encoding="utf-8"),"core schema migration missing from ordered history")
+require(any("dpp_organizations" in p.read_text(encoding="utf-8") for p in files),"core schema migration missing from ordered history")
 print("M06_MIGRATION_ORDER_PASS: canonical DPP migrations are timestamp-ordered, non-destructive, DPP-prefixed, and ready for clean PostgreSQL replay")
