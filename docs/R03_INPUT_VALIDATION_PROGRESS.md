@@ -2,28 +2,41 @@
 
 Status: **PARTIAL — master task remains RED**
 
-This dependency-safe slice covers only the already-GREEN M20 database import boundary. It does not claim the full server/file/API validation required by R03.
+R03 now has two evidence-backed dependency-safe layers:
 
-Negative regression coverage proves rejection of:
+1. M20 database/import boundary negative validation.
+2. M17-M19 serverless API body/field validation.
+
+## Covered negative cases
+
+Database/import boundary:
 
 - negative import counters
 - non-positive staged row numbers
 - non-object normalized model/item JSON
 - non-array validation error payloads
-- disallowed battery category values
+- disallowed battery category/lifecycle values
 - model identifiers longer than 128 characters
-- disallowed lifecycle status values
 - battery unique identifiers longer than 300 characters
 
-The suite runs inside a transaction/rollback against the bound Supabase project and on clean PostgreSQL replay in CI.
+Serverless/API boundary:
 
-R03 remains RED until M13 and M17-M20 are complete and malformed/oversize/disallowed file and API payloads are covered end-to-end.
+- string, Buffer and already-parsed object bodies above 1 MiB reject with HTTP 413 `PAYLOAD_TOO_LARGE`
+- malformed JSON and unserializable bodies reject with HTTP 400 `INVALID_JSON`
+- model/item/passport invalid IDs, categories/statuses, field lengths and JSON shapes reject locally
+- oversize/malformed requests are rejected before any Supabase upstream call
+- M17-M19 use one shared `api/_request.js` limiter so parsed-object bodies cannot bypass the size check
+- the 413 behavior is part of the canonical M22 API error contract
+- M13 evidence metadata policy remains versioned at 10 MiB with allowed content types, storage-path rule and SHA-256 format
 
 ## Evidence — 2026-09-19
 
-- Bound Supabase project `frhletkiuupgksmgxoxc`: explicit transaction/rollback suite returned `R03_M20_INPUT_VALIDATION_SUBSET_PASS`.
-- GitHub Actions run `35398725407` on `d6b6b3b491862db0f7e763f160e0afc4e0383ece`: SUCCESS.
-- CI step `Run R03 M20 negative input validation subset`: PASS after clean PostgreSQL 17 migration replay.
-- Standard browser smoke also PASS; artifact `10569002388`.
-- Master R03 remains RED until M13 and M17-M20 server/file/API negative validation are complete.
+- Bound Supabase M20 rollback suite: `R03_M20_INPUT_VALIDATION_SUBSET_PASS`.
+- Prior full CI `35398725407`: M20 negative DB subset PASS.
+- Full CI `35407365035` on `146c2d90f3ca9f1fcc4f6b0b1c6ad9184c00b6ea`: SUCCESS.
+- CI step `Validate R03 API input validation contract`: PASS.
+- CI step `Run R03 API payload negative suite`: PASS.
+- Clean PostgreSQL 17 replay, R03 M20 DB negative suite, R04/RLS/RPC security gates and browser smoke: PASS.
+- `data/api-input-validation-matrix.json` versions the current 10 negative API/file-policy scenarios.
 
+R03 remains RED until M13 real storage upload/download validation and the dependent M17-M20 production/API flows are fully accepted and exercised end-to-end.
