@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T01:06:00+03:00",
+  "updatedAt": "2026-09-19T01:09:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -276,7 +276,7 @@
           "id": "M13",
           "title": "DPP Registry test-environment workflow",
           "status": "red",
-          "evidence": "Official testing environment verified; product integration not started."
+          "evidence": "PARTIAL: tenant-scoped evidence metadata + MIME/size/path/target rules PASS in bound Supabase rollback suite and full CI 35399987261. Direct production table grants remain revoked. M13 remains RED pending M03 and real storage/API upload/download enforcement."
         },
         {
           "id": "M14",
