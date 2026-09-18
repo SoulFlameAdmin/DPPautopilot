@@ -57,7 +57,7 @@
   ],
   "evidence_files": [
     "tests/api/input-validation.test.cjs",
-    "tests/db/test_input_validation_security_subset.sql",
+    "tests/db/test_import_negative_validation_subset.sql",
     "data/evidence-file-policy.json"
   ],
   "remaining": [
