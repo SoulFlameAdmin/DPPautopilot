@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "Dependency scan after F04 integrity hardening",
+  "currentTask": "M18 — battery items API precursor",
   "currentGate": "MVP",
-  "lastCompletedTask": "F04 integrity hardening — canonical↔machine tracker resync + CI drift guard; GitHub Actions 35402353233 SUCCESS on 74fee9b510565ba0f327b0c75c81c0ed34368ecf",
-  "nextTask": "Continue only with a newly eligible dependency-safe RED task or independent hardening; keep F08 and M01 deferred until their external conditions change.",
-  "message": "D01-D14 remain GREEN. Canonical dependency scan has no RED task whose declared dependencies are all GREEN. F04 tracker drift is repaired and evidence-backed; no Vercel action was attempted.",
+  "lastCompletedTask": "M17 partial model API precursor — CI 35403166134 SUCCESS + bound Supabase M17_MODELS_RPC_SUBSET_PASS",
+  "nextTask": "Build tenant/RBAC-scoped battery-item CRUD precursor with model linkage, lifecycle enforcement, HTTP/DB tests and exact RPC allowlist; keep M18 RED until M03/M01/deployed E2E acceptance.",
+  "message": "D01-D14 remain GREEN. M17 now has evidence-backed HTTP + DB precursor and bound Supabase runtime evidence, but remains RED due declared dependencies/deployed acceptance. F08 and M01 remain deferred; no Vercel action attempted.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T01:40:00+03:00"
+  "updatedAt": "2026-09-19T01:52:00+03:00"
 }
