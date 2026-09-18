@@ -234,6 +234,8 @@ jobs:
           echo "R12_RESTORE_DRILL_PASS"
       - name: Validate M01 authentication client contract
         run: python scripts/validate_auth_contract.py
+      - name: Validate M01 recovery completion contract
+        run: python scripts/validate_auth_recovery_contract.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
       - name: Browser smoke test demo surfaces
@@ -385,6 +387,17 @@ jobs:
             --window-size=900,900 --screenshot=artifacts/m01-auth.png \
             'http://127.0.0.1:8000/demo/auth.html'
           python scripts/validate_auth_ui.py artifacts/m01-auth-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/auth-recovery.html' > artifacts/m01-recovery-dom.html
+          python - <<'PY'
+          from pathlib import Path
+          dom=Path("artifacts/m01-recovery-dom.html").read_text(encoding="utf-8",errors="replace")
+          assert 'data-recovery-ready="true"' in dom
+          assert 'data-recovery-session="missing"' in dom
+          assert 'Missing or invalid recovery session.' in dom
+          print("M01_RECOVERY_UI_PASS: recovery page loads safely and blocks password update without a valid recovery session")
+          PY
 
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
             --dump-dom 'http://127.0.0.1:8000/demo/mapping.html' > artifacts/m07-mapping-dom.html
