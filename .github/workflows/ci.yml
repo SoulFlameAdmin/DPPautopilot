@@ -52,6 +52,8 @@ jobs:
         run: python scripts/validate_import_mapping_contract.py
       - name: Validate M20 transactional import contract
         run: python scripts/validate_transactional_import_contract.py
+      - name: Validate M22 import error contract
+        run: python scripts/validate_import_error_contract.py
       - name: Validate R01 environment and secret management
         run: python scripts/validate_env_secret_management.py
       - name: Validate R11 backup policy
@@ -155,6 +157,10 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_registry_idempotency_subset.sql
+      - name: Run M22 import error contract subset
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_import_error_contract_subset.sql
       - name: R12 isolated logical backup restore drill
         env:
           PGPASSWORD: postgres
