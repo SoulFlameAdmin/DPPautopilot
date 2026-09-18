@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T00:54:00+03:00",
+  "updatedAt": "2026-09-19T01:00:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -258,7 +258,7 @@
           "id": "M10",
           "title": "Immutable audit log for critical actions",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "PARTIAL: four-class access policy + public projection leakage tests PASS in CI 35399171822. M10 remains RED until M03 and real API enforcement exist."
         },
         {
           "id": "M11",
@@ -270,7 +270,7 @@
           "id": "M12",
           "title": "Unique identifiers and lifecycle status",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "PARTIAL: immutable audit DB infrastructure runtime-tested in bound Supabase and CI 35399171822. M12 remains RED until M03/app actor authorization is proven."
         },
         {
           "id": "M13",

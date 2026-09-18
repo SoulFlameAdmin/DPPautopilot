@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M10 — partial public/private access enforcement precursor",
+  "currentTask": "M13 — evidence attachment metadata/file-policy precursor",
   "currentGate": "MVP",
-  "lastCompletedTask": "U03/T01/T08 partial coverage — accessible form errors, semantic error units, reliability matrix",
-  "nextTask": "Build and test public/private passport projection/access rules from existing M09 catalog and D06 public view; keep M10 RED until M03/API enforcement exists.",
-  "message": "Merged evidence after concurrent R03 work. Full CI 35398504301 SUCCESS for U03/T01/T08 additions. Continuing with M10 precursor without touching F08/M01.",
+  "lastCompletedTask": "M10/M12 partial coverage — access projection and immutable audit infrastructure",
+  "nextTask": "Add tenant-scoped evidence metadata schema plus explicit MIME/size/path policy and DB tests; keep M13 RED until M03 and real storage upload/download enforcement exist.",
+  "message": "M10 public/private projection and M12 immutable audit precursor are evidence-backed. Full CI 35399171822 SUCCESS; bound Supabase M12 rollback test PASS. Continuing with M13 precursor without touching F08/M01.",
   "deferredBlockers": [
     "F08 — Git→Vercel deployment integration/hook is not firing: post-quota mirror trigger produced no status and Vercel still reports zero deployments.",
     "M01 — runtime password-update completion via normal recovery redirect remains unproven until a deployable DPP recovery URL or equivalent allowed interactive flow exists."
   ],
-  "updatedAt": "2026-09-19T00:52:00+03:00"
+  "updatedAt": "2026-09-19T01:00:00+03:00"
 }
