@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T01:52:00+03:00",
+  "updatedAt": "2026-09-19T01:56:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -444,7 +444,7 @@
           "acceptanceCriteria": "Authenticated CRUD with model linkage/tenant enforcement",
           "evidenceRequired": "API tests",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M03,M04."
+          "evidence": "PARTIAL authenticated battery-item API precursor: /api/items + four tenant/RBAC RPCs; CI 35403480117 on 3f0326fe... SUCCESS; bound Supabase migration dpp_items_api applied and M18_ITEMS_RPC_SUBSET_PASS; live ACL/search_path verified. M18 remains RED pending M01/M03 and deployed E2E acceptance. — PARTIAL PASS"
         },
         {
           "id": "M19",
