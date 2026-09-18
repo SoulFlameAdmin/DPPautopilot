@@ -1,15 +1,15 @@
 {
   "worker": "DAVID",
   "mode": "BUILD",
-  "state": "blocked",
-  "currentTask": "No dependency-safe RED task remains",
+  "state": "working",
+  "currentTask": "T01 — partial unit suite for GREEN D07/D09 business rules",
   "currentGate": "MVP",
-  "lastCompletedTask": "X06 — AI mapping assistant",
-  "nextTask": "Unblock either F08 Git→Vercel deployment integration/hook or M01 deployed recovery redirect/runtime password-update acceptance; then continue M02→M03→M05/M10/M12/M13→M17+ dependency chains.",
-  "message": "All currently dependency-safe work is exhausted. X06 is GREEN; latest full CI run 35394545987 is SUCCESS. F08 is now blocked by inactive/missing Git→Vercel deployment integration (post-quota trigger still produced zero deployments). M01 has real confirmation/session/refresh/logout/recovery evidence and recovery PATCH implementation, but final runtime password-update completion depends on a deployable recovery redirect or equivalent allowed interactive flow.",
+  "lastCompletedTask": "T02 — partial green database integration coverage",
+  "nextTask": "Add deterministic unit tests for identifiers/completeness already GREEN; keep T01 RED until M22 error contract exists.",
+  "message": "Defer cycle 1 continues without touching F08/M01. T02 partial suite is evidence-backed in CI and bound Supabase; next safe slice is T01 for D07/D09.",
   "deferredBlockers": [
     "F08 — Git→Vercel deployment integration/hook is not firing: post-quota mirror trigger produced no status and Vercel still reports zero deployments.",
     "M01 — runtime password-update completion via normal recovery redirect remains unproven until a deployable DPP recovery URL or equivalent allowed interactive flow exists."
   ],
-  "updatedAt": "2026-09-18T23:59:00+03:00"
+  "updatedAt": "2026-09-19T00:13:00+03:00"
 }
