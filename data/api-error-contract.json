@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "task": "M22",
+  "scope": "Shared HTTP error contract for current DPP serverless API precursors; M22 remains RED until M17-M20 are fully accepted and M20 has an HTTP API.",
+  "envelope": {
+    "error": {
+      "code": "UPPER_SNAKE_CASE",
+      "message": "stable public message"
+    }
+  },
+  "default": {
+    "http_status": 502,
+    "code": "UPSTREAM_ERROR",
+    "message": "Database request failed."
+  },
+  "common_sqlstate": {
+    "DP101": {
+      "http_status": 401,
+      "code": "AUTH_REQUIRED",
+      "message": "Authentication is required."
+    },
+    "DP102": {
+      "http_status": 403,
+      "code": "FORBIDDEN",
+      "message": "The request is not permitted."
+    },
+    "DP103": {
+      "http_status": 403,
+      "code": "FORBIDDEN",
+      "message": "The request is not permitted."
+    },
+    "DP104": {
+      "http_status": 403,
+      "code": "FORBIDDEN",
+      "message": "The request is not permitted."
+    }
+  },
+  "surfaces": {
+    "models": {
+      "23505": {
+        "http_status": 409,
+        "code": "MODEL_CONFLICT",
+        "message": "The battery model conflicts with an existing record."
+      },
+      "DP201": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP202": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP203": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP204": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP205": {
+        "http_status": 404,
+        "code": "MODEL_NOT_FOUND",
+        "message": "The battery model was not found."
+      }
+    },
+    "items": {
+      "23503": {
+        "http_status": 409,
+        "code": "ITEM_CONFLICT",
+        "message": "The battery item conflicts with a related record."
+      },
+      "23505": {
+        "http_status": 409,
+        "code": "ITEM_CONFLICT",
+        "message": "The battery item conflicts with an existing record."
+      },
+      "23514": {
+        "http_status": 409,
+        "code": "ITEM_CONFLICT",
+        "message": "The battery item conflicts with a data constraint."
+      },
+      "DP301": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP302": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP303": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP304": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP305": {
+        "http_status": 404,
+        "code": "MODEL_NOT_FOUND",
+        "message": "The battery model was not found."
+      },
+      "DP306": {
+        "http_status": 404,
+        "code": "ITEM_NOT_FOUND",
+        "message": "The battery item was not found."
+      },
+      "DP307": {
+        "http_status": 409,
+        "code": "LIFECYCLE_CONFLICT",
+        "message": "The lifecycle transition conflicts with the current item state."
+      },
+      "DP308": {
+        "http_status": 409,
+        "code": "ITEM_HAS_PASSPORT",
+        "message": "The battery item cannot be deleted because a passport exists."
+      }
+    },
+    "passport": {
+      "23505": {
+        "http_status": 409,
+        "code": "PASSPORT_CONFLICT",
+        "message": "The passport conflicts with an existing record."
+      },
+      "DP401": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP402": {
+        "http_status": 404,
+        "code": "PUBLIC_PASSPORT_NOT_FOUND",
+        "message": "The public passport was not found."
+      },
+      "DP403": {
+        "http_status": 404,
+        "code": "PASSPORT_NOT_FOUND",
+        "message": "The passport was not found."
+      },
+      "DP404": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP405": {
+        "http_status": 404,
+        "code": "ITEM_NOT_FOUND",
+        "message": "The battery item was not found."
+      },
+      "DP406": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP407": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP408": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP409": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP410": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      }
+    },
+    "export": {}
+  },
+  "local_codes": {
+    "AUTH_REQUIRED": {
+      "http_status": 401,
+      "message": "Bearer authentication is required."
+    },
+    "INVALID_JSON": {
+      "http_status": 400,
+      "message": "Request body must be valid JSON."
+    },
+    "METHOD_NOT_ALLOWED": {
+      "http_status": 405,
+      "message": "Unsupported method."
+    },
+    "VALIDATION_ERROR": {
+      "http_status": 422,
+      "message": "The request failed validation."
+    },
+    "SERVER_CONFIGURATION_MISSING": {
+      "http_status": 500,
+      "message": "Server configuration is incomplete."
+    },
+    "UPSTREAM_ERROR": {
+      "http_status": 502,
+      "message": "Database request failed."
+    }
+  }
+}
