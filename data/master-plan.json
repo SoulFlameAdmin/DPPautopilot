@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T01:40:00+03:00",
+  "updatedAt": "2026-09-19T01:52:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -435,7 +435,7 @@
           "acceptanceCriteria": "Authenticated CRUD with validation/tenant enforcement",
           "evidenceRequired": "API tests",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M03,M04."
+          "evidence": "PARTIAL authenticated model API precursor: /api/models + four tenant/RBAC-scoped SECURITY DEFINER RPCs; HTTP/DB/security tests PASS in GitHub Actions 35403166134 on 206e8cc445053ff413c5598962988bb6589a5188; migration dpp_models_api applied to bound Supabase and rollback matrix returned M17_MODELS_RPC_SUBSET_PASS; live RPC ACL/search_path verified. M17 remains RED until M01/M03 and deployed end-to-end auth acceptance are complete. — PARTIAL PASS"
         },
         {
           "id": "M18",
