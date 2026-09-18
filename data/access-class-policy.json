@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "task": "M10",
+  "allowed_classes": [
+    "public",
+    "public_identifier",
+    "legitimate_interest",
+    "authority_only"
+  ],
+  "public_projection_classes": [
+    "public",
+    "public_identifier"
+  ],
+  "restricted_projection_classes": [
+    "legitimate_interest",
+    "authority_only"
+  ],
+  "notes": [
+    "This policy is a field-classification/projection precursor only.",
+    "M10 remains RED until M03 exists and the real API enforces the classes server-side."
+  ]
+}
