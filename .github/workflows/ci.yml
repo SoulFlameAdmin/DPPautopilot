@@ -164,6 +164,20 @@ jobs:
               'http://127.0.0.1:8000/demo/separation.html'
           done
           python scripts/validate_responsive_artifacts.py artifacts
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/replay.html?auto=1' > artifacts/d13-replay-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --window-size=900,900 --screenshot=artifacts/d13-replay.png \
+            'http://127.0.0.1:8000/demo/replay.html?auto=1'
+          python scripts/validate_replay_ui.py artifacts/d13-replay-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=5000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/acceptance.html' > artifacts/d14-acceptance-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=5000 \
+            --window-size=1000,1000 --screenshot=artifacts/d14-acceptance.png \
+            'http://127.0.0.1:8000/demo/acceptance.html'
+          python scripts/validate_demo_acceptance.py artifacts/d14-acceptance-dom.html
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
