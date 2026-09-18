@@ -27,7 +27,7 @@ def is_present(value: Any) -> bool:
     if isinstance(value, str):
         return bool(value.strip())
     if isinstance(value, (list, dict)):
-        return len(value) > 0
+        return True
     return True
 
 
