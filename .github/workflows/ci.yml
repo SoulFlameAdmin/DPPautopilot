@@ -11,7 +11,21 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dpp_replay
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dpp_replay"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,7 +36,7 @@ jobs:
       - name: Install D08 QR scanner dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zbar-tools
+          sudo apt-get install -y zbar-tools postgresql-client
           python -m pip install --disable-pip-version-check 'qrcode[pil]==8.2'
       - name: Validate repository contracts
         run: python scripts/validate_repo.py
@@ -36,6 +50,73 @@ jobs:
         run: python scripts/validate_completeness.py
       - name: Validate M04 core database schema contract
         run: python scripts/validate_core_schema_contract.py
+      - name: Validate M06 migration ordering contract
+        run: python scripts/validate_migration_workflow.py
+      - name: Replay all DPP migrations on clean PostgreSQL 17
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSQL=(psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1)
+          "${PSQL[@]}" <<'SQL'
+          create extension if not exists pgcrypto;
+          create role anon nologin;
+          create role authenticated nologin;
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          SQL
+          for file in supabase/migrations/*.sql; do
+            echo "Replaying $file"
+            "${PSQL[@]}" -f "$file"
+          done
+          "${PSQL[@]}" <<'SQL'
+          do $
+          declare
+            expected text[] := array[
+              'dpp_app_binding',
+              'dpp_organizations',
+              'dpp_organization_members',
+              'dpp_battery_models',
+              'dpp_battery_items',
+              'dpp_passports'
+            ];
+            name text;
+            has_rls boolean;
+            grants_count integer;
+            binding_count integer;
+          begin
+            foreach name in array expected loop
+              if to_regclass('public.' || name) is null then
+                raise exception 'M06 replay missing table %', name;
+              end if;
+              select c.relrowsecurity into has_rls
+              from pg_class c join pg_namespace n on n.oid=c.relnamespace
+              where n.nspname='public' and c.relname=name;
+              if has_rls is not true then
+                raise exception 'M06 replay table % does not have RLS enabled', name;
+              end if;
+            end loop;
+
+            select count(*) into grants_count
+            from information_schema.role_table_grants
+            where table_schema='public'
+              and table_name = any(expected)
+              and grantee in ('anon','authenticated');
+            if grants_count <> 0 then
+              raise exception 'M06 replay leaked % anon/authenticated grants', grants_count;
+            end if;
+
+            select count(*) into binding_count
+            from public.dpp_app_binding
+            where app_key='dpp-autopilot'
+              and repo_full_name='SoulFlameAdmin/DPPautopilot';
+            if binding_count <> 1 then
+              raise exception 'M06 replay binding row mismatch: %', binding_count;
+            end if;
+          end $;
+          SQL
+          echo "M06_MIGRATION_REPLAY_PASS"
       - name: Validate M01 authentication client contract
         run: python scripts/validate_auth_contract.py
       - name: Check repository security hygiene
