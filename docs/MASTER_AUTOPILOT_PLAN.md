@@ -78,22 +78,22 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 
 | ID | Task | Depends on | Acceptance criteria | Evidence required | Status |
 |---|---|---|---|---|---|
-| M01 | Authentication | F13 | Sign-up/in/out/reset/session handling works | Auth integration tests | RED |
+| M01 | Authentication | F13 | Sign-up/in/out/reset/session handling works | Auth integration tests | BLOCKED |
 | M02 | Organisations / tenants | M01 | Users belong to organisations and active tenant is explicit | DB + integration tests | RED |
 | M03 | RBAC | M01,M02 | Owner/admin/editor/viewer permissions enforced server-side | Authorization test matrix | RED |
 | M04 | Core database schema | F13,F11 | Models/items/passports/orgs/users represented with PK/FK/check constraints | Migration + schema diff | GREEN |
 | M05 | Row Level Security | M02,M03,M04 | Cross-tenant reads/writes are denied by database policy | Negative security tests | RED |
-| M06 | Migration workflow | M04 | Reproducible ordered migrations from clean database | Migration replay test | RED |
+| M06 | Migration workflow | M04 | Reproducible ordered migrations from clean database | Migration replay test | GREEN |
 | M07 | CSV mapping wizard | M04 | Customer columns map to canonical fields with saved mapping | Integration/E2E test | RED |
 | M08 | Import validation / row errors | M07,F11 | Invalid rows do not silently pass; errors are downloadable/actionable | Unit/integration tests | RED |
-| M09 | Annex/requirement data model mapping | F11,M04 | Canonical schema traces to requirement matrix | Traceability review | RED |
+| M09 | Annex/requirement data model mapping | F11,M04 | Canonical schema traces to requirement matrix | Traceability review | GREEN |
 | M10 | Public/private access categories | M03,M09 | Every passport field has explicit access class; API enforces it | API/security tests | RED |
-| M11 | Version history | M04 | Material passport changes create immutable version records | DB integration tests | RED |
+| M11 | Version history | M04 | Material passport changes create immutable version records | DB integration tests | GREEN |
 | M12 | Critical audit log | M03,M04 | Actor/action/time/target/before-after metadata captured; app cannot alter past entries | DB policy tests | RED |
 | M13 | Evidence attachments | M03,M04 | Allowed files upload/download under tenant policy; type/size limits enforced | Storage tests | RED |
-| M14 | Identifier/lifecycle service | M04,D07 | Identifier uniqueness and lifecycle transitions enforced | Unit/integration tests | RED |
-| M15 | Registry test workflow abstraction | F11,M14 | Registry payload/status model exists without unsupported live claims | Contract tests | RED |
-| M16 | Registry status tracking | M15 | Submission/accepted/rejected/retry states persisted with timestamps | Integration tests | RED |
+| M14 | Identifier/lifecycle service | M04,D07 | Identifier uniqueness and lifecycle transitions enforced | Unit/integration tests | GREEN |
+| M15 | Registry test workflow abstraction | F11,M14 | Registry payload/status model exists without unsupported live claims | Contract tests | GREEN |
+| M16 | Registry status tracking | M15 | Submission/accepted/rejected/retry states persisted with timestamps | Integration tests | GREEN |
 | M17 | API: models | M03,M04 | Authenticated CRUD with validation/tenant enforcement | API tests | RED |
 | M18 | API: battery items | M03,M04 | Authenticated CRUD with model linkage/tenant enforcement | API tests | RED |
 | M19 | API: passports | M03,M04,M10 | Public/private read and controlled write endpoints | API/security tests | RED |
@@ -223,3 +223,10 @@ Append evidence here only after verification.
 | 2026-09-18 | D13 | Browser mutate→reset replay PASS in run `35389607402`: mutation detected and reset returns to exact known synthetic fixture state | PASS |
 | 2026-09-18 | D14 | Full browser demo acceptance PASS in run `35389607402`, commit `9d0c20c2bcce06848cdfe263caeb13730c355df4`: import→validate→passport→QR, 4/4 steps, zero runtime errors; artifact `10565675779` | PASS |
 | 2026-09-18 | M04 | Supabase migration `dpp_core_schema` applied to project `frhletkiuupgksmgxoxc`; runtime verification confirmed 5 DPP-only core tables, PK/FK/check/unique constraints, tenant-safe composite FKs, RLS enabled, and no `anon`/`authenticated` table grants. Canonical migration `supabase/migrations/20260918231500_dpp_core_schema.sql`; GitHub Actions run `35390158548` on commit `575d5a7e08895aa217ff8749d2764a3533bf0954` SUCCESS including `M04_SCHEMA_CONTRACT_PASS`. | PASS |
+| 2026-09-18 | M01 | Real Supabase Auth client flow implemented (`demo/auth.html`) for sign-up/sign-in/reset/sign-out/session using verified publishable key only. Auth settings endpoint confirmed email signup enabled, `mailer_autoconfirm=false`, Google OAuth enabled, anonymous users disabled. CI run `35390664165` on `aefe7fce47f43a6bdef988bc3f966d3e8989815a` SUCCESS for auth contract/browser smoke. Full acceptance remains externally blocked because confirmed-email inbox or interactive OAuth is required to prove sign-in/reset/session end-to-end without bypassing auth. | BLOCKED |
+| 2026-09-18 | M06 | Canonical ordered migrations include F13 binding and all DPP migrations; clean PostgreSQL 17 replay with `ON_ERROR_STOP=1`, DPP table existence, RLS and client-grant assertions PASS in GitHub Actions run `35390995153` on `3a47aaa64a31560316cfdfa4ca8953560430a1a0`. | PASS |
+| 2026-09-18 | M09 | `data/dpp-field-catalog.json` DB targets aligned to real M04 typed columns / exact `canonical_data` JSON paths; `M09_SCHEMA_TRACEABILITY_PASS` in run `35391493185` on `c122ce724b979b80446c5ca788c70a3175054229`. | PASS |
+| 2026-09-18 | M11 | Migration `dpp_passport_version_history` applied in Supabase; runtime transaction proved versions 1→2 on material update and blocked history tampering; contract + clean replay PASS in run `35391493185`. | PASS |
+| 2026-09-18 | M14 | Lifecycle migration applied in Supabase; runtime transaction allowed `original→second_life`, rejected `second_life→original`, and rejected duplicate identifier; contract + clean replay PASS in run `35391493185`. | PASS |
+| 2026-09-18 | M15 | Provider-neutral registry workflow abstraction migration applied in Supabase with explicit no-live-connectivity claim; contract and clean replay PASS in run `35391493185`. | PASS |
+| 2026-09-18 | M16 | Supabase runtime transaction proved `draft→queued→submitted→accepted`, automatic timestamps/attempt_count and rejected invalid `accepted→draft`; contract + clean replay PASS in run `35391493185`. | PASS |

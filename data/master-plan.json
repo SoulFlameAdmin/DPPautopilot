@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-18T23:20:00+03:00",
+  "updatedAt": "2026-09-18T23:35:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -203,8 +203,8 @@
         {
           "id": "M01",
           "title": "Add authenticated organisations and users",
-          "status": "red",
-          "evidence": "Not started; verified Supabase namespace is now available."
+          "status": "blocked",
+          "evidence": "Auth UI/client contract PASS in run 35390664165; full sign-in/reset/session acceptance requires external confirmed-email inbox or interactive Google OAuth; no bypass attempted."
         },
         {
           "id": "M02",
@@ -233,8 +233,8 @@
         {
           "id": "M06",
           "title": "Import validation and row-level errors",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "Ordered canonical DPP migrations replay cleanly on PostgreSQL 17 with RLS/grant assertions; run 35390995153 SUCCESS."
         },
         {
           "id": "M07",
@@ -251,8 +251,8 @@
         {
           "id": "M09",
           "title": "Version history for passport changes",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "42 catalog fields map to real M04 typed columns or exact canonical_data JSON paths; run 35391493185 SUCCESS."
         },
         {
           "id": "M10",
@@ -263,8 +263,8 @@
         {
           "id": "M11",
           "title": "Document/evidence attachments",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "Immutable passport version history applied and runtime-tested in Supabase; contract/clean replay run 35391493185 SUCCESS."
         },
         {
           "id": "M12",
@@ -281,20 +281,20 @@
         {
           "id": "M14",
           "title": "Registry registration status tracking",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "Identifier uniqueness/lifecycle transition rules applied and runtime-tested in Supabase; contract/clean replay run 35391493185 SUCCESS."
         },
         {
           "id": "M15",
           "title": "API endpoints for battery/passport CRUD",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "Provider-neutral registry test workflow schema applied; runtime/contract/clean replay evidence PASS in run 35391493185."
         },
         {
           "id": "M16",
           "title": "Export customer data and evidence package",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "Registry status graph/timestamps/attempt_count runtime test PASS; run 35391493185 SUCCESS."
         },
         {
           "id": "M17",
