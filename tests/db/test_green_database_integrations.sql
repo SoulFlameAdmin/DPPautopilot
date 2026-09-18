@@ -1,5 +1,6 @@
--- T02 partial integration suite for already-GREEN database capabilities.
--- Intentionally excludes still-RED M05/M10/M12/M13; T02 must remain RED until those dependencies are complete.
+-- T02 partial integration suite for current database capabilities.
+-- Includes GREEN DB behaviors plus dependency-safe partial M12/M13 hardening.
+-- T02 remains RED until all declared M04-M16 dependencies are fully GREEN.
 
 do $t02$
 declare
@@ -14,9 +15,12 @@ declare
   v_revision integer;
   v_attempts integer;
   v_result jsonb;
+  v_evidence uuid;
   immutable_rejected boolean := false;
   lifecycle_rejected boolean := false;
   registry_rejected boolean := false;
+  evidence_rejected boolean := false;
+  audit_rejected boolean := false;
 begin
   insert into public.dpp_organizations(id,name,slug)
   values(v_org,'T02 Integration Org','t02-integration');
@@ -104,6 +108,61 @@ begin
     raise exception 'T02 M14 invalid lifecycle reversal was not rejected';
   end if;
 
+  select count(*) into v_count
+  from public.dpp_audit_log
+  where organization_id=v_org
+    and action='UPDATE'
+    and target_table='dpp_battery_items'
+    and target_id=v_item
+    and before_data->>'lifecycle_status'='original'
+    and after_data->>'lifecycle_status'='second_life';
+  if v_count<>1 then
+    raise exception 'T02 M12 lifecycle audit expected 1 row, got %',v_count;
+  end if;
+
+  begin
+    update public.dpp_audit_log
+    set action='DELETE'
+    where organization_id=v_org
+      and target_table='dpp_battery_items'
+      and target_id=v_item;
+  exception when sqlstate '55000' then
+    audit_rejected:=true;
+  end;
+  if not audit_rejected then
+    raise exception 'T02 M12 audit history mutation was not rejected';
+  end if;
+
+  insert into public.dpp_evidence_attachments(
+    organization_id,related_record_type,related_record_id,storage_path,
+    original_filename,content_type,byte_size,sha256_hex
+  ) values(
+    v_org,'battery_model',v_model,v_org::text||'/evidence/t02/report.pdf',
+    'report.pdf','application/pdf',2048,repeat('a',64)
+  ) returning id into v_evidence;
+
+  select count(*) into v_count
+  from public.dpp_evidence_attachments
+  where organization_id=v_org and id=v_evidence;
+  if v_count<>1 then
+    raise exception 'T02 M13 evidence metadata expected 1 row, got %',v_count;
+  end if;
+
+  begin
+    insert into public.dpp_evidence_attachments(
+      organization_id,related_record_type,related_record_id,storage_path,
+      original_filename,content_type,byte_size,sha256_hex
+    ) values(
+      v_org,'battery_model',v_model,v_org::text||'/evidence/t02/malware.exe',
+      'malware.exe','application/x-msdownload',128,repeat('b',64)
+    );
+  exception when check_violation then
+    evidence_rejected:=true;
+  end;
+  if not evidence_rejected then
+    raise exception 'T02 M13 disallowed evidence MIME type was not rejected';
+  end if;
+
   insert into public.dpp_registry_submissions(
     id,organization_id,battery_item_id,passport_id,environment,provider,status,request_payload
   ) values(
@@ -161,9 +220,20 @@ begin
   end if;
 
   select count(*) into v_count
+  from pg_class c
+  join pg_namespace n on n.oid=c.relnamespace
+  where n.nspname='public'
+    and c.relkind in ('r','p')
+    and c.relname like 'dpp\_%' escape '\'
+    and not c.relrowsecurity;
+  if v_count<>0 then
+    raise exception 'T02 RLS regression: % DPP tables missing RLS',v_count;
+  end if;
+
+  select count(*) into v_count
   from information_schema.role_table_grants
   where table_schema='public'
-    and table_name like 'dpp_%'
+    and table_name like 'dpp\_%' escape '\'
     and grantee in ('anon','authenticated');
   if v_count<>0 then
     raise exception 'T02 deny-by-default regression: % anon/authenticated table grants found',v_count;
@@ -171,4 +241,4 @@ begin
 end
 $t02$;
 
-select 'T02_GREEN_DB_SUBSET_PASS' as result;
+select 'T02_CURRENT_DB_SUBSET_PASS' as result;
