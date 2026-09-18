@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T02:44:00+03:00",
+  "updatedAt": "2026-09-19T02:49:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -622,7 +622,7 @@
           "acceptanceCriteria": "Cross-tenant attack cases consistently deny access",
           "evidenceRequired": "Security test report",
           "status": "red",
-          "evidence": "PARTIAL DB-boundary tenant isolation security suite: bound Supabase rollback attack matrix returned `R04_DB_TENANT_ISOLATION_SUBSET_PASS`, covering cross-tenant enumeration, guessed-ID update/delete, forged tenant inserts, evidence metadata forgery, viewer mutation denial and tenant-scoped audit visibility. Full CI `35400349613` on `6d77ddc65660a92d657514dc01b02b51854adb0f` SUCCESS including clean replay R04 gate and browser smoke; artifact `10568949488`. R04 remains RED until M17-M21 API/export surfaces exist and equivalent attacks are exercised through them. — PARTIAL PASS"
+          "evidence": "PARTIAL API + DB tenant-isolation hardening: 9 API attack scenarios prove no client tenant override, non-enumerating guessed-ID failures, export RBAC denial and public passport allowlisting; prior DB suite covers forged tenant inserts/evidence/audit isolation. CI 35406978527 on a1028ffa08cef16538743746671411542e50730b SUCCESS including API matrix/attack suite, DB isolation, RLS/RPC guards and browser smoke. R04 remains RED pending M05/M17-M21 full acceptance and deployed live HTTP attack testing. — PARTIAL PASS"
         },
         {
           "id": "R05",
