@@ -19,6 +19,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install D08 QR scanner dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zbar-tools
+          python -m pip install --disable-pip-version-check 'qrcode[pil]==8.2'
       - name: Validate repository contracts
         run: python scripts/validate_repo.py
       - name: Validate DPP field traceability catalog
@@ -87,6 +92,29 @@ jobs:
             --window-size=1440,1200 --screenshot=artifacts/d06-passport.png \
             'http://127.0.0.1:8000/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001'
           python scripts/validate_public_passport.py artifacts/d06-passport-dom.html artifacts/d06-passport-missing-dom.html
+
+          EXPECTED_QR_URL='http://127.0.0.1:8000/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001'
+          python scripts/generate_qr_evidence.py --url "$EXPECTED_QR_URL" --png artifacts/d08-generated.png --svg artifacts/d08-generated.svg
+          zbarimg --quiet --raw artifacts/d08-generated.png > artifacts/d08-generated-decoded.txt
+          curl -fsS "$EXPECTED_QR_URL" > artifacts/d08-route.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+            --dump-dom 'http://127.0.0.1:8000/demo/qr.html' > artifacts/d08-qr-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+            --window-size=900,1000 --screenshot=artifacts/d08-qr.png \
+            'http://127.0.0.1:8000/demo/qr.html'
+
+          python - <<'PY'
+          import base64, re
+          from pathlib import Path
+          dom = Path("artifacts/d08-qr-dom.html").read_text(encoding="utf-8")
+          m = re.search(r'data:image/png;base64,([A-Za-z0-9+/=]+)', dom)
+          if not m:
+              raise SystemExit("embedded D08 PNG data URI not found")
+          Path("artifacts/d08-ui-qr.png").write_bytes(base64.b64decode(m.group(1)))
+          PY
+          zbarimg --quiet --raw artifacts/d08-ui-qr.png > artifacts/d08-ui-decoded.txt
+          python scripts/validate_qr.py artifacts/d08-generated-decoded.txt artifacts/d08-ui-decoded.txt "$EXPECTED_QR_URL" artifacts/d08-qr-dom.html
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
