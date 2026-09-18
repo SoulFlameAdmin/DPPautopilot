@@ -52,6 +52,8 @@ jobs:
         run: python scripts/validate_import_mapping_contract.py
       - name: Validate M20 transactional import contract
         run: python scripts/validate_transactional_import_contract.py
+      - name: Validate R01 environment and secret management
+        run: python scripts/validate_env_secret_management.py
       - name: Validate D02 synthetic sample fixture
         run: python scripts/validate_sample_fixture.py
       - name: Validate D07 deterministic identifiers
