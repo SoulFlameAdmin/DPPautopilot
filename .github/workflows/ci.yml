@@ -73,7 +73,7 @@ jobs:
             "${PSQL[@]}" -f "$file"
           done
           "${PSQL[@]}" <<'SQL'
-          do $
+          do $m06$
           declare
             expected text[] := array[
               'dpp_app_binding',
@@ -116,7 +116,7 @@ jobs:
             if binding_count <> 1 then
               raise exception 'M06 replay binding row mismatch: %', binding_count;
             end if;
-          end $;
+          end $m06$;
           SQL
           echo "M06_MIGRATION_REPLAY_PASS"
       - name: Validate M01 authentication client contract
