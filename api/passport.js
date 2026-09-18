@@ -1,5 +1,7 @@
 'use strict';
 
+const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
+
 function send(res, status, body) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -31,17 +33,8 @@ function validObject(value) {
 }
 
 function mapDatabaseError(data) {
-  const code = data && data.code;
-  if (code === 'DP101') return [401, 'AUTH_REQUIRED'];
-  if (code === 'DP102' || code === 'DP103' || code === 'DP104') return [403, 'FORBIDDEN'];
-  if (code === 'DP401' || code === 'DP404' || code === 'DP406' || code === 'DP407' || code === 'DP408' || code === 'DP409' || code === 'DP410') {
-    return [422, 'VALIDATION_ERROR'];
-  }
-  if (code === 'DP402') return [404, 'PUBLIC_PASSPORT_NOT_FOUND'];
-  if (code === 'DP403') return [404, 'PASSPORT_NOT_FOUND'];
-  if (code === 'DP405') return [404, 'ITEM_NOT_FOUND'];
-  if (code === '23505') return [409, 'PASSPORT_CONFLICT'];
-  return [502, 'UPSTREAM_ERROR'];
+  const mapped = mapSharedDatabaseError('passport', data);
+  return [mapped.status, mapped.code, mapped.message];
 }
 
 async function rpc(name, payload, authorization, env = process.env, fetchImpl = fetch) {
@@ -70,10 +63,11 @@ async function rpc(name, payload, authorization, env = process.env, fetchImpl = 
   try { data = await response.json(); } catch (_) { data = null; }
 
   if (!response.ok) {
-    const [status, publicCode] = mapDatabaseError(data);
+    const [status, publicCode, publicMessage] = mapDatabaseError(data);
     const error = new Error(publicCode);
     error.status = status;
     error.publicCode = publicCode;
+    error.publicMessage = publicMessage;
     throw error;
   }
   return data;
@@ -163,11 +157,11 @@ async function handler(req, res) {
   } catch (error) {
     const status = Number.isInteger(error.status) ? error.status : 502;
     const code = error.publicCode || error.message || 'UPSTREAM_ERROR';
-    const message = status === 500
+    const message = error.publicMessage || (status === 500
       ? 'Server configuration is incomplete.'
       : status >= 500
         ? 'Database request failed.'
-        : code.replace(/_/g, ' ').toLowerCase();
+        : code.replace(/_/g, ' ').toLowerCase());
     return send(res, status, { error: { code, message } });
   }
 }
