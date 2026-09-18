@@ -11,8 +11,9 @@ assert contract.get("task")=="M22"
 assert contract.get("envelope")=={"error":{"code":"UPPER_SNAKE_CASE","message":"stable public message"}}
 assert contract.get("default",{}).get("code")=="UPSTREAM_ERROR"
 assert contract.get("default",{}).get("http_status")==502
+assert contract.get("local_codes",{}).get("PAYLOAD_TOO_LARGE",{}).get("http_status")==413
 
-valid_status={400,401,403,404,405,409,422,500,502}
+valid_status={400,401,403,404,405,409,413,422,500,502}
 code_re=re.compile(r"^[A-Z][A-Z0-9_]*$")
 sql_re=re.compile(r"^(?:DP\d{3}|23\d{3})$")
 
