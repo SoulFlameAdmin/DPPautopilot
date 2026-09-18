@@ -66,6 +66,8 @@ jobs:
         run: python scripts/validate_sample_fixture.py
       - name: Validate D07 deterministic identifiers
         run: python scripts/validate_identifiers.py
+      - name: Run T01 green business-rule unit suite
+        run: python -m unittest discover -s tests/unit -p 'test_*.py' -v
       - name: Validate D09 completeness and D10 warnings
         run: python scripts/validate_completeness.py
       - name: Validate M04 core database schema contract
