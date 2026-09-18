@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "scope": "M20 import database boundary; future API must preserve semantic code mapping",
+  "errors": [
+    {
+      "sqlstate": "DP001",
+      "code": "import_not_found",
+      "message": "Import run does not exist.",
+      "intended_http_status": 404
+    },
+    {
+      "sqlstate": "DP002",
+      "code": "import_has_no_rows",
+      "message": "Import run has no staged rows.",
+      "intended_http_status": 422
+    },
+    {
+      "sqlstate": "DP003",
+      "code": "import_not_committable",
+      "message": "Import run is not in a valid commit state.",
+      "intended_http_status": 409
+    },
+    {
+      "sqlstate": "DP004",
+      "code": "import_row_has_validation_errors",
+      "message": "A staged row still has validation errors.",
+      "intended_http_status": 422
+    },
+    {
+      "sqlstate": "DP005",
+      "code": "import_row_missing_identity",
+      "message": "A staged row is missing normalized identity fields.",
+      "intended_http_status": 422
+    },
+    {
+      "sqlstate": "DP006",
+      "code": "import_commit_count_mismatch",
+      "message": "Committed row count differs from validated row count.",
+      "intended_http_status": 409
+    },
+    {
+      "sqlstate": "DP007",
+      "code": "import_committed_state_inconsistent",
+      "message": "A committed import has inconsistent row links.",
+      "intended_http_status": 409
+    },
+    {
+      "sqlstate": "DP008",
+      "code": "duplicate_battery_identifier",
+      "message": "A battery unique identifier already exists.",
+      "intended_http_status": 409
+    }
+  ]
+}
