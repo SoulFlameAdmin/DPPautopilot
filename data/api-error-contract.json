@@ -208,6 +208,10 @@
     "UPSTREAM_ERROR": {
       "http_status": 502,
       "message": "Database request failed."
+    },
+    "PAYLOAD_TOO_LARGE": {
+      "http_status": 413,
+      "message": "Request body exceeds the 1 MiB limit."
     }
   }
 }
