@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "task": "R04",
+  "status": "partial",
+  "scope": "API-layer tenant isolation / anti-enumeration hardening for M17-M21 precursors; R04 remains RED until dependencies are fully GREEN and deployed E2E attack testing is possible.",
+  "scenarios": [
+    {
+      "id": "models_tenant_injection",
+      "surface": "/api/models",
+      "expected": "organization_id is never forwarded; active tenant is server-side only"
+    },
+    {
+      "id": "items_tenant_injection",
+      "surface": "/api/items",
+      "expected": "organization_id is never forwarded; model linkage stays tenant-scoped in RPC"
+    },
+    {
+      "id": "passport_tenant_injection",
+      "surface": "/api/passport",
+      "expected": "organization_id is never forwarded; item/passport scope stays server-side"
+    },
+    {
+      "id": "export_tenant_injection",
+      "surface": "/api/export",
+      "expected": "client tenant selectors are ignored; export RPC uses active tenant context"
+    },
+    {
+      "id": "guessed_model_id",
+      "surface": "/api/models",
+      "expected": "cross-tenant/missing model is stable 404 MODEL_NOT_FOUND without detail leak"
+    },
+    {
+      "id": "guessed_item_id",
+      "surface": "/api/items",
+      "expected": "cross-tenant/missing item is stable 404 ITEM_NOT_FOUND without detail leak"
+    },
+    {
+      "id": "guessed_passport_id",
+      "surface": "/api/passport",
+      "expected": "cross-tenant/missing private passport is stable 404 PASSPORT_NOT_FOUND without detail leak"
+    },
+    {
+      "id": "export_role_denial",
+      "surface": "/api/export",
+      "expected": "non-owner/admin export is stable 403 FORBIDDEN without DB detail leak"
+    },
+    {
+      "id": "public_passport_allowlist",
+      "surface": "/api/passport public",
+      "expected": "response emits only public top-level keys even if upstream shape drifts"
+    }
+  ],
+  "evidence_files": [
+    "tests/api/tenant-isolation.test.cjs",
+    "tests/db/test_tenant_isolation_subset.sql"
+  ],
+  "remaining": [
+    "Deployed live HTTP attack suite awaits F08/M01-dependent production/preview path and fully accepted M17-M21 dependencies."
+  ]
+}
