@@ -1,0 +1,11 @@
+{
+  "supabaseUrl": "https://frhletkiuupgksmgxoxc.supabase.co",
+  "publishableKey": "sb_publishable_JQPnalB8jOs639_PWoR6mA_AOk11xWC",
+  "authSettingsEvidence": {
+    "checkedAt": "2026-09-18",
+    "emailSignup": true,
+    "mailerAutoconfirm": false,
+    "googleOAuth": true,
+    "anonymousUsers": false
+  }
+}
