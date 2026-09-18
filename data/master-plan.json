@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T01:30:00+03:00",
+  "updatedAt": "2026-09-19T01:40:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -50,7 +50,7 @@
           "acceptanceCriteria": "`data/master-plan.json` remains parseable and dashboard can render it",
           "evidenceRequired": "CI validator + dashboard smoke test",
           "status": "green",
-          "evidence": "GitHub Actions run `35265447807` on commit `a3d408f5b5dac9b34ffc0d9e85d68e5e95ef3a65`: repository contract PASS + headless Chrome dashboard render PASS; screenshot artifact `d01-dashboard-smoke` id `10516670805` — PASS"
+          "evidence": "Machine tracker resynchronized from canonical task tables; scripts/validate_repo.py now fails CI on canonical/machine ID, title, status or dependency drift; scripts/ui_smoke.py derives dashboard gate expectations from the machine plan. GitHub Actions run 35402353233 on commit 74fee9b510565ba0f327b0c75c81c0ed34368ecf SUCCESS."
         },
         {
           "id": "F05",
