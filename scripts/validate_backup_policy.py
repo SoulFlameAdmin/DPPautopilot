@@ -15,7 +15,7 @@ for phrase in [
     "<= 24 hours",
     "target rto",
     "<= 8 hours",
-    "storage objects separately",
+    "storage/evidence objects separately",
     "r12 remains red",
     "frhletkiuupgksmgxoxc",
 ]:
