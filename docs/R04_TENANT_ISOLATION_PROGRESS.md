@@ -17,3 +17,12 @@ Covered attack cases:
 The test uses temporary `authenticated` grants and synthetic identities only inside an explicit transaction/rollback; production direct table grants remain closed.
 
 R04 remains RED until M17-M21 exist and equivalent cross-tenant attacks are exercised through the authenticated API/export surfaces.
+
+## Evidence — 2026-09-19
+
+- Bound Supabase transaction/rollback suite returned `R04_DB_TENANT_ISOLATION_SUBSET_PASS`.
+- Covered cross-tenant enumeration, guessed-ID update/delete, forged tenant inserts, evidence metadata forgery, viewer write denial, and tenant-scoped audit visibility.
+- Full GitHub Actions run `35400349613` on `6d77ddc65660a92d657514dc01b02b51854adb0f`: SUCCESS, including `Run R04 DB tenant isolation subset` and browser smoke.
+- UI artifact: `10568949488`.
+- R04 remains RED until M17-M21 expose API/export surfaces and the same attacks are verified there.
+

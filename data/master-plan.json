@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T01:09:00+03:00",
+  "updatedAt": "2026-09-19T01:13:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -406,7 +406,7 @@
           "id": "R04",
           "title": "Tenant isolation security tests",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "PARTIAL: DB attack matrix PASS in bound Supabase rollback suite and full CI 35400349613; cross-tenant reads/writes/ID-guessing/forged tenant/evidence/audit role boundaries covered. Remains RED pending M17-M21 API/export attack coverage."
         },
         {
           "id": "R05",
