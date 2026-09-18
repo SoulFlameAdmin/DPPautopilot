@@ -68,6 +68,40 @@ def main():
     require("Source of truth" in canonical, "canonical master plan must declare itself source of truth")
     require("GREEN" in canonical and "Evidence log" in canonical, "canonical plan must define status/evidence protocol")
 
+    # F04 integrity: data/master-plan.json must remain a faithful machine view
+    # of the canonical task tables; fail CI on ID/title/status/dependency drift.
+    canonical_tasks = {}
+    for raw in canonical.splitlines():
+        if not raw.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in raw.split("|")[1:-1]]
+        if len(cells) < 6:
+            continue
+        tid = cells[0]
+        if len(tid) != 3 or not tid[0].isalpha() or not tid[1:].isdigit():
+            continue
+        canonical_tasks[tid] = {
+            "title": cells[1],
+            "dependsOn": cells[2],
+            "status": cells[5].lower(),
+        }
+
+    machine_tasks = {}
+    for gate in plan["gates"]:
+        for task in gate["tasks"]:
+            machine_tasks[task["id"]] = task
+
+    require(set(machine_tasks) == set(canonical_tasks),
+            "machine-readable task IDs must exactly match canonical task IDs")
+    for tid, expected in canonical_tasks.items():
+        actual = machine_tasks[tid]
+        require(actual.get("title") == expected["title"],
+                f"machine title drift for {tid}: {actual.get('title')!r} != {expected['title']!r}")
+        require(actual.get("status") == expected["status"],
+                f"machine status drift for {tid}: {actual.get('status')!r} != {expected['status']!r}")
+        require(actual.get("dependsOn") == expected["dependsOn"],
+                f"machine dependency drift for {tid}: {actual.get('dependsOn')!r} != {expected['dependsOn']!r}")
+
     print(f"PASS: repository contracts valid; {len(ids)} machine-readable tasks checked")
 
 
