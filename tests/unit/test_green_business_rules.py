@@ -104,7 +104,7 @@ class CompletenessBusinessRulesTests(unittest.TestCase):
         self.assertIsNone(get_path({"a": {}}, "a.b"))
         self.assertFalse(is_present(None))
         self.assertFalse(is_present("   "))
-        self.assertTrue(is_present(""))
+        self.assertFalse(is_present(""))
         self.assertTrue(is_present([]))
         self.assertTrue(is_present({}))
         self.assertEqual(
