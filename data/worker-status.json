@@ -2,13 +2,13 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M04 — Core database schema",
+  "currentTask": "M01 — Authentication",
   "currentGate": "MVP",
-  "lastCompletedTask": "D14 — Demo acceptance",
-  "nextTask": "Implement and verify DPP-only Supabase core schema with PK/FK/check constraints and deny-by-default RLS; then continue dependency-safe MVP tasks while F08 remains deferred.",
-  "message": "D01-D14 are now evidence-backed GREEN. Full demo acceptance passed GitHub Actions run 35389607402 on commit 9d0c20c2bcce06848cdfe263caeb13730c355df4 with artifact 10565675779. F08 remains an external Vercel build-rate-limit blocker and is deferred; independent MVP work continues at M04.",
+  "lastCompletedTask": "M04 — Core database schema",
+  "nextTask": "Implement Supabase Auth client flow and verify all non-interactive acceptance possible; if confirmation/OAuth prevents full acceptance, record M01 BLOCKED and continue with M06/M07/M09/M11/M14.",
+  "message": "M04 is evidence-backed GREEN: Supabase runtime schema verification plus GitHub CI run 35390158548 succeeded. DAVID advances to M01 while F08 remains deferred.",
   "deferredBlockers": [
     "F08 — first verified browser-ready production deployment remains deferred pending Vercel quota/capacity or authorized alternative hosting."
   ],
-  "updatedAt": "2026-09-18T23:10:00+03:00"
+  "updatedAt": "2026-09-18T23:20:00+03:00"
 }

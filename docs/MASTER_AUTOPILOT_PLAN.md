@@ -81,7 +81,7 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | M01 | Authentication | F13 | Sign-up/in/out/reset/session handling works | Auth integration tests | RED |
 | M02 | Organisations / tenants | M01 | Users belong to organisations and active tenant is explicit | DB + integration tests | RED |
 | M03 | RBAC | M01,M02 | Owner/admin/editor/viewer permissions enforced server-side | Authorization test matrix | RED |
-| M04 | Core database schema | F13,F11 | Models/items/passports/orgs/users represented with PK/FK/check constraints | Migration + schema diff | RED |
+| M04 | Core database schema | F13,F11 | Models/items/passports/orgs/users represented with PK/FK/check constraints | Migration + schema diff | GREEN |
 | M05 | Row Level Security | M02,M03,M04 | Cross-tenant reads/writes are denied by database policy | Negative security tests | RED |
 | M06 | Migration workflow | M04 | Reproducible ordered migrations from clean database | Migration replay test | RED |
 | M07 | CSV mapping wizard | M04 | Customer columns map to canonical fields with saved mapping | Integration/E2E test | RED |
@@ -222,3 +222,4 @@ Append evidence here only after verification.
 | 2026-09-18 | D12 | Phone/tablet/desktop screenshot matrix for 8 core demo surfaces PASS in run `35389607402`; artifact `10565675779` contains 24 responsive screenshots | PASS |
 | 2026-09-18 | D13 | Browser mutate→reset replay PASS in run `35389607402`: mutation detected and reset returns to exact known synthetic fixture state | PASS |
 | 2026-09-18 | D14 | Full browser demo acceptance PASS in run `35389607402`, commit `9d0c20c2bcce06848cdfe263caeb13730c355df4`: import→validate→passport→QR, 4/4 steps, zero runtime errors; artifact `10565675779` | PASS |
+| 2026-09-18 | M04 | Supabase migration `dpp_core_schema` applied to project `frhletkiuupgksmgxoxc`; runtime verification confirmed 5 DPP-only core tables, PK/FK/check/unique constraints, tenant-safe composite FKs, RLS enabled, and no `anon`/`authenticated` table grants. Canonical migration `supabase/migrations/20260918231500_dpp_core_schema.sql`; GitHub Actions run `35390158548` on commit `575d5a7e08895aa217ff8749d2764a3533bf0954` SUCCESS including `M04_SCHEMA_CONTRACT_PASS`. | PASS |

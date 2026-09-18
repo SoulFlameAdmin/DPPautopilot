@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-18T23:10:00+03:00",
+  "updatedAt": "2026-09-18T23:20:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -221,8 +221,8 @@
         {
           "id": "M04",
           "title": "Persistent database schema for models/items/passports",
-          "status": "red",
-          "evidence": "Depends on F13 and F11; F13 is resolved, F11 remains partial."
+          "status": "green",
+          "evidence": "Supabase migration dpp_core_schema applied to frhletkiuupgksmgxoxc; 5 DPP core tables with PK/FK/check/unique constraints, RLS and deny-by-default client grants verified. Canonical migration in repo; CI run 35390158548 SUCCESS on 575d5a7e08895aa217ff8749d2764a3533bf0954."
         },
         {
           "id": "M05",
