@@ -1,6 +1,7 @@
 'use strict';
 
 const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
+const { parseBody, bodyErrorResponse } = require('./_request.js');
 
 const CATEGORIES = new Set([
   'portable',
@@ -23,14 +24,6 @@ function bearer(req) {
   return typeof value === 'string' && /^Bearer\s+\S+$/i.test(value) ? value : null;
 }
 
-function parseBody(req) {
-  if (req.body == null || req.body === '') return {};
-  if (typeof req.body === 'object') return req.body;
-  if (typeof req.body !== 'string' || Buffer.byteLength(req.body, 'utf8') > 1024 * 1024) {
-    throw new Error('INVALID_BODY');
-  }
-  return JSON.parse(req.body);
-}
 
 function validUuid(value) {
   return typeof value === 'string' &&
@@ -107,8 +100,9 @@ async function handler(req, res) {
   let body = {};
   try {
     body = parseBody(req);
-  } catch (_) {
-    return send(res, 400, { error: { code: 'INVALID_JSON', message: 'Request body must be valid JSON.' } });
+  } catch (error) {
+    const response = bodyErrorResponse(error);
+    return send(res, response.status, response.body);
   }
 
   try {
