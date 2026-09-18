@@ -16,10 +16,8 @@ function bearer(req){
 }
 
 function mapDatabaseError(data){
-  const code=data&&data.code;
-  if(code==='DP101') return [401,'AUTH_REQUIRED'];
-  if(code==='DP102'||code==='DP103'||code==='DP104') return [403,'FORBIDDEN'];
-  return [502,'UPSTREAM_ERROR'];
+  const mapped=mapSharedDatabaseError('export',data);
+  return [mapped.status,mapped.code,mapped.message];
 }
 
 async function rpc(authorization,env=process.env,fetchImpl=fetch){
@@ -43,10 +41,11 @@ async function rpc(authorization,env=process.env,fetchImpl=fetch){
   let data=null;
   try{data=await response.json();}catch(_){data=null;}
   if(!response.ok){
-    const [status,publicCode]=mapDatabaseError(data);
+    const [status,publicCode,publicMessage]=mapDatabaseError(data);
     const error=new Error(publicCode);
     error.status=status;
     error.publicCode=publicCode;
+    error.publicMessage=publicMessage;
     throw error;
   }
   return data;
@@ -68,8 +67,8 @@ async function handler(req,res){
   }catch(error){
     const status=Number.isInteger(error.status)?error.status:502;
     const code=error.publicCode||error.message||'UPSTREAM_ERROR';
-    const message=status===500?'Server configuration is incomplete.':
-      status>=500?'Database request failed.':code.replace(/_/g,' ').toLowerCase();
+    const message=error.publicMessage||(status===500?'Server configuration is incomplete.':
+      status>=500?'Database request failed.':code.replace(/_/g,' ').toLowerCase());
     return send(res,status,{error:{code,message}});
   }
 }
