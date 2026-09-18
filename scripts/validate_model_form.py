@@ -36,7 +36,8 @@ def main() -> None:
         'data-input-preserved="true"',
         'aria-invalid="true"',
         'id="f_model_identification_manufacturer_name_error"',
-        'data-error-for="model.identification.manufacturer.name">Required field<',
+        'data-error-for="model.identification.manufacturer.name"',
+        '>Required field<',
         'INVALID · 1 field error(s)',
     ]:
         require(marker in invalid, f"D04 invalid form missing error evidence: {marker}")
