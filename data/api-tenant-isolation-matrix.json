@@ -52,7 +52,7 @@
   ],
   "evidence_files": [
     "tests/api/tenant-isolation.test.cjs",
-    "tests/db/test_tenant_isolation_subset.sql"
+    "tests/db/test_tenant_isolation_security_subset.sql"
   ],
   "remaining": [
     "Deployed live HTTP attack suite awaits F08/M01-dependent production/preview path and fully accepted M17-M21 dependencies."
