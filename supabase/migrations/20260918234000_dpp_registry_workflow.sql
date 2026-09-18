@@ -2,6 +2,9 @@
 -- This schema does not claim live connectivity to the EU DPP Registry.
 -- It models a provider-neutral test/live submission lifecycle for later adapters.
 
+alter table public.dpp_passports
+  add constraint dpp_passports_organization_id_id_key unique (organization_id, id);
+
 create table public.dpp_registry_submissions (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.dpp_organizations(id) on delete cascade,
