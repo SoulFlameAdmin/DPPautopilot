@@ -51,8 +51,8 @@
 - Preview/staging uses synthetic or explicitly sanitized pilot data.
 - Production data may only be processed after tenant isolation, RBAC, privacy inventory, retention rules, backups and recovery tests satisfy the master plan.
 
-## Current binding state (2026-09-17)
+## Current binding state (2026-09-18)
 
 - GitHub canonical repo: `SoulFlameAdmin/DPPautopilot`.
-- Vercel binding: not yet established. Existing `dpp` project points to another repository and is not an allowed substitute.
-- Supabase binding: not yet established. Existing `soulflame-twins` project is not an allowed substitute without explicit verification.
+- Vercel delivery path: established through the documented controlled deployment mirror. F08 production deployment remains externally blocked by the Vercel build-rate limit; the mirror is delivery-only and does not replace the canonical repository.
+- Supabase binding: project `frhletkiuupgksmgxoxc` is explicitly bound to DPP Autopilot through the canonical `dpp_app_binding` migration and DPP-only namespace rules. DPP client access remains deny-by-default until task-specific policies are introduced and tested.
