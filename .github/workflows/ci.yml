@@ -143,6 +143,10 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_green_database_integrations.sql
+      - name: Run T08 registry reliability subset
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_registry_reliability_subset.sql
       - name: R12 isolated logical backup restore drill
         env:
           PGPASSWORD: postgres
