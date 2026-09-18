@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="bg">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DPP Autopilot · Recovery</title>
+<style>:root{--bg:#07090d;--p:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--green:#39d98a;--red:#ff6677}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:720px;margin:auto;padding:24px}.card{border:1px solid var(--line);background:var(--p);border-radius:16px;padding:18px;margin:14px 0}input,button{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:#111820;color:var(--text)}button{margin-top:10px;cursor:pointer;font-weight:700}.muted{color:var(--muted)}.ok{color:var(--green)}.bad{color:var(--red)}</style></head>
+<body data-recovery-ready="false" data-recovery-session="missing" data-password-update="idle">
+<main class="shell"><a href="/demo/auth.html">← Authentication</a><h1>M01 · Password recovery completion</h1>
+<p class="muted">This page accepts only a valid Supabase recovery session from the URL fragment. The token stays in memory and is never persisted.</p>
+<section class="card"><input id="password" type="password" autocomplete="new-password" minlength="8" placeholder="New password"><button id="save">Set new password</button></section>
+<section class="card"><pre id="status">Checking recovery session…</pre></section>
+</main>
+<script>
+let cfg=null,accessToken=null;
+function parseHash(){return Object.fromEntries(new URLSearchParams(location.hash.replace(/^#/,'')))}
+function setState(msg,cls=''){status.className=cls;status.textContent=msg}
+async function init(){
+ cfg=await fetch('/data/auth-config.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('auth config unavailable');return r.json()});
+ const h=parseHash();
+ accessToken=h.access_token||null;
+ const isRecovery=h.type==='recovery' && !!accessToken;
+ document.body.dataset.recoverySession=isRecovery?'valid':'missing';
+ document.body.dataset.recoveryReady='true';
+ setState(isRecovery?'Recovery session ready. Enter a new password.':'Missing or invalid recovery session.',isRecovery?'ok':'bad');
+}
+save.onclick=async()=>{
+ if(!accessToken){document.body.dataset.passwordUpdate='blocked';return setState('Recovery session required.','bad')}
+ if(password.value.length<8){document.body.dataset.passwordUpdate='blocked';return setState('Password must be at least 8 characters.','bad')}
+ try{
+  const r=await fetch(cfg.supabaseUrl+'/auth/v1/user',{
+   method:'PATCH',
+   headers:{'apikey':cfg.publishableKey,'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},
+   body:JSON.stringify({password:password.value})
+  });
+  const body=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(body.msg||body.message||('HTTP '+r.status));
+  accessToken=null;
+  history.replaceState(null,'',location.pathname);
+  document.body.dataset.passwordUpdate='success';
+  document.body.dataset.recoverySession='consumed';
+  setState('Password updated successfully. Recovery token cleared from the URL.','ok');
+ }catch(e){document.body.dataset.passwordUpdate='failed';setState(e.message,'bad')}
+};
+init().catch(e=>{document.body.dataset.recoveryReady='true';setState(e.message,'bad')});
+</script></body></html>
