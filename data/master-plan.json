@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T00:52:00+03:00",
+  "updatedAt": "2026-09-19T00:54:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -400,7 +400,7 @@
           "id": "R03",
           "title": "TLS/security headers and secure defaults",
           "status": "red",
-          "evidence": "Requires production deployment."
+          "evidence": "PARTIAL: M20 DB boundary negative validation PASS in bound Supabase rollback suite and full CI 35398725407; rejects malformed JSON shapes, invalid counters/row numbers, disallowed category/lifecycle, and oversize identifiers. R03 remains RED pending M13 and M17-M20 server/file/API coverage."
         },
         {
           "id": "R04",
