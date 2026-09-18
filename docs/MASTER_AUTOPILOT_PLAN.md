@@ -179,7 +179,7 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | X03 | BMS/telemetry ingestion | X01 | Authenticated ingestion with validation/idempotency | Load/integration tests | RED |
 | X04 | Supplier portal | C15 | Scoped supplier access and evidence requests | RBAC/E2E tests | RED |
 | X05 | Missing-data automation | X04 | Rules create deduplicated reminders with audit trail | Integration tests | RED |
-| X06 | AI mapping assistant | M07 | Suggestions are reviewable, non-destructive and confidence/evidence aware | Evaluation set | RED |
+| X06 | AI mapping assistant | M07 | Suggestions are reviewable, non-destructive and confidence/evidence aware | Evaluation set | GREEN |
 | X07 | Manufacturing-scale bulk generation | T07 | Contracted throughput target met | Load report | RED |
 | X08 | Webhooks/events | M17-M23 | Signed/retryable/idempotent events | Contract/reliability tests | RED |
 | X09 | Analytics | C15 | Tenant-safe operational metrics without leaking restricted data | Security/data tests | RED |
@@ -237,3 +237,4 @@ Append evidence here only after verification.
 | 2026-09-18 | R11 | Supabase org `touhddzpjdlrzmykcywf` verified on Free plan; backup scope, production paid/manual backup requirement, target RPO <=24h, target RTO <=8h, Storage-object separation and PITR non-claim documented. R11 validator PASS in run `35393276568`. | PASS |
 | 2026-09-18 | R12 | CI created synthetic DPP data, produced PostgreSQL 17 custom-format logical backup, restored into isolated `dpp_restore` database, and verified row/link integrity, binding row and RLS. `R12_RESTORE_DRILL_PASS` in full run `35393276568`. | PASS |
 | 2026-09-18 | R14 | All GitHub Actions pinned to immutable official commit SHAs; CI Python dependencies exact-version pinned; `pip-audit==2.10.1` audit PASS and supply-chain validator PASS in run `35393276568`. | PASS |
+| 2026-09-18 | X06 | Deterministic mapping assistant evaluated on 12-case held-out set: 10/10 positive mappings correct, 2/2 unknown columns left unsuggested, 0 false positives/misses. Browser review UI proves suggestions begin unapplied, expose confidence/evidence and require explicit Apply. Full CI run `35393690587` on `c3e7ca504eaf5ee7ae36f6cfe134404f0910b8bc` SUCCESS; artifact `10566727334`. | PASS |

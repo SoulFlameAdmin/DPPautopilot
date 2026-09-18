@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-18T23:50:00+03:00",
+  "updatedAt": "2026-09-18T23:54:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -533,8 +533,8 @@
         {
           "id": "X06",
           "title": "AI-assisted mapping from customer schemas",
-          "status": "red",
-          "evidence": "Post-production scope."
+          "status": "green",
+          "evidence": "Evaluation + browser review PASS in run 35393690587, artifact 10566727334; 10 positive correct, 2 unknown untouched, 0 false positives/misses, default applied-count=0."
         },
         {
           "id": "X07",

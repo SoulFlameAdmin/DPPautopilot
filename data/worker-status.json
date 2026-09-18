@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "X06 — AI mapping assistant",
+  "currentTask": "M01 — Authentication acceptance unblock attempt",
   "currentGate": "MVP",
-  "lastCompletedTask": "R14 — Dependency / supply-chain checks",
-  "nextTask": "Implement reviewable, non-destructive mapping suggestions with confidence/evidence and deterministic evaluation set; keep M01/F08 blockers deferred.",
-  "message": "M20/R01/R11/R12/R14 are evidence-backed GREEN from full CI run 35393276568; UI artifact 10566726582. Remaining MVP/API/RBAC/security chains are blocked by M01/M03 or F08, so DAVID advances to dependency-safe X06 (depends only on GREEN M07).",
+  "lastCompletedTask": "X06 — AI mapping assistant",
+  "nextTask": "Attempt normal Supabase email-confirmation flow using a dedicated test alias only if it can be safely isolated; do not bypass confirmation/OAuth or alter auth security settings. If still blocked, no dependency-safe RED task remains.",
+  "message": "X06 is evidence-backed GREEN. All remaining RED dependency chains currently converge on M01 or F08; DAVID makes a normal email-confirmation M01 acceptance attempt without bypassing auth.",
   "deferredBlockers": [
     "F08 — first verified browser-ready production deployment remains deferred pending Vercel quota/capacity or authorized alternative hosting.",
     "M01 — full authentication acceptance requires a confirmed-email inbox or interactive Google OAuth session; implementation and non-interactive browser/contract tests already pass."
   ],
-  "updatedAt": "2026-09-18T23:50:00+03:00"
+  "updatedAt": "2026-09-18T23:54:00+03:00"
 }
