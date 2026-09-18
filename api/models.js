@@ -1,5 +1,7 @@
 'use strict';
 
+const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
+
 const CATEGORIES = new Set([
   'portable',
   'light_means_of_transport',
@@ -50,13 +52,8 @@ function validateCreate(body) {
 }
 
 function mapDatabaseError(data) {
-  const code = data && data.code;
-  if (code === 'DP101') return [401, 'AUTH_REQUIRED'];
-  if (code === 'DP102' || code === 'DP103' || code === 'DP104') return [403, 'FORBIDDEN'];
-  if (code === 'DP201' || code === 'DP202' || code === 'DP203' || code === 'DP204') return [422, 'VALIDATION_ERROR'];
-  if (code === 'DP205') return [404, 'MODEL_NOT_FOUND'];
-  if (code === '23505') return [409, 'MODEL_CONFLICT'];
-  return [502, 'UPSTREAM_ERROR'];
+  const mapped = mapSharedDatabaseError('models', data);
+  return [mapped.status, mapped.code, mapped.message];
 }
 
 async function rpc(name, payload, authorization, env = process.env, fetchImpl = fetch) {
@@ -87,10 +84,11 @@ async function rpc(name, payload, authorization, env = process.env, fetchImpl = 
   }
 
   if (!response.ok) {
-    const [status, publicCode] = mapDatabaseError(data);
+    const [status, publicCode, publicMessage] = mapDatabaseError(data);
     const error = new Error(publicCode);
     error.status = status;
     error.publicCode = publicCode;
+    error.publicMessage = publicMessage;
     throw error;
   }
   return data;
@@ -163,11 +161,11 @@ async function handler(req, res) {
   } catch (error) {
     const status = Number.isInteger(error.status) ? error.status : 502;
     const code = error.publicCode || error.message || 'UPSTREAM_ERROR';
-    const message = status === 500
+    const message = error.publicMessage || (status === 500
       ? 'Server configuration is incomplete.'
       : status >= 500
         ? 'Database request failed.'
-        : code.replace(/_/g, ' ').toLowerCase();
+        : code.replace(/_/g, ' ').toLowerCase());
     return send(res, status, { error: { code, message } });
   }
 }
