@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T01:13:00+03:00",
+  "updatedAt": "2026-09-19T01:16:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -210,13 +210,13 @@
           "id": "M02",
           "title": "Multi-organisation data isolation",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "PARTIAL: explicit active tenant context with membership FK; bound Supabase M02/M03 matrix PASS and full CI 35400537746 SUCCESS. Remains RED until M01 auth acceptance + app/API consumption."
         },
         {
           "id": "M03",
           "title": "Role-based access control",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "PARTIAL: server-side owner/admin/editor/viewer role assertion over active tenant; bound Supabase matrix PASS and full CI 35400537746 SUCCESS. Remains RED until M01/M02 accepted end-to-end."
         },
         {
           "id": "M04",

@@ -17,3 +17,13 @@ Implemented:
 Integration coverage exercises owner/admin/editor/viewer behavior, cross-tenant selection denial, insufficient-role denial and missing-auth denial.
 
 M02 and M03 remain RED until M01 authentication is fully accepted and the application/API consumes this tenant/RBAC contract end-to-end.
+
+## Evidence — 2026-09-19
+
+- Bound Supabase project `frhletkiuupgksmgxoxc`: explicit rollback integration matrix returned `M02_M03_TENANT_RBAC_SUBSET_PASS`.
+- Owner/admin/editor/viewer role behavior, non-member active-tenant denial, insufficient-role denial and missing-auth denial all passed.
+- GitHub Actions run `35400537746` on `f6d7a964d6f2482f1701c86d36f54262455dbdb7`: SUCCESS.
+- Clean PostgreSQL replay step `Run M02 M03 tenant RBAC subset`: PASS.
+- Browser smoke: PASS; artifact `10569034799`.
+- M02/M03 remain RED because M01 runtime recovery completion is still externally blocked and app/API consumption has not yet been accepted.
+
