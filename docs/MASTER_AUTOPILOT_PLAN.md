@@ -1,7 +1,7 @@
 # DPP Autopilot — MASTER AUTOPILOT PLAN
 
 **Source of truth:** this file.  
-**Plan version:** 2.4  
+**Plan version:** 2.5  
 **Frozen:** 2026-09-17  
 **Target:** evidence-backed production readiness, not percentage-by-assumption.
 
@@ -24,7 +24,7 @@
 
 ## Current implementation audit
 
-At freeze time the repository was a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. During execution the repository gained a canonical master plan, environment policy, requirements traceability contract, machine-readable field catalog, security baseline, repository/field/security validators, `.gitignore`, GitHub Actions CI, browser-rendered dashboard smoke tests with screenshot artifacts, blocker evidence documents, a verified Supabase DPP binding marker, and a documented Vercel deployment-mirror path. D01 now provides the tested dashboard/navigation shell and visible stage boundaries. The project still has no authenticated DPP users, production DPP database schema/API layer, or successful DPP Autopilot Vercel production deployment.
+At freeze time the repository was a static prototype: `index.html`, `vercel.json`, `README.md`, `data/master-plan.json`, and `data/worker-status.json`. During execution the repository gained a canonical master plan, environment policy, requirements traceability contract, machine-readable field catalog, security baseline, repository/field/security validators, `.gitignore`, GitHub Actions CI, browser-rendered dashboard smoke tests with screenshot artifacts, blocker evidence documents, a verified Supabase DPP binding marker, and a documented Vercel deployment-mirror path. D01-D14 now provide a fully tested synthetic demo journey: dashboard/navigation, fixture/import, model/item forms, public passport, deterministic identifiers, scannable QR, catalog-derived completeness/warnings, model/item separation, responsive evidence, reset/replay and end-to-end demo acceptance. The project still has no authenticated DPP users, production DPP database schema/API layer, or successful DPP Autopilot Vercel production deployment.
 
 ## Product scope
 
@@ -60,19 +60,19 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | ID | Task | Depends on | Acceptance criteria | Evidence required | Status |
 |---|---|---|---|---|---|
 | D01 | Product dashboard / navigation | F09 | Dashboard usable with clear Demo/MVP/Production boundaries | UI smoke test + screenshots | GREEN |
-| D02 | Realistic sample battery dataset | F11 | Sample model/items cover required demo fields and are explicitly synthetic | Fixture validation test | RED |
-| D03 | CSV import demo | D02 | File can be loaded, columns previewed and mapped without backend | Browser test fixture | RED |
-| D04 | Battery model form | D02 | Required model fields validate and errors are visible | Form tests | RED |
-| D05 | Battery instance form | D04 | Item fields link to model and validate identifiers/status | Form tests | RED |
-| D06 | Public passport view | D04,D05 | Stable route renders public-safe passport fields | E2E route test | RED |
-| D07 | Unique identifier generation | D05 | IDs are deterministic/unique per defined strategy and collision tested | Unit tests | RED |
-| D08 | QR/data carrier | D06,D07 | QR resolves to exact passport URL and is scannable | E2E + scan evidence | RED |
-| D09 | Completeness score | D04,D05,F11 | Score derives from defined field requirements | Unit tests | RED |
-| D10 | Missing-field warnings | D09 | Missing/invalid fields show actionable messages | UI tests | RED |
-| D11 | Model vs item data separation | D04,D05 | UI and data structures clearly separate shared/model and instance data | Unit/UI tests | RED |
-| D12 | Responsive demo | D01-D11 | Core flows pass phone/tablet/desktop viewports | Responsive E2E screenshots | RED |
-| D13 | Demo reset/replay | D02-D12 | Reset returns app to known fixture state | E2E test | RED |
-| D14 | Demo acceptance | D01-D13 | Create/import -> validate -> passport -> QR completes without console/runtime error | Recorded E2E evidence | RED |
+| D02 | Realistic sample battery dataset | F11 | Sample model/items cover required demo fields and are explicitly synthetic | Fixture validation test | GREEN |
+| D03 | CSV import demo | D02 | File can be loaded, columns previewed and mapped without backend | Browser test fixture | GREEN |
+| D04 | Battery model form | D02 | Required model fields validate and errors are visible | Form tests | GREEN |
+| D05 | Battery instance form | D04 | Item fields link to model and validate identifiers/status | Form tests | GREEN |
+| D06 | Public passport view | D04,D05 | Stable route renders public-safe passport fields | E2E route test | GREEN |
+| D07 | Unique identifier generation | D05 | IDs are deterministic/unique per defined strategy and collision tested | Unit tests | GREEN |
+| D08 | QR/data carrier | D06,D07 | QR resolves to exact passport URL and is scannable | E2E + scan evidence | GREEN |
+| D09 | Completeness score | D04,D05,F11 | Score derives from defined field requirements | Unit tests | GREEN |
+| D10 | Missing-field warnings | D09 | Missing/invalid fields show actionable messages | UI tests | GREEN |
+| D11 | Model vs item data separation | D04,D05 | UI and data structures clearly separate shared/model and instance data | Unit/UI tests | GREEN |
+| D12 | Responsive demo | D01-D11 | Core flows pass phone/tablet/desktop viewports | Responsive E2E screenshots | GREEN |
+| D13 | Demo reset/replay | D02-D12 | Reset returns app to known fixture state | E2E test | GREEN |
+| D14 | Demo acceptance | D01-D13 | Create/import -> validate -> passport -> QR completes without console/runtime error | Recorded E2E evidence | GREEN |
 
 # MVP / DATA / AUTH / API
 
@@ -209,3 +209,16 @@ Append evidence here only after verification.
 | 2026-09-17 | F13 | Migration `bind_dpp_autopilot_namespace` applied to Supabase project `frhletkiuupgksmgxoxc`; `public.dpp_app_binding` verified with one DPP binding row, RLS enabled, anon/authenticated privileges revoked | PASS |
 | 2026-09-17 | F14 | `.gitignore`, security hygiene scanner and security baseline committed; CI PASS on `5747153bc6b94589a6e805e9d8790dd6e304654c` | PASS |
 | 2026-09-17 | D01 | Bulgarian burger menu with `Етапи`, full-screen plan, DAVID status and five visible product boundaries implemented in `index.html`; browser smoke PASS and screenshot artifact `10516670805` in run `35265447807` | PASS |
+| 2026-09-18 | D02 | `data/sample-battery.json` synthetic fixture validation PASS in GitHub Actions run `35267233610`, commit `5ea7209b88e22cd806c027f50e276f7cc41aad4d` | PASS |
+| 2026-09-18 | D03 | CSV import preview/mapping browser assertions PASS in run `35267233610`; UI evidence artifact `10517128357` | PASS |
+| 2026-09-18 | D04 | Catalog-driven battery model form positive/negative browser validation PASS in run `35267233610`; artifact `10517128357` | PASS |
+| 2026-09-18 | D05 | Individual item form model-link/identifier/lifecycle browser validation PASS in run `35267233610`; artifact `10517128357` | PASS |
+| 2026-09-18 | D06 | Public passport browser route/privacy assertions PASS in run `35267233610`; restricted markers excluded and missing identifier deterministic | PASS |
+| 2026-09-18 | D07 | Deterministic identifier tests PASS in run `35267233610`: fixture match, round-trip, 10,000 IDs with zero collisions, invalid inputs rejected | PASS |
+| 2026-09-18 | D08 | Real QR generation + `zbarimg` scan of generated and embedded UI carrier + exact URL comparison + HTTP 200 route PASS in run `35388892927`, artifact `10564414632` | PASS |
+| 2026-09-18 | D09 | Catalog-driven completeness unit/browser tests PASS in run `35389607402`: complete fixture = 100%, deterministic required-field removal lowers score | PASS |
+| 2026-09-18 | D10 | Missing-field browser warning PASS in run `35389607402`: exact field path, regulatory source and actionable UI target rendered | PASS |
+| 2026-09-18 | D11 | Model/item separation browser assertions PASS in run `35389607402`: canonical model/item path sets are disjoint with zero cross-level leakage | PASS |
+| 2026-09-18 | D12 | Phone/tablet/desktop screenshot matrix for 8 core demo surfaces PASS in run `35389607402`; artifact `10565675779` contains 24 responsive screenshots | PASS |
+| 2026-09-18 | D13 | Browser mutate→reset replay PASS in run `35389607402`: mutation detected and reset returns to exact known synthetic fixture state | PASS |
+| 2026-09-18 | D14 | Full browser demo acceptance PASS in run `35389607402`, commit `9d0c20c2bcce06848cdfe263caeb13730c355df4`: import→validate→passport→QR, 4/4 steps, zero runtime errors; artifact `10565675779` | PASS |

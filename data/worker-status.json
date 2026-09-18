@@ -2,13 +2,13 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "D01 — Create DPP Autopilot landing/dashboard",
-  "currentGate": "DEMO",
-  "lastCompletedTask": "F08 Attempt 08 — Supabase fallback limits verified with production-side HTTP tests",
-  "nextTask": "Build and test D01, then continue D02-D14 in dependency order while F08 remains externally blocked; periodically recheck F08 without stopping independent work",
-  "message": "F08 remains BLOCKED and must not stall independent development. Attempt 08 rechecked Vercel at 2026-09-17 22:19:52 Europe/Sofia: both DPP projects still have zero deployments and the controlled mirror remains build-rate-limit. A DPP-only Supabase Edge fallback and public Storage bucket were implemented and tested through pg_net: JSON endpoints/objects return real HTTP 200, but current Supabase platform behavior and documentation confirm HTML/XHTML is intentionally served as text/plain, so it cannot be accepted as browser-ready F08 hosting. DAVID should continue D01-D14 while periodically rechecking F08. Evidence: docs/BINDING_ATTEMPT_08.md.",
+  "currentTask": "M04 — Core database schema",
+  "currentGate": "MVP",
+  "lastCompletedTask": "D14 — Demo acceptance",
+  "nextTask": "Implement and verify DPP-only Supabase core schema with PK/FK/check constraints and deny-by-default RLS; then continue dependency-safe MVP tasks while F08 remains deferred.",
+  "message": "D01-D14 are now evidence-backed GREEN. Full demo acceptance passed GitHub Actions run 35389607402 on commit 9d0c20c2bcce06848cdfe263caeb13730c355df4 with artifact 10565675779. F08 remains an external Vercel build-rate-limit blocker and is deferred; independent MVP work continues at M04.",
   "deferredBlockers": [
-    "F08 — first verified browser-ready production deployment: Vercel build-rate-limit; Supabase HTML hosting invalid because HTML/XHTML is forced to text/plain"
+    "F08 — first verified browser-ready production deployment remains deferred pending Vercel quota/capacity or authorized alternative hosting."
   ],
-  "updatedAt": "2026-09-17T22:19:52+03:00"
+  "updatedAt": "2026-09-18T23:10:00+03:00"
 }

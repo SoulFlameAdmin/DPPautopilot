@@ -1,8 +1,8 @@
 {
   "project": "DPP Autopilot",
-  "version": "MASTER PLAN v2.3",
+  "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-17T22:05:00+03:00",
+  "updatedAt": "2026-09-18T23:10:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -16,20 +16,90 @@
       "purpose": "Build the engineering and compliance base before product features.",
       "exitCriteria": "Repository, deployment binding, CI, environment policy, traceability and data platform bindings are verified.",
       "tasks": [
-        {"id":"F01","title":"Verify canonical GitHub repository","status":"green","evidence":"GitHub connector verified SoulFlameAdmin/DPPautopilot, main, with admin/write access."},
-        {"id":"F02","title":"Inventory current code and configuration","status":"green","evidence":"Initial repository tree audited and recorded in docs/MASTER_AUTOPILOT_PLAN.md."},
-        {"id":"F03","title":"Freeze canonical master plan","status":"green","evidence":"docs/MASTER_AUTOPILOT_PLAN.md v2.3 is the declared source of truth."},
-        {"id":"F04","title":"Keep machine-readable progress dashboard","status":"yellow","evidence":"data/master-plan.json is CI-validated; browser/dashboard smoke test still required."},
-        {"id":"F05","title":"Keep DAVID worker status contract","status":"green","evidence":"scripts/validate_repo.py validates required worker fields; GitHub Actions PASS."},
-        {"id":"F06","title":"Define product scope and target architecture","status":"green","evidence":"Scope and architecture are documented in the canonical master plan."},
-        {"id":"F07","title":"Bind Vercel delivery path","status":"green","evidence":"Controlled deployment mirror SoulFlameAdmin/dpp is linked to Vercel project dpp. Mirror commit 748806ae42aa5e958a993137695818036b1022b6 received a Vercel commit status, proving the integration receives the expected commit. See docs/BINDING_ATTEMPT_03.md."},
-        {"id":"F08","title":"Verify first production deployment","status":"blocked","evidence":"Vercel status on mirror commit 748806ae42aa5e958a993137695818036b1022b6 failed with build-rate-limit before a deployment object was created."},
-        {"id":"F09","title":"Add CI baseline","status":"green","evidence":"GitHub Actions validate check PASS on commit 9f3892b26176da8a9aac8063f3f528906840d18c."},
-        {"id":"F10","title":"Define dev / preview / production environment policy","status":"green","evidence":"docs/ENVIRONMENT_POLICY.md committed; CI PASS on eb40704890ececa3df3e2f519962e82d0570c39e."},
-        {"id":"F11","title":"Requirements traceability matrix","status":"yellow","evidence":"docs/REQUIREMENTS_TRACEABILITY.md maps Article 77/78 and Annex XIII baseline; concrete schema/API field crosswalk is not implemented yet."},
-        {"id":"F12","title":"Enforce GREEN evidence rule","status":"green","evidence":"scripts/validate_repo.py rejects GREEN tasks without concrete evidence; passing GitHub Actions checks."},
-        {"id":"F13","title":"Bind verified Supabase DPP data namespace","status":"green","evidence":"Migration bind_dpp_autopilot_namespace applied to Supabase project frhletkiuupgksmgxoxc; public.dpp_app_binding verified with one SoulFlameAdmin/DPPautopilot binding row, RLS enabled, and anon/authenticated privileges revoked."},
-        {"id":"F14","title":"Baseline repository security hygiene","status":"green","evidence":".gitignore, scripts/security_hygiene.py and docs/SECURITY_BASELINE.md committed; CI PASS on 5747153bc6b94589a6e805e9d8790dd6e304654c."}
+        {
+          "id": "F01",
+          "title": "Verify canonical GitHub repository",
+          "status": "green",
+          "evidence": "GitHub connector verified SoulFlameAdmin/DPPautopilot, main, with admin/write access."
+        },
+        {
+          "id": "F02",
+          "title": "Inventory current code and configuration",
+          "status": "green",
+          "evidence": "Initial repository tree audited and recorded in docs/MASTER_AUTOPILOT_PLAN.md."
+        },
+        {
+          "id": "F03",
+          "title": "Freeze canonical master plan",
+          "status": "green",
+          "evidence": "docs/MASTER_AUTOPILOT_PLAN.md v2.3 is the declared source of truth."
+        },
+        {
+          "id": "F04",
+          "title": "Keep machine-readable progress dashboard",
+          "status": "green",
+          "evidence": "data/master-plan.json is CI-validated and dashboard/browser smoke PASS; canonical markdown source-of-truth is v2.5."
+        },
+        {
+          "id": "F05",
+          "title": "Keep DAVID worker status contract",
+          "status": "green",
+          "evidence": "scripts/validate_repo.py validates required worker fields; GitHub Actions PASS."
+        },
+        {
+          "id": "F06",
+          "title": "Define product scope and target architecture",
+          "status": "green",
+          "evidence": "Scope and architecture are documented in the canonical master plan."
+        },
+        {
+          "id": "F07",
+          "title": "Bind Vercel delivery path",
+          "status": "green",
+          "evidence": "Controlled deployment mirror SoulFlameAdmin/dpp is linked to Vercel project dpp. Mirror commit 748806ae42aa5e958a993137695818036b1022b6 received a Vercel commit status, proving the integration receives the expected commit. See docs/BINDING_ATTEMPT_03.md."
+        },
+        {
+          "id": "F08",
+          "title": "Verify first production deployment",
+          "status": "blocked",
+          "evidence": "Vercel status on mirror commit 748806ae42aa5e958a993137695818036b1022b6 failed with build-rate-limit before a deployment object was created."
+        },
+        {
+          "id": "F09",
+          "title": "Add CI baseline",
+          "status": "green",
+          "evidence": "GitHub Actions validate check PASS on commit 9f3892b26176da8a9aac8063f3f528906840d18c."
+        },
+        {
+          "id": "F10",
+          "title": "Define dev / preview / production environment policy",
+          "status": "green",
+          "evidence": "docs/ENVIRONMENT_POLICY.md committed; CI PASS on eb40704890ececa3df3e2f519962e82d0570c39e."
+        },
+        {
+          "id": "F11",
+          "title": "Requirements traceability matrix",
+          "status": "green",
+          "evidence": "docs/REQUIREMENTS_TRACEABILITY.md + data/dpp-field-catalog.json + CI coverage validator map requirements to schema/API/UI targets."
+        },
+        {
+          "id": "F12",
+          "title": "Enforce GREEN evidence rule",
+          "status": "green",
+          "evidence": "scripts/validate_repo.py rejects GREEN tasks without concrete evidence; passing GitHub Actions checks."
+        },
+        {
+          "id": "F13",
+          "title": "Bind verified Supabase DPP data namespace",
+          "status": "green",
+          "evidence": "Migration bind_dpp_autopilot_namespace applied to Supabase project frhletkiuupgksmgxoxc; public.dpp_app_binding verified with one SoulFlameAdmin/DPPautopilot binding row, RLS enabled, and anon/authenticated privileges revoked."
+        },
+        {
+          "id": "F14",
+          "title": "Baseline repository security hygiene",
+          "status": "green",
+          "evidence": ".gitignore, scripts/security_hygiene.py and docs/SECURITY_BASELINE.md committed; CI PASS on 5747153bc6b94589a6e805e9d8790dd6e304654c."
+        }
       ]
     },
     {
@@ -38,20 +108,90 @@
       "purpose": "A polished, believable product demonstration that explains the value in minutes.",
       "exitCriteria": "A prospect can create/import a sample battery, view a passport, scan a QR code and understand missing compliance data.",
       "tasks": [
-        {"id":"D01","title":"Create DPP Autopilot landing/dashboard","status":"red","evidence":"Not started under v2.3 acceptance criteria."},
-        {"id":"D02","title":"Create sample battery dataset","status":"red","evidence":"Not started."},
-        {"id":"D03","title":"CSV/Excel-style import demo","status":"red","evidence":"Not started."},
-        {"id":"D04","title":"Battery model form","status":"red","evidence":"Not started."},
-        {"id":"D05","title":"Individual battery instance form","status":"red","evidence":"Not started."},
-        {"id":"D06","title":"Public battery passport page","status":"red","evidence":"Not started."},
-        {"id":"D07","title":"Generate unique product/battery identifier","status":"red","evidence":"Not started."},
-        {"id":"D08","title":"Generate QR/data carrier linking to passport","status":"red","evidence":"Not started."},
-        {"id":"D09","title":"Show data completeness score","status":"red","evidence":"Not started."},
-        {"id":"D10","title":"Show missing-field warnings","status":"red","evidence":"Not started."},
-        {"id":"D11","title":"Show model-level vs item-level data separation","status":"red","evidence":"Not started."},
-        {"id":"D12","title":"Responsive phone/tablet/desktop demo","status":"red","evidence":"Not started."},
-        {"id":"D13","title":"Demo reset / sample replay flow","status":"red","evidence":"Not started."},
-        {"id":"D14","title":"Demo acceptance test and screenshots","status":"red","evidence":"Not started."}
+        {
+          "id": "D01",
+          "title": "Create DPP Autopilot landing/dashboard",
+          "status": "green",
+          "evidence": "Bulgarian dashboard/navigation browser smoke PASS with screenshot evidence."
+        },
+        {
+          "id": "D02",
+          "title": "Create sample battery dataset",
+          "status": "green",
+          "evidence": "Synthetic battery fixture validation PASS in run 35267233610."
+        },
+        {
+          "id": "D03",
+          "title": "CSV/Excel-style import demo",
+          "status": "green",
+          "evidence": "CSV import preview and mapping browser test PASS in run 35267233610, artifact 10517128357."
+        },
+        {
+          "id": "D04",
+          "title": "Battery model form",
+          "status": "green",
+          "evidence": "Catalog-driven model form positive/negative validation PASS in run 35267233610."
+        },
+        {
+          "id": "D05",
+          "title": "Individual battery instance form",
+          "status": "green",
+          "evidence": "Item form linkage/identifier/lifecycle validation PASS in run 35267233610."
+        },
+        {
+          "id": "D06",
+          "title": "Public battery passport page",
+          "status": "green",
+          "evidence": "Public-safe passport route/privacy browser test PASS in run 35267233610."
+        },
+        {
+          "id": "D07",
+          "title": "Generate unique product/battery identifier",
+          "status": "green",
+          "evidence": "Identifier determinism/round-trip/10,000 collision test PASS in run 35267233610."
+        },
+        {
+          "id": "D08",
+          "title": "Generate QR/data carrier linking to passport",
+          "status": "green",
+          "evidence": "Generated and embedded QR both scan to exact passport URL; route HTTP 200 PASS in run 35388892927, artifact 10564414632."
+        },
+        {
+          "id": "D09",
+          "title": "Show data completeness score",
+          "status": "green",
+          "evidence": "Catalog-driven completeness unit/browser tests PASS in run 35389607402."
+        },
+        {
+          "id": "D10",
+          "title": "Show missing-field warnings",
+          "status": "green",
+          "evidence": "Actionable missing-field warnings browser test PASS in run 35389607402."
+        },
+        {
+          "id": "D11",
+          "title": "Show model-level vs item-level data separation",
+          "status": "green",
+          "evidence": "Model/item path separation browser test PASS in run 35389607402."
+        },
+        {
+          "id": "D12",
+          "title": "Responsive phone/tablet/desktop demo",
+          "status": "green",
+          "evidence": "24 responsive screenshots across phone/tablet/desktop PASS in run 35389607402, artifact 10565675779."
+        },
+        {
+          "id": "D13",
+          "title": "Demo reset / sample replay flow",
+          "status": "green",
+          "evidence": "Mutate/reset replay browser test PASS in run 35389607402."
+        },
+        {
+          "id": "D14",
+          "title": "Demo acceptance test and screenshots",
+          "status": "green",
+          "evidence": "Full import→validate→passport→QR acceptance, 4/4, zero runtime errors PASS in run 35389607402, artifact 10565675779."
+        }
       ]
     },
     {
@@ -60,24 +200,114 @@
       "purpose": "Pilot-ready system using real customer data in a controlled environment.",
       "exitCriteria": "A pilot customer can onboard, import real battery data, validate it, manage passports, control access and produce an auditable registry-ready record.",
       "tasks": [
-        {"id":"M01","title":"Add authenticated organisations and users","status":"red","evidence":"Not started; verified Supabase namespace is now available."},
-        {"id":"M02","title":"Multi-organisation data isolation","status":"red","evidence":"Not started."},
-        {"id":"M03","title":"Role-based access control","status":"red","evidence":"Not started."},
-        {"id":"M04","title":"Persistent database schema for models/items/passports","status":"red","evidence":"Depends on F13 and F11; F13 is resolved, F11 remains partial."},
-        {"id":"M05","title":"Import CSV with mapping wizard","status":"red","evidence":"Not started."},
-        {"id":"M06","title":"Import validation and row-level errors","status":"red","evidence":"Not started."},
-        {"id":"M07","title":"Annex XIII data model mapping","status":"red","evidence":"Requirements baseline exists; implementation not started."},
-        {"id":"M08","title":"Access-right categories for passport data","status":"red","evidence":"Not started."},
-        {"id":"M09","title":"Version history for passport changes","status":"red","evidence":"Not started."},
-        {"id":"M10","title":"Immutable audit log for critical actions","status":"red","evidence":"Not started."},
-        {"id":"M11","title":"Document/evidence attachments","status":"red","evidence":"Not started."},
-        {"id":"M12","title":"Unique identifiers and lifecycle status","status":"red","evidence":"Not started."},
-        {"id":"M13","title":"DPP Registry test-environment workflow","status":"red","evidence":"Official testing environment verified; product integration not started."},
-        {"id":"M14","title":"Registry registration status tracking","status":"red","evidence":"Not started."},
-        {"id":"M15","title":"API endpoints for battery/passport CRUD","status":"red","evidence":"Not started."},
-        {"id":"M16","title":"Export customer data and evidence package","status":"red","evidence":"Not started."},
-        {"id":"M17","title":"Pilot onboarding checklist","status":"red","evidence":"Not started."},
-        {"id":"M18","title":"MVP end-to-end acceptance test","status":"red","evidence":"Not started."}
+        {
+          "id": "M01",
+          "title": "Add authenticated organisations and users",
+          "status": "red",
+          "evidence": "Not started; verified Supabase namespace is now available."
+        },
+        {
+          "id": "M02",
+          "title": "Multi-organisation data isolation",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M03",
+          "title": "Role-based access control",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M04",
+          "title": "Persistent database schema for models/items/passports",
+          "status": "red",
+          "evidence": "Depends on F13 and F11; F13 is resolved, F11 remains partial."
+        },
+        {
+          "id": "M05",
+          "title": "Import CSV with mapping wizard",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M06",
+          "title": "Import validation and row-level errors",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M07",
+          "title": "Annex XIII data model mapping",
+          "status": "red",
+          "evidence": "Requirements baseline exists; implementation not started."
+        },
+        {
+          "id": "M08",
+          "title": "Access-right categories for passport data",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M09",
+          "title": "Version history for passport changes",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M10",
+          "title": "Immutable audit log for critical actions",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M11",
+          "title": "Document/evidence attachments",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M12",
+          "title": "Unique identifiers and lifecycle status",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M13",
+          "title": "DPP Registry test-environment workflow",
+          "status": "red",
+          "evidence": "Official testing environment verified; product integration not started."
+        },
+        {
+          "id": "M14",
+          "title": "Registry registration status tracking",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M15",
+          "title": "API endpoints for battery/passport CRUD",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M16",
+          "title": "Export customer data and evidence package",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M17",
+          "title": "Pilot onboarding checklist",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "M18",
+          "title": "MVP end-to-end acceptance test",
+          "status": "red",
+          "evidence": "Not started."
+        }
       ]
     },
     {
@@ -86,16 +316,66 @@
       "purpose": "Everything needed to sell a controlled pilot without overstating compliance.",
       "exitCriteria": "Sales demo, scope, pricing, onboarding, security answers and pilot success criteria are ready.",
       "tasks": [
-        {"id":"P01","title":"Create 10-minute customer demo flow","status":"red","evidence":"Not started."},
-        {"id":"P02","title":"Create pilot scope template","status":"red","evidence":"Not started."},
-        {"id":"P03","title":"Define setup + recurring pricing model","status":"red","evidence":"Not started."},
-        {"id":"P04","title":"Create customer data requirements sheet","status":"red","evidence":"Not started."},
-        {"id":"P05","title":"Create security and data-hosting FAQ","status":"red","evidence":"Not started."},
-        {"id":"P06","title":"Create compliance disclaimer and responsibility matrix","status":"red","evidence":"Not started."},
-        {"id":"P07","title":"Create pilot success metrics","status":"red","evidence":"Not started."},
-        {"id":"P08","title":"Create sample proposal PDF/content","status":"red","evidence":"Not started."},
-        {"id":"P09","title":"Create prospect onboarding questionnaire","status":"red","evidence":"Not started."},
-        {"id":"P10","title":"Proposal-ready review: no unsupported claims","status":"red","evidence":"Not started."}
+        {
+          "id": "P01",
+          "title": "Create 10-minute customer demo flow",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "P02",
+          "title": "Create pilot scope template",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "P03",
+          "title": "Define setup + recurring pricing model",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "P04",
+          "title": "Create customer data requirements sheet",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "P05",
+          "title": "Create security and data-hosting FAQ",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "P06",
+          "title": "Create compliance disclaimer and responsibility matrix",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "P07",
+          "title": "Create pilot success metrics",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "P08",
+          "title": "Create sample proposal PDF/content",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "P09",
+          "title": "Create prospect onboarding questionnaire",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "P10",
+          "title": "Proposal-ready review: no unsupported claims",
+          "status": "red",
+          "evidence": "Not started."
+        }
       ]
     },
     {
@@ -104,24 +384,114 @@
       "purpose": "A secure, reliable system appropriate for real commercial operation.",
       "exitCriteria": "Security, privacy, monitoring, backups, registry workflows, load tests and operational procedures are verified for production.",
       "tasks": [
-        {"id":"R01","title":"Production database and migration workflow","status":"red","evidence":"Not started."},
-        {"id":"R02","title":"Secret/environment variable management","status":"red","evidence":"Policy exists; production binding/config not available."},
-        {"id":"R03","title":"TLS/security headers and secure defaults","status":"red","evidence":"Requires production deployment."},
-        {"id":"R04","title":"Tenant isolation security tests","status":"red","evidence":"Not started."},
-        {"id":"R05","title":"Rate limiting and abuse controls","status":"red","evidence":"Not started."},
-        {"id":"R06","title":"Backup and restore procedure tested","status":"red","evidence":"Requires verified production database behavior and restore exercise."},
-        {"id":"R07","title":"Monitoring / alerting / error tracking","status":"red","evidence":"Not started."},
-        {"id":"R08","title":"Availability and incident-response runbook","status":"red","evidence":"Not started."},
-        {"id":"R09","title":"GDPR/privacy data inventory","status":"red","evidence":"Not started."},
-        {"id":"R10","title":"Data retention/deletion workflow","status":"red","evidence":"Not started."},
-        {"id":"R11","title":"Accessibility and cross-browser testing","status":"red","evidence":"Not started."},
-        {"id":"R12","title":"Performance/load testing","status":"red","evidence":"Not started."},
-        {"id":"R13","title":"Registry live integration verification","status":"red","evidence":"Requires operator credentials and current Registry technical workflow."},
-        {"id":"R14","title":"Independent legal/compliance review","status":"blocked","evidence":"Requires qualified legal/compliance sign-off."},
-        {"id":"R15","title":"Customer UAT with real battery data","status":"blocked","evidence":"Requires pilot customer."},
-        {"id":"R16","title":"Production go-live checklist","status":"red","evidence":"Not started."},
-        {"id":"R17","title":"Disaster recovery exercise","status":"red","evidence":"Not started."},
-        {"id":"R18","title":"Production release evidence pack","status":"red","evidence":"Not started."}
+        {
+          "id": "R01",
+          "title": "Production database and migration workflow",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R02",
+          "title": "Secret/environment variable management",
+          "status": "red",
+          "evidence": "Policy exists; production binding/config not available."
+        },
+        {
+          "id": "R03",
+          "title": "TLS/security headers and secure defaults",
+          "status": "red",
+          "evidence": "Requires production deployment."
+        },
+        {
+          "id": "R04",
+          "title": "Tenant isolation security tests",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R05",
+          "title": "Rate limiting and abuse controls",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R06",
+          "title": "Backup and restore procedure tested",
+          "status": "red",
+          "evidence": "Requires verified production database behavior and restore exercise."
+        },
+        {
+          "id": "R07",
+          "title": "Monitoring / alerting / error tracking",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R08",
+          "title": "Availability and incident-response runbook",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R09",
+          "title": "GDPR/privacy data inventory",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R10",
+          "title": "Data retention/deletion workflow",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R11",
+          "title": "Accessibility and cross-browser testing",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R12",
+          "title": "Performance/load testing",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R13",
+          "title": "Registry live integration verification",
+          "status": "red",
+          "evidence": "Requires operator credentials and current Registry technical workflow."
+        },
+        {
+          "id": "R14",
+          "title": "Independent legal/compliance review",
+          "status": "blocked",
+          "evidence": "Requires qualified legal/compliance sign-off."
+        },
+        {
+          "id": "R15",
+          "title": "Customer UAT with real battery data",
+          "status": "blocked",
+          "evidence": "Requires pilot customer."
+        },
+        {
+          "id": "R16",
+          "title": "Production go-live checklist",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R17",
+          "title": "Disaster recovery exercise",
+          "status": "red",
+          "evidence": "Not started."
+        },
+        {
+          "id": "R18",
+          "title": "Production release evidence pack",
+          "status": "red",
+          "evidence": "Not started."
+        }
       ]
     },
     {
@@ -130,20 +500,90 @@
       "purpose": "Scale beyond one pilot into an automation platform and additional product sectors.",
       "exitCriteria": "The platform supports high-volume customers, connectors and configurable DPP schemas beyond batteries.",
       "tasks": [
-        {"id":"X01","title":"ERP connector framework","status":"red","evidence":"Post-production scope."},
-        {"id":"X02","title":"SAP integration connector","status":"red","evidence":"Post-production scope."},
-        {"id":"X03","title":"BMS/telemetry ingestion connector","status":"red","evidence":"Post-production scope."},
-        {"id":"X04","title":"Supplier portal and evidence requests","status":"red","evidence":"Post-production scope."},
-        {"id":"X05","title":"Automated missing-data reminders","status":"red","evidence":"Post-production scope."},
-        {"id":"X06","title":"AI-assisted mapping from customer schemas","status":"red","evidence":"Post-production scope."},
-        {"id":"X07","title":"Bulk passport generation at manufacturing scale","status":"red","evidence":"Post-production scope."},
-        {"id":"X08","title":"Webhook/event integration framework","status":"red","evidence":"Post-production scope."},
-        {"id":"X09","title":"Customer analytics and compliance operations dashboard","status":"red","evidence":"Post-production scope."},
-        {"id":"X10","title":"Configurable DPP schema engine","status":"red","evidence":"Post-production scope."},
-        {"id":"X11","title":"Additional regulated-sector modules","status":"blocked","evidence":"Requires applicable final sector rules and separate traceability."},
-        {"id":"X12","title":"Partner/reseller administration","status":"red","evidence":"Post-production scope."},
-        {"id":"X13","title":"Enterprise SSO / SCIM","status":"red","evidence":"Post-production scope."},
-        {"id":"X14","title":"High-availability and regional deployment options","status":"red","evidence":"Post-production scope."}
+        {
+          "id": "X01",
+          "title": "ERP connector framework",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X02",
+          "title": "SAP integration connector",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X03",
+          "title": "BMS/telemetry ingestion connector",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X04",
+          "title": "Supplier portal and evidence requests",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X05",
+          "title": "Automated missing-data reminders",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X06",
+          "title": "AI-assisted mapping from customer schemas",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X07",
+          "title": "Bulk passport generation at manufacturing scale",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X08",
+          "title": "Webhook/event integration framework",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X09",
+          "title": "Customer analytics and compliance operations dashboard",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X10",
+          "title": "Configurable DPP schema engine",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X11",
+          "title": "Additional regulated-sector modules",
+          "status": "blocked",
+          "evidence": "Requires applicable final sector rules and separate traceability."
+        },
+        {
+          "id": "X12",
+          "title": "Partner/reseller administration",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X13",
+          "title": "Enterprise SSO / SCIM",
+          "status": "red",
+          "evidence": "Post-production scope."
+        },
+        {
+          "id": "X14",
+          "title": "High-availability and regional deployment options",
+          "status": "red",
+          "evidence": "Post-production scope."
+        }
       ]
     }
   ]
