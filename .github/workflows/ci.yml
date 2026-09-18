@@ -169,6 +169,10 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_import_negative_validation_subset.sql
+      - name: Run M12 audit log subset
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_audit_log_subset.sql
       - name: R12 isolated logical backup restore drill
         env:
           PGPASSWORD: postgres
