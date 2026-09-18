@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T01:56:00+03:00",
+  "updatedAt": "2026-09-19T02:08:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -453,7 +453,7 @@
           "acceptanceCriteria": "Public/private read and controlled write endpoints",
           "evidenceRequired": "API/security tests",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M03,M04,M10."
+          "evidence": "PARTIAL passport API precursor: /api/passport + public/private/write RPCs; M10 fail-closed public payload policy enforced server-side; CI 35404209335 on d58dc7ff715b92ed0abb18707c417bc998c14b83 SUCCESS; bound Supabase migrations dpp_passports_api + dpp_passport_public_policy_guard applied; runtime M19_PASSPORT_API_SUBSET_PASS; live ACL confirms anon only on public read, authenticated on M19 RPCs, fixed search_path. M19 remains RED pending M03/M10 and deployed E2E acceptance. — PARTIAL PASS"
         },
         {
           "id": "M20",
