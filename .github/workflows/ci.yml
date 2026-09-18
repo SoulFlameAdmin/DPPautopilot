@@ -181,9 +181,11 @@ jobs:
           ) on conflict do nothing;
           SQL
 
-          pg_dump -h 127.0.0.1 -U postgres -d dpp_replay -Fc -f /tmp/dpp-restore-drill.dump
-          createdb -h 127.0.0.1 -U postgres dpp_restore
-          pg_restore -h 127.0.0.1 -U postgres -d dpp_restore --no-owner --no-privileges /tmp/dpp-restore-drill.dump
+          docker run --rm --network host -e PGPASSWORD=postgres -v /tmp:/tmp postgres:17 \
+            pg_dump -h 127.0.0.1 -U postgres -d dpp_replay -Fc -f /tmp/dpp-restore-drill.dump
+          psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -c 'create database dpp_restore'
+          docker run --rm --network host -e PGPASSWORD=postgres -v /tmp:/tmp postgres:17 \
+            pg_restore -h 127.0.0.1 -U postgres -d dpp_restore --no-owner --no-privileges /tmp/dpp-restore-drill.dump
 
           psql -h 127.0.0.1 -U postgres -d dpp_restore -v ON_ERROR_STOP=1 <<'SQL'
           do $r12$
