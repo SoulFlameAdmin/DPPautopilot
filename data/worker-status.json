@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "Defer continuation complete — M23 import idempotency/concurrency subset",
+  "currentTask": "T01 — extend unit suite over M22 error catalog",
   "currentGate": "MVP",
-  "lastCompletedTask": "M23 — partial M20 import idempotency/concurrency coverage",
-  "nextTask": "Continue with the next dependency-safe partial slice from source of truth; keep F08/M01 deferred until new evidence changes their blockers.",
-  "message": "Without touching deferred F08/M01, M23 partial coverage found and fixed a duplicate-commit defect. Bound Supabase sequential + true two-session parallel probes PASS; full CI run 35396707595 SUCCESS with M23 gate and browser regression.",
+  "lastCompletedTask": "M22/M23 — import error contract + registry idempotency partial coverage",
+  "nextTask": "Add unit-level semantic mapping coverage for DP001-DP008; keep T01 RED until M22 itself is GREEN.",
+  "message": "M23 registry duplicate-submission gap fixed and parallel-tested; M22 DP001-DP008 import DB error contract added and runtime-tested. Full CI 35397635051 SUCCESS; artifact 10569016076.",
   "deferredBlockers": [
     "F08 — Git→Vercel deployment integration/hook is not firing: post-quota mirror trigger produced no status and Vercel still reports zero deployments.",
     "M01 — runtime password-update completion via normal recovery redirect remains unproven until a deployable DPP recovery URL or equivalent allowed interactive flow exists."
   ],
-  "updatedAt": "2026-09-19T00:28:00+03:00"
+  "updatedAt": "2026-09-19T00:40:00+03:00"
 }

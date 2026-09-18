@@ -18,3 +18,12 @@ Implemented custom PostgreSQL SQLSTATE codes:
 The semantic mapping and intended future HTTP status are versioned in `data/import-error-contract.json`. The future M17-M19 API layer must preserve these semantics in its machine-readable response body.
 
 M22 is **not GREEN** yet because M17-M19 are RED and no real API currently exposes these codes/messages.
+
+## Evidence — import DB error-contract slice
+
+- Migration `20260919005000_dpp_import_error_contract.sql` was applied successfully to bound project `frhletkiuupgksmgxoxc`.
+- Bound Supabase negative integration suite returned `M22_IMPORT_ERROR_CONTRACT_SUBSET_PASS`, proving exact `DP001` through `DP008` error semantics at the transactional-import database boundary.
+- Versioned semantic mapping lives in `data/import-error-contract.json`.
+- Static validator `scripts/validate_import_error_contract.py` and DB integration test both PASS in GitHub Actions run `35397635051`.
+- M22 remains RED because M17-M19 are still RED and the API layer does not yet expose stable machine-readable HTTP responses.
+
