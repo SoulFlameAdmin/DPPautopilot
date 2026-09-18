@@ -44,6 +44,8 @@ jobs:
         run: python scripts/validate_field_catalog.py
       - name: Validate M09 schema traceability
         run: python scripts/validate_schema_traceability.py
+      - name: Validate M11 M14 database contracts
+        run: python scripts/validate_history_lifecycle_contract.py
       - name: Validate D02 synthetic sample fixture
         run: python scripts/validate_sample_fixture.py
       - name: Validate D07 deterministic identifiers
