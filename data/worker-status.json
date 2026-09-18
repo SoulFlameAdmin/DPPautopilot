@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M18 — battery items API precursor",
+  "currentTask": "M19 — passport API precursor",
   "currentGate": "MVP",
-  "lastCompletedTask": "M17 partial model API precursor — CI 35403166134 SUCCESS + bound Supabase M17_MODELS_RPC_SUBSET_PASS",
-  "nextTask": "Build tenant/RBAC-scoped battery-item CRUD precursor with model linkage, lifecycle enforcement, HTTP/DB tests and exact RPC allowlist; keep M18 RED until M03/M01/deployed E2E acceptance.",
-  "message": "D01-D14 remain GREEN. M17 now has evidence-backed HTTP + DB precursor and bound Supabase runtime evidence, but remains RED due declared dependencies/deployed acceptance. F08 and M01 remain deferred; no Vercel action attempted.",
+  "lastCompletedTask": "M18 partial battery-item API precursor — CI 35403480117 SUCCESS + bound Supabase M18_ITEMS_RPC_SUBSET_PASS",
+  "nextTask": "Build public/private passport read and controlled write precursor with API/security tests; keep M19 RED until M03/M10 dependencies and deployed E2E acceptance are fully satisfied.",
+  "message": "M17 and M18 now have evidence-backed HTTP+DB precursors and bound Supabase runtime evidence. F08/M01 remain deferred; no Vercel action attempted.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T01:52:00+03:00"
+  "updatedAt": "2026-09-19T01:56:00+03:00"
 }
