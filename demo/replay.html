@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="bg">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DPP Autopilot · Demo replay</title>
+<style>:root{--bg:#07090d;--p:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--green:#39d98a;--amber:#ffbd52}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:900px;margin:auto;padding:24px}.card{border:1px solid var(--line);background:var(--p);border-radius:16px;padding:18px;margin:14px 0}button{border:1px solid var(--line);background:#151c25;color:var(--text);padding:10px 14px;border-radius:10px;margin-right:8px}.ok{color:var(--green)}.warn{color:var(--amber)}code{color:#c9d7e8}.muted{color:var(--muted)}</style></head>
+<body data-reset-ready="false" data-mutated-detected="false" data-reset-equal="false">
+<main class="shell"><a href="/">← Dashboard</a><h1>Demo reset / replay</h1>
+<section class="card"><p>Known fixture: <code>data/sample-battery.json</code></p><button id="mutate">Mutate demo state</button><button id="reset">Reset fixture</button><button id="replay">Replay automatically</button><div id="status" class="muted">Loading…</div></section>
+<section class="card"><pre id="snapshot"></pre></section></main>
+<script>
+let baseline=null,state=null;
+const show=()=>{snapshot.textContent=JSON.stringify({manufacturer:state?.model?.identification?.manufacturer?.name,modelId:state?.model?.identification?.model_id,itemId:state?.items?.[0]?.unique_identifier},null,2)};
+function mutateState(){state.model.identification.manufacturer.name='MUTATED DEMO';state.items[0].lifecycle_status='repurposed';document.body.dataset.mutatedDetected=String(JSON.stringify(state)!==JSON.stringify(baseline));status.innerHTML='<span class="warn">Mutated state detected</span>';show()}
+function resetState(){state=structuredClone(baseline);const equal=JSON.stringify(state)===JSON.stringify(baseline);document.body.dataset.resetEqual=String(equal);status.innerHTML=equal?'<span class="ok">Reset returned to exact known fixture state</span>':'<span class="warn">Reset mismatch</span>';show()}
+async function replayScenario(){mutateState();resetState()}
+mutate.onclick=mutateState;reset.onclick=resetState;replay.onclick=replayScenario;
+(async()=>{try{const r=await fetch('/data/sample-battery.json',{cache:'no-store'});if(!r.ok)throw new Error('fixture load failed');baseline=await r.json();state=structuredClone(baseline);document.body.dataset.resetReady='true';status.textContent='Known fixture loaded';show();if(new URLSearchParams(location.search).get('auto')==='1')await replayScenario()}catch(e){status.textContent=e.message}})();
+</script></body></html>
