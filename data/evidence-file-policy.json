@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "task": "M13",
+  "bucket": "dpp-evidence",
+  "max_bytes": 10485760,
+  "allowed_content_types": [
+    "application/pdf",
+    "image/png",
+    "image/jpeg",
+    "text/csv",
+    "application/json"
+  ],
+  "allowed_related_record_types": [
+    "battery_model",
+    "battery_item",
+    "passport",
+    "registry_submission",
+    "import_run"
+  ],
+  "storage_path_rule": "<organization_uuid>/<object path>; '..' segments are forbidden",
+  "sha256_format": "64 lowercase hexadecimal characters",
+  "note": "Project file policy, not a legal requirement. M13 stays RED until real storage upload/download is tenant-enforced and tested."
+}

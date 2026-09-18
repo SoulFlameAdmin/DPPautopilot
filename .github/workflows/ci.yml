@@ -46,6 +46,8 @@ jobs:
         run: python scripts/validate_schema_traceability.py
       - name: Validate M10 access-class policy
         run: python scripts/validate_access_policy.py
+      - name: Validate M13 evidence file policy
+        run: python scripts/validate_evidence_policy.py
       - name: Validate M11 M14 database contracts
         run: python scripts/validate_history_lifecycle_contract.py
       - name: Validate M15 M16 registry workflow contract
@@ -181,6 +183,16 @@ jobs:
           psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
           begin;
           \i tests/db/test_tenant_rls_subset.sql
+          rollback;
+          SQL
+      - name: Run M13 evidence metadata subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_evidence_attachments_subset.sql
           rollback;
           SQL
       - name: R12 isolated logical backup restore drill
