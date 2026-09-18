@@ -97,7 +97,7 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | M17 | API: models | M03,M04 | Authenticated CRUD with validation/tenant enforcement | API tests | RED |
 | M18 | API: battery items | M03,M04 | Authenticated CRUD with model linkage/tenant enforcement | API tests | RED |
 | M19 | API: passports | M03,M04,M10 | Public/private read and controlled write endpoints | API/security tests | RED |
-| M20 | API: imports | M07,M08 | Create/validate/commit import flow is transactional | Integration tests | RED |
+| M20 | API: imports | M07,M08 | Create/validate/commit import flow is transactional | Integration tests | GREEN |
 | M21 | Export data/evidence | M10-M13 | Tenant-scoped export includes required records/history/evidence manifest | Integration/E2E test | RED |
 | M22 | Validation/error contract | M17-M20 | API returns stable machine-readable error codes/messages | Contract tests | RED |
 | M23 | Idempotency/concurrency rules | M17-M20 | Duplicate import/submission and conflicting writes are safely handled | Concurrency tests | RED |
@@ -120,7 +120,7 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 
 | ID | Task | Depends on | Acceptance criteria | Evidence required | Status |
 |---|---|---|---|---|---|
-| R01 | Environment/secret management | F10,F13 | No service-role secrets client-side; env scope documented and verified | Config inspection | RED |
+| R01 | Environment/secret management | F10,F13 | No service-role secrets client-side; env scope documented and verified | Config inspection | GREEN |
 | R02 | Security headers / TLS | F08 | Production serves TLS and required headers; unsafe defaults removed | HTTP header test | RED |
 | R03 | Input/file validation | M13,M17-M20 | Server rejects malformed/oversize/disallowed payloads | Negative tests | RED |
 | R04 | Tenant isolation security suite | M05,M17-M21 | Cross-tenant attack cases consistently deny access | Security test report | RED |
@@ -130,10 +130,10 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | R08 | Retention/deletion/export | R07 | User/org deletion and export follow defined policy with audit-safe exceptions | Integration tests | RED |
 | R09 | Logging/observability | F08,M17-M20 | Structured errors and request correlation available without leaking secrets | Runtime log evidence | RED |
 | R10 | Monitoring/alerting | R09 | Critical availability/error signals have thresholds and owners | Alert test evidence | RED |
-| R11 | Backup policy | F13,M04 | Backup scope/RPO/RTO documented against actual Supabase plan/features | Backup config evidence | RED |
-| R12 | Restore test | R11 | Restore to isolated environment succeeds and integrity checks pass | Restore drill report | RED |
+| R11 | Backup policy | F13,M04 | Backup scope/RPO/RTO documented against actual Supabase plan/features | Backup config evidence | GREEN |
+| R12 | Restore test | R11 | Restore to isolated environment succeeds and integrity checks pass | Restore drill report | GREEN |
 | R13 | Incident runbook | R09-R12 | Severity, triage, comms, rollback, data incident steps documented | `docs/INCIDENT_RUNBOOK.md` | RED |
-| R14 | Dependency/supply-chain checks | F09 | CI checks vulnerable dependencies/actions and pins critical workflow actions | Passing security CI | RED |
+| R14 | Dependency/supply-chain checks | F09 | CI checks vulnerable dependencies/actions and pins critical workflow actions | Passing security CI | GREEN |
 
 # TESTING / RELIABILITY / PERFORMANCE
 
@@ -232,3 +232,8 @@ Append evidence here only after verification.
 | 2026-09-18 | M16 | Supabase runtime transaction proved `draft→queued→submitted→accepted`, automatic timestamps/attempt_count and rejected invalid `accepted→draft`; contract + clean replay PASS in run `35391493185`. | PASS |
 | 2026-09-18 | M07 | Tenant-scoped saved CSV mapping schema `dpp_import_mappings` applied in Supabase; runtime transaction proved 8-field mapping persistence and revision 1→2 on material update. Browser wizard auto-maps 8/8 sample CSV columns to canonical catalog fields. Full GitHub Actions run `35392126077` on commit `95cfbb1b7337bc368a103a8a5cd6d0f1fe2b65e9` SUCCESS; artifact `10566174421`. | PASS |
 | 2026-09-18 | M08 | Invalid CSV fixture/browser validator blocks invalid rows, exposes stable row/column/canonical-field error codes and downloadable JSON error report. Full GitHub Actions run `35392126077` SUCCESS; artifact `10566174421`. | PASS |
+| 2026-09-18 | M20 | Supabase migration `dpp_transactional_imports` applied; runtime transaction proved valid 2-row commit, invalid-import rejection, and forced second-row duplicate rollback with zero partial models/items. Contract + clean PostgreSQL replay + full regression PASS in GitHub Actions run `35393276568` on `05952f87eef171364d7f6237b3748332b01562ae`. | PASS |
+| 2026-09-18 | R01 | Public-vs-secret classification documented; stale environment binding state corrected; client/static scan confirms only Supabase URL + publishable key are client-side and no service-role/database/registry/signing secret material is present. `.env.example` placeholders + CI validator PASS in run `35393276568`. | PASS |
+| 2026-09-18 | R11 | Supabase org `touhddzpjdlrzmykcywf` verified on Free plan; backup scope, production paid/manual backup requirement, target RPO <=24h, target RTO <=8h, Storage-object separation and PITR non-claim documented. R11 validator PASS in run `35393276568`. | PASS |
+| 2026-09-18 | R12 | CI created synthetic DPP data, produced PostgreSQL 17 custom-format logical backup, restored into isolated `dpp_restore` database, and verified row/link integrity, binding row and RLS. `R12_RESTORE_DRILL_PASS` in full run `35393276568`. | PASS |
+| 2026-09-18 | R14 | All GitHub Actions pinned to immutable official commit SHAs; CI Python dependencies exact-version pinned; `pip-audit==2.10.1` audit PASS and supply-chain validator PASS in run `35393276568`. | PASS |

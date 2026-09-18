@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-18T23:40:00+03:00",
+  "updatedAt": "2026-09-18T23:50:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -387,8 +387,8 @@
         {
           "id": "R01",
           "title": "Production database and migration workflow",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "Environment/secret classification + client secret scan + placeholders PASS in run 35393276568."
         },
         {
           "id": "R02",
@@ -447,14 +447,14 @@
         {
           "id": "R11",
           "title": "Accessibility and cross-browser testing",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "Actual Supabase Free plan documented with backup scope, RPO/RTO and production backup requirements; CI PASS run 35393276568."
         },
         {
           "id": "R12",
           "title": "Performance/load testing",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "PostgreSQL 17 logical backup restored to isolated DB with integrity/RLS/binding checks; run 35393276568 PASS."
         },
         {
           "id": "R13",
@@ -465,8 +465,8 @@
         {
           "id": "R14",
           "title": "Independent legal/compliance review",
-          "status": "blocked",
-          "evidence": "Requires qualified legal/compliance sign-off."
+          "status": "green",
+          "evidence": "Immutable action SHA pins + exact Python dependency pins + pip-audit PASS in run 35393276568."
         },
         {
           "id": "R15",
