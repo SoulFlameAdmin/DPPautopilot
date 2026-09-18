@@ -58,6 +58,8 @@ jobs:
         run: python scripts/validate_backup_policy.py
       - name: Validate R14 supply-chain policy
         run: python scripts/validate_supply_chain.py
+      - name: Validate X06 mapping assistant evaluation
+        run: python scripts/validate_mapping_assistant.py
       - name: Audit Python CI dependencies
         run: python -m pip_audit -r requirements-ci.txt
       - name: Validate D02 synthetic sample fixture
@@ -397,6 +399,13 @@ jobs:
             --window-size=1100,1000 --screenshot=artifacts/m08-import-validation.png \
             'http://127.0.0.1:8000/demo/import-validation.html'
           python scripts/validate_import_validation_ui.py artifacts/m08-import-validation-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/mapping-assistant.html' > artifacts/x06-mapping-assistant-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --window-size=1100,1000 --screenshot=artifacts/x06-mapping-assistant.png \
+            'http://127.0.0.1:8000/demo/mapping-assistant.html'
+          python scripts/validate_mapping_assistant_ui.py artifacts/x06-mapping-assistant-dom.html
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
