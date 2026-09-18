@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T02:38:00+03:00",
+  "updatedAt": "2026-09-19T02:44:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -489,7 +489,7 @@
           "acceptanceCriteria": "Duplicate import/submission and conflicting writes are safely handled",
           "evidenceRequired": "Concurrency tests",
           "status": "red",
-          "evidence": "PARTIAL registry-submission idempotency: pre-fix duplicate submissions were possible. Migration `20260919004000_dpp_registry_submission_idempotency.sql` adds scoped idempotency keys + safe create function. Bound Supabase sequential test returned `M23_REGISTRY_IDEMPOTENCY_SUBSET_PASS`; real two-session parallel create returned one shared submission id (one new + one existing), exact count=1, differing-payload key reuse rejected. Full CI `35397635051` on `055cbba9d44296f4653bf28f5e90f55186c221ab` SUCCESS, artifact `10569016076`. M23 remains RED until M17-M19 API-level conflict handling exists. — PARTIAL PASS"
+          "evidence": "PARTIAL API conflict/idempotency hardening: DB suites prove duplicate import commit no-op and registry idempotency; tests/api/conflicts.test.cjs proves M17/M18/M19 23505 conflicts map to stable non-leaking HTTP 409 MODEL_CONFLICT / ITEM_CONFLICT / PASSPORT_CONFLICT and unknown DB errors fail closed to 502. Reliability matrix now includes this fourth executable scenario. CI 35406140746 on dd0f1eef3bb34aabeb98f1132ff614a1680ca55b SUCCESS including API conflict, import/registry idempotency, DB/security gates and browser smoke. M23 remains RED until M17-M20 are fully accepted. — PARTIAL PASS"
         },
         {
           "id": "M24",
@@ -792,7 +792,7 @@
           "acceptanceCriteria": "Retries/timeouts/idempotency survive injected failures",
           "evidenceRequired": "Reliability report",
           "status": "red",
-          "evidence": "PARTIAL reliability matrix: `data/reliability-test-matrix.json` versions retry/timeout, import idempotency and registry idempotency scenarios; CI validator confirms all three executable DB tests and PASS markers remain wired. PASS in full CI `35398504301`. T08 remains RED while M23 is RED. — PARTIAL PASS"
+          "evidence": "PARTIAL reliability matrix: retry/timeout, import idempotency, registry idempotency and M17-M19 API write-conflict scenarios are versioned and executable. CI 35406140746 SUCCESS with all four scenario contracts/tests green. T08 remains RED while M23 remains RED. — PARTIAL PASS"
         },
         {
           "id": "T09",
