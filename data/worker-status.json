@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T01 — partial unit suite for GREEN D07/D09 business rules",
+  "currentTask": "Defer cycle 1 complete — dependency-safe partial suites expanded",
   "currentGate": "MVP",
-  "lastCompletedTask": "T02 — partial green database integration coverage",
-  "nextTask": "Add deterministic unit tests for identifiers/completeness already GREEN; keep T01 RED until M22 error contract exists.",
-  "message": "Defer cycle 1 continues without touching F08/M01. T02 partial suite is evidence-backed in CI and bound Supabase; next safe slice is T01 for D07/D09.",
+  "lastCompletedTask": "T08 — partial registry reliability coverage and retry attempt fix",
+  "nextTask": "Continue next defer cycle from source of truth with the earliest safe partial slice; keep F08/M01 deferred until new evidence changes their blockers.",
+  "message": "Defer cycle 1 produced real progress without touching deferred blockers: T02 partial DB integration PASS in CI + bound Supabase; T01 partial unit suite PASS; T08 exposed and fixed a real registry retry attempt counter bug, then passed Supabase + CI. Full run 35395905409 SUCCESS; artifact 10567641704.",
   "deferredBlockers": [
     "F08 — Git→Vercel deployment integration/hook is not firing: post-quota mirror trigger produced no status and Vercel still reports zero deployments.",
     "M01 — runtime password-update completion via normal recovery redirect remains unproven until a deployable DPP recovery URL or equivalent allowed interactive flow exists."
   ],
-  "updatedAt": "2026-09-19T00:13:00+03:00"
+  "updatedAt": "2026-09-19T00:19:00+03:00"
 }

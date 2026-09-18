@@ -13,3 +13,12 @@ This dependency-safe suite covers the already-GREEN M15/M16 registry workflow:
 During defer cycle 1, the runtime test exposed a real defect: a second submission attempt remained at `attempt_count=1` because the trigger increment was incorrectly coupled to `submitted_at is null`. Migration `20260919002000_dpp_registry_retry_attempt_fix.sql` corrects that behavior while preserving the first `submitted_at` timestamp.
 
 T08 is **not GREEN** yet because M23 idempotency/concurrency is still RED. The M23 portion of reliability acceptance must be implemented and added before T08 can become GREEN.
+
+## Evidence — defer cycle 1
+
+- Bound Supabase runtime test first exposed a real defect: after synthetic timeout and retry, `attempt_count` remained 1 instead of 2.
+- Migration `20260919002000_dpp_registry_retry_attempt_fix.sql` was applied successfully to project `frhletkiuupgksmgxoxc`.
+- The corrected runtime retry test returned `T08_REGISTRY_RELIABILITY_SUBSET_PASS` inside an explicit rollback transaction.
+- GitHub Actions run `35395905409` on commit `20040c3d25a02a0a029731d51a016b9b657af672`: `Run T08 registry reliability subset` PASS after clean PostgreSQL 17 migration replay.
+- T08 remains RED because M23 idempotency/concurrency is still RED.
+
