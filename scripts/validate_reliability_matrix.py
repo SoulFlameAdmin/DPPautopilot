@@ -12,24 +12,25 @@ assert matrix.get("task") == "T08", "matrix must belong to T08"
 assert matrix.get("status") == "partial", "T08 must remain partial while M23 is RED"
 
 scenarios = matrix.get("scenarios", [])
-assert len(scenarios) == 3, f"expected 3 reliability scenarios, got {len(scenarios)}"
+assert len(scenarios) == 4, f"expected 4 reliability scenarios, got {len(scenarios)}"
 
 required_ids = {
     "registry_timeout_retry",
     "import_duplicate_commit",
     "registry_duplicate_submission",
+    "api_write_conflicts",
 }
 assert {s["id"] for s in scenarios} == required_ids, "T08 reliability scenario set changed unexpectedly"
 
 for scenario in scenarios:
     path = ROOT / scenario["test"]
     assert path.is_file(), f"missing T08 reliability test file: {path}"
-    sql = path.read_text(encoding="utf-8")
+    test_text = path.read_text(encoding="utf-8")
     marker = scenario["expected_marker"]
-    assert marker in sql, f"expected PASS marker {marker} missing from {path.name}"
+    assert marker in test_text, f"expected PASS marker {marker} missing from {path.name}"
     assert scenario.get("covers"), f"scenario {scenario['id']} has no declared coverage"
 
 remaining = matrix.get("remaining", [])
 assert remaining, "T08 remaining dependency note is required while task is partial"
 
-print("T08_RELIABILITY_MATRIX_PASS: retry, import idempotency and registry idempotency coverage are versioned and linked to executable DB tests")
+print("T08_RELIABILITY_MATRIX_PASS: retry, import/registry idempotency and API conflict coverage are versioned and linked to executable tests")
