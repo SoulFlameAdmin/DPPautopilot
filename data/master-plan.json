@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T02:08:00+03:00",
+  "updatedAt": "2026-09-19T02:25:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -471,7 +471,7 @@
           "acceptanceCriteria": "Tenant-scoped export includes required records/history/evidence manifest",
           "evidenceRequired": "Integration/E2E test",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M10-M13."
+          "evidence": "PARTIAL export/evidence precursor: /api/export + owner/admin-only dpp_api_export_bundle() exports active-tenant organisation/models/items/passports/version history/audit/evidence metadata manifest, excluding object bytes/access URLs. CI 35405402646 on 9e2b1eb5c60e3b3de3da4562edb03071a4edd06c SUCCESS; migration dpp_export_bundle applied to bound Supabase; runtime M21_EXPORT_BUNDLE_SUBSET_PASS; live ACL anon=false/authenticated=true with fixed search_path. M21 remains RED pending M10-M13 completion and deployed E2E export acceptance. — PARTIAL PASS"
         },
         {
           "id": "M22",
