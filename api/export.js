@@ -1,5 +1,7 @@
 'use strict';
 
+const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
+
 function send(res,status,body){
   res.statusCode=status;
   res.setHeader('Content-Type','application/json; charset=utf-8');
