@@ -88,6 +88,8 @@ jobs:
         run: node --test tests/api/export.test.cjs
       - name: Run M22 API error mapper unit tests
         run: node --test tests/api/error-contract.test.cjs
+      - name: Run M23 API write conflict subset
+        run: node --test tests/api/conflicts.test.cjs
       - name: Validate D09 completeness and D10 warnings
         run: python scripts/validate_completeness.py
       - name: Validate M04 core database schema contract
