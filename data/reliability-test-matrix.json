@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "task": "T08",
+  "status": "partial",
+  "scenarios": [
+    {
+      "id": "registry_timeout_retry",
+      "source_task": "M15/M16",
+      "test": "tests/db/test_registry_reliability_subset.sql",
+      "expected_marker": "T08_REGISTRY_RELIABILITY_SUBSET_PASS",
+      "covers": [
+        "timeout_metadata",
+        "retry_wait",
+        "retry_submission_count",
+        "accepted_terminal_state"
+      ]
+    },
+    {
+      "id": "import_duplicate_commit",
+      "source_task": "M20/M23-partial",
+      "test": "tests/db/test_import_idempotency_subset.sql",
+      "expected_marker": "M23_IMPORT_IDEMPOTENCY_SUBSET_PASS",
+      "covers": [
+        "duplicate_commit_noop",
+        "same_import_serialization",
+        "no_duplicate_model_item"
+      ]
+    },
+    {
+      "id": "registry_duplicate_submission",
+      "source_task": "M15/M16/M23-partial",
+      "test": "tests/db/test_registry_idempotency_subset.sql",
+      "expected_marker": "M23_REGISTRY_IDEMPOTENCY_SUBSET_PASS",
+      "covers": [
+        "idempotency_key",
+        "parallel_safe_create",
+        "same_key_same_request_noop",
+        "same_key_different_request_rejected"
+      ]
+    }
+  ],
+  "remaining": [
+    "M17-M19 API-level idempotency/conflicting writes must be implemented and M23 must become GREEN before T08 can become GREEN"
+  ]
+}
