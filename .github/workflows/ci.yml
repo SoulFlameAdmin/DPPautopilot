@@ -76,6 +76,8 @@ jobs:
         run: python scripts/validate_identifiers.py
       - name: Run T01 green business-rule unit suite
         run: python -m unittest discover -s tests/unit -p 'test_*.py' -v
+      - name: Run M17 models HTTP contract unit tests
+        run: node --test tests/api/models.test.cjs
       - name: Validate D09 completeness and D10 warnings
         run: python scripts/validate_completeness.py
       - name: Validate M04 core database schema contract
@@ -193,6 +195,16 @@ jobs:
           psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
           begin;
           \i tests/db/test_tenant_context_rbac_subset.sql
+          rollback;
+          SQL
+      - name: Run M17 models RPC tenant/RBAC subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \\i tests/db/test_models_api_subset.sql
           rollback;
           SQL
       - name: Run global DPP RLS grants guard
