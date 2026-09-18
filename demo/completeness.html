@@ -16,7 +16,7 @@
 </main>
 <script>
 const getPath=(obj,path)=>{let cur=obj;for(const p of path.split('.')){if(cur==null||typeof cur!=='object'||!(p in cur))return undefined;cur=cur[p]}return cur};
-const present=v=>v!==undefined&&v!==null&&(!(typeof v==='string')||v.trim()!=='')&&(!Array.isArray(v)||v.length>0)&&(!(typeof v==='object'&&!Array.isArray(v))||Object.keys(v).length>0);
+const present=v=>v!==undefined&&v!==null&&(!(typeof v==='string')||v.trim()!=='');
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 (async()=>{
  try{
