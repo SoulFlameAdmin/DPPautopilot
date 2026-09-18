@@ -126,6 +126,13 @@ jobs:
             --window-size=900,1000 --screenshot=artifacts/d09-completeness.png \
             'http://127.0.0.1:8000/demo/completeness.html'
           python scripts/validate_completeness_ui.py artifacts/d09-complete-dom.html artifacts/d10-missing-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/separation.html' > artifacts/d11-separation-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --window-size=1000,900 --screenshot=artifacts/d11-separation.png \
+            'http://127.0.0.1:8000/demo/separation.html'
+          python scripts/validate_separation_ui.py artifacts/d11-separation-dom.html
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@v4
