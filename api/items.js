@@ -1,5 +1,7 @@
 'use strict';
 
+const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
+
 const LIFECYCLE = new Set([
   'original','repurposed','remanufactured','second_life','waste','retired'
 ]);
@@ -47,17 +49,8 @@ function validateCreate(body) {
 }
 
 function mapDatabaseError(data) {
-  const code = data && data.code;
-  if (code === 'DP101') return [401, 'AUTH_REQUIRED'];
-  if (code === 'DP102' || code === 'DP103' || code === 'DP104') return [403, 'FORBIDDEN'];
-  if (code === 'DP301' || code === 'DP302' || code === 'DP303' || code === 'DP304') return [422, 'VALIDATION_ERROR'];
-  if (code === 'DP305') return [404, 'MODEL_NOT_FOUND'];
-  if (code === 'DP306') return [404, 'ITEM_NOT_FOUND'];
-  if (code === 'DP307') return [409, 'LIFECYCLE_CONFLICT'];
-  if (code === 'DP308') return [409, 'ITEM_HAS_PASSPORT'];
-  if (code === '23505') return [409, 'ITEM_CONFLICT'];
-  if (code === '23503' || code === '23514') return [409, 'ITEM_CONFLICT'];
-  return [502, 'UPSTREAM_ERROR'];
+  const mapped = mapSharedDatabaseError('items', data);
+  return [mapped.status, mapped.code, mapped.message];
 }
 
 async function rpc(name, payload, authorization, env = process.env, fetchImpl = fetch) {
@@ -84,10 +77,11 @@ async function rpc(name, payload, authorization, env = process.env, fetchImpl = 
   try { data = await response.json(); } catch (_) { data = null; }
 
   if (!response.ok) {
-    const [status, publicCode] = mapDatabaseError(data);
+    const [status, publicCode, publicMessage] = mapDatabaseError(data);
     const error = new Error(publicCode);
     error.status = status;
     error.publicCode = publicCode;
+    error.publicMessage = publicMessage;
     throw error;
   }
   return data;
@@ -158,11 +152,11 @@ async function handler(req, res) {
   } catch (error) {
     const status = Number.isInteger(error.status) ? error.status : 502;
     const code = error.publicCode || error.message || 'UPSTREAM_ERROR';
-    const message = status === 500
+    const message = error.publicMessage || (status === 500
       ? 'Server configuration is incomplete.'
       : status >= 500
         ? 'Database request failed.'
-        : code.replace(/_/g, ' ').toLowerCase();
+        : code.replace(/_/g, ' ').toLowerCase());
     return send(res, status, { error: { code, message } });
   }
 }
