@@ -1,13 +1,19 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/((?!data/).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!data/|api/).*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/data/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
       ]
     }
   ]
