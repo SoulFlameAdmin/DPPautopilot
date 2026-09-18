@@ -37,9 +37,21 @@
         "same_key_same_request_noop",
         "same_key_different_request_rejected"
       ]
+    },
+    {
+      "id": "api_write_conflicts",
+      "source_task": "M17/M18/M19/M23-partial",
+      "test": "tests/api/conflicts.test.cjs",
+      "expected_marker": "M23_API_WRITE_CONFLICT_SUBSET_PASS",
+      "covers": [
+        "model_unique_conflict_409",
+        "item_unique_conflict_409",
+        "passport_unique_conflict_409",
+        "unexpected_db_error_fail_closed"
+      ]
     }
   ],
   "remaining": [
-    "M17-M19 API-level idempotency/conflicting writes must be implemented and M23 must become GREEN before T08 can become GREEN"
+    "M17-M20 must become fully accepted before M23 can become GREEN; API conflict behavior is now explicitly covered for M17-M19 while import and registry idempotency remain DB-proven."
   ]
 }
