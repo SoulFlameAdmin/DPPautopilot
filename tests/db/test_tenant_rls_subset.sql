@@ -10,8 +10,17 @@ declare
   org_a uuid := '74747474-7474-4474-8474-747474747474';
   org_b uuid := '75757575-7575-4575-8575-757575757575';
 begin
-  insert into auth.users(id,is_sso_user,is_anonymous) values
-    (u_owner,false,false),(u_viewer,false,false),(u_other,false,false);
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema='auth' and table_name='users' and column_name='created_at'
+  ) then
+    execute format(
+      'insert into auth.users(id,created_at,updated_at,is_sso_user,is_anonymous) values (%L,now(),now(),false,false),(%L,now(),now(),false,false),(%L,now(),now(),false,false)',
+      u_owner,u_viewer,u_other
+    );
+  else
+    insert into auth.users(id) values (u_owner),(u_viewer),(u_other);
+  end if;
 
   insert into public.dpp_organizations(id,name,slug) values
     (org_a,'M05 Org A','m05-org-a'),
