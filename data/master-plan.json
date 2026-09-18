@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-18T23:54:00+03:00",
+  "updatedAt": "2026-09-18T23:59:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -62,7 +62,7 @@
           "id": "F08",
           "title": "Verify first production deployment",
           "status": "blocked",
-          "evidence": "Vercel status on mirror commit 748806ae42aa5e958a993137695818036b1022b6 failed with build-rate-limit before a deployment object was created."
+          "evidence": "Post-quota mirror trigger commit d573b6ebc9072dbce41a0253f33730433d2c1897 produced no GitHub Vercel status and Vercel project prj_K0RSGrEkEr3XDouCTA3tdasbqH55 still reports zero deployments. Blocker is inactive/missing Git→Vercel deployment hook/integration, not the earlier daily quota."
         },
         {
           "id": "F09",
@@ -204,7 +204,7 @@
           "id": "M01",
           "title": "Add authenticated organisations and users",
           "status": "blocked",
-          "evidence": "Auth UI/client contract PASS in run 35390664165; full sign-in/reset/session acceptance requires external confirmed-email inbox or interactive Google OAuth; no bypass attempted."
+          "evidence": "Normal Auth flow proved confirmation, authenticated user session, refresh, logout invalidation, recovery request/email; recovery-completion PATCH page contract/browser-safe state PASS in full CI run 35394545987. Remaining acceptance gap: actual runtime password update through recovery redirect cannot be exercised while F08 deployment is unavailable; direct recovery-token forwarding is safety-blocked."
         },
         {
           "id": "M02",
