@@ -5,7 +5,8 @@ do $guard$
 declare
   v_bad_path text;
   v_public_exec text;
-  v_anon_exec text;
+  v_anon_extra text;
+  v_anon_missing text;
   v_auth_extra text;
   v_auth_missing text;
 begin
@@ -39,15 +40,28 @@ begin
   end if;
 
   select string_agg(p.oid::regprocedure::text,', ' order by p.oid::regprocedure::text)
-    into v_anon_exec
+    into v_anon_extra
   from pg_proc p
   join pg_namespace n on n.oid=p.pronamespace
   where n.nspname='public'
     and p.proname like 'dpp\_%' escape '\'
-    and has_function_privilege('anon',p.oid,'EXECUTE');
+    and has_function_privilege('anon',p.oid,'EXECUTE')
+    and p.oid::regprocedure::text <> 'dpp_api_passport_public(text)';
 
-  if v_anon_exec is not null then
-    raise exception 'DPP functions executable by anon: %',v_anon_exec;
+  if v_anon_extra is not null then
+    raise exception 'Unexpected anon DPP RPC exposure: %',v_anon_extra;
+  end if;
+
+  if not has_function_privilege(
+    'anon',
+    to_regprocedure('public.dpp_api_passport_public(text)'),
+    'EXECUTE'
+  ) then
+    v_anon_missing := 'dpp_api_passport_public(text)';
+  end if;
+
+  if v_anon_missing is not null then
+    raise exception 'Required anon DPP RPC missing EXECUTE: %',v_anon_missing;
   end if;
 
   select string_agg(p.oid::regprocedure::text,', ' order by p.oid::regprocedure::text)
@@ -63,6 +77,10 @@ begin
       'dpp_api_models_delete(uuid)',
       'dpp_api_models_list()',
       'dpp_api_models_update(uuid,text,text,text,jsonb)',
+      'dpp_api_passport_create(uuid,jsonb,jsonb)',
+      'dpp_api_passport_private(uuid)',
+      'dpp_api_passport_public(text)',
+      'dpp_api_passport_update(uuid,text,jsonb,jsonb)',
       'dpp_api_items_create(uuid,text,text,jsonb)',
       'dpp_api_items_delete(uuid)',
       'dpp_api_items_list()',
@@ -84,6 +102,10 @@ begin
       ('dpp_api_models_delete(uuid)'),
       ('dpp_api_models_list()'),
       ('dpp_api_models_update(uuid,text,text,text,jsonb)'),
+      ('dpp_api_passport_create(uuid,jsonb,jsonb)'),
+      ('dpp_api_passport_private(uuid)'),
+      ('dpp_api_passport_public(text)'),
+      ('dpp_api_passport_update(uuid,text,jsonb,jsonb)'),
       ('dpp_api_items_create(uuid,text,text,jsonb)'),
       ('dpp_api_items_delete(uuid)'),
       ('dpp_api_items_list()'),
