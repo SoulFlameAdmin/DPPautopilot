@@ -58,6 +58,8 @@ jobs:
         run: python scripts/validate_transactional_import_contract.py
       - name: Validate M22 import error contract
         run: python scripts/validate_import_error_contract.py
+      - name: Validate M22 API error contract
+        run: python scripts/validate_api_error_contract.py
       - name: Validate R01 environment and secret management
         run: python scripts/validate_env_secret_management.py
       - name: Validate R11 backup policy
@@ -84,6 +86,8 @@ jobs:
         run: node --test tests/api/passport.test.cjs
       - name: Run M21 export HTTP contract unit tests
         run: node --test tests/api/export.test.cjs
+      - name: Run M22 API error mapper unit tests
+        run: node --test tests/api/error-contract.test.cjs
       - name: Validate D09 completeness and D10 warnings
         run: python scripts/validate_completeness.py
       - name: Validate M04 core database schema contract
