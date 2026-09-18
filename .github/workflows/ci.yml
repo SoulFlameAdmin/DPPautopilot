@@ -199,6 +199,10 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_global_rls_grants_guard.sql
+      - name: Run DPP security definer RPC guard
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_security_definer_rpc_guard.sql
       - name: Run M13 evidence metadata subset
         env:
           PGPASSWORD: postgres
