@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T01:00:00+03:00",
+  "updatedAt": "2026-09-19T01:06:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -228,7 +228,7 @@
           "id": "M05",
           "title": "Import CSV with mapping wizard",
           "status": "red",
-          "evidence": "Not started."
+          "evidence": "PARTIAL: tenant/RBAC policies applied on bound Supabase with production table grants still revoked. Runtime rollback matrix M05_RLS_POLICY_SUBSET_PASS; clean full CI 35399659669 SUCCESS. Remains RED pending M02/M03 and real authenticated app/API enforcement."
         },
         {
           "id": "M06",
