@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "description": "Reviewable non-destructive mapping suggestion rules. Suggestions never mutate saved mappings until explicitly accepted by a user.",
+  "fields": [
+    {
+      "path": "model.identification.manufacturer.name",
+      "aliases": [
+        "manufacturer_name",
+        "manufacturer",
+        "maker",
+        "producer",
+        "manufacturer name"
+      ]
+    },
+    {
+      "path": "model.identification.model_id",
+      "aliases": [
+        "model_id",
+        "model",
+        "model number",
+        "model identifier",
+        "battery model"
+      ]
+    },
+    {
+      "path": "model.identification.category",
+      "aliases": [
+        "category",
+        "battery_category",
+        "battery type",
+        "product category"
+      ]
+    },
+    {
+      "path": "model.rated_capacity_ah",
+      "aliases": [
+        "rated_capacity_ah",
+        "capacity_ah",
+        "rated capacity",
+        "capacity ah",
+        "amp hours"
+      ]
+    },
+    {
+      "path": "model.composition.chemistry",
+      "aliases": [
+        "chemistry",
+        "battery chemistry",
+        "cell chemistry",
+        "chemical system"
+      ]
+    },
+    {
+      "path": "item.unique_identifier",
+      "aliases": [
+        "unique_identifier",
+        "uid",
+        "battery id",
+        "serial",
+        "serial number",
+        "identifier"
+      ]
+    },
+    {
+      "path": "item.lifecycle_status",
+      "aliases": [
+        "lifecycle_status",
+        "lifecycle",
+        "status",
+        "battery status",
+        "life cycle status"
+      ]
+    },
+    {
+      "path": "item.state_of_health",
+      "aliases": [
+        "state_of_health_percent",
+        "state of health",
+        "soh",
+        "soh percent",
+        "health percent"
+      ]
+    }
+  ]
+}
