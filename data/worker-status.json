@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M07/M08 — CSV mapping + import validation final browser regression",
+  "currentTask": "M20 — Transactional import flow",
   "currentGate": "MVP",
-  "lastCompletedTask": "M16 — Registry status tracking",
-  "nextTask": "If M07/M08 browser regression passes, mark them GREEN and implement M20 transactional import flow. M01 remains externally BLOCKED; M02/M03-dependent work stays deferred.",
-  "message": "M06/M09/M11/M14/M15/M16 are evidence-backed GREEN. M01 has real implementation and CI smoke but remains externally BLOCKED by confirmed-email/OAuth acceptance. F08 remains deferred.",
+  "lastCompletedTask": "M08 — Import validation / row errors",
+  "nextTask": "Implement tenant-scoped import runs/rows with validate/commit status, all-or-nothing commit semantics and DB/runtime/CI evidence.",
+  "message": "M07 and M08 are evidence-backed GREEN from run 35392126077. DAVID advances to M20; M01 remains externally BLOCKED.",
   "deferredBlockers": [
     "F08 — first verified browser-ready production deployment remains deferred pending Vercel quota/capacity or authorized alternative hosting.",
     "M01 — full authentication acceptance requires a confirmed-email inbox or interactive Google OAuth session; implementation and non-interactive browser/contract tests already pass."
   ],
-  "updatedAt": "2026-09-18T23:35:00+03:00"
+  "updatedAt": "2026-09-18T23:40:00+03:00"
 }

@@ -84,8 +84,8 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | M04 | Core database schema | F13,F11 | Models/items/passports/orgs/users represented with PK/FK/check constraints | Migration + schema diff | GREEN |
 | M05 | Row Level Security | M02,M03,M04 | Cross-tenant reads/writes are denied by database policy | Negative security tests | RED |
 | M06 | Migration workflow | M04 | Reproducible ordered migrations from clean database | Migration replay test | GREEN |
-| M07 | CSV mapping wizard | M04 | Customer columns map to canonical fields with saved mapping | Integration/E2E test | RED |
-| M08 | Import validation / row errors | M07,F11 | Invalid rows do not silently pass; errors are downloadable/actionable | Unit/integration tests | RED |
+| M07 | CSV mapping wizard | M04 | Customer columns map to canonical fields with saved mapping | Integration/E2E test | GREEN |
+| M08 | Import validation / row errors | M07,F11 | Invalid rows do not silently pass; errors are downloadable/actionable | Unit/integration tests | GREEN |
 | M09 | Annex/requirement data model mapping | F11,M04 | Canonical schema traces to requirement matrix | Traceability review | GREEN |
 | M10 | Public/private access categories | M03,M09 | Every passport field has explicit access class; API enforces it | API/security tests | RED |
 | M11 | Version history | M04 | Material passport changes create immutable version records | DB integration tests | GREEN |
@@ -230,3 +230,5 @@ Append evidence here only after verification.
 | 2026-09-18 | M14 | Lifecycle migration applied in Supabase; runtime transaction allowed `original→second_life`, rejected `second_life→original`, and rejected duplicate identifier; contract + clean replay PASS in run `35391493185`. | PASS |
 | 2026-09-18 | M15 | Provider-neutral registry workflow abstraction migration applied in Supabase with explicit no-live-connectivity claim; contract and clean replay PASS in run `35391493185`. | PASS |
 | 2026-09-18 | M16 | Supabase runtime transaction proved `draft→queued→submitted→accepted`, automatic timestamps/attempt_count and rejected invalid `accepted→draft`; contract + clean replay PASS in run `35391493185`. | PASS |
+| 2026-09-18 | M07 | Tenant-scoped saved CSV mapping schema `dpp_import_mappings` applied in Supabase; runtime transaction proved 8-field mapping persistence and revision 1→2 on material update. Browser wizard auto-maps 8/8 sample CSV columns to canonical catalog fields. Full GitHub Actions run `35392126077` on commit `95cfbb1b7337bc368a103a8a5cd6d0f1fe2b65e9` SUCCESS; artifact `10566174421`. | PASS |
+| 2026-09-18 | M08 | Invalid CSV fixture/browser validator blocks invalid rows, exposes stable row/column/canonical-field error codes and downloadable JSON error report. Full GitHub Actions run `35392126077` SUCCESS; artifact `10566174421`. | PASS |

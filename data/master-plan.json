@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-18T23:35:00+03:00",
+  "updatedAt": "2026-09-18T23:40:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -239,14 +239,14 @@
         {
           "id": "M07",
           "title": "Annex XIII data model mapping",
-          "status": "red",
-          "evidence": "Requirements baseline exists; implementation not started."
+          "status": "green",
+          "evidence": "Supabase saved-mapping runtime test PASS; 8/8 browser mapping wizard PASS in run 35392126077, artifact 10566174421."
         },
         {
           "id": "M08",
           "title": "Access-right categories for passport data",
-          "status": "red",
-          "evidence": "Not started."
+          "status": "green",
+          "evidence": "Actionable row-error browser validation and downloadable JSON report PASS in run 35392126077, artifact 10566174421."
         },
         {
           "id": "M09",
