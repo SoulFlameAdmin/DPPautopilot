@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M13 — evidence attachment metadata/file-policy precursor",
-  "currentGate": "MVP",
-  "lastCompletedTask": "M10/M12 partial coverage — access projection and immutable audit infrastructure",
-  "nextTask": "Add tenant-scoped evidence metadata schema plus explicit MIME/size/path policy and DB tests; keep M13 RED until M03 and real storage upload/download enforcement exist.",
-  "message": "M10 public/private projection and M12 immutable audit precursor are evidence-backed. Full CI 35399171822 SUCCESS; bound Supabase M12 rollback test PASS. Continuing with M13 precursor without touching F08/M01.",
+  "currentTask": "F04 integrity hardening — canonical source-of-truth ↔ machine tracker synchronization",
+  "currentGate": "FOUNDATION",
+  "lastCompletedTask": "D01-D14 demo block — already GREEN and evidence-backed; latest security hardening CI PASS on 2e23f9ac9f04d591477f81d13cfdb9c620216c8b",
+  "nextTask": "Verify the synchronization guard in GitHub Actions, record F04 evidence, then continue only dependency-safe non-deploy work while F08/M01 stay deferred.",
+  "message": "Canonical dependency analysis found zero RED tasks whose declared dependencies are all GREEN. The stale machine-readable tracker and worker/UI state are being repaired without touching Vercel.",
   "deferredBlockers": [
-    "F08 — Git→Vercel deployment integration/hook is not firing: post-quota mirror trigger produced no status and Vercel still reports zero deployments.",
-    "M01 — runtime password-update completion via normal recovery redirect remains unproven until a deployable DPP recovery URL or equivalent allowed interactive flow exists."
+    "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
+    "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T01:00:00+03:00"
+  "updatedAt": "2026-09-19T01:30:00+03:00"
 }
