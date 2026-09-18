@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T01 — extend unit suite over M22 error catalog",
+  "currentTask": "M10 — partial public/private access enforcement precursor",
   "currentGate": "MVP",
-  "lastCompletedTask": "M22/M23 — import error contract + registry idempotency partial coverage",
-  "nextTask": "Add unit-level semantic mapping coverage for DP001-DP008; keep T01 RED until M22 itself is GREEN.",
-  "message": "M23 registry duplicate-submission gap fixed and parallel-tested; M22 DP001-DP008 import DB error contract added and runtime-tested. Full CI 35397635051 SUCCESS; artifact 10569016076.",
+  "lastCompletedTask": "U03/T01/T08 partial coverage — accessible form errors, semantic error units, reliability matrix",
+  "nextTask": "Build and test public/private passport projection/access rules from existing M09 catalog and D06 public view; keep M10 RED until M03/API enforcement exists.",
+  "message": "Merged evidence after concurrent R03 work. Full CI 35398504301 SUCCESS for U03/T01/T08 additions. Continuing with M10 precursor without touching F08/M01.",
   "deferredBlockers": [
     "F08 — Git→Vercel deployment integration/hook is not firing: post-quota mirror trigger produced no status and Vercel still reports zero deployments.",
     "M01 — runtime password-update completion via normal recovery redirect remains unproven until a deployable DPP recovery URL or equivalent allowed interactive flow exists."
   ],
-  "updatedAt": "2026-09-19T00:40:00+03:00"
+  "updatedAt": "2026-09-19T00:52:00+03:00"
 }

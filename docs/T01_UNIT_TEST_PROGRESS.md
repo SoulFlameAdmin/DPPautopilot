@@ -17,3 +17,10 @@ T01 is **not GREEN** yet because its declared dependency M22 (stable API validat
 - The suite uses Python `unittest` and covers deterministic identifiers, round-trip and invalid inputs, a 2,000-ID collision sample, 100% completeness scoring, deterministic missing-item behavior and actionable missing-field traceability.
 - T01 remains RED until M22 is GREEN and stable API error-code/message unit coverage is added.
 
+## Evidence — M22 semantic mapping extension
+
+- `scripts/import_error_contract.py` provides a reusable semantic mapper from `DP001`-`DP008` to stable code/message/HTTP-status metadata.
+- `tests/unit/test_import_error_contract.py` verifies exact mappings, fresh return objects and fail-safe handling for unknown SQLSTATE values.
+- Full GitHub Actions run `35398504301` on `54fe4db25b2f65309874e3fa41a284c3bd835c7e`: T01 unit suite PASS.
+- T01 remains RED because M22 remains RED until M17-M19 expose the contract through a real API.
+

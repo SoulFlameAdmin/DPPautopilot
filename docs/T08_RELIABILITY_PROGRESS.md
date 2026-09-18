@@ -22,3 +22,10 @@ T08 is **not GREEN** yet because M23 idempotency/concurrency is still RED. The M
 - GitHub Actions run `35395905409` on commit `20040c3d25a02a0a029731d51a016b9b657af672`: `Run T08 registry reliability subset` PASS after clean PostgreSQL 17 migration replay.
 - T08 remains RED because M23 idempotency/concurrency is still RED.
 
+## Evidence — versioned reliability matrix
+
+- `data/reliability-test-matrix.json` links registry timeout/retry, import duplicate-commit idempotency and registry duplicate-submission idempotency.
+- `scripts/validate_reliability_matrix.py` fails CI if a declared executable test or PASS marker disappears.
+- `Validate T08 reliability matrix` PASS in full GitHub Actions run `35398504301`.
+- T08 remains RED while master M23 is RED.
+
