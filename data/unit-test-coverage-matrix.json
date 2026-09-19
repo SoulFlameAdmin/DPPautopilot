@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "task": "T01",
+  "status": "partial",
+  "coverage_type": "acceptance_rule_coverage",
+  "note": "This is deterministic requirement/test mapping, not statement/branch line-coverage percentage.",
+  "areas": [
+    {
+      "id": "identifiers",
+      "acceptance": "Deterministic identifiers normalize, round-trip, avoid sample collisions and reject invalid inputs.",
+      "tests": [
+        "tests/unit/test_green_business_rules.py::IdentifierBusinessRulesTests::test_deterministic_normalization_and_round_trip",
+        "tests/unit/test_green_business_rules.py::IdentifierBusinessRulesTests::test_sequential_identifier_sample_has_no_collisions",
+        "tests/unit/test_green_business_rules.py::IdentifierBusinessRulesTests::test_identifier_rejects_invalid_inputs",
+        "tests/unit/test_green_business_rules.py::IdentifierBusinessRulesTests::test_invalid_identifier_strings_are_rejected"
+      ]
+    },
+    {
+      "id": "scoring",
+      "acceptance": "Completeness scoring is deterministic, traces missing required fields and handles empty requirement sets.",
+      "tests": [
+        "tests/unit/test_green_business_rules.py::CompletenessBusinessRulesTests::test_complete_fixture_scores_100_percent",
+        "tests/unit/test_green_business_rules.py::CompletenessBusinessRulesTests::test_missing_required_field_reduces_score_and_preserves_traceability",
+        "tests/unit/test_green_business_rules.py::CompletenessBusinessRulesTests::test_missing_item_is_handled_deterministically",
+        "tests/unit/test_green_business_rules.py::CompletenessBusinessRulesTests::test_empty_required_field_set_scores_100",
+        "tests/unit/test_green_business_rules.py::CompletenessBusinessRulesTests::test_presence_and_path_helpers_are_stable"
+      ]
+    },
+    {
+      "id": "validation",
+      "acceptance": "Passport access classification/projection validation is deterministic and fail-closed for invalid item selection.",
+      "tests": [
+        "tests/unit/test_passport_access.py::PassportAccessPolicyTests::test_all_42_fields_have_allowed_access_class",
+        "tests/unit/test_passport_access.py::PassportAccessPolicyTests::test_public_and_restricted_classes_are_disjoint",
+        "tests/unit/test_passport_access.py::PassportAccessPolicyTests::test_public_projection_contains_only_public_classes",
+        "tests/unit/test_passport_access.py::PassportAccessPolicyTests::test_restricted_sample_values_do_not_leak",
+        "tests/unit/test_passport_access.py::PassportAccessPolicyTests::test_invalid_item_index_is_rejected"
+      ]
+    },
+    {
+      "id": "errors",
+      "acceptance": "Import SQLSTATE errors map to stable semantic code/message/status and unknown states fail safely.",
+      "tests": [
+        "tests/unit/test_import_error_contract.py::ImportErrorContractUnitTests::test_catalog_contains_exact_dp001_dp010_set",
+        "tests/unit/test_import_error_contract.py::ImportErrorContractUnitTests::test_semantic_mapping_is_stable",
+        "tests/unit/test_import_error_contract.py::ImportErrorContractUnitTests::test_mapper_returns_fresh_dict",
+        "tests/unit/test_import_error_contract.py::ImportErrorContractUnitTests::test_unknown_sqlstate_fails_safe"
+      ]
+    }
+  ],
+  "green_blocker": "M22 remains RED; T01 cannot be GREEN until its declared dependencies are fully accepted."
+}
