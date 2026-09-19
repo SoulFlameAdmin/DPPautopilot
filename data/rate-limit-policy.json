@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "R05",
   "status": "partial",
   "strategy": "process_local_dual_bucket_fixed_window_precursor",
@@ -83,6 +83,7 @@
     "network_bucket_always_enforced": true,
     "credential_bucket_when_authorization_present": true,
     "allow_only_when_all_buckets_within_limit": true,
-    "bearer_rotation_cannot_reset_network_budget": true
+    "bearer_rotation_cannot_reset_network_budget": true,
+    "active_request_buckets_protected_from_cap_eviction": true
   }
 }
