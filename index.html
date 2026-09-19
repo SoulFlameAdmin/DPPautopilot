@@ -100,27 +100,40 @@
     const mapped=(lang==="en"?toEn:toBg).get(trimmed); if(!mapped) return value;
     return value.replace(trimmed,mapped);
   }
+  let observer=null;
+  let applying=false;
   function apply(lang){
-    document.documentElement.lang=lang;
-    localStorage.setItem("dpp-language",lang);
-    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-    let n; while((n=walker.nextNode())){
-      const tag=n.parentElement?.tagName;
-      if(tag==="SCRIPT"||tag==="STYLE"||tag==="NOSCRIPT") continue;
-      n.nodeValue=mapText(n.nodeValue,lang);
+    if(applying) return;
+    applying=true;
+    if(observer) observer.disconnect();
+    try{
+      document.documentElement.lang=lang;
+      localStorage.setItem("dpp-language",lang);
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+      let n; while((n=walker.nextNode())){
+        const tag=n.parentElement?.tagName;
+        if(tag==="SCRIPT"||tag==="STYLE"||tag==="NOSCRIPT") continue;
+        const next=mapText(n.nodeValue,lang);
+        if(next!==n.nodeValue) n.nodeValue=next;
+      }
+      document.querySelectorAll("[data-lang-toggle]").forEach(b=>{
+        const text=lang==="bg"?"BG / EN":"EN / BG";
+        const title=lang==="bg"?"Смени на English":"Switch to Български";
+        if(b.textContent!==text) b.textContent=text;
+        if(b.title!==title) b.title=title;
+      });
+    }finally{
+      applying=false;
+      if(observer) observer.observe(document.body,{childList:true,subtree:true});
     }
-    document.querySelectorAll("[data-lang-toggle]").forEach(b=>{
-      b.textContent=lang==="bg"?"BG / EN":"EN / BG";
-      b.title=lang==="bg"?"Смени на English":"Switch to Български";
-    });
   }
   const initial=localStorage.getItem("dpp-language")==="en"?"en":"bg";
   document.addEventListener("click",e=>{
     const b=e.target.closest("[data-lang-toggle]"); if(!b) return;
     apply(document.documentElement.lang==="bg"?"en":"bg");
   });
-  const observer=new MutationObserver(()=>apply(document.documentElement.lang==="en"?"en":"bg"));
-  window.addEventListener("DOMContentLoaded",()=>{apply(initial);observer.observe(document.body,{childList:true,subtree:true});});
+  observer=new MutationObserver(()=>apply(document.documentElement.lang==="en"?"en":"bg"));
+  window.addEventListener("DOMContentLoaded",()=>apply(initial));
 })();
 </script>
 </body>
