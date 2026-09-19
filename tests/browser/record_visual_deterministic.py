@@ -88,10 +88,26 @@ def normalize(page, surface: str):
       }
       html{scroll-behavior:auto!important}
     """)
-    page.evaluate("""() => {
+    page.evaluate("""async () => {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
       window.scrollTo(0,0);
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     }""")
+    if surface=="import-validation":
+        page.wait_for_function("""() => {
+          const body=document.body;
+          const summary=document.getElementById('summary');
+          const rows=document.querySelectorAll('#errors tr');
+          return body?.dataset.validationReady==='true'
+            && body.dataset.downloadReady==='true'
+            && summary?.dataset.asyncState==='success'
+            && rows.length===Number(body.dataset.errorCount||'-1');
+        }""", timeout=5000)
+        page.evaluate("""async () => {
+          if (document.fonts && document.fonts.ready) await document.fonts.ready;
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        }""")
     if surface=="dashboard":
         page.evaluate(
             """values => {
@@ -112,7 +128,7 @@ def normalize(page, surface: str):
             }""",
             DASHBOARD_NORMALIZATION,
         )
-    page.wait_for_timeout(120)
+    page.wait_for_timeout(250)
 
 def capture_pass(playwright, pass_name: str):
     browser=playwright.chromium.launch(headless=True)
