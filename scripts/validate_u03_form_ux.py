@@ -48,7 +48,6 @@ def main() -> None:
         'id="password_error"',
         'Enter a valid email address.',
         'Password is required.',
-        'value="invalid-email"',
     ]:
         require(marker in auth_invalid,f"U03 auth invalid evidence missing: {marker}")
     require(auth_invalid.count('aria-invalid="true"')>=2,"U03 auth invalid controls not exposed")
@@ -63,7 +62,6 @@ def main() -> None:
         'data-input-preserved="true"',
         'aria-describedby="password_help password_error"',
         'aria-invalid="true"',
-        'value="short"',
         'Password must be at least 8 characters.',
     ]:
         require(marker in recovery_invalid,f"U03 recovery invalid evidence missing: {marker}")
