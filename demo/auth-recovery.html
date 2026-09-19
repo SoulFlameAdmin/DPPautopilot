@@ -16,14 +16,14 @@ let cfg=null,accessToken=null;
 function parseHash(){return Object.fromEntries(new URLSearchParams(location.hash.replace(/^#/,'')))}
 function setState(msg,cls=''){status.className=cls;status.textContent=msg}
 async function init(){
- cfg=await fetch('/data/auth-config.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('auth config unavailable');return r.json()});
  const h=parseHash();
+ history.replaceState(null,'',location.pathname);
  const candidate=h.access_token||null;
  const expiresAt=Number(h.expires_at||0);
  const notExpired=!expiresAt || expiresAt*1000>Date.now();
  const isRecovery=h.type==='recovery' && !!candidate && notExpired;
  accessToken=isRecovery?candidate:null;
- history.replaceState(null,'',location.pathname);
+ cfg=await fetch('/data/auth-config.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('auth config unavailable');return r.json()});
  document.body.dataset.recoverySession=isRecovery?'valid':'missing';
  document.body.dataset.recoveryReady='true';
  setState(isRecovery?'Recovery session ready. Enter a new password.':'Missing, expired or invalid recovery session.',isRecovery?'ok':'bad');
