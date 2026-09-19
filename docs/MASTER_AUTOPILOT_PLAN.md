@@ -329,3 +329,10 @@ Append evidence here only after verification.
 - Failed U03 probe runs were not accepted as evidence.
 - Exact-head full CI `35448135007` SUCCESS on `main@7ae81bf7731eae04566816a8039f12e111e232c1`; browser evidence artifact `10585941329`.
 - U03 remains RED/PARTIAL because M22 is RED and deployed production E2E acceptance is not yet available.
+
+
+### U04 measured responsive regression
+- Runtime responsive probe covers 10 core surfaces at phone/tablet/desktop widths and records viewport/root scroll/blocking-overlay evidence.
+- Initial probe found tablet model-field and validation-table overflow; fixed in `b1e3c22f2b6a657bea8dce5aa4e89a6e7d5addbc` and `5e629a7ca4fba800c2c3cd49acda941350b27cc7`.
+- Exact-head PR-only full CI `35448804599` completed SUCCESS, including browser responsive matrix and full API/DB/security regression.
+- U04 remains RED because U01-U03 are not GREEN and deployed production E2E acceptance is not yet available.
