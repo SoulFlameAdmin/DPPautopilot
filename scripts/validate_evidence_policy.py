@@ -9,8 +9,9 @@ meta_sql=(ROOT/"supabase/migrations/20260919009000_dpp_evidence_attachments.sql"
 storage_sql=(ROOT/"supabase/migrations/20260919027000_dpp_evidence_storage.sql").read_text(encoding="utf-8")
 fix_sql=(ROOT/"supabase/migrations/20260919028000_dpp_evidence_storage_policy_fix.sql").read_text(encoding="utf-8")
 guard_sql=(ROOT/"supabase/migrations/20260919038000_dpp_evidence_storage_registration_tenant_guard.sql").read_text(encoding="utf-8")
+edge_fn=(ROOT/"supabase/functions/dpp-evidence-object/index.ts").read_text(encoding="utf-8")
 
-assert policy.get("version")==4
+assert policy.get("version")==5
 assert policy.get("task")=="M13"
 assert policy.get("bucket")=="dpp-evidence"
 assert policy.get("max_bytes")==10_485_760
@@ -42,6 +43,39 @@ assert storage["hosted_migrations"]==[
 ]
 assert storage["metadata_registration_tenant_guard"] is True
 assert storage["metadata_registration_helper"]=="public.dpp_evidence_storage_registered(text)"
+edge=storage["edge_function"]
+assert edge["name"]=="dpp-evidence-object"
+assert edge["source"]=="supabase/functions/dpp-evidence-object/index.ts"
+assert edge["verify_jwt"] is True
+assert edge["service_role_allowed"] is False
+assert edge["operations"]==["upload","download","delete"]
+assert edge["overwrite_allowed"] is False
+assert edge["runtime_acceptance_required"] is True
+
+for token in [
+ "npm:@supabase/supabase-js@2.95.0",
+ "SUPABASE_URL",
+ "SUPABASE_ANON_KEY",
+ 'req.headers.get("Authorization")',
+ "client.auth.getUser(token)",
+ '.storage.from(BUCKET).upload(',
+ "upsert: false",
+ '.storage.from(BUCKET).download(',
+ '.storage.from(BUCKET).remove([',
+ "EVIDENCE_PATH_INVALID",
+ "EVIDENCE_TYPE_NOT_ALLOWED",
+ "EVIDENCE_TOO_LARGE",
+ "EVIDENCE_UPLOAD_DENIED",
+ "EVIDENCE_DELETE_DENIED",
+]:
+    assert token in edge_fn, f"M13 Edge Function missing contract token: {token}"
+
+for forbidden in ["SERVICE_ROLE", "service_role", "SUPABASE_SERVICE_ROLE_KEY"]:
+    assert forbidden not in edge_fn, f"M13 Edge Function must not use privileged key material: {forbidden}"
+
+for content_type in expected_types:
+    assert content_type in edge_fn, f"M13 Edge Function missing allowed content type: {content_type}"
+assert "10_485_760" in edge_fn
 
 for token in [
  "dpp_evidence_storage_org_id",
@@ -80,4 +114,4 @@ for token in [
 for content_type in expected_types:
     assert content_type in meta_sql and content_type in storage_sql
 
-print("M13_EVIDENCE_POLICY_PASS: tenant metadata plus private Storage bucket/RLS, tenant-guarded SECURITY DEFINER registration predicate, MIME/size/path/hash limits and no-overwrite integrity contract are declared")
+print("M13_EVIDENCE_POLICY_PASS: tenant metadata plus private Storage bucket/RLS, tenant-guarded registration, caller-JWT Edge Function, MIME/size/path/hash limits and no-overwrite integrity contract are declared")
