@@ -15,7 +15,7 @@
     <div class="synthetic">Тази страница работи само със synthetic demo данни. Няма backend write и не променя production данни.</div>
     <section class="card">
       <h2>1. Зареди CSV</h2>
-      <div class="actions"><input id="fileInput" type="file" accept=".csv,text/csv" /><button class="btn primary" id="loadSample" type="button">Зареди synthetic sample</button></div>
+      <div class="actions"><div><label for="fileInput" class="hint">CSV file</label><input id="fileInput" type="file" accept=".csv,text/csv" aria-describedby="loadStatus" /></div><button class="btn primary" id="loadSample" type="button">Зареди synthetic sample</button></div>
       <div id="loadStatus" class="status" role="status" aria-live="polite">Няма зареден файл.</div>
     </section>
     <section class="card" id="mappingCard" hidden>
