@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "task": "R08",
+  "status": "partial",
+  "scope": "DPP Autopilot only; shared Supabase non-dpp_* data is excluded.",
+  "export": {
+    "implementation": "M21 dpp_api_export_bundle() owner/admin active-tenant export",
+    "required_before_org_deletion": true,
+    "current_gap": "Evidence object bytes are not included; only the evidence metadata manifest is exported."
+  },
+  "retention_rules": [
+    {
+      "id": "import_terminal_staging",
+      "stores": [
+        "dpp_import_runs",
+        "dpp_import_rows"
+      ],
+      "policy": "purge_terminal_after_days",
+      "terminal_statuses": [
+        "invalid",
+        "committed"
+      ],
+      "minimum_age_days": 30,
+      "implemented": true,
+      "notes": "staged/validated in-progress imports are never purged by the precursor"
+    },
+    {
+      "id": "passport_history",
+      "stores": [
+        "dpp_passports",
+        "dpp_passport_versions"
+      ],
+      "policy": "retain_until_approved_regulatory_period",
+      "implemented": false,
+      "blocks_org_deletion": true
+    },
+    {
+      "id": "registry_history",
+      "stores": [
+        "dpp_registry_submissions"
+      ],
+      "policy": "retain_until_external_recipient_and_legal_period_approved",
+      "implemented": false,
+      "blocks_org_deletion": true
+    },
+    {
+      "id": "evidence_objects",
+      "stores": [
+        "dpp_evidence_attachments",
+        "Supabase Storage dpp-evidence"
+      ],
+      "policy": "retain_until_object_lifecycle_and_deletion_are_proven",
+      "implemented": false,
+      "blocks_org_deletion": true
+    },
+    {
+      "id": "audit_history",
+      "stores": [
+        "dpp_audit_log"
+      ],
+      "policy": "immutable_audit_exception_pending_accepted_period_and_minimization",
+      "implemented": false,
+      "blocks_org_deletion": true,
+      "notes": "audit rows intentionally survive relational cascades; before/after snapshots require an accepted minimization/redaction policy before destructive org deletion"
+    },
+    {
+      "id": "auth_identity",
+      "stores": [
+        "auth.users",
+        "dpp_organization_members",
+        "dpp_user_tenant_context"
+      ],
+      "policy": "membership_lifecycle_now_auth_account_deletion_pending",
+      "implemented": false,
+      "blocks_user_deletion": true
+    }
+  ],
+  "org_deletion": {
+    "enabled": false,
+    "fail_closed": true,
+    "readiness_rpc": "dpp_api_retention_status()",
+    "blockers": [
+      "full export including evidence object bytes not proven",
+      "passport/version regulatory retention period not accepted",
+      "registry submission retention/external recipient terms not accepted",
+      "evidence storage deletion lifecycle not accepted",
+      "audit snapshot retention/minimization exception not accepted",
+      "auth account deletion workflow not accepted"
+    ]
+  },
+  "implemented_actions": {
+    "import_staging_purge_rpc": "dpp_api_purge_import_staging(timestamptz)",
+    "roles": [
+      "owner",
+      "admin"
+    ],
+    "minimum_age_days": 30,
+    "auditable": true
+  }
+}
