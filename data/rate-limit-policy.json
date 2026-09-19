@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "task": "R05",
   "status": "partial",
   "strategy": "process_local_dual_bucket_fixed_window_precursor",
@@ -56,6 +56,15 @@
     "tenant": {
       "GET": "authenticated_read",
       "POST": "authenticated_write"
+    },
+    "organizations": {
+      "POST": "authenticated_write"
+    },
+    "members": {
+      "GET": "authenticated_read",
+      "POST": "authenticated_write",
+      "PATCH": "authenticated_write",
+      "DELETE": "authenticated_write"
     }
   },
   "response": {
