@@ -72,7 +72,6 @@ begin
     and p.proname like 'dpp\_%' escape '\'
     and has_function_privilege('authenticated',p.oid,'EXECUTE')
     and p.oid::regprocedure::text not in (
-      'dpp_active_organization_id()',
       'dpp_api_models_create(text,text,text,jsonb)',
       'dpp_api_models_delete(uuid)',
       'dpp_api_models_list()',
@@ -98,8 +97,6 @@ begin
       'dpp_evidence_storage_registered(text)',
       'dpp_has_org_role(uuid,text[])',
       'dpp_request_user_id()',
-      'dpp_require_active_role(text[])',
-      'dpp_set_active_organization(uuid)'
     );
 
   if v_auth_extra is not null then
