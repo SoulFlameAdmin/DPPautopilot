@@ -801,7 +801,7 @@
           "acceptanceCriteria": "Automated accessibility checks block regressions",
           "evidenceRequired": "CI report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: U05."
+          "evidence": "PARTIAL automated accessibility regression gate: dedicated T09 policy/report validates the 10 U05 browser surfaces after browser smoke and blocks CI on probe/readiness/pass/landmark/H1/label/focus/alt/contrast regressions. Exact-head full CI `35454178109` SUCCESS; artifact `10587916127` digest `sha256:7579219d91feec1cedd790f0eb66be67b364774526071c993c4195cf48a57fc7` records 10/10 surfaces PASS with every critical counter at 0. Implementation merged as `ba72ee7c6987bc6854da72dc5f01e7de4d54368b`. T09 remains RED because U05 is not GREEN and deployed/manual accessibility acceptance is explicitly false. — PARTIAL PASS"
         },
         {
           "id": "T10",
