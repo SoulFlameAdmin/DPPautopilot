@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "task": "R03",
   "status": "partial",
   "max_body_bytes": 1048576,
@@ -73,6 +73,26 @@
       "id": "evidence_file_policy",
       "surface": "M13 policy",
       "expected": "10 MiB/type/path/hash metadata policy remains versioned"
+    },
+    {
+      "id": "oversize_parsed_organizations_body",
+      "surface": "/api/organizations",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "oversize_parsed_members_body",
+      "surface": "/api/members",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "invalid_organization_fields",
+      "surface": "/api/organizations",
+      "expected": "400/422 validation error before upstream"
+    },
+    {
+      "id": "invalid_member_fields",
+      "surface": "/api/members",
+      "expected": "400/422 validation error before upstream"
     }
   ],
   "evidence_files": [
