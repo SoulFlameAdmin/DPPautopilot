@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import struct
 import sys
 from pathlib import Path
 
@@ -51,7 +52,13 @@ def main() -> None:
             png_path=artifacts/f"u04-{viewport}-{surface}.png"
             require(dom_path.is_file(),f"U04 missing DOM evidence: {dom_path.name}")
             require(png_path.is_file(),f"U04 missing screenshot: {png_path.name}")
-            require(png_path.stat().st_size>=4000,f"U04 screenshot unexpectedly small: {png_path.name}")
+            raw=png_path.read_bytes()[:24]
+            require(len(raw)>=24 and raw[:8]==b"\x89PNG\r\n\x1a\n" and raw[12:16]==b"IHDR",
+                    f"U04 invalid PNG screenshot: {png_path.name}")
+            png_width,png_height=struct.unpack(">II",raw[16:24])
+            require(png_width>=min_width and png_width<=max_width,
+                    f"U04 {viewport}/{surface} screenshot width {png_width} outside expected range")
+            require(png_height>=500,f"U04 {viewport}/{surface} screenshot height unexpectedly small: {png_height}")
 
             dom=dom_path.read_text(encoding="utf-8",errors="replace")
             for marker in [
