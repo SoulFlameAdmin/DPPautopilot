@@ -2,6 +2,7 @@
 
 const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
+const { startRequestObservability } = require('./_observability.js');
 
 function send(res,status,body){
   res.statusCode=status;
@@ -53,6 +54,7 @@ async function rpc(authorization,env=process.env,fetchImpl=fetch){
 }
 
 async function handler(req,res){
+  startRequestObservability(req,res,'export');
   const rateLimit=enforceRateLimit(req,res,'export');
   if(!rateLimit.allowed) return send(res,429,rateLimitBody());
   const method=String(req.method||'GET').toUpperCase();
