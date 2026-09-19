@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "U01 core navigation precursor",
-  "currentGate": "UX",
-  "lastCompletedTask": "M24 onboarding browser precursor + full CI 35428911661 SUCCESS",
-  "nextTask": "Build and browser-test complete core navigation (dashboard/models/items/imports/passports/settings) without claiming U01 GREEN while M24 remains RED.",
-  "message": "M24 now has DB + HTTP/stateful + browser precursor evidence. demo/onboarding.html is linked from the dashboard and full CI 35428911661 is SUCCESS. Next safe work is U01 core navigation/settings precursor; F08/M01 remain deferred, no Vercel deploy occurred, and DAVID orchestrator files remain untouched.",
+  "currentTask": "External dependency frontier after U01 core navigation precursor",
+  "currentGate": "MVP",
+  "lastCompletedTask": "U01 core navigation precursor + full CI 35429103687 SUCCESS",
+  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue only dependency-safe non-deploy precursors; next useful UX work is U02 deterministic async loading/empty/error states.",
+  "message": "Core dashboard navigation now exposes models/items/imports/passports/settings and settings returns to core synthetic workflows without secret persistence; full CI 35429103687 is SUCCESS. U01 remains RED only because M24/deployed E2E is unavailable. F08/M01 remain deferred; no Vercel deploy/redeploy occurred, so no deploy lease was required. DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T10:20:00+03:00"
+  "updatedAt": "2026-09-19T10:24:00+03:00"
 }
