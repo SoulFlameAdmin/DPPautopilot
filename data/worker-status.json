@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T02 — database integration suite precursor analysis",
+  "currentTask": "T03 — API integration suite precursor analysis",
   "currentGate": "TESTING",
-  "lastCompletedTask": "T01 partial acceptance coverage report — CI 35411823429 SUCCESS",
-  "nextTask": "Strengthen the current DB integration suite/report using already implemented M04-M16 precursor behavior without marking T02 GREEN until all declared dependencies are fully accepted.",
-  "message": "D01-D14 remain GREEN. T01 now has an evidence-backed acceptance coverage report mapping 4 areas to 18 concrete unittest methods, but remains RED while M22 is RED. F08/M01 remain deferred. No Vercel deploy attempted. DAVID orchestrator files untouched.",
+  "lastCompletedTask": "T02 partial database integration coverage — CI 35412095340 + bound Supabase rollback PASS",
+  "nextTask": "Strengthen T03 API integration coverage/report across M17-M23 without marking T03 GREEN until all declared API dependencies and deployed HTTP integration are fully accepted.",
+  "message": "D01-D14 remain GREEN. T02 now maps all M04-M16 dependencies to concrete DB/contract checks and has fresh clean-CI plus bound-Supabase rollback evidence, but remains RED while M05/M10/M12/M13 are RED. F08/M01 remain deferred. No Vercel deploy attempted. DAVID orchestrator files untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T04:31:00+03:00"
+  "updatedAt": "2026-09-19T04:40:00+03:00"
 }
