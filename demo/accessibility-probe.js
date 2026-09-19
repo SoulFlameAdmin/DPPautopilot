@@ -123,7 +123,10 @@
       a11yPositiveTabindexCount:String(positiveTabindex.length),
       a11yFocusFailureCount:String(focusFailures),
       a11yMissingAltCount:String(missingAlt.length),
-      a11yContrastViolationCount:String(contrastViolations.length)
+      a11yContrastViolationCount:String(contrastViolations.length),
+      a11yFirstContrastTarget:contrastViolations[0]
+        ? [contrastViolations[0].tagName.toLowerCase(),contrastViolations[0].id||'',contrastViolations[0].className||''].join('#').slice(0,160)
+        : ''
     });
   }
 
