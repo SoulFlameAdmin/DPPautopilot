@@ -12,15 +12,16 @@
   }
 
   function snapshot(inputs){
-    return Array.from(inputs).map(input=>({
-      id:input.id,
+    return Array.from(inputs).map((input,index)=>({
+      index,
       value:input.value
     }));
   }
 
   function inputsPreserved(before,inputs){
-    const now=new Map(Array.from(inputs).map(input=>[input.id,input.value]));
-    return before.every(entry=>now.get(entry.id)===entry.value);
+    const now=Array.from(inputs);
+    if(before.length!==now.length) return false;
+    return before.every((entry,index)=>entry.index===index&&now[index].value===entry.value);
   }
 
   function markPreserved(before,inputs){
