@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M22/M23 — API contract and concurrency hardening",
+  "currentTask": "External dependency frontier after hardened full regression",
   "currentGate": "MVP",
-  "lastCompletedTask": "M17-M19 current bound runtime regression — 3/3 PASS",
-  "nextTask": "Revalidate and strengthen stable API error/idempotency/concurrency behavior across models, items, passports and imports without falsely promoting dependency-blocked tasks.",
-  "message": "D01-D14 remain GREEN. F08/M01 deferred. Current Supabase regression confirms M17-M19 compatibility after tenant/access/audit hardening. No Vercel deploy attempted. DAVID orchestrator files untouched.",
+  "lastCompletedTask": "M13/M22/M23 hardening + full CI 35423117317 SUCCESS",
+  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue only dependency-safe non-deploy hardening/evidence work; M01 is the earliest mandatory external blocker.",
+  "message": "D01-D14 remain GREEN. Full hardened regression 35423117317 is SUCCESS, including M23 optimistic concurrency and M13 tenant-safe Storage registration. F08 and M01 remain external blockers; no Vercel deploy/redeploy was attempted, so no deploy lease was required. DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
-    "F08 — inactive/missing Git→Vercel deployment hook; deferred until new evidence.",
-    "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred until deployment path exists."
+    "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
+    "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path."
   ],
-  "updatedAt": "2026-09-19T07:38:00+03:00"
+  "updatedAt": "2026-09-19T08:11:00+03:00"
 }
