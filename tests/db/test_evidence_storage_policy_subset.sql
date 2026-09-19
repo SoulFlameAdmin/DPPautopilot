@@ -96,9 +96,15 @@ begin
 
   perform set_config('request.jwt.claim.sub',u_editor::text,true);
   execute 'set local role authenticated';
-  execute format('delete from storage.objects where bucket_id=%L and name=%L','dpp-evidence',object_name);
-  get diagnostics v_count = row_count;
-  if v_count<>0 then raise exception 'M13 editor delete unexpectedly affected % rows',v_count; end if;
+  v_denied:=false;
+  begin
+    execute format('delete from storage.objects where bucket_id=%L and name=%L','dpp-evidence',object_name);
+    get diagnostics v_count = row_count;
+    if v_count<>0 then raise exception 'M13 editor delete unexpectedly affected % rows',v_count; end if;
+  exception when insufficient_privilege then
+    -- Supabase may reject direct storage.objects deletion before/after RLS via storage.protect_delete().
+    v_denied:=true;
+  end;
 
   v_denied:=false;
   begin
