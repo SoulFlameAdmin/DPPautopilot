@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "task": "C14",
+  "status": "partial",
+  "output": "docs/PRODUCTION_EVIDENCE.md",
+  "dependencies": [
+    "C07",
+    "C08",
+    "C09",
+    "C10",
+    "C11",
+    "C12",
+    "C13"
+  ],
+  "decision": {
+    "ready_when": "all_dependencies_green",
+    "current_default": "not_ready",
+    "note": "The evidence pack is an index, not a waiver. Missing/blocked dependency evidence keeps C14 RED."
+  },
+  "sections": {
+    "source_ci": [
+      "F01",
+      "F03",
+      "F09",
+      "F12",
+      "F13",
+      "F14"
+    ],
+    "migrations_data": [
+      "M04",
+      "M06",
+      "M07",
+      "M11",
+      "M14",
+      "M15",
+      "M16",
+      "M20",
+      "C04"
+    ],
+    "testing": [
+      "D14",
+      "T01",
+      "T02",
+      "T03",
+      "T07",
+      "T08",
+      "R04",
+      "R12"
+    ],
+    "deployment_release": [
+      "F07",
+      "F08",
+      "C01",
+      "C02",
+      "C03",
+      "C05",
+      "C06",
+      "C07",
+      "C08",
+      "C09",
+      "C10",
+      "C11",
+      "C12",
+      "C13"
+    ],
+    "operations_security": [
+      "R01",
+      "R02",
+      "R09",
+      "R10",
+      "R11",
+      "R12",
+      "R13",
+      "R14"
+    ],
+    "privacy_compliance": [
+      "F11",
+      "R07",
+      "R08",
+      "C10",
+      "C11",
+      "C12",
+      "C13"
+    ]
+  },
+  "required_repository_artifacts": [
+    "docs/MASTER_AUTOPILOT_PLAN.md",
+    "data/master-plan.json",
+    "docs/REQUIREMENTS_TRACEABILITY.md",
+    "docs/R11_BACKUP_POLICY.md",
+    "docs/R12_RESTORE_DRILL.md",
+    "docs/INCIDENT_RUNBOOK.md",
+    "docs/C05_ROLLBACK_PROCEDURE_PROGRESS.md",
+    "docs/C07_PRODUCTION_SMOKE_PROGRESS.md",
+    "docs/C08_RUNTIME_ERROR_REVIEW_PROGRESS.md",
+    "docs/C09_PERFORMANCE_ACCEPTANCE_PROGRESS.md",
+    "docs/C10_SECURITY_ACCEPTANCE_PROGRESS.md",
+    "docs/C11_PRIVACY_COMPLIANCE_ACCEPTANCE_PROGRESS.md"
+  ],
+  "must_not_claim": [
+    "production deployment complete while F08 is blocked",
+    "legal/compliance sign-off without C12 external evidence",
+    "pilot UAT acceptance without C13 customer evidence",
+    "100% final acceptance before C15"
+  ]
+}
