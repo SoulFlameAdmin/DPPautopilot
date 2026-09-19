@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "task": "T09",
+  "title": "Accessibility regression gate precursor",
+  "surfaces": [
+    "dashboard",
+    "model",
+    "item",
+    "import",
+    "import-validation",
+    "passport",
+    "settings",
+    "onboarding",
+    "mapping",
+    "auth"
+  ],
+  "required": {
+    "accessibility_probe": true,
+    "accessibility_ready": true,
+    "a11y_pass": true,
+    "main_count_min": 1,
+    "h1_count": 1,
+    "zero_counters": [
+      "duplicate-id-count",
+      "unlabeled-count",
+      "positive-tabindex-count",
+      "focus-failure-count",
+      "missing-alt-count",
+      "contrast-violation-count"
+    ]
+  },
+  "final_acceptance": {
+    "depends_on_u05_green": true,
+    "deployed_manual_accessibility": false
+  }
+}
