@@ -318,7 +318,7 @@
           "acceptanceCriteria": "Models/items/passports/orgs/users represented with PK/FK/check constraints",
           "evidenceRequired": "Migration + schema diff",
           "status": "green",
-          "evidence": "Supabase migration `dpp_core_schema` applied to project `frhletkiuupgksmgxoxc`; runtime verification confirmed 5 DPP-only core tables, PK/FK/check/unique constraints, tenant-safe composite FKs, RLS enabled, and no `anon`/`authenticated` table grants. Canonical migration `supabase/migrations/20260918231500_dpp_core_schema.sql`; GitHub Actions run `35390158548` on commit `575d5a7e08895aa217ff8749d2764a3533bf0954` SUCCESS including `M04_SCHEMA_CONTRACT_PASS`. — PASS"
+          "evidence": "Supabase migration `dpp_core_schema` applied to project `frhletkiuupgksmgxoxc`; runtime verification confirmed 5 DPP-only core tables, PK/FK/check/unique constraints, tenant-safe composite FKs, RLS enabled, and no `anon`/`authenticated` table grants. Canonical migration `supabase/migrations/20260918231500_dpp_core_schema.sql`; GitHub Actions run `35390158548` on commit `575d5a7e08895aa217ff8749d2764a3533bf0954` SUCCESS including `M04_SCHEMA_CONTRACT_PASS`. Production performance hardening migration `dpp_fk_covering_indexes` adds all 16 covering indexes flagged by Supabase advisor; bound guard returned `DPP_FK_COVERING_INDEXES_PASS` and fresh performance-advisor scan reports zero DPP `unindexed_foreign_keys` findings. — PASS"
         },
         {
           "id": "M05",
@@ -854,7 +854,7 @@
           "acceptanceCriteria": "Migration applied/verified before incompatible app release",
           "evidenceRequired": "Deployment log",
           "status": "red",
-          "evidence": "PARTIAL migration deployment gate refreshed against the real bound Supabase history: data/bound-supabase-migration-snapshot.json now covers all committed canonical migrations through dpp_transition_helpers_search_path; fail-closed validator, manifest SHA-256 and exact-project/commit/schema gates previously passed in full run 35423117317, and the new search-path migration is applied/verified in bound Supabase. No deployment was attempted. C04 remains RED because C03 is RED and release-time approved deployment/application evidence does not yet exist. — PARTIAL PASS"
+          "evidence": "PARTIAL migration deployment gate refreshed against the real bound Supabase history: data/bound-supabase-migration-snapshot.json now covers all committed canonical migrations through dpp_fk_covering_indexes; search-path and FK-index hardening migrations are applied/verified in bound Supabase. Existing fail-closed validator, manifest SHA-256 and exact-project/commit/schema gates passed in hardened regression 35423117317; a new exact-head regression is pending for these latest hardening migrations. No deployment was attempted. C04 remains RED because C03 is RED and release-time approved deployment/application evidence does not yet exist. — PARTIAL PASS"
         },
         {
           "id": "C05",
