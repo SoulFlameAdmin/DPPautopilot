@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T09 accessibility regression gate precursor",
+  "currentTask": "T10 full regression aggregate precursor",
   "currentGate": "TESTING",
-  "lastCompletedTask": "T04 layered E2E precursor + full CI 35453738938 SUCCESS",
-  "nextTask": "Build a dedicated fail-closed T09 accessibility CI report from the 10 U05 browser surfaces, prove it in full CI, and keep T09 RED/PARTIAL while U05/manual deployed accessibility acceptance remains non-green. Do not retry F08/M01 without new unblock evidence.",
-  "message": "T04 now has a real layered browser/API/DB precursor report and bound Supabase reproof, but final deployed browser-to-DB/auth/storage acceptance remains explicitly false. No Vercel deployment occurred; DAVID orchestrator files remain untouched.",
+  "lastCompletedTask": "T09 accessibility gate precursor + full CI 35454178109 SUCCESS",
+  "nextTask": "Build T10 aggregate clean-checkout report over T01-T09, prove it in exact-head full CI, and keep final acceptance false until T01-T09 are GREEN and an approved release CI run exists. Do not retry F08/M01 without new unblock evidence.",
+  "message": "T09 now has a fail-closed machine-readable accessibility gate across 10 surfaces; full CI 35454178109 is SUCCESS. T09 remains RED/PARTIAL because U05/manual deployed accessibility acceptance are not GREEN. No Vercel deployment occurred; DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T19:15:00+03:00"
+  "updatedAt": "2026-09-19T19:20:00+03:00"
 }
