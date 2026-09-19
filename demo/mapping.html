@@ -23,7 +23,7 @@ let headers=[],catalog=[];
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 function render(){
  const options=catalog.map(f=>`<option value="${esc(f.path)}">${esc(f.path)}</option>`).join('');
- rows.innerHTML=headers.map(h=>`<div class="row"><strong>${esc(h)}</strong><select data-source="${esc(h)}"><option value="">— unmapped —</option>${options}</select></div>`).join('');
+ rows.innerHTML=headers.map(h=>`<div class="row"><strong>${esc(h)}</strong><select data-source="${esc(h)}" aria-label="Map ${esc(h)} to canonical field"><option value="">— unmapped —</option>${options}</select></div>`).join('');
  for(const sel of rows.querySelectorAll('select')){if(canonical[sel.dataset.source])sel.value=canonical[sel.dataset.source];sel.onchange=update}
  update();
 }
