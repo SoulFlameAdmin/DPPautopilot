@@ -1,4 +1,4 @@
-name: U07 deterministic visual candidate
+name: U07 visual regression
 
 on:
   pull_request:
@@ -31,10 +31,12 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Prove U07 deterministic screenshots
         run: python tests/browser/record_visual_deterministic.py
-      - name: Upload U07 candidate
+      - name: Compare U07 screenshots with approved baseline
+        run: python scripts/validate_u07_visual_regression.py artifacts/u07-deterministic/candidate-v2.json
+      - name: Upload U07 regression evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: u07-deterministic-candidate
+          name: u07-visual-regression-evidence
           path: artifacts/u07-deterministic/
           if-no-files-found: error
