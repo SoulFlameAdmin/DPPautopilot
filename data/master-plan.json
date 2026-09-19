@@ -435,7 +435,7 @@
           "acceptanceCriteria": "Authenticated CRUD with validation/tenant enforcement",
           "evidenceRequired": "API tests",
           "status": "red",
-          "evidence": "PARTIAL authenticated model API precursor: /api/models + four tenant/RBAC-scoped SECURITY DEFINER RPCs; HTTP/DB/security tests PASS in GitHub Actions 35403166134 on 206e8cc445053ff413c5598962988bb6589a5188; migration dpp_models_api applied to bound Supabase and rollback matrix returned M17_MODELS_RPC_SUBSET_PASS; live RPC ACL/search_path verified. M17 remains RED until M01/M03 and deployed end-to-end auth acceptance are complete. — PARTIAL PASS"
+          "evidence": "PARTIAL authenticated models API precursor revalidated against current bound Supabase: M17_MODELS_RPC_SUBSET_PASS proves active-tenant list/create/update/delete, owner/editor writes, viewer read-only, validation SQLSTATEs and non-enumerating cross-tenant failures. Serverless handler/unit contract already exists. M17 remains RED because M03 is not GREEN and deployed authenticated HTTP acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M18",
@@ -444,7 +444,7 @@
           "acceptanceCriteria": "Authenticated CRUD with model linkage/tenant enforcement",
           "evidenceRequired": "API tests",
           "status": "red",
-          "evidence": "PARTIAL authenticated battery-item API precursor: /api/items + four tenant/RBAC RPCs; CI 35403480117 on 3f0326fe... SUCCESS; bound Supabase migration dpp_items_api applied and M18_ITEMS_RPC_SUBSET_PASS; live ACL/search_path verified. M18 remains RED pending M01/M03 and deployed E2E acceptance. — PARTIAL PASS"
+          "evidence": "PARTIAL authenticated items API precursor revalidated against current bound Supabase: M18_ITEMS_RPC_SUBSET_PASS proves active-tenant item CRUD, model linkage, lifecycle/validation rules, RBAC and cross-tenant denial. Serverless handler/unit contract already exists. M18 remains RED because M03 is not GREEN and deployed authenticated HTTP acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M19",
@@ -453,7 +453,7 @@
           "acceptanceCriteria": "Public/private read and controlled write endpoints",
           "evidenceRequired": "API/security tests",
           "status": "red",
-          "evidence": "PARTIAL passport API precursor: /api/passport + public/private/write RPCs; M10 fail-closed public payload policy enforced server-side; CI 35404209335 on d58dc7ff715b92ed0abb18707c417bc998c14b83 SUCCESS; bound Supabase migrations dpp_passports_api + dpp_passport_public_policy_guard applied; runtime M19_PASSPORT_API_SUBSET_PASS; live ACL confirms anon only on public read, authenticated on M19 RPCs, fixed search_path. M19 remains RED pending M03/M10 and deployed E2E acceptance. — PARTIAL PASS"
+          "evidence": "PARTIAL passport API precursor revalidated against current bound Supabase: M19_PASSPORT_API_SUBSET_PASS plus M10_PUBLIC_PRIVATE_RUNTIME_PASS prove active-tenant authenticated private CRUD/read, anonymous active public read, server-side restricted-public-field rejection and non-enumerating tenant isolation. M19 remains RED because M03/M10 are not GREEN and deployed HTTP acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M20",
