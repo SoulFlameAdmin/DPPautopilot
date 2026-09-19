@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "task": "C04",
+  "status": "partial",
+  "migration_dir": "supabase/migrations",
+  "filename_pattern": "^(\\d{14})_([a-z0-9_]+)\\.sql$",
+  "manifest_output": "artifacts/c04-migration-manifest.json",
+  "bound_snapshot": "data/bound-supabase-migration-snapshot.json",
+  "bound_project_id": "frhletkiuupgksmgxoxc",
+  "gate": {
+    "default": "deny",
+    "require_exact_candidate_commit": true,
+    "require_manifest_sha256": true,
+    "require_all_manifest_names_applied": true,
+    "require_schema_verification_pass": true,
+    "allow_extra_database_migrations": true,
+    "compare_database_by": "canonical_name",
+    "compare_repo_contents_by": "sha256"
+  },
+  "evidence_required": [
+    "candidate_commit_sha",
+    "manifest.commit_sha",
+    "manifest.manifest_sha256",
+    "manifest.migrations[].name/sha256",
+    "database.project_id",
+    "database.applied_migration_names",
+    "schema_verification.status",
+    "schema_verification.commit_sha"
+  ],
+  "remaining": [
+    "C03 must be GREEN before C04 can be GREEN.",
+    "A release-time database snapshot must be captured after applying any new migration to the approved non-production/production target as appropriate.",
+    "The exact release commit manifest and schema verification must be stored with deployment evidence."
+  ]
+}
