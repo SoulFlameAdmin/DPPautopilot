@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "External dependency frontier after U02 deterministic async-state precursor",
+  "currentTask": "U04 responsive production UX precursor",
   "currentGate": "UX",
-  "lastCompletedTask": "U02 deterministic async-state precursor + full CI 35429830868 SUCCESS",
-  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue dependency-safe non-deploy UX precursors; strengthen U03 accessible form validation/error recovery across core write surfaces before U04.",
-  "message": "All six async core views now expose browser-proven loading/empty/success/error states; 24-state matrix and full CI 35429830868 are SUCCESS. U02 remains RED only because U01/M24/deployed E2E are not GREEN. F08/M01/M13 external gaps remain deferred; no Vercel deploy/redeploy occurred and DAVID orchestrator files remain untouched.",
+  "lastCompletedTask": "U03 accessible form validation precursor + full CI 35448135007 SUCCESS",
+  "nextTask": "Do not retry F08/M01 without new unblock evidence. Strengthen U04 with measured phone/tablet/desktop overflow/blocker browser evidence; keep U04 RED until U01-U03 dependencies are GREEN and deployed E2E is accepted.",
+  "message": "U03 accessible validation/input-preservation is browser-proven across model/item/auth/recovery/mapping/import; full CI 35448135007 is SUCCESS and artifact 10585941329 is recorded. U03 remains RED because M22/deployed E2E are not GREEN. Proceeding to non-deploy U04 responsive precursor. No Vercel deployment occurred; DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T10:41:00+03:00"
+  "updatedAt": "2026-09-19T17:18:00+03:00"
 }
