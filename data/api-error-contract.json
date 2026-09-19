@@ -250,7 +250,51 @@
         "message": "The import mapping was not found."
       }
     },
-    "tenant": {}
+    "tenant": {},
+    "organizations": {
+      "23505": {
+        "http_status": 409,
+        "code": "ORGANIZATION_CONFLICT",
+        "message": "An organization with the requested identity already exists."
+      },
+      "DP501": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      }
+    },
+    "members": {
+      "23503": {
+        "http_status": 409,
+        "code": "MEMBER_CONFLICT",
+        "message": "The membership conflicts with a related identity."
+      },
+      "23505": {
+        "http_status": 409,
+        "code": "MEMBER_CONFLICT",
+        "message": "The membership already exists."
+      },
+      "DP501": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP502": {
+        "http_status": 404,
+        "code": "MEMBER_TARGET_NOT_FOUND",
+        "message": "The target user was not found."
+      },
+      "DP503": {
+        "http_status": 404,
+        "code": "MEMBER_NOT_FOUND",
+        "message": "The membership was not found."
+      },
+      "DP505": {
+        "http_status": 409,
+        "code": "MEMBER_CONFLICT",
+        "message": "The membership already exists."
+      }
+    }
   },
   "local_codes": {
     "AUTH_REQUIRED": {
