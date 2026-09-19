@@ -336,3 +336,11 @@ Append evidence here only after verification.
 - Initial probe found tablet model-field and validation-table overflow; fixed in `b1e3c22f2b6a657bea8dce5aa4e89a6e7d5addbc` and `5e629a7ca4fba800c2c3cd49acda941350b27cc7`.
 - Exact-head PR-only full CI `35448804599` completed SUCCESS, including browser responsive matrix and full API/DB/security regression.
 - U04 remains RED because U01-U03 are not GREEN and deployed production E2E acceptance is not yet available.
+
+
+### U05 automated accessibility precursor — 2026-09-19
+- Browser-native accessibility probe covers 10 core surfaces: dashboard, model, item, import, import-validation, passport, settings, onboarding, mapping and auth.
+- Automated checks require a main landmark, exactly one H1, zero duplicate IDs, accessible names for visible interactive controls, no positive tabindex, successful programmatic focus, alt text on visible images and passing measured contrast.
+- Concrete defects found and fixed before acceptance: mapping select labels, import-validation back-link contrast, mapping back-link contrast and auth back-link contrast. Failed probes were not accepted as evidence.
+- Exact-head PR-only full CI `35450600111` on `main@e61fcf2c8fbbee5e6d587a5c52081581d83f5bb5` completed SUCCESS, including the U05 browser gate and full API/DB/security/restore regression.
+- U05 remains RED/PARTIAL because U01-U04 are not GREEN and required manual/deployed accessibility acceptance is not yet proven. No Vercel deployment was attempted.
