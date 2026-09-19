@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "External dependency frontier after M24 onboarding precursor",
-  "currentGate": "MVP",
-  "lastCompletedTask": "M02/M03/M22/M24 onboarding precursor + full CI 35428653493 SUCCESS",
-  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue dependency-safe non-deploy product/security precursors; prefer gaps that increase real onboarding/deployed readiness without claiming GREEN.",
-  "message": "Organization/member DB + HTTP onboarding and a stateful M24 new-org→member→model/item→import→passport precursor are implemented and full CI 35428653493 is SUCCESS. Bound onboarding migrations/tests pass. M02/M03/M22/M24 remain RED/PARTIAL only because M01/deployed real-auth/storage acceptance is still unavailable. F08/M01 remain deferred; no Vercel deploy/redeploy occurred, so no deploy lease was required. DAVID orchestrator files remain untouched.",
+  "currentTask": "U01 core navigation precursor",
+  "currentGate": "UX",
+  "lastCompletedTask": "M24 onboarding browser precursor + full CI 35428911661 SUCCESS",
+  "nextTask": "Build and browser-test complete core navigation (dashboard/models/items/imports/passports/settings) without claiming U01 GREEN while M24 remains RED.",
+  "message": "M24 now has DB + HTTP/stateful + browser precursor evidence. demo/onboarding.html is linked from the dashboard and full CI 35428911661 is SUCCESS. Next safe work is U01 core navigation/settings precursor; F08/M01 remain deferred, no Vercel deploy occurred, and DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T10:15:00+03:00"
+  "updatedAt": "2026-09-19T10:20:00+03:00"
 }
