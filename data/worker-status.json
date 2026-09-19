@@ -1,16 +1,16 @@
 {
   "worker": "DAVID",
   "mode": "BUILD",
-  "state": "blocked",
-  "currentTask": "F08 guarded Vercel CLI deployment lane merged and fully validated; awaiting authorized real deployment execution",
-  "currentGate": "FOUNDATION",
-  "lastCompletedTask": "PR #57 merged as a3e4f745e7bd575279dc01afcb1dde0e7f0abe88; PR CI 35463559589 SUCCESS and post-merge main CI 35463752080 SUCCESS",
-  "nextTask": "When VERCEL_TOKEN and workflow dispatch authorization are available, run DPP Vercel deploy for the exact current main SHA, verify live home/master-plan HTTP smoke and receipt, then continue M01/M13 dependent production acceptance",
-  "message": "A real fallback deployment mechanism now exists and is merged: manual exact-SHA Vercel CLI deployment, locked to the DPP Vercel team/project, production-confirmed, smoke-tested and receipt-producing. F08 is intentionally still BLOCKED because neither this connector session nor the repository has proven an authorized VERCEL_TOKEN workflow execution, and Vercel still has no real DPP deployment evidence.",
+  "state": "working",
+  "currentTask": "M02 organization discovery precursor merged and evidenced; continue earliest dependency-safe MVP precursor while F08/M01 remain deferred external blockers",
+  "currentGate": "MVP / DATA / AUTH / API",
+  "lastCompletedTask": "PR #66 merged as f48f8b7884e2e3ad3e53c61374acc7a781c4bb87; exact-head CI 35475511177 SUCCESS; canonical evidence recorded in f8efd58f703750c5e7dae2593ae1db414aa2f953",
+  "nextTask": "Continue dependency-safe non-deploy MVP hardening in task order; do not retry F08 without new quota/access evidence. Prefer M03/RBAC or another RED task whose implementation can advance without M01 deployment acceptance.",
+  "message": "F08 and M01 remain external blockers, but they do not stop independent project work. D01-D14 are GREEN. M02/M03 and downstream API/security tasks have substantial partial evidence; continue real implementation/tests without status inflation, and only revisit Vercel when new evidence shows deployment can proceed.",
   "deferredBlockers": [
-    "F08 — deployment code path is ready and CI-proven, but a credentialed real Vercel workflow execution is still required; no production deployment is claimed.",
-    "M01 — final runtime recovery password-update acceptance requires the real deployed DPP recovery redirect produced after F08.",
-    "M13 — real authenticated Storage API byte upload/download/delete acceptance still lacks an available direct Storage object action in the current Supabase connector."
+    "F08 — Vercel production acceptance remains externally blocked; do not retry without new quota/access evidence and always obey the global Supabase deployment lease law.",
+    "M01 — final runtime recovery password-update acceptance remains blocked on a usable deployed recovery redirect.",
+    "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-19T22:18:08+03:00"
+  "updatedAt": "2026-09-20T02:25:00+03:00"
 }
