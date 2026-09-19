@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "task": "C05",
+  "status": "partial",
+  "canonical": {
+    "source_repo": "SoulFlameAdmin/DPPautopilot",
+    "source_branch": "main",
+    "vercel_project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "supabase_project_id": "frhletkiuupgksmgxoxc"
+  },
+  "default_decision": "deny",
+  "strategies": {
+    "application_rollback": {
+      "allowed_triggers": [
+        "application_regression"
+      ],
+      "database_mutation": false,
+      "requirements": [
+        "target deployment is immutable, READY and belongs to canonical Vercel project",
+        "target deployment is explicitly marked last-known-good",
+        "target release commit differs from failing release commit",
+        "target release passed CI/security/browser verification",
+        "target application is verified compatible with the currently active schema"
+      ]
+    },
+    "forward_fix": {
+      "allowed_triggers": [
+        "schema_incompatible",
+        "irreversible_migration",
+        "migration_defect"
+      ],
+      "destructive_database_rollback": false,
+      "requirements": [
+        "forward-fix candidate commit differs from failing release",
+        "C04 migration gate passed for exact forward-fix commit",
+        "isolated schema verification passed for exact forward-fix commit",
+        "forward-fix migration plan is tested"
+      ]
+    },
+    "isolated_restore_then_recover": {
+      "allowed_triggers": [
+        "data_corruption",
+        "data_loss"
+      ],
+      "direct_production_restore": false,
+      "requirements": [
+        "backup source is identified and recovery point is recorded",
+        "isolated restore completed successfully",
+        "schema/relations/RLS/binding integrity checks passed",
+        "data-loss boundary and storage-object recovery state are documented",
+        "explicit production recovery authorization exists before any destructive production action"
+      ]
+    }
+  },
+  "safety_rules": [
+    "Never roll back the database merely because an application rollback is requested.",
+    "Never treat a PostgreSQL restore as evidence-object recovery.",
+    "Never execute a production rollback/redeploy without the DAVID Vercel deployment lease when a Vercel action is required.",
+    "Never bypass authentication, MFA, CAPTCHA, provider permissions or approval gates.",
+    "Preserve audit/log/request-ID evidence before destructive recovery.",
+    "Prefer backward-compatible forward-fix migrations over destructive schema rollback."
+  ],
+  "runtime_state": {
+    "live_rollback_executed": false,
+    "live_database_restore_executed": false,
+    "deployment_lease_required_for_this_precursor": false
+  },
+  "remaining": [
+    "C03 and C04 must be GREEN before C05 can be GREEN.",
+    "A real last-known-good production deployment must exist before application rollback can be drilled live.",
+    "Production backup mode/storage-object recovery coverage must meet R11 before a production data-recovery drill.",
+    "A live rollback/recovery drill must capture exact deployment/database evidence and post-recovery smoke checks."
+  ]
+}
