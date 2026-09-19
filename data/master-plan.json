@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T07:05:00+03:00",
+  "updatedAt": "2026-09-19T07:38:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -300,7 +300,7 @@
           "acceptanceCriteria": "Users belong to organisations and active tenant is explicit",
           "evidenceRequired": "DB + integration tests",
           "status": "red",
-          "evidence": "PARTIAL explicit active-tenant precursor: migration `20260919010000_dpp_tenant_context_rbac.sql` adds membership-backed `dpp_user_tenant_context` and `dpp_set_active_organization()`; non-member selection and missing auth fail closed. Bound Supabase rollback matrix returned `M02_M03_TENANT_RBAC_SUBSET_PASS`; full CI `35400537746` on `f6d7a964d6f2482f1701c86d36f54262455dbdb7` SUCCESS with clean PostgreSQL replay + browser smoke; artifact `10569034799`. M02 remains RED until M01 auth acceptance is complete and app/API consumes active-tenant context. — PARTIAL PASS"
+          "evidence": "PARTIAL explicit tenant membership/context implementation now includes SECURITY DEFINER tenant-context RPCs plus /api/tenant. Bound Supabase rollback matrix M02_M03_TENANT_API_SUBSET_PASS proved caller-only membership enumeration, no invented active tenant, multi-tenant switch, non-member denial and unauthenticated fail-closed. Exact-file Node tenant API tests passed 6/6. CI wiring is committed at c4a358651e7b2af641e1f580517bf762bb4998aa but no Actions run is yet surfaced. M02 remains RED because dependency M01 is BLOCKED and full authenticated app acceptance is not yet available. — PARTIAL PASS"
         },
         {
           "id": "M03",
@@ -309,7 +309,7 @@
           "acceptanceCriteria": "Owner/admin/editor/viewer permissions enforced server-side",
           "evidenceRequired": "Authorization test matrix",
           "status": "red",
-          "evidence": "PARTIAL server-side RBAC precursor: `dpp_require_active_role(text[])` enforces owner/admin/editor/viewer against the explicit active tenant; bound Supabase matrix proved owner/admin/editor/viewer positive and insufficient-role/cross-tenant/missing-auth negative cases. Full CI `35400537746` SUCCESS; artifact `10569034799`. M03 remains RED until M01/M02 are fully accepted and authenticated app/API authorization is exercised end-to-end. — PARTIAL PASS"
+          "evidence": "PARTIAL server-side RBAC implementation now reaches tenant-context API: caller roles are returned only for caller memberships; active tenant switch is membership checked; existing dpp_require_active_role remains the server-side role assertion used by data RPCs. Bound Supabase M02_M03_TENANT_API_SUBSET_PASS plus exact-file Node tests 6/6 passed. CI wiring is committed at c4a358651e7b2af641e1f580517bf762bb4998aa but no Actions run is yet surfaced. M03 remains RED because dependencies M01/M02 are not GREEN. — PARTIAL PASS"
         },
         {
           "id": "M04",
