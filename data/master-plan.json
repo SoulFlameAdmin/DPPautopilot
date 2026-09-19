@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T19:42:00+03:00",
+  "updatedAt": "2026-09-19T22:18:08+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -86,7 +86,7 @@
           "acceptanceCriteria": "Production deployment READY; app and data JSON return 200",
           "evidenceRequired": "Deployment metadata + HTTP verification",
           "status": "blocked",
-          "evidence": "After the documented quota-reset window passed, mirror-only trigger commit `d573b6ebc9072dbce41a0253f33730433d2c1897` was created in `SoulFlameAdmin/dpp`. Repeated verification still showed zero Vercel deployments for project `prj_K0RSGrEkEr3XDouCTA3tdasbqH55` and no GitHub commit status, so the current blocker is an inactive/missing Git→Vercel deployment integration/hook rather than the earlier daily build quota. No further trigger commits were spammed. — BLOCKED"
+          "evidence": "The original Git→Vercel integration remains inactive and both known DPP Vercel projects still had 0 deployments at the latest read. To remove that single-hook dependency, PR #57 added a guarded manual exact-SHA Vercel CLI delivery lane bound to team `team_cKaIZfnCMzoiiq80J0MhV0A2` and project `prj_K0RSGrEkEr3XDouCTA3tdasbqH55`: production is restricted to the exact current `main` SHA plus explicit `DEPLOY_PRODUCTION` confirmation, uses secret `VERCEL_TOKEN`, performs prebuilt deployment, live `/` + `/data/master-plan.json` smoke checks, and writes a deployment receipt. PR CI `35463559589` SUCCESS and post-merge main CI `35463752080` SUCCESS on merge commit `a3e4f745e7bd575279dc01afcb1dde0e7f0abe88`. No real Vercel production deployment has yet executed, so F08 remains BLOCKED until credentialed workflow execution yields a live verified deployment. — BLOCKED"
         },
         {
           "id": "F09",
