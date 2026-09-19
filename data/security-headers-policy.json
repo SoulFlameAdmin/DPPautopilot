@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "task": "R02",
+  "status": "partial",
+  "source": "vercel.json",
+  "scope": "all routes including static app, data files and API responses",
+  "headers": {
+    "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests",
+    "Strict-Transport-Security": "max-age=31536000",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Permissions-Policy": "camera=(self), microphone=(), geolocation=(), payment=(), usb=()"
+  },
+  "csp_compatibility": {
+    "external_asset_search": "Repository code search found no committed https:// asset references on the default branch.",
+    "supabase_connect": [
+      "https://*.supabase.co",
+      "wss://*.supabase.co"
+    ],
+    "local_asset_schemes": [
+      "'self'",
+      "data:",
+      "blob:"
+    ],
+    "inline_scripts_styles": "Temporarily allowed because current static demo uses inline scripts/styles; remove unsafe-inline after nonce/hash refactor."
+  },
+  "live_acceptance_required": [
+    "HTTPS endpoint is reachable on the real production hostname.",
+    "Live response headers match the committed policy on HTML, /data/* and /api/* routes.",
+    "TLS certificate/chain/hostname validation succeeds.",
+    "No CSP violations break authentication, API calls or core UI flows."
+  ],
+  "blockers": [
+    "F08 production deployment is blocked by inactive/missing Git→Vercel deployment hook.",
+    "No live TLS/header scan may be claimed before a real deployment exists."
+  ]
+}
