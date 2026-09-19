@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "C14 — final production evidence pack precursor analysis",
-  "currentGate": "RELEASE",
-  "lastCompletedTask": "C11 partial privacy/compliance acceptance precursor — CI 35415910084 SUCCESS",
-  "nextTask": "Build a fail-closed production evidence-pack index over existing commit/test/migration/backup/runbook/release evidence without claiming C14 GREEN while C07-C13 remain incomplete or blocked.",
-  "message": "D01-D14 remain GREEN. C11 now has evidence-backed fail-closed privacy/compliance acceptance rules but remains RED pending R07/R08; C12 legal sign-off and C13 pilot UAT remain external/blocked. Next useful independent precursor is C14 evidence-pack assembly. F08/M01 remain deferred. No Vercel deploy or database mutation attempted. DAVID orchestrator files untouched.",
+  "currentTask": "M05 — tenant isolation/RLS downstream hardening",
+  "currentGate": "MVP",
+  "lastCompletedTask": "M02/M03 tenant-context API precursor — Supabase runtime PASS + Node 6/6 PASS",
+  "nextTask": "Strengthen M05 tenant isolation using the now explicit tenant-context API contract without claiming GREEN while M01/M02/M03 remain non-GREEN.",
+  "message": "D01-D14 remain GREEN. F08/M01 remain deferred external blockers. M02/M03 gained real application tenant-context API consumption and runtime/unit evidence; statuses remain RED due dependencies. No Vercel deploy attempted. DAVID orchestrator files untouched.",
   "deferredBlockers": [
-    "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
-    "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
+    "F08 — inactive/missing Git→Vercel deployment hook; deferred until new evidence.",
+    "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred until deployment path exists."
   ],
-  "updatedAt": "2026-09-19T05:33:23+03:00"
+  "updatedAt": "2026-09-19T07:38:00+03:00"
 }
