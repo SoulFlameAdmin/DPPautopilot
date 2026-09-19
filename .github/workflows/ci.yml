@@ -631,6 +631,13 @@ jobs:
             'http://127.0.0.1:8000/?plan=open'
           python scripts/ui_smoke.py artifacts/d01-dom.html artifacts/d01-dashboard.png
 
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/onboarding.html?sample=1' > artifacts/m24-onboarding-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --window-size=1440,1100 --screenshot=artifacts/m24-onboarding.png \
+            'http://127.0.0.1:8000/demo/onboarding.html?sample=1'
+          python scripts/validate_onboarding_demo.py artifacts/m24-onboarding-dom.html
+
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
             --dump-dom 'http://127.0.0.1:8000/demo/import.html?sample=1' > artifacts/d03-import-dom.html
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
