@@ -110,6 +110,8 @@ jobs:
         run: node --test tests/api/input-validation.test.cjs
       - name: Run T03 stateful API integration precursor
         run: node --test tests/api/integration.test.cjs
+      - name: Generate T03 API integration coverage report
+        run: python scripts/generate_api_integration_report.py
       - name: Run R05 abuse and 429 precursor suite
         run: node --test tests/api/rate-limit.test.cjs
       - name: Run R09 observability redaction suite
