@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "status": "approved_precursor",
+  "approved_at": "2026-09-19T18:43:00+03:00",
+  "source_run_id": 35452567110,
+  "source_artifact_id": 10586867949,
+  "source_artifact_digest": "sha256:591feaa103ae7f377cb27534305a1e1d086a4915a60dd8ea4af51dedc0c3b6ff",
+  "source_commit": "36032b682ab649d07fab82ffb885ea168e4b5408",
+  "browser": "chromium",
+  "browser_version": "153.0.8010.12",
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "normalization": {
+    "dashboard_dynamic_fields": [
+      "blockedCount",
+      "currentTask",
+      "greenCount",
+      "lastCompleted",
+      "nextTask",
+      "overallPct",
+      "remainingCount",
+      "workerMessage",
+      "workerStamp"
+    ],
+    "animations_disabled": true,
+    "reduced_motion": "reduce",
+    "full_page": false
+  },
+  "review": {
+    "visual_review": "pass",
+    "deterministic_repeat": "10/10 byte-identical",
+    "notes": "10 core viewport screenshots reviewed; no clipping, overlap, broken cards/forms, empty render or visible layout regression."
+  },
+  "surfaces": {
+    "dashboard": {
+      "route": "/",
+      "sha256": "da2a59f9c8428289dd7613b90f07088bdacb9620fad4a175268777a8be9a1833"
+    },
+    "model": {
+      "route": "/demo/model.html?sample=1",
+      "sha256": "11f892e4ff512077148a54bc2ec0aed6403b8c89e7c2637193869568485443fc"
+    },
+    "item": {
+      "route": "/demo/item.html?sample=1",
+      "sha256": "9cf1620aa20ec318988190cfee535898b734bf65e7d0ccad169617b2b327a798"
+    },
+    "import": {
+      "route": "/demo/import.html?sample=1",
+      "sha256": "63b128bc121d0dcb503d4909439655ee34969a3cab04790d6c61c5d59ce713a4"
+    },
+    "import-validation": {
+      "route": "/demo/import-validation.html",
+      "sha256": "0f87a97a8a66a0d9844107c3d6baa40a60cdcf599ea551deefaae838688a35dc"
+    },
+    "passport": {
+      "route": "/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001",
+      "sha256": "fa92cb0d11fe38ae4cc84e4ce551ca50ec690157af0590525e8eb23d79d03db1"
+    },
+    "settings": {
+      "route": "/demo/settings.html?sample=1",
+      "sha256": "e8635e455f7e630f4711b2d7d9bab2ba3b94c6e7581299ffcd2124db3a5ef7ed"
+    },
+    "onboarding": {
+      "route": "/demo/onboarding.html?sample=1",
+      "sha256": "1ef9383999285fbb9a8489e9ca193870e478636f604a27de20a8bcb6536a349b"
+    },
+    "mapping": {
+      "route": "/demo/mapping.html",
+      "sha256": "799ce8148926067d7807e41acefceb5fef1a9e9ce7de543d62611386ddb1bc73"
+    },
+    "auth": {
+      "route": "/demo/auth.html",
+      "sha256": "87b82f34c2235b0a8b25d43f11a6c15839385d8148d5fdabd629fa2f0abf81b0"
+    }
+  }
+}
