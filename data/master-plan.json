@@ -953,7 +953,7 @@
           "acceptanceCriteria": "Every required task GREEN; no mandatory test failing; production verified",
           "evidenceRequired": "Final audit + evidence pack",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: C14."
+          "evidence": "PARTIAL fail-closed final-acceptance precursor: data/final-acceptance-policy.json + scripts/final_acceptance_audit.py audit all mandatory pre-production/release tasks through C14, require C14 GREEN/READY, final mandatory CI SUCCESS and exact verified production commit/deployment; any RED/BLOCKED task or missing/drifted production evidence returns NOT_COMPLETE. CI 35416413176 on 736be285dd35388d8622f8b2c51ae84d3a3a061b SUCCESS including C15 validator/tests and generated audit artifact 10576245984 plus full regression. C15 remains RED because the real audit is not complete while mandatory tasks/production verification remain non-GREEN or unproven. — PARTIAL PASS"
         }
       ]
     },
