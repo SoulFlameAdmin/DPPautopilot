@@ -40,6 +40,28 @@ test('POST requires bearer authentication before upstream',async()=>{
   });
 });
 
+test('GET lists only caller organizations and explicit active tenant state',async()=>{
+  let seen;
+  await withEnvFetch(async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return [{
+      organization_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      name:'Pilot Org',slug:'pilot-org',role:'owner',active:true
+    }];}};
+  },async()=>{
+    const res=makeRes();
+    await handler(req('GET',null),res);
+    assert.equal(res.statusCode,200);
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_organizations_list');
+    assert.equal(seen.options.headers.Authorization,'Bearer onboarding-token');
+    assert.deepEqual(JSON.parse(seen.options.body),{});
+    const body=JSON.parse(res.body);
+    assert.equal(body.data.length,1);
+    assert.equal(body.data[0].active,true);
+    assert.equal(body.data[0].role,'owner');
+  });
+});
+
 test('POST validates and forwards organization creation RPC',async()=>{
   let seen;
   await withEnvFetch(async(url,options)=>{
@@ -88,7 +110,7 @@ test('organization conflict maps to stable 409 without DB detail leak',async()=>
 
 test('unsupported methods return 405 with Allow header',async()=>{
   const res=makeRes();
-  await handler(req('GET',null),res);
+  await handler(req('PUT',null),res);
   assert.equal(res.statusCode,405);
-  assert.equal(res.headers.allow,'POST');
+  assert.equal(res.headers.allow,'GET, POST');
 });
