@@ -1,6 +1,7 @@
 'use strict';
 
 (function(){
+  if(new URLSearchParams(window.location.search).get('accessibilityProbe')!=='1') return;
   const interactiveSelector='a[href],button,input:not([type="hidden"]),select,textarea,[tabindex]';
 
   function visible(el){
