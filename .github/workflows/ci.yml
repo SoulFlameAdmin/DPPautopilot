@@ -152,6 +152,10 @@ jobs:
         run: python -m unittest tests.unit.test_final_acceptance -v
       - name: Generate T01 unit acceptance coverage report
         run: python scripts/generate_unit_test_report.py
+      - name: Run M02 M24 organizations HTTP contract unit tests
+        run: node --test tests/api/organizations.test.cjs
+      - name: Run M03 M24 members HTTP contract unit tests
+        run: node --test tests/api/members.test.cjs
       - name: Run M17 models HTTP contract unit tests
         run: node --test tests/api/models.test.cjs
       - name: Run M18 items HTTP contract unit tests
