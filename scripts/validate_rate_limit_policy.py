@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==5
+assert policy.get("version")==6
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
 assert policy.get("strategy")=="process_local_dual_bucket_fixed_window_precursor"
@@ -41,7 +41,7 @@ for name,(limit,window) in expected_rules.items():
     assert rules[name]["window_seconds"]==window
 
 surfaces=policy.get("surfaces",{})
-assert set(surfaces)=={"tenant","models","items","passport","imports","export"}
+assert set(surfaces)=={"tenant","organizations","members","models","items","passport","imports","export"}
 api_surface_inventory={
     path.stem for path in (ROOT/"api").glob("*.js")
     if not path.name.startswith("_")
@@ -71,7 +71,7 @@ for token in [
 ]:
     assert token in helper, f"R05 helper missing {token}"
 
-for surface in ["tenant","models","items","passport","imports","export"]:
+for surface in ["tenant","organizations","members","models","items","passport","imports","export"]:
     text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
     assert "require('./_rate_limit.js')" in text, f"{surface} does not import R05 limiter"
     call=f"enforceRateLimit(req,res,'{surface}')"
@@ -106,4 +106,4 @@ limitations=policy.get("limitations",[])
 assert any("parallel serverless isolates" in x for x in limitations)
 assert any("shared durable limiter" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: six inventoried API surfaces have versioned process-local abuse budgets, dual privacy-hashed network/credential buckets, bounded memory, canonical 429 behavior and explicit distributed-runtime limitation")
+print("R05_RATE_LIMIT_POLICY_PASS: eight inventoried API surfaces have versioned process-local abuse budgets, dual privacy-hashed network/credential buckets, bounded memory, canonical 429 behavior and explicit distributed-runtime limitation")
