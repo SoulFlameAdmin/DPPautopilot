@@ -84,6 +84,8 @@ jobs:
         run: python scripts/validate_rollback_policy.py
       - name: Validate C06 staging acceptance policy
         run: python scripts/validate_staging_acceptance.py
+      - name: Validate C07 production smoke policy
+        run: python scripts/validate_production_smoke.py
       - name: Generate C04 migration release manifest
         run: python scripts/generate_migration_release_manifest.py --commit "$GITHUB_SHA"
       - name: Upload C04 migration manifest
@@ -114,6 +116,8 @@ jobs:
         run: python -m unittest tests.unit.test_rollback_evidence -v
       - name: Run C06 staging acceptance tests
         run: python -m unittest tests.unit.test_staging_acceptance -v
+      - name: Run C07 production smoke evidence tests
+        run: python -m unittest tests.unit.test_production_smoke -v
       - name: Generate T01 unit acceptance coverage report
         run: python scripts/generate_unit_test_report.py
       - name: Run M17 models HTTP contract unit tests
