@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T02:25:00+03:00",
+  "updatedAt": "2026-09-20T02:45:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -309,7 +309,7 @@
           "acceptanceCriteria": "Owner/admin/editor/viewer permissions enforced server-side",
           "evidenceRequired": "Authorization test matrix",
           "status": "red",
-          "evidence": "PARTIAL server-side RBAC now includes production-shaped organization member management in addition to existing owner/admin/editor/viewer matrices. Bound `M02_M03_M24_ORGANIZATION_ONBOARDING_PASS` proves owner creation, admin/editor/viewer add/update/delete boundaries, owner protection, admin anti-escalation, viewer denial and cross-tenant isolation; `DPP_SECURITY_DEFINER_RPC_GUARD_PASS` remains PASS. `/api/members` HTTP contract tests cover auth, active-tenant routing, CRUD RPC forwarding, stable errors and tenant-override rejection. Exact-head full CI `35428653493` SUCCESS. M03 remains RED because M01/M02 are not GREEN and deployed authorization acceptance is unavailable. — PARTIAL PASS"
+          "evidence": "PARTIAL server-side RBAC now includes production-shaped membership management plus authoritative active-tenant role/capability discovery. Bound Supabase migration `dpp_authorization_context` version `20260919233507` is applied; runtime owner/admin/editor/viewer matrix returned `M03_AUTHORIZATION_CONTEXT_PASS`. ACL verification proves `SECURITY DEFINER`, fixed `search_path=public, pg_temp`, authenticated EXECUTE and anon denial. Exact-head GitHub Actions CI `35476608040` on `d7c9ff0b35a773a9c4be8baf4c435a8886b9c040` completed SUCCESS, including C04 bound migration gate, clean PostgreSQL replay, M03 authorization context matrix and global SECURITY DEFINER RPC guard. PR #68 merged as `c1ae0b05b35fc6905d4442189aab1c4af9c2de67`. M03 remains RED because M01/M02 are not GREEN and deployed authorization acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M04",
