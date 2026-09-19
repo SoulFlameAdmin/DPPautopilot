@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T22:18:08+03:00",
+  "updatedAt": "2026-09-19T23:51:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -86,7 +86,7 @@
           "acceptanceCriteria": "Production deployment READY; app and data JSON return 200",
           "evidenceRequired": "Deployment metadata + HTTP verification",
           "status": "blocked",
-          "evidence": "The original Git→Vercel integration remains inactive and both known DPP Vercel projects still had 0 deployments at the latest read. To remove that single-hook dependency, PR #57 added a guarded manual exact-SHA Vercel CLI delivery lane bound to team `team_cKaIZfnCMzoiiq80J0MhV0A2` and project `prj_K0RSGrEkEr3XDouCTA3tdasbqH55`: production is restricted to the exact current `main` SHA plus explicit `DEPLOY_PRODUCTION` confirmation, uses secret `VERCEL_TOKEN`, performs prebuilt deployment, live `/` + `/data/master-plan.json` smoke checks, and writes a deployment receipt. PR CI `35463559589` SUCCESS and post-merge main CI `35463752080` SUCCESS on merge commit `a3e4f745e7bd575279dc01afcb1dde0e7f0abe88`. No real Vercel production deployment has yet executed, so F08 remains BLOCKED until credentialed workflow execution yields a live verified deployment. — BLOCKED"
+          "evidence": "Vercel project `dpp-autopilot` (`prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr`) now has a real target=production deployment `dpl_9y7hWGAJoZpSszbEWjY8ixQUR3os` in READY state from Git commit `2c4b21364a9aaac889b1ad2cacd6eac67a80850b`. Production alias `dpp-autopilot.vercel.app` is currently protected by Vercel SSO/Deployment Protection: connector HTTP verification returns 302 redirect instead of the required public 200, and protected JSON routes cannot be independently verified as public 200. F08 therefore remains BLOCKED until production protection is intentionally configured to permit the required public app/data smoke, or equivalent accepted public 200 evidence exists. No redeploy was attempted. — BLOCKED"
         },
         {
           "id": "F09",
@@ -291,7 +291,7 @@
           "acceptanceCriteria": "Sign-up/in/out/reset/session handling works",
           "evidenceRequired": "Auth integration tests",
           "status": "blocked",
-          "evidence": "Normal Supabase Auth acceptance advanced without admin bypass: email confirmation completed for an isolated test identity, authenticated `/auth/v1/user` returned HTTP 200, refresh-token flow returned new bearer tokens, logout returned 204 and the old session then returned 403 `session_not_found`; recovery request returned 200 and the recovery email arrived. Recovery-completion page now implements authenticated `PATCH /auth/v1/user` with fragment-only token/no persistence; contract + browser-safe default state passed full CI run `35394545987` on `d843dd7f432475ee53a85028846bb8663d9c32f1`. Final runtime password-update completion remains unproven because the DPP recovery redirect is not deployable while F08 is blocked and direct recovery-token forwarding is blocked by safety controls. — BLOCKED"
+          "evidence": "Normal Supabase Auth acceptance already proves email confirmation, authenticated session, refresh, logout invalidation and recovery-email request; recovery-completion page implements authenticated password PATCH with fragment-only token handling and CI coverage. A real DPP production deployment now exists, but its production alias is behind Vercel Deployment Protection/SSO and returns 302 to unauthenticated clients, so the normal recovery redirect still cannot complete as a public runtime flow. M01 remains BLOCKED pending an intentionally accessible deployed recovery route and real password-update completion evidence; no recovery token bypass or forwarding was attempted. — BLOCKED"
         },
         {
           "id": "M02",
