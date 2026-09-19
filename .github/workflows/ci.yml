@@ -74,6 +74,8 @@ jobs:
         run: python scripts/validate_api_input_validation.py
       - name: Validate T03 API integration matrix
         run: python scripts/validate_api_integration_matrix.py
+      - name: Validate R05 rate limit policy
+        run: python scripts/validate_rate_limit_policy.py
       - name: Validate X06 mapping assistant evaluation
         run: python scripts/validate_mapping_assistant.py
       - name: Audit Python CI dependencies
@@ -104,6 +106,8 @@ jobs:
         run: node --test tests/api/input-validation.test.cjs
       - name: Run T03 stateful API integration precursor
         run: node --test tests/api/integration.test.cjs
+      - name: Run R05 abuse and 429 precursor suite
+        run: node --test tests/api/rate-limit.test.cjs
       - name: Validate D09 completeness and D10 warnings
         run: python scripts/validate_completeness.py
       - name: Validate M04 core database schema contract
