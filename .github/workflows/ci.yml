@@ -428,6 +428,8 @@ jobs:
         run: python scripts/validate_observability_policy.py
       - name: Validate R10 monitoring alert policy
         run: python scripts/validate_monitoring_alert_policy.py
+      - name: Validate R13 incident runbook
+        run: python scripts/validate_incident_runbook.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
       - name: Browser smoke test demo surfaces
