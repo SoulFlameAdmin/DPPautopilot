@@ -68,10 +68,24 @@ async function handler(req,res){
   const authorization=bearer(req);
   if(!authorization) return send(res,401,{error:{code:'AUTH_REQUIRED',message:'Bearer authentication is required.'}});
 
-  const method=String(req.method||'POST').toUpperCase();
-  if(method!=='POST'){
-    res.setHeader('Allow','POST');
+  const method=String(req.method||'GET').toUpperCase();
+  if(!['GET','POST'].includes(method)){
+    res.setHeader('Allow','GET, POST');
     return send(res,405,{error:{code:'METHOD_NOT_ALLOWED',message:'Unsupported method.'}});
+  }
+
+  if(method==='GET'){
+    try{
+      const organizations=await rpc('dpp_api_organizations_list',{},authorization);
+      return send(res,200,{data:organizations});
+    }catch(error){
+      const status=Number.isInteger(error.status)?error.status:502;
+      const code=error.publicCode||error.message||'UPSTREAM_ERROR';
+      const message=error.publicMessage||(status===500
+        ?'Server configuration is incomplete.'
+        :status>=500?'Database request failed.':code.replace(/_/g,' ').toLowerCase());
+      return send(res,status,{error:{code,message}});
+    }
   }
 
   let body={};
