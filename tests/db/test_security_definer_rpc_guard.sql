@@ -72,6 +72,11 @@ begin
     and p.proname like 'dpp\_%' escape '\'
     and has_function_privilege('authenticated',p.oid,'EXECUTE')
     and p.oid::regprocedure::text not in (
+      'dpp_api_members_add(uuid,text)',
+      'dpp_api_members_delete(uuid)',
+      'dpp_api_members_list()',
+      'dpp_api_members_update(uuid,text)',
+      'dpp_api_organization_create(text,text)',
       'dpp_api_models_create(text,text,text,jsonb)',
       'dpp_api_models_delete(uuid)',
       'dpp_api_models_list()',
@@ -105,6 +110,11 @@ begin
 
   with required(signature) as (
     values
+      ('dpp_api_members_add(uuid,text)'),
+      ('dpp_api_members_delete(uuid)'),
+      ('dpp_api_members_list()'),
+      ('dpp_api_members_update(uuid,text)'),
+      ('dpp_api_organization_create(text,text)'),
       ('dpp_api_models_create(text,text,text,jsonb)'),
       ('dpp_api_models_delete(uuid)'),
       ('dpp_api_models_list()'),
