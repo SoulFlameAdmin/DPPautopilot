@@ -77,7 +77,11 @@ function startRequestObservability(req,res,surface,options={}){
         auth_present:authPresent(req),
         error_code:errorCodeFromBody(status,chunk)
       };
-      emit(logger,status,event);
+      try{
+        emit(logger,status,event);
+      }catch(_){
+        // Observability is fail-open: a broken logging sink must never block the HTTP response.
+      }
     }
     return originalEnd(chunk,...args);
   };
