@@ -131,3 +131,39 @@ test('31st anonymous public passport read is blocked before upstream',async()=>{
     if(oldKey===undefined) delete process.env.SUPABASE_ANON_KEY; else process.env.SUPABASE_ANON_KEY=oldKey;
   }
 });
+
+
+test('bucket keys do not retain raw IP or bearer material',()=>{
+  const request=req('POST',{},{} ,'Bearer raw-secret-token','203.0.113.77');
+  limiter.checkRateLimit(request,'models',{
+    rules:{authenticated_write:{limit:2,window_seconds:60}},
+    nowMs:1000
+  });
+  const keys=[...limiter._test.buckets.keys()];
+  assert.equal(keys.length,1);
+  assert.equal(keys[0].includes('203.0.113.77'),false);
+  assert.equal(keys[0].includes('raw-secret-token'),false);
+  assert.match(keys[0],/^models\|authenticated_write\|[0-9a-f]{32}\|0$/);
+});
+
+test('expired buckets are evicted on later windows',()=>{
+  const rules={authenticated_write:{limit:2,window_seconds:60}};
+  limiter.checkRateLimit(req('POST',{},{} ,'Bearer a','203.0.113.1'),'models',{rules,nowMs:1000,maxBuckets:10});
+  limiter.checkRateLimit(req('POST',{},{} ,'Bearer b','203.0.113.2'),'models',{rules,nowMs:2000,maxBuckets:10});
+  assert.equal(limiter._test.buckets.size,2);
+
+  limiter.checkRateLimit(req('POST',{},{} ,'Bearer c','203.0.113.3'),'models',{rules,nowMs:61000,maxBuckets:10});
+  assert.equal(limiter._test.buckets.size,1);
+});
+
+test('bucket map is hard capped during unique-identity flood',()=>{
+  const rules={authenticated_write:{limit:5,window_seconds:60}};
+  for(let i=1;i<=8;i++){
+    limiter.checkRateLimit(
+      req('POST',{},{} ,`Bearer token-${i}`,`203.0.113.${i}`),
+      'models',
+      {rules,nowMs:1000,maxBuckets:3}
+    );
+  }
+  assert.equal(limiter._test.buckets.size,3);
+});
