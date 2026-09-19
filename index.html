@@ -32,7 +32,9 @@
 
   <section class="overlay" id="planOverlay" aria-hidden="true" aria-label="Етапи и технически master plan"><div class="overlay-head"><div class="overlay-head-inner"><div><div class="eyebrow">Engineering control room</div><h2>DPP Autopilot · Етапи</h2></div><button class="btn primary" id="closePlanButton" onclick="closePlan()">✕ Затвори</button></div></div><div class="overlay-body"><div class="filterbar" id="filters"><button class="filter active" data-filter="all">Всички</button><button class="filter" data-filter="green">GREEN</button><button class="filter" data-filter="yellow">YELLOW</button><button class="filter" data-filter="red">RED</button><button class="filter" data-filter="blocked">BLOCKED</button></div><div id="planContent">Зареждане на master plan…</div></div></section>
 
+  <script src="/demo/async-state.js"></script>
   <script>
+    const u02=window.DPPAsyncState;
     let PLAN=null;let activeFilter='all';
     const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
     function scrollToId(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'})}
@@ -48,10 +50,30 @@
     function renderSummary(){const tasks=flattenTasks();const green=tasks.filter(x=>x.status==='green').length;const blocked=tasks.filter(x=>x.status==='blocked').length;const remaining=tasks.length-green;const pct=tasks.length?Math.round(green/tasks.length*100):0;overallPct.textContent=pct+'%';overallBar.style.width=pct+'%';greenCount.textContent=green;remainingCount.textContent=remaining;blockedCount.textContent=blocked}
     function renderGates(){const host=document.getElementById('gates');host.innerHTML='';const visible=(PLAN.gates||[]).filter(g=>g.id!=='FOUNDATION');visible.forEach((g,i)=>{const c=calc(g);const el=document.createElement('article');el.className='gate';el.dataset.stage=g.id;el.innerHTML=`<div class="gate-kicker">Етап ${i+1}</div><h3>${esc(g.label)}</h3><p>${esc(g.purpose)}</p><div class="gate-foot"><div class="gate-count"><span>${c.green}/${c.total} GREEN</span><span>${c.pct}%</span></div><div class="progress"><span style="width:${c.pct}%"></span></div></div>`;host.appendChild(el)})}
     function renderPlan(){if(!PLAN)return;const host=document.getElementById('planContent');host.innerHTML='';PLAN.gates.forEach(g=>{const tasks=(g.tasks||[]).filter(t=>activeFilter==='all'||t.status===activeFilter);if(!tasks.length)return;const c=calc(g);const phase=document.createElement('section');phase.className='phase';phase.dataset.phase=g.id;phase.innerHTML=`<div class="phase-head"><div class="phase-head-row"><div><h3>${esc(g.label)}</h3><div class="phase-purpose">${esc(g.purpose)}</div><div class="exit"><strong>Exit:</strong> ${esc(g.exitCriteria)}</div></div><div style="text-align:right;min-width:90px"><strong>${c.pct}%</strong><div style="font-size:11px;color:#748296">${c.green}/${c.total} GREEN</div></div></div></div><div class="tasks">${tasks.map(t=>`<div class="task"><span class="task-status ${colorClass(t.status)}"></span><span class="task-id">${esc(t.id)}</span><div><div class="task-title">${esc(t.title)}</div><div class="task-evidence">${esc(t.evidence)}</div></div></div>`).join('')}</div>`;host.appendChild(phase)})}
-    async function loadPlan(){try{const r=await fetch('/data/master-plan.json?ts='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('plan '+r.status);PLAN=await r.json();renderSummary();renderGates();renderPlan()}catch(e){document.getElementById('planContent').innerHTML='<div class="error">Master plan could not be loaded: '+esc(e.message)+'</div>'}}
-    async function loadWorker(){try{const r=await fetch('/data/worker-status.json?ts='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('worker '+r.status);const w=await r.json();currentTask.textContent=w.currentTask||'—';lastCompleted.textContent=w.lastCompletedTask||'—';nextTask.textContent=w.nextTask||'—';workerMessage.textContent=w.message||'';workerStamp.textContent=(w.state||'unknown').toUpperCase()+' · '+(w.currentGate||'')+' · '+new Date(w.updatedAt).toLocaleString('bg-BG');const p=document.getElementById('workerPulse');p.style.background=w.state==='working'?'var(--green)':w.state==='blocked'?'var(--red)':'var(--yellow)'}catch(e){currentTask.textContent='Worker status unavailable';workerMessage.textContent=e.message;workerPulse.style.background='var(--red)'}}
+    async function loadPlan(){try{const r=await fetch('/data/master-plan.json?ts='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('plan '+r.status);PLAN=await r.json();renderSummary();renderGates();renderPlan();return true}catch(e){document.getElementById('planContent').innerHTML='<div class="error">Master plan could not be loaded: '+esc(e.message)+'</div>';return false}}
+    async function loadWorker(){try{const r=await fetch('/data/worker-status.json?ts='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('worker '+r.status);const w=await r.json();currentTask.textContent=w.currentTask||'—';lastCompleted.textContent=w.lastCompletedTask||'—';nextTask.textContent=w.nextTask||'—';workerMessage.textContent=w.message||'';workerStamp.textContent=(w.state||'unknown').toUpperCase()+' · '+(w.currentGate||'')+' · '+new Date(w.updatedAt).toLocaleString('bg-BG');const p=document.getElementById('workerPulse');p.style.background=w.state==='working'?'var(--green)':w.state==='blocked'?'var(--red)':'var(--yellow)';return true}catch(e){currentTask.textContent='Worker status unavailable';workerMessage.textContent=e.message;workerPulse.style.background='var(--red)';return false}}
     document.getElementById('filters').addEventListener('click',e=>{if(!e.target.matches('.filter'))return;document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');activeFilter=e.target.dataset.filter;renderPlan()});
-    Promise.all([loadPlan(),loadWorker()]).then(()=>{if(new URLSearchParams(location.search).get('plan')==='open')openPlan()});setInterval(loadWorker,20000);setInterval(loadPlan,60000);
+    (async()=>{
+      const forced=u02.forced;
+      if(forced&&forced!=='success'){
+        const messages={
+          loading:'Зареждане на master plan и worker status…',
+          empty:'Няма master plan / worker данни за показване.',
+          error:'Dashboard data could not be loaded.'
+        };
+        u02.set(forced,planContent,messages[forced]);
+        currentTask.textContent=messages[forced];
+        lastCompleted.textContent='—';nextTask.textContent='—';workerMessage.textContent='';
+        workerStamp.textContent=forced.toUpperCase();
+        if(forced==='empty'){gates.innerHTML='';overallPct.textContent='0%';greenCount.textContent='0';remainingCount.textContent='0';blockedCount.textContent='0'}
+        return;
+      }
+      u02.set('loading',planContent,'Зареждане на master plan…');
+      const [planOk,workerOk]=await Promise.all([loadPlan(),loadWorker()]);
+      u02.set(planOk&&workerOk?'success':'error',planContent);
+      if(new URLSearchParams(location.search).get('plan')==='open')openPlan();
+      setInterval(loadWorker,20000);setInterval(loadPlan,60000);
+    })();
   </script>
 </body>
 </html>
