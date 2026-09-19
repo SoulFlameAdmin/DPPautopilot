@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T06:56:00+03:00",
+  "updatedAt": "2026-09-19T07:05:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -908,7 +908,7 @@
           "acceptanceCriteria": "Security checklist/tests pass; no known critical/high issue accepted silently",
           "evidenceRequired": "Security report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: R01-R14,C07."
+          "evidence": "PARTIAL fail-closed security acceptance: all R01-R14 controls must pass with evidence, exact canonical C07 production commit/deployment identity must align, repository hygiene + live production security evidence must pass, issue inventory must be attested complete, and unresolved critical/high findings must be zero. CI 35415678455 on 66ffa1020ca273c0826639bc258ec43c1d2ac173 SUCCESS including C10 tests and full regression stack. No live security scan/deploy performed. C10 remains RED pending R01-R14/C07 GREEN and exact-deployment live security evidence. — PARTIAL PASS"
         },
         {
           "id": "C11",
