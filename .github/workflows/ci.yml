@@ -813,16 +813,16 @@ jobs:
             "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3200 \
               --window-size=1440,1000 --dump-dom "$URL" > "artifacts/u05-${SURFACE}.html"
           }
-          render_u05 dashboard 'http://127.0.0.1:8000/'
-          render_u05 model 'http://127.0.0.1:8000/demo/model.html?sample=1'
-          render_u05 item 'http://127.0.0.1:8000/demo/item.html?sample=1'
-          render_u05 import 'http://127.0.0.1:8000/demo/import.html?sample=1'
-          render_u05 import-validation 'http://127.0.0.1:8000/demo/import-validation.html'
-          render_u05 passport 'http://127.0.0.1:8000/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001'
-          render_u05 settings 'http://127.0.0.1:8000/demo/settings.html?sample=1'
-          render_u05 onboarding 'http://127.0.0.1:8000/demo/onboarding.html?sample=1'
-          render_u05 mapping 'http://127.0.0.1:8000/demo/mapping.html'
-          render_u05 auth 'http://127.0.0.1:8000/demo/auth.html'
+          render_u05 dashboard 'http://127.0.0.1:8000/?accessibilityProbe=1'
+          render_u05 model 'http://127.0.0.1:8000/demo/model.html?sample=1&accessibilityProbe=1'
+          render_u05 item 'http://127.0.0.1:8000/demo/item.html?sample=1&accessibilityProbe=1'
+          render_u05 import 'http://127.0.0.1:8000/demo/import.html?sample=1&accessibilityProbe=1'
+          render_u05 import-validation 'http://127.0.0.1:8000/demo/import-validation.html?accessibilityProbe=1'
+          render_u05 passport 'http://127.0.0.1:8000/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001&accessibilityProbe=1'
+          render_u05 settings 'http://127.0.0.1:8000/demo/settings.html?sample=1&accessibilityProbe=1'
+          render_u05 onboarding 'http://127.0.0.1:8000/demo/onboarding.html?sample=1&accessibilityProbe=1'
+          render_u05 mapping 'http://127.0.0.1:8000/demo/mapping.html?accessibilityProbe=1'
+          render_u05 auth 'http://127.0.0.1:8000/demo/auth.html?accessibilityProbe=1'
           python scripts/validate_u05_accessibility.py artifacts
 
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
