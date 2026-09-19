@@ -55,6 +55,13 @@ begin
   end;
   if not seen then raise exception 'M03 generic member add allowed owner role'; end if;
 
+  seen:=false;
+  begin
+    perform public.dpp_api_members_add(u_extra,null);
+  exception when sqlstate 'DP501' then seen:=true;
+  end;
+  if not seen then raise exception 'M03 generic member add did not reject null role'; end if;
+
   members:=public.dpp_api_members_list();
   if jsonb_array_length(members)<>4 then
     raise exception 'M03 owner member list expected 4 rows, got %',jsonb_array_length(members);
@@ -65,6 +72,13 @@ begin
 
   perform public.dpp_api_members_add(u_extra,'viewer');
   perform public.dpp_api_members_update(u_extra,'editor');
+
+  seen:=false;
+  begin
+    perform public.dpp_api_members_update(u_extra,null);
+  exception when sqlstate 'DP501' then seen:=true;
+  end;
+  if not seen then raise exception 'M03 member update did not reject null role'; end if;
 
   seen:=false;
   begin
