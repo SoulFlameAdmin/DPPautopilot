@@ -26,8 +26,11 @@ for sqlstate,entry in contract.get("common_sqlstate",{}).items():
     assert isinstance(entry["message"],str) and entry["message"].strip()
     seen_surface_entries+=1
 
+expected_surfaces={"models","items","passport","export","imports","tenant","organizations","members"}
+assert set(contract.get("surfaces",{}))==expected_surfaces, (
+    f"M22 API surface drift: {sorted(contract.get('surfaces',{}))}"
+)
 for surface,mapping in contract.get("surfaces",{}).items():
-    assert surface in {"models","items","passport","export","imports","tenant"}, f"unexpected surface {surface}"
     for sqlstate,entry in mapping.items():
         assert sql_re.match(sqlstate), f"invalid {surface} SQLSTATE {sqlstate}"
         assert entry["http_status"] in valid_status
@@ -37,7 +40,7 @@ for surface,mapping in contract.get("surfaces",{}).items():
 
 assert seen_surface_entries>=20, "M22 API error catalog unexpectedly small"
 
-api_names=["models","items","passport","export","imports","tenant"]
+api_names=["models","items","passport","export","imports","tenant","organizations","members"]
 declared_codes={
     entry["code"]
     for entry in contract.get("common_sqlstate",{}).values()
@@ -59,11 +62,17 @@ helper=(ROOT/"api/_errors.js").read_text(encoding="utf-8")
 for token in ["api-error-contract.json","mapDatabaseError","localError","errorBody","contract.default"]:
     assert token in helper, f"shared error helper missing {token}"
 
-for name in ["models","items","passport","export","imports","tenant"]:
+for name in api_names:
     text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
     assert "require('./_errors.js')" in text, f"{name} API does not import shared M22 error helper"
     assert f"mapSharedDatabaseError('{name}'" in text, f"{name} API does not declare its shared error surface"
     assert "error.publicMessage" in text, f"{name} API does not preserve canonical public message"
     assert not re.search(r"if\s*\(\s*code\s*===?\s*['\"]DP\d{3}",text), f"{name} API still hardcodes DP SQLSTATE mapping"
 
-print(f"M22_API_ERROR_CONTRACT_PASS: {seen_surface_entries} SQLSTATE mappings centralized across 6 API surfaces")
+assert contract["surfaces"]["organizations"]["DP501"]["code"]=="VALIDATION_ERROR"
+assert contract["surfaces"]["organizations"]["23505"]["code"]=="ORGANIZATION_CONFLICT"
+assert contract["surfaces"]["members"]["DP502"]["code"]=="MEMBER_TARGET_NOT_FOUND"
+assert contract["surfaces"]["members"]["DP503"]["code"]=="MEMBER_NOT_FOUND"
+assert contract["surfaces"]["members"]["DP505"]["code"]=="MEMBER_CONFLICT"
+
+print(f"M22_API_ERROR_CONTRACT_PASS: {seen_surface_entries} SQLSTATE mappings centralized across {len(api_names)} API surfaces")
