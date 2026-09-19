@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T04:55:00+03:00",
+  "updatedAt": "2026-09-19T05:44:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -783,7 +783,7 @@
           "acceptanceCriteria": "Agreed concurrency/data-volume targets pass within latency/error budgets",
           "evidenceRequired": "Load report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M17-M21."
+          "evidence": "PARTIAL synthetic handler-load precursor: 200 requests at concurrency 25 across models/items/passport/imports/export with zero errors and versioned p95/wall budgets; 1000-row import volume; same-client 125-request overload proves 120 successes + 5 canonical 429 responses before upstream. CI 35413316603 on 5d3df2e3b9c78ecf6f4fe1f638150d46492db45d SUCCESS including full regression; artifact 10575440649 contains t07-load-report.json. T07 remains RED pending full M17-M21 acceptance and deployed preview/staging HTTP/TLS/Vercel/Supabase/cold-start load evidence. — PARTIAL PASS"
         },
         {
           "id": "T08",
