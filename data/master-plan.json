@@ -756,7 +756,7 @@
           "acceptanceCriteria": "Critical user journeys pass from browser to DB",
           "evidenceRequired": "E2E report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M24,U01-U04."
+          "evidence": "PARTIAL layered E2E precursor: exact-head full CI `35453738938` SUCCESS includes M24 stateful API onboarding, M02/M03/M24 local DB onboarding rollback, browser onboarding smoke, T04 report generation/upload and full regression. Bound Supabase `frhletkiuupgksmgxoxc` was re-run in BEGIN/ROLLBACK and returned `M02_M03_M24_ORGANIZATION_ONBOARDING_PASS`. Artifact `10586914695` (`sha256:6a3755029254b409b107921fc5e5d058982c1b71c32c64b03f9cfc8326403de9`) records `precursor_pass=true`, but final acceptance remains explicitly false for deployed browser-to-DB, real auth session, real Storage object roundtrip and production route. T04 remains RED because M24/U01-U04 are not GREEN and production-like browser→DB acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "T05",
