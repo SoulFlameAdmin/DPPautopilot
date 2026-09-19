@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "task": "R13",
+  "status": "partial",
+  "runbook": "docs/INCIDENT_RUNBOOK.md",
+  "dependencies": {
+    "R09": "partial structured request correlation/logging",
+    "R10": "partial monitoring thresholds/owners",
+    "R11": "green backup policy",
+    "R12": "green isolated restore drill"
+  },
+  "roles": [
+    "Incident commander",
+    "DPP operations owner",
+    "DPP platform owner",
+    "Privacy/security lead",
+    "Communications owner"
+  ],
+  "severities": [
+    {
+      "id": "SEV1",
+      "target_ack_minutes": 15,
+      "criteria": [
+        "sustained critical availability signal",
+        "confirmed or suspected tenant isolation breach",
+        "confirmed or suspected unauthorized disclosure of confidential/personal data",
+        "material data corruption or destructive write affecting production records"
+      ]
+    },
+    {
+      "id": "SEV2",
+      "target_ack_minutes": 30,
+      "criteria": [
+        "major degradation without confirmed data exposure",
+        "sustained warning signals with material user impact",
+        "authentication/authorization failure spike affecting legitimate users"
+      ]
+    },
+    {
+      "id": "SEV3",
+      "target_ack_minutes": 240,
+      "criteria": [
+        "limited degradation or non-urgent defect",
+        "warning signal without material user impact"
+      ]
+    }
+  ],
+  "required_phases": [
+    "detect_and_open",
+    "triage",
+    "contain",
+    "communicate",
+    "recover",
+    "verify",
+    "close_and_learn"
+  ],
+  "monitoring_signals": [
+    "availability_5xx_rate",
+    "consecutive_5xx",
+    "latency_p95",
+    "auth_failure_rate",
+    "rate_limit_pressure"
+  ],
+  "safety_rules": [
+    "Preserve request IDs, structured logs and audit evidence; do not paste secrets/tokens into incident notes.",
+    "Do not bypass authentication, MFA, CAPTCHA or provider permissions during recovery.",
+    "Do not run destructive database operations without an approved, evidence-backed recovery plan.",
+    "Use isolated restore validation before considering backup data trustworthy for recovery.",
+    "Treat suspected tenant isolation or data disclosure as a privacy/security incident immediately."
+  ],
+  "runtime_gaps": [
+    "No deployed R09 log ingestion evidence while F08 is blocked.",
+    "No live R10 notification destination or acknowledgement drill.",
+    "No production C05 rollback procedure accepted yet.",
+    "Legal/privacy notification obligations require applicable-jurisdiction review and are not hard-coded by this precursor."
+  ]
+}
