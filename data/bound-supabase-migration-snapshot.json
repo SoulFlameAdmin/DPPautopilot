@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "task": "C04",
+  "project_id": "frhletkiuupgksmgxoxc",
+  "observed_at": "2026-09-19",
+  "source": "Supabase list_migrations read-only connector",
+  "applied_migrations": [
+    {
+      "version": "20260917184609",
+      "name": "bind_dpp_autopilot_namespace"
+    },
+    {
+      "version": "20260918201051",
+      "name": "dpp_core_schema"
+    },
+    {
+      "version": "20260918202334",
+      "name": "dpp_passport_version_history"
+    },
+    {
+      "version": "20260918202336",
+      "name": "dpp_identifier_lifecycle_rules"
+    },
+    {
+      "version": "20260918202535",
+      "name": "dpp_registry_workflow"
+    },
+    {
+      "version": "20260918202724",
+      "name": "dpp_import_mappings"
+    },
+    {
+      "version": "20260918203725",
+      "name": "dpp_transactional_imports"
+    },
+    {
+      "version": "20260918211601",
+      "name": "dpp_registry_retry_attempt_fix"
+    },
+    {
+      "version": "20260918212248",
+      "name": "dpp_import_commit_idempotency"
+    },
+    {
+      "version": "20260918213146",
+      "name": "dpp_registry_submission_idempotency"
+    },
+    {
+      "version": "20260918213613",
+      "name": "dpp_import_error_contract"
+    },
+    {
+      "version": "20260918215511",
+      "name": "dpp_audit_log"
+    },
+    {
+      "version": "20260918215829",
+      "name": "dpp_tenant_rls_policies"
+    },
+    {
+      "version": "20260918220416",
+      "name": "dpp_evidence_attachments"
+    },
+    {
+      "version": "20260918221225",
+      "name": "dpp_tenant_context_rbac"
+    },
+    {
+      "version": "20260918225004",
+      "name": "dpp_models_api"
+    },
+    {
+      "version": "20260918225437",
+      "name": "dpp_items_api"
+    },
+    {
+      "version": "20260918230623",
+      "name": "dpp_passports_api"
+    },
+    {
+      "version": "20260918230625",
+      "name": "dpp_passport_public_policy_guard"
+    },
+    {
+      "version": "20260918232543",
+      "name": "dpp_export_bundle"
+    },
+    {
+      "version": "20260919000546",
+      "name": "dpp_imports_api"
+    },
+    {
+      "version": "20260919003928",
+      "name": "dpp_retention_deletion_precursor"
+    }
+  ],
+  "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
+}
