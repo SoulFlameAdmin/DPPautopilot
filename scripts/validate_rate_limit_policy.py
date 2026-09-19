@@ -92,6 +92,8 @@ for token in [
     "41st authenticated model write",
     "31st anonymous public passport read",
     "41st authenticated tenant context write",
+    "41st authenticated member write",
+    "41st authenticated organization write",
     "RATE_LIMITED",
     "retry-after",
     "expired dual buckets are evicted",
