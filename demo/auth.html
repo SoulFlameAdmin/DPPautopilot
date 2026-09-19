@@ -1,17 +1,31 @@
 <!doctype html>
 <html lang="bg">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>DPP Autopilot · Authentication</title>
-<style>:root{--bg:#07090d;--p:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--green:#39d98a;--amber:#ffbd52;--red:#ff6677}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:820px;margin:auto;padding:24px}.card{border:1px solid var(--line);background:var(--p);border-radius:16px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}input,button{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:#111820;color:var(--text)}button{cursor:pointer;font-weight:700}.muted{color:var(--muted)}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}pre{white-space:pre-wrap;word-break:break-word}@media(max-width:650px){.grid{grid-template-columns:1fr}.shell{padding:14px}}</style>
+<style>:root{--bg:#07090d;--p:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--green:#39d98a;--amber:#ffbd52;--red:#ff6677}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:820px;margin:auto;padding:24px}.card{border:1px solid var(--line);background:var(--p);border-radius:16px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-weight:700;margin-bottom:6px}.field-error{min-height:18px;margin-top:5px;color:var(--red);font-size:12px}input,button{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:#111820;color:var(--text)}button{cursor:pointer;font-weight:700}.muted{color:var(--muted)}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}pre{white-space:pre-wrap;word-break:break-word}@media(max-width:650px){.grid{grid-template-columns:1fr}.shell{padding:14px}}</style>
 </head>
-<body data-auth-ready="false" data-session-state="unknown">
+<body data-auth-ready="false" data-session-state="unknown" data-input-preserved="unknown" data-form-valid="unknown">
 <main class="shell"><a href="/">← Dashboard</a><h1>M01 · Authentication</h1>
 <p class="muted">Supabase Auth client flow. Publishable key only; no service-role secret is present in the browser.</p>
-<section class="card"><div class="grid"><input id="email" type="email" autocomplete="email" placeholder="email@example.com"><input id="password" type="password" autocomplete="current-password" placeholder="Password"></div><div class="grid" style="margin-top:12px"><button id="signup">Sign up</button><button id="signin">Sign in</button><button id="reset">Reset password</button><button id="signout">Sign out</button></div></section>
-<section class="card"><strong>Session</strong><pre id="session">Loading…</pre></section><section class="card"><strong>Result</strong><pre id="result">Ready.</pre></section>
+<section class="card"><div class="grid"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" placeholder="email@example.com" aria-describedby="email_help email_error" aria-invalid="false"><div id="email_help" class="muted">Use the account email address.</div><div id="email_error" class="field-error" aria-live="polite"></div></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password" aria-describedby="password_help password_error" aria-invalid="false"><div id="password_help" class="muted">Required for sign-up and sign-in.</div><div id="password_error" class="field-error" aria-live="polite"></div></div></div><div class="grid" style="margin-top:12px"><button id="signup">Sign up</button><button id="signin">Sign in</button><button id="reset">Reset password</button><button id="signout">Sign out</button></div></section>
+<section class="card"><strong>Session</strong><pre id="session" role="status" aria-live="polite">Loading…</pre></section><section class="card"><strong>Result</strong><pre id="result" role="status" aria-live="polite">Ready.</pre></section>
 </main>
+<script src="/demo/form-ux.js"></script>
 <script>
+const formUx=window.DPPFormUX;
 let cfg,accessToken=null,refreshToken=null;
 const out=(x,cls='')=>{result.className=cls;result.textContent=typeof x==='string'?x:JSON.stringify(x,null,2)};
+function validateAuth({passwordRequired=true}={}){
+ const controls=[email,password],before=formUx.snapshot(controls);
+ const emailValue=email.value.trim();
+ const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
+ const passwordOk=!passwordRequired||password.value.length>0;
+ formUx.setError(email,email_error,emailOk?'':'Enter a valid email address.');
+ formUx.setError(password,password_error,passwordOk?'':'Password is required.');
+ const ok=emailOk&&passwordOk;
+ document.body.dataset.formValid=String(ok);
+ formUx.markPreserved(before,controls);
+ return ok;
+}
 async function call(path,{method='GET',body,token}={}){
  const headers={'apikey':cfg.publishableKey,'Content-Type':'application/json'};
  if(token) headers.Authorization='Bearer '+token;
@@ -30,10 +44,17 @@ async function init(){
  if(!cfg.supabaseUrl.startsWith('https://')||!cfg.publishableKey.startsWith('sb_publishable_')) throw new Error('invalid auth config');
  setSession(null);document.body.dataset.authReady='true';
 }
-signup.onclick=async()=>{try{const d=await call('/auth/v1/signup',{method:'POST',body:{email:email.value,password:password.value}});setSession(d);out(d.session?'Sign-up created authenticated session.':'Sign-up accepted; email confirmation is required by current project settings.','ok')}catch(e){out(e.message,'bad')}};
-signin.onclick=async()=>{try{const d=await call('/auth/v1/token?grant_type=password',{method:'POST',body:{email:email.value,password:password.value}});setSession(d);out('Sign-in succeeded.','ok')}catch(e){out(e.message,'bad')}};
+signup.onclick=async()=>{if(!validateAuth())return out('Check the highlighted fields.','bad');try{const d=await call('/auth/v1/signup',{method:'POST',body:{email:email.value.trim(),password:password.value}});setSession(d);out(d.session?'Sign-up created authenticated session.':'Sign-up accepted; email confirmation is required by current project settings.','ok')}catch(e){out(e.message,'bad')}};
+signin.onclick=async()=>{if(!validateAuth())return out('Check the highlighted fields.','bad');try{const d=await call('/auth/v1/token?grant_type=password',{method:'POST',body:{email:email.value.trim(),password:password.value}});setSession(d);out('Sign-in succeeded.','ok')}catch(e){out(e.message,'bad')}};
 function recoveryRedirect(){return new URL('/demo/auth-recovery.html',location.origin).href}
-reset.onclick=async()=>{try{const redirectTo=recoveryRedirect();await call('/auth/v1/recover?redirect_to='+encodeURIComponent(redirectTo),{method:'POST',body:{email:email.value}});out('If the account is eligible, a password reset email will be sent.','ok')}catch(e){out(e.message,'bad')}};
+reset.onclick=async()=>{if(!validateAuth({passwordRequired:false}))return out('Check the highlighted email field.','bad');try{const redirectTo=recoveryRedirect();await call('/auth/v1/recover?redirect_to='+encodeURIComponent(redirectTo),{method:'POST',body:{email:email.value.trim()}});out('If the account is eligible, a password reset email will be sent.','ok')}catch(e){out(e.message,'bad')}};
 signout.onclick=async()=>{try{if(accessToken)await call('/auth/v1/logout',{method:'POST',token:accessToken});setSession(null);out('Signed out.','ok')}catch(e){setSession(null);out(e.message,'bad')}};
-init().catch(e=>out(e.message,'bad'));
+init().then(()=>{
+ const q=new URLSearchParams(location.search);
+ if(q.get('invalid')==='1'){
+   email.value='invalid-email';
+   password.value='';
+   signin.click();
+ }
+}).catch(e=>out(e.message,'bad'));
 </script></body></html>
