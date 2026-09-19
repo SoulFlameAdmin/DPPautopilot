@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "U07 visual regression baseline precursor",
-  "currentGate": "UX",
-  "lastCompletedTask": "U06 cross-browser precursor + CI 35450988227 + cross-browser 35450988219 SUCCESS",
-  "nextTask": "Review U07 pinned-Chromium visual candidate artifacts, approve deterministic baseline only after visual/artifact validation, then enforce regression comparison. Do not retry F08/M01 without new unblock evidence.",
-  "message": "U06 is implemented and merged (`52437f8d...`): Chromium/Firefox/WebKit passed 30/30 core surface flows; standard full CI also passed. U06 remains RED/PARTIAL because U04/deployed acceptance are not GREEN. No Vercel deployment occurred; DAVID orchestrator files remain untouched.",
+  "currentTask": "T04 critical E2E suite precursor",
+  "currentGate": "TESTING",
+  "lastCompletedTask": "U07 approved visual baseline + regression enforcement + CI 35453421923 SUCCESS",
+  "nextTask": "Build a transparent T04 acceptance report that ties browser synthetic onboarding, stateful API journey and bound DB onboarding evidence together while explicitly marking deployed browser-to-DB/auth/storage acceptance as missing. Do not retry F08/M01 without new unblock evidence.",
+  "message": "U07 deterministic visual baseline is approved and hash-enforced; T05/T06 now have real suite precursor evidence. U07/T05/T06 remain RED/PARTIAL because upstream dependencies and deployed acceptance are not GREEN. No Vercel deployment occurred; DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T18:18:00+03:00"
+  "updatedAt": "2026-09-19T19:04:00+03:00"
 }
