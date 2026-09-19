@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T04:31:00+03:00",
+  "updatedAt": "2026-09-19T04:40:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -738,7 +738,7 @@
           "acceptanceCriteria": "Schema/RLS/audit/versioning/import behaviors pass against test DB",
           "evidenceRequired": "Integration report",
           "status": "red",
-          "evidence": "PARTIAL dependency-safe coverage only: GREEN DB subset (M04/M06/M07/M11/M14/M15/M16/M20 + deny-by-default grants) passes in GitHub Actions run `35395443843` on `78d8de7e344ca175f9b74f758c3b395ace972c6e` and against bound Supabase `frhletkiuupgksmgxoxc` inside rollback transaction with result `T02_GREEN_DB_SUBSET_PASS`. T02 remains RED until M05/M10/M12/M13 are implemented and added. — PARTIAL PASS"
+          "evidence": "PARTIAL database-integration acceptance coverage: versioned matrix maps all M04-M16 dependencies to executable PostgreSQL/contract checks; report generator verifies markers/files and emits artifacts/t02-db-integration-report.json. CI 35412095340 on a19b72f487cd8e53196d5da7289b0871ab69c40d SUCCESS including combined T02 suite/report, clean replay, M05/M12/M13 DB subsets, restore/security and browser smoke; artifact 10574319218. Bound Supabase frhletkiuupgksmgxoxc executed the same combined suite inside BEGIN/ROLLBACK and returned T02_BOUND_SUPABASE_ROLLBACK_PASS. T02 remains RED while M05/M10/M12/M13 are partial/RED. — PARTIAL PASS"
         },
         {
           "id": "T03",
