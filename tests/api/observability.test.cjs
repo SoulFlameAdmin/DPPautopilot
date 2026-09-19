@@ -200,3 +200,23 @@ test('real tenant handler emits correlated redacted 401 structured event',async(
   assert.equal(captured[0].includes('must-not-appear'),false);
   assert.equal(captured[0].includes('Bearer authentication'),false);
 });
+
+
+test('logging sink failure never blocks the response',()=>{
+  const res=makeRes();
+  const req={
+    method:'GET',
+    headers:{'x-request-id':'logger-fail-1234',authorization:'Bearer never-log-this'}
+  };
+  const brokenLogger={
+    info(){throw new Error('log transport unavailable');},
+    warn(){throw new Error('log transport unavailable');},
+    error(){throw new Error('log transport unavailable');}
+  };
+
+  obs.startRequestObservability(req,res,'models',{logger:brokenLogger,now:()=>1000});
+  res.statusCode=200;
+  assert.doesNotThrow(()=>res.end(JSON.stringify({data:{ok:true}})));
+  assert.equal(res.body,JSON.stringify({data:{ok:true}}));
+  assert.equal(res.headers['x-request-id'],'logger-fail-1234');
+});
