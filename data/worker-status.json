@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T03 — API integration suite precursor",
-  "currentGate": "TESTING",
-  "lastCompletedTask": "M20 HTTP/API hardening — CI 35408015181 SUCCESS + bound Supabase M20_IMPORT_API_SUBSET_PASS",
-  "nextTask": "Aggregate M17-M23 positive/negative HTTP flows into a versioned T03 integration matrix and executable stateful handler integration suite; keep T03 RED until M17-M23 are fully accepted/deployed.",
-  "message": "M20 remains GREEN and now has a proven tenant/RBAC HTTP surface. M17-M21 all have serverless API surfaces. F08/M01 remain deferred; no Vercel action attempted.",
+  "currentTask": "R05 — authentication/authorization check precursor analysis",
+  "currentGate": "SECURITY",
+  "lastCompletedTask": "T03 partial stateful API integration precursor — CI 35408308324 SUCCESS",
+  "nextTask": "Version and execute an API authorization matrix across M17-M21/M20 imports without marking R05 GREEN until M17-M20 dependencies are fully accepted.",
+  "message": "D01-D14 remain GREEN. M20 now has a proven HTTP facade and T03 has an evidence-backed stateful integration precursor. F08/M01 remain deferred. No Vercel action attempted.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T03:06:00+03:00"
+  "updatedAt": "2026-09-19T03:15:00+03:00"
 }
