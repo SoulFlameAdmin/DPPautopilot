@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T04:40:00+03:00",
+  "updatedAt": "2026-09-19T04:48:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -747,7 +747,7 @@
           "acceptanceCriteria": "Positive/negative API flows pass",
           "evidenceRequired": "API test report",
           "status": "red",
-          "evidence": "PARTIAL stateful API integration precursor: 8 versioned scenarios across M17-M23 cover protected auth, model→item→passport public/private→export, import create→validate→commit→idempotent repeat→get, stable not-found/conflict errors and invalid-import commit rejection. CI 35408308324 on 125e8746facda66437d2cb103e7f21861b5619c6 SUCCESS including T03 validator/test, all API contracts, clean DB replay, tenant/RBAC/security and browser smoke. T03 remains RED pending full acceptance of M17-M23 and deployed HTTP integration. — PARTIAL PASS"
+          "evidence": "PARTIAL API-integration acceptance coverage: report generator validates 5 executable stateful integration tests, 8 scenarios and collective M17-M23 coverage across models/items/passport/imports/export. CI 35412297769 on 461e22c77629369e28e1e2da19c76884cae81ec0 SUCCESS including T03 test/report, full API/DB/security regression, clean replay, restore and browser smoke; artifact 10574279507. T03 remains RED pending full M17-M23 acceptance and deployed HTTP integration. — PARTIAL PASS"
         },
         {
           "id": "T04",
