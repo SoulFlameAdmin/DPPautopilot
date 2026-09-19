@@ -24,15 +24,25 @@ function normalizedIp(req){
   return socketIp.trim().slice(0,128)||'unknown';
 }
 
-function authDigest(req){
-  const auth=firstHeader(req,'authorization');
-  if(!auth) return 'anon';
-  return crypto.createHash('sha256').update(auth).digest('hex').slice(0,24);
+function digest(value,length=32){
+  return crypto.createHash('sha256').update(value).digest('hex').slice(0,length);
 }
 
-function identityDigest(req){
-  const material=`${normalizedIp(req)}|${authDigest(req)}`;
-  return crypto.createHash('sha256').update(material).digest('hex').slice(0,32);
+function authDigest(req){
+  const auth=firstHeader(req,'authorization');
+  if(!auth) return null;
+  return digest(auth,24);
+}
+
+function networkDigest(req){
+  return digest(normalizedIp(req),32);
+}
+
+function bucketIdentities(req){
+  const identities=[`network:${networkDigest(req)}`];
+  const credential=authDigest(req);
+  if(credential) identities.push(`credential:${credential}`);
+  return identities;
 }
 
 function classify(surface,req){
@@ -60,6 +70,14 @@ function pruneBuckets(nowMs,maxBuckets=DEFAULT_MAX_BUCKETS,force=false){
   lastPruneMs=nowMs;
 }
 
+function incrementBucket(key,resetAt){
+  const previousState=buckets.get(key);
+  const previous=previousState&&Number.isInteger(previousState.count)?previousState.count:0;
+  const count=previous+1;
+  buckets.set(key,{count,resetAt});
+  return count;
+}
+
 function checkRateLimit(req,surface,options={}){
   const ruleName=options.ruleName||classify(surface,req);
   const rules=options.rules||policy.rules;
@@ -76,17 +94,16 @@ function checkRateLimit(req,surface,options={}){
 
   pruneBuckets(nowMs,maxBuckets,false);
 
-  const identity=identityDigest(req);
-  const key=`${surface}|${ruleName}|${identity}|${windowStart}`;
-  const previousState=buckets.get(key);
-  const previous=previousState&&Number.isInteger(previousState.count)?previousState.count:0;
-  const count=previous+1;
-  buckets.set(key,{count,resetAt});
+  const counts=bucketIdentities(req).map(identity=>{
+    const key=`${surface}|${ruleName}|${identity}|${windowStart}`;
+    return incrementBucket(key,resetAt);
+  });
 
   if(buckets.size>maxBuckets) pruneBuckets(nowMs,maxBuckets,true);
 
-  const remaining=Math.max(0,rule.limit-count);
-  const allowed=count<=rule.limit;
+  const highestCount=Math.max(...counts);
+  const remaining=Math.max(0,rule.limit-highestCount);
+  const allowed=counts.every(count=>count<=rule.limit);
   const retryAfterSeconds=allowed?0:Math.max(1,Math.ceil((resetAt-nowMs)/1000));
 
   return {
@@ -130,7 +147,8 @@ module.exports={
   _test:{
     normalizedIp,
     authDigest,
-    identityDigest,
+    networkDigest,
+    bucketIdentities,
     pruneBuckets,
     resetForTests,
     buckets,
