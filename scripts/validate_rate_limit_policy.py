@@ -97,7 +97,7 @@ for token in [
     "expired dual buckets are evicted",
     "bucket map is hard capped",
     "bucket keys do not retain raw IP",
-    "rotating bearer values cannot bypass the network budget",
+    "rotating bearer or network identity cannot bypass the paired budgets",
     "active network bucket survives memory-cap credential churn",
 ]:
     assert token in test_text, f"R05 abuse suite missing {token}"
