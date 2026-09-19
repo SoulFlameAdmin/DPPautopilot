@@ -1,75 +1,92 @@
 {
-  "version": 1,
+  "version": 2,
   "approved_candidate": {
-    "workflow_run": 35451176656,
-    "artifact_id": 10587200789,
-    "artifact_digest": "sha256:a5d66ee08baeae4867c3f428512959b9a84e8b0a7fbaf19289ba505fd829b900",
-    "source_head": "21df8cf7fd4d518f002e5e9c211ae5dee152f2e4",
+    "workflow_run": 35451697630,
+    "artifact_id": 10586871825,
+    "artifact_digest": "sha256:50e17a704361b98edb70a29cfda12924872995a874145a2bd14be8bb8ec98433",
+    "source_head": "d4654d0df7d755912027f904c7d14053ff1e7371",
     "browser_version": "153.0.8010.12",
     "viewport": {
       "width": 1440,
       "height": 1000
     },
-    "review": "10/10 candidate screenshots reviewed for nonblank rendering, expected route content/layout and absence of obvious error/overflow artifacts before baseline approval"
+    "normalization": "Animations/transitions/caret disabled; dashboard worker/master-plan counters and progress text/widths replaced with stable baseline values before capture.",
+    "review": "10/10 normalized screenshots manually reviewed for nonblank rendering, expected route content/layout, and absence of obvious error/overflow artifacts."
+  },
+  "signature": {
+    "grid": 32,
+    "samples_per_axis": 4,
+    "luma_levels": 16,
+    "comparison": "exact SHA-256 of quantized luminance grid; raw PNG SHA is provenance-only"
   },
   "surfaces": {
     "dashboard": {
       "route": "/",
-      "sha256": "0d833789648cc6c3c7211c40905a9cbe6c8dba42102338958b803d47dd4234a5",
+      "raw_sha256_reference": "3798a22ee87fdfc2a83d0bff316e081b355d6c1a7901c151b9b6a602a65deb87",
+      "visual_signature_sha256": "773187be1dcb20f146dbded59e65844d30680ac58240ca1fa200b1290578cd36",
       "width": 1440,
-      "height": 1717
+      "height": 1621
     },
     "model": {
       "route": "/demo/model.html?sample=1",
-      "sha256": "5e677035dedea1e6703fda8aa48caa5c9ae754a81da63e9c85ec3d9e65a40b03",
+      "raw_sha256_reference": "5e677035dedea1e6703fda8aa48caa5c9ae754a81da63e9c85ec3d9e65a40b03",
+      "visual_signature_sha256": "1cdf032bfaf6938280af73d2a6da8222c8d2ccd7a6f7c3c180c67346781b2373",
       "width": 1440,
       "height": 3650
     },
     "item": {
       "route": "/demo/item.html?sample=1",
-      "sha256": "5c529b0d92d54735279fa0f66d848b902f21d643bb7de858c4c5e28fdbbfbfea",
+      "raw_sha256_reference": "5c529b0d92d54735279fa0f66d848b902f21d643bb7de858c4c5e28fdbbfbfea",
+      "visual_signature_sha256": "65d808b36c8aeb0454ee870de9c057638a5526776594434095fc0040a42fcf7f",
       "width": 1440,
       "height": 1918
     },
     "import": {
       "route": "/demo/import.html?sample=1",
-      "sha256": "198c0510031b270039518010f59981f9481c1fd180ff3c1b0ec37ee735ce1200",
+      "raw_sha256_reference": "198c0510031b270039518010f59981f9481c1fd180ff3c1b0ec37ee735ce1200",
+      "visual_signature_sha256": "f690bdcd1cca65728acec2fc513f267d84a4dc2a8c9da836ad6847ab93a4e205",
       "width": 1440,
       "height": 1413
     },
     "import-validation": {
       "route": "/demo/import-validation.html",
-      "sha256": "1b8d6d37769623af30204ea17dbf94f057d13d0019cd75963be2c423b7bc6868",
+      "raw_sha256_reference": "0f87a97a8a66a0d9844107c3d6baa40a60cdcf599ea551deefaae838688a35dc",
+      "visual_signature_sha256": "b0f5000ee6f37a936efe8521d84b3024e3922178386c65534c6ea916f787ef4b",
       "width": 1440,
       "height": 1000
     },
     "passport": {
       "route": "/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001",
-      "sha256": "90b078482475b68bcaddacebd5057d39693f64f38663882974db87c5fefb8d3f",
+      "raw_sha256_reference": "90b078482475b68bcaddacebd5057d39693f64f38663882974db87c5fefb8d3f",
+      "visual_signature_sha256": "6e4199f54716a8565c32c2b0acabd946c1b5aecce2bbd7017e48ad55ad650ba9",
       "width": 1440,
       "height": 3461
     },
     "settings": {
       "route": "/demo/settings.html?sample=1",
-      "sha256": "e8635e455f7e630f4711b2d7d9bab2ba3b94c6e7581299ffcd2124db3a5ef7ed",
+      "raw_sha256_reference": "e8635e455f7e630f4711b2d7d9bab2ba3b94c6e7581299ffcd2124db3a5ef7ed",
+      "visual_signature_sha256": "bea93382e5507fe9c14093862808614351512e0a45e3595b98ddf850aaddb019",
       "width": 1440,
       "height": 1000
     },
     "onboarding": {
       "route": "/demo/onboarding.html?sample=1",
-      "sha256": "0391f88ce7c6e8594d4ed3216ff0da88d467821fc470f3c5e5b0101483540187",
+      "raw_sha256_reference": "0391f88ce7c6e8594d4ed3216ff0da88d467821fc470f3c5e5b0101483540187",
+      "visual_signature_sha256": "94581b4b2d2b3decb7a9efd8b8caebe574df5d3b1033c297d8bda921d987010d",
       "width": 1440,
       "height": 1119
     },
     "mapping": {
       "route": "/demo/mapping.html",
-      "sha256": "0987a3df13395d6f9d734f3f922a09480c135dc6a69a4722b23265382df7fe7e",
+      "raw_sha256_reference": "0987a3df13395d6f9d734f3f922a09480c135dc6a69a4722b23265382df7fe7e",
+      "visual_signature_sha256": "9d20e5af1867b34d0ba3ee50913b8c39e5eaa93b54ced004a364617c2109fd4d",
       "width": 1440,
       "height": 1438
     },
     "auth": {
       "route": "/demo/auth.html",
-      "sha256": "87b82f34c2235b0a8b25d43f11a6c15839385d8148d5fdabd629fa2f0abf81b0",
+      "raw_sha256_reference": "87b82f34c2235b0a8b25d43f11a6c15839385d8148d5fdabd629fa2f0abf81b0",
+      "visual_signature_sha256": "eaf38be287f331539096836c3978575971f1294a3d9f5db495c64c4a14652bfe",
       "width": 1440,
       "height": 1000
     }
