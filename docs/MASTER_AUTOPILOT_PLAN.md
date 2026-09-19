@@ -195,6 +195,7 @@ Append evidence here only after verification.
 
 | Date | Task | Evidence | Result |
 |---|---|---|---|
+| 2026-09-19 | M02/M03 | Added authenticated tenant-context API contract: migration `20260919034000_dpp_tenant_context_api.sql` exposes only caller memberships/roles and explicit active-organisation state through SECURITY DEFINER RPCs; `api/tenant.js` forwards the caller bearer token and supports GET context + membership-checked POST switch. Bound Supabase rollback matrix returned `M02_M03_TENANT_API_SUBSET_PASS`. Exact-file Node contract tests passed 6/6 locally for missing auth, bearer forwarding, UUID validation, active-tenant switch, DP102→403 non-member denial and method gate. CI wiring added in commit `c4a358651e7b2af641e1f580517bf762bb4998aa`; GitHub Actions run not yet surfaced, so CI PASS is not claimed. M02/M03 remain RED until M01 is GREEN and end-to-end authenticated app acceptance is available. | PARTIAL PASS |
 | 2026-09-17 | F01 | GitHub connector verified `SoulFlameAdmin/DPPautopilot`, default branch `main`, admin/write permissions | PASS |
 | 2026-09-17 | F02 | Root inventory verified static prototype files only at audit start | PASS |
 | 2026-09-17 | F03 | Canonical plan created at `docs/MASTER_AUTOPILOT_PLAN.md` | PASS |
