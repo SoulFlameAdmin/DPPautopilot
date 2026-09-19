@@ -23,6 +23,10 @@ function validUuid(value) {
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+function validTimestamp(value) {
+  return typeof value === 'string' && value.trim().length > 0 && Number.isFinite(Date.parse(value));
+}
+
 function validObject(value) {
   return value == null || (!Array.isArray(value) && typeof value === 'object');
 }
@@ -148,6 +152,9 @@ async function handler(req, res) {
     if (!validUuid(id)) {
       return send(res, 400, { error: { code: 'INVALID_PASSPORT_ID', message: 'A valid passport UUID is required.' } });
     }
+    if (!validTimestamp(body.expected_updated_at)) {
+      return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
+    }
     if (body.status != null && !['draft','active','suspended','retired'].includes(body.status)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'unsupported passport status' } });
     }
@@ -158,11 +165,12 @@ async function handler(req, res) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'private_payload must be a JSON object' } });
     }
 
-    const passport = await rpc('dpp_api_passport_update', {
+    const passport = await rpc('dpp_api_passport_update_checked', {
       p_id: id,
       p_status: body.status == null ? null : body.status,
       p_public_payload: body.public_payload == null ? null : body.public_payload,
-      p_private_payload: body.private_payload == null ? null : body.private_payload
+      p_private_payload: body.private_payload == null ? null : body.private_payload,
+      p_expected_updated_at: body.expected_updated_at
     }, authorization);
     return send(res, 200, { data: passport });
   } catch (error) {
@@ -178,4 +186,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validObject, sanitizePublicPassport, mapDatabaseError, rpc };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, sanitizePublicPassport, mapDatabaseError, rpc };
