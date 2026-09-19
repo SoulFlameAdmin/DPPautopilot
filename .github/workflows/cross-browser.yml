@@ -9,6 +9,8 @@ on:
       - 'requirements-browser.txt'
       - '.github/workflows/cross-browser.yml'
       - 'scripts/validate_supply_chain.py'
+      - 'data/t10-regression-gate.json'
+      - 'scripts/generate_t10_full_regression_report.py'
   workflow_dispatch:
 
 permissions:
