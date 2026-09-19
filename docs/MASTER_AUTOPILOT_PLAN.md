@@ -344,3 +344,11 @@ Append evidence here only after verification.
 - Concrete defects found and fixed before acceptance: mapping select labels, import-validation back-link contrast, mapping back-link contrast and auth back-link contrast. Failed probes were not accepted as evidence.
 - Exact-head PR-only full CI `35450600111` on `main@e61fcf2c8fbbee5e6d587a5c52081581d83f5bb5` completed SUCCESS, including the U05 browser gate and full API/DB/security/restore regression.
 - U05 remains RED/PARTIAL because U01-U04 are not GREEN and required manual/deployed accessibility acceptance is not yet proven. No Vercel deployment was attempted.
+
+
+### U06 cross-browser compatibility precursor — 2026-09-19
+- Added pinned Playwright 1.63.0 browser tooling and immutable-SHA GitHub Actions supply-chain enforcement.
+- Dedicated matrix covers dashboard, model, item, import, import-validation, passport, settings, onboarding, mapping and auth on Chromium 153.0.8010.12, Firefox 155.0 and WebKit 26.6.
+- Cross-browser run `35450988219` SUCCESS; artifact `10587340403` records 30/30 engine/surface passes with one main landmark, one H1, no horizontal overflow, readiness markers true where applicable and no page errors.
+- Standard full CI `35450988227` SUCCESS; U06 implementation merged as `52437f8d404e2a643bcea219914f54ccf1d3a874`.
+- U06 remains RED/PARTIAL because U04 is not GREEN and deployed production cross-browser acceptance is not yet available. No Vercel deployment was attempted.
