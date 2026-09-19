@@ -2,14 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "External dependency frontier after RPC and R05 hardening",
+  "currentTask": "External dependency frontier after API security surface hardening",
   "currentGate": "MVP",
-  "lastCompletedTask": "Internal RPC hardening CI 35425179398 + R05 memory/privacy CI 35425334617 SUCCESS",
+  "lastCompletedTask": "Tenant/R03-R05-R09 security surface hardening + full CI 35426026323 SUCCESS",
   "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue only dependency-safe non-deploy hardening/evidence work; M01 remains the earliest mandatory external blocker.",
-  "message": "D01-D14 remain GREEN. Internal authenticated RPC surface is reduced and R05 process-local limiter is privacy-hashed/bounded; full CIs 35425179398 and 35425334617 are SUCCESS. F08 and M01 remain external blockers. No Vercel deploy/redeploy was attempted, so no deploy lease was required. DAVID orchestrator files remain untouched.",
+  "message": "D01-D14 remain GREEN. All six public API handlers are inventory-guarded for R05/R09; all five body-bearing handlers are inventory-guarded for R03, with tenant/import negative coverage and exact-head full CI 35426026323 SUCCESS. R03/R05/R09 remain RED only for declared dependency/deployed acceptance gaps. F08 and M01 remain external blockers. No Vercel deploy/redeploy was attempted, so no deploy lease was required. DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
-    "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path."
+    "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
+    "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T09:00:00+03:00"
+  "updatedAt": "2026-09-19T09:16:00+03:00"
 }
