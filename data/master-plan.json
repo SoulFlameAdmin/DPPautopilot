@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T06:31:00+03:00",
+  "updatedAt": "2026-09-19T06:40:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -881,7 +881,7 @@
           "acceptanceCriteria": "Home/auth/core API/public passport endpoints verified after deploy",
           "evidenceRequired": "Timestamped smoke report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: C03,C06,F08."
+          "evidence": "PARTIAL fail-closed production smoke: exact production commit/project/READY deployment, TLS and timestamp-after-ready, same-commit C03/C06, home/auth UI, protected core API 401/X-Request-ID and public-passport privacy/security-header checks. Unit tests reject wrong target/state, stale timing, TLS/gate drift, missing headers, auth-boundary failure and public-data leaks. CI 35415123886 on 026494a128e2f0982e4bbef30a3fb0f7eca5308b SUCCESS including C07 checks, C01-C06, T07, clean DB replay, R12 restore, security hygiene and browser smoke. No production deploy/smoke executed. C07 remains RED pending C03/C06/F08 and live timestamped smoke. — PARTIAL PASS"
         },
         {
           "id": "C08",
