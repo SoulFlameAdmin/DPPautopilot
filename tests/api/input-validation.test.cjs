@@ -4,6 +4,8 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const tenant=require('../../api/tenant.js');
+const organizations=require('../../api/organizations.js');
+const members=require('../../api/members.js');
 const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
@@ -53,7 +55,7 @@ test('shared parser rejects malformed JSON and unserializable objects',()=>{
   );
 });
 
-for(const [name,handler] of [['tenant',tenant],['models',models],['items',items],['passport',passport],['imports',imports]]){
+for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['imports',imports]]){
   test(`${name} rejects >1 MiB parsed object before upstream DB access`,async()=>{
     const original=global.fetch;
     let called=false;
@@ -80,6 +82,52 @@ test('tenant rejects malformed JSON and invalid organization id locally before u
     res=makeRes();
     await tenant(req('POST',{organization_id:'not-a-uuid'}),res);
     assertError(res,422,'INVALID_ORGANIZATION_ID');
+
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
+});
+
+test('organizations rejects malformed JSON and invalid create fields locally before upstream',async()=>{
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('upstream must not be called');};
+  try{
+    let res=makeRes();
+    await organizations(req('POST','{"bad":'),res);
+    assertError(res,400,'INVALID_JSON');
+
+    res=makeRes();
+    await organizations(req('POST',{name:'',slug:'pilot-org'}),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    res=makeRes();
+    await organizations(req('POST',{name:'Pilot',slug:'Bad Slug'}),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
+});
+
+test('members rejects malformed JSON invalid UUID and invalid role locally before upstream',async()=>{
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('upstream must not be called');};
+  try{
+    let res=makeRes();
+    await members(req('POST','{"bad":'),res);
+    assertError(res,400,'INVALID_JSON');
+
+    res=makeRes();
+    await members(req('POST',{user_id:'not-a-uuid',role:'viewer'}),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    res=makeRes();
+    await members(req('PATCH',{user_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',role:'owner'}),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    res=makeRes();
+    await members(req('DELETE',{user_id:'not-a-uuid'}),res);
+    assertError(res,422,'VALIDATION_ERROR');
 
     assert.equal(called,false);
   }finally{global.fetch=original;}
