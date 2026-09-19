@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T03:21:00+03:00",
+  "updatedAt": "2026-09-19T03:29:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -640,7 +640,7 @@
           "acceptanceCriteria": "Session/cookie/redirect/reset flows use secure defaults",
           "evidenceRequired": "Security review evidence",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M01,M03."
+          "evidence": "PARTIAL repository auth-security review: fixed same-origin encoded recovery redirect, generic reset response, no-referrer, memory-only tokens, recovery type/expiry gate, immediate fragment removal, authenticated password PATCH and post-success token clearing. data/auth-security-review.json versions 10 controls. CI 35409227727 on e67ae2be62be2ea366bad4b2f15ade08c06763e2 SUCCESS. R06 remains RED pending M01/M03 full acceptance and deployed recovery/password-update proof. — PARTIAL PASS"
         },
         {
           "id": "R07",
