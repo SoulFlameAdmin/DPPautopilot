@@ -76,22 +76,26 @@ begin
       'dpp_api_models_create(text,text,text,jsonb)',
       'dpp_api_models_delete(uuid)',
       'dpp_api_models_list()',
-      'dpp_api_models_update(uuid,text,text,text,jsonb)',
+      'dpp_api_models_update_checked(uuid,text,text,text,jsonb,timestamp with time zone)',
       'dpp_api_passport_create(uuid,jsonb,jsonb)',
       'dpp_api_passport_private(uuid)',
       'dpp_api_passport_public(text)',
-      'dpp_api_passport_update(uuid,text,jsonb,jsonb)',
+      'dpp_api_passport_update_checked(uuid,text,jsonb,jsonb,timestamp with time zone)',
       'dpp_api_retention_status()',
       'dpp_api_purge_import_staging(timestamp with time zone)',
       'dpp_api_items_create(uuid,text,text,jsonb)',
       'dpp_api_items_delete(uuid)',
       'dpp_api_items_list()',
-      'dpp_api_items_update(uuid,uuid,text,text,jsonb)',
+      'dpp_api_items_update_checked(uuid,uuid,text,text,jsonb,timestamp with time zone)',
       'dpp_api_export_bundle()',
       'dpp_api_import_commit(uuid)',
       'dpp_api_import_create(jsonb,uuid)',
       'dpp_api_import_get(uuid)',
       'dpp_api_import_validate(uuid)',
+      'dpp_api_tenant_context()',
+      'dpp_api_tenant_context_set(uuid)',
+      'dpp_evidence_storage_org_id(text)',
+      'dpp_evidence_storage_registered(text)',
       'dpp_has_org_role(uuid,text[])',
       'dpp_request_user_id()',
       'dpp_require_active_role(text[])',
@@ -108,22 +112,26 @@ begin
       ('dpp_api_models_create(text,text,text,jsonb)'),
       ('dpp_api_models_delete(uuid)'),
       ('dpp_api_models_list()'),
-      ('dpp_api_models_update(uuid,text,text,text,jsonb)'),
+      ('dpp_api_models_update_checked(uuid,text,text,text,jsonb,timestamp with time zone)'),
       ('dpp_api_passport_create(uuid,jsonb,jsonb)'),
       ('dpp_api_passport_private(uuid)'),
       ('dpp_api_passport_public(text)'),
-      ('dpp_api_passport_update(uuid,text,jsonb,jsonb)'),
+      ('dpp_api_passport_update_checked(uuid,text,jsonb,jsonb,timestamp with time zone)'),
       ('dpp_api_retention_status()'),
       ('dpp_api_purge_import_staging(timestamp with time zone)'),
       ('dpp_api_items_create(uuid,text,text,jsonb)'),
       ('dpp_api_items_delete(uuid)'),
       ('dpp_api_items_list()'),
-      ('dpp_api_items_update(uuid,uuid,text,text,jsonb)'),
+      ('dpp_api_items_update_checked(uuid,uuid,text,text,jsonb,timestamp with time zone)'),
       ('dpp_api_export_bundle()'),
       ('dpp_api_import_commit(uuid)'),
       ('dpp_api_import_create(jsonb,uuid)'),
       ('dpp_api_import_get(uuid)'),
       ('dpp_api_import_validate(uuid)'),
+      ('dpp_api_tenant_context()'),
+      ('dpp_api_tenant_context_set(uuid)'),
+      ('dpp_evidence_storage_org_id(text)'),
+      ('dpp_evidence_storage_registered(text)'),
       ('dpp_has_org_role(uuid,text[])'),
       ('dpp_request_user_id()'),
       ('dpp_require_active_role(text[])'),
@@ -136,6 +144,12 @@ begin
 
   if v_auth_missing is not null then
     raise exception 'Required authenticated DPP RPC missing EXECUTE: %',v_auth_missing;
+  end if;
+
+  if has_function_privilege('authenticated',to_regprocedure('public.dpp_api_models_update(uuid,text,text,text,jsonb)'),'EXECUTE')
+     or has_function_privilege('authenticated',to_regprocedure('public.dpp_api_items_update(uuid,uuid,text,text,jsonb)'),'EXECUTE')
+     or has_function_privilege('authenticated',to_regprocedure('public.dpp_api_passport_update(uuid,text,jsonb,jsonb)'),'EXECUTE') then
+    raise exception 'M23 unchecked update RPC regained authenticated EXECUTE';
   end if;
 end
 $guard$;
