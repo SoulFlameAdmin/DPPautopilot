@@ -269,6 +269,34 @@
     "RATE_LIMITED": {
       "http_status": 429,
       "message": "Too many requests. Retry later."
+    },
+    "INVALID_MODEL_ID": {
+      "http_status": 400,
+      "message": "A valid model UUID is required."
+    },
+    "INVALID_ITEM_ID": {
+      "http_status": 400,
+      "message": "A valid item UUID is required."
+    },
+    "INVALID_IDENTIFIER": {
+      "http_status": 400,
+      "message": "identifier must contain 1..300 characters."
+    },
+    "INVALID_PASSPORT_ID": {
+      "http_status": 400,
+      "message": "A valid passport UUID is required."
+    },
+    "INVALID_IMPORT_ACTION": {
+      "http_status": 422,
+      "message": "action must be validate or commit."
+    },
+    "INVALID_IMPORT_ID": {
+      "http_status": 400,
+      "message": "A valid import UUID is required."
+    },
+    "INVALID_ORGANIZATION_ID": {
+      "http_status": 422,
+      "message": "organization_id must be a valid UUID."
     }
   }
 }
