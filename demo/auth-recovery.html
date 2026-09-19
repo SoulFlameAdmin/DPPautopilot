@@ -11,6 +11,7 @@
 <script src="/demo/form-ux.js"></script>
 <script>
 const formUx=window.DPPFormUX;
+const invalidDemo=new URLSearchParams(location.search).get('invalid')==='1';
 let cfg=null,accessToken=null;
 function parseHash(){return Object.fromEntries(new URLSearchParams(location.hash.replace(/^#/,'')))}
 function setState(msg,cls=''){status.className=cls;status.textContent=msg}
@@ -22,7 +23,7 @@ async function init(){
  const notExpired=!expiresAt || expiresAt*1000>Date.now();
  const isRecovery=h.type==='recovery' && !!candidate && notExpired;
  accessToken=isRecovery?candidate:null;
- history.replaceState(null,'',location.pathname+location.search);
+ history.replaceState(null,'',location.pathname);
  document.body.dataset.recoverySession=isRecovery?'valid':'missing';
  document.body.dataset.recoveryReady='true';
  setState(isRecovery?'Recovery session ready. Enter a new password.':'Missing, expired or invalid recovery session.',isRecovery?'ok':'bad');
@@ -50,8 +51,7 @@ save.onclick=async()=>{
  }catch(e){document.body.dataset.passwordUpdate='failed';setState(e.message,'bad')}
 };
 init().then(()=>{
- const q=new URLSearchParams(location.search);
- if(q.get('invalid')==='1'&&accessToken){
+ if(invalidDemo&&accessToken){
    password.value='short';
    save.click();
  }
