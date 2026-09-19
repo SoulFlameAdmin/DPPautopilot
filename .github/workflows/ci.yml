@@ -767,6 +767,45 @@ jobs:
           done
           python scripts/validate_responsive_artifacts.py artifacts
 
+          # U04 measured responsive evidence: real browser viewport metrics plus
+          # screenshots across core U01-U03 flows.
+          render_u04() {
+            local VIEWPORT="$1"
+            local SIZE="$2"
+            local SURFACE="$3"
+            local URL="$4"
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2800 \
+              --window-size="$SIZE" \
+              --screenshot="artifacts/u04-${VIEWPORT}-${SURFACE}.png" \
+              --dump-dom "$URL" > "artifacts/u04-${VIEWPORT}-${SURFACE}.html"
+          }
+
+          for SPEC in 'phone:390,844' 'tablet:768,1024' 'desktop:1440,1000'; do
+            VIEWPORT="${SPEC%%:*}"
+            SIZE="${SPEC#*:}"
+            render_u04 "$VIEWPORT" "$SIZE" dashboard \
+              'http://127.0.0.1:8000/?responsiveProbe=1'
+            render_u04 "$VIEWPORT" "$SIZE" model \
+              'http://127.0.0.1:8000/demo/model.html?sample=1&responsiveProbe=1'
+            render_u04 "$VIEWPORT" "$SIZE" item \
+              'http://127.0.0.1:8000/demo/item.html?sample=1&responsiveProbe=1'
+            render_u04 "$VIEWPORT" "$SIZE" import \
+              'http://127.0.0.1:8000/demo/import.html?sample=1&responsiveProbe=1'
+            render_u04 "$VIEWPORT" "$SIZE" import-validation \
+              'http://127.0.0.1:8000/demo/import-validation.html?responsiveProbe=1'
+            render_u04 "$VIEWPORT" "$SIZE" passport \
+              'http://127.0.0.1:8000/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001&responsiveProbe=1'
+            render_u04 "$VIEWPORT" "$SIZE" settings \
+              'http://127.0.0.1:8000/demo/settings.html?sample=1&responsiveProbe=1'
+            render_u04 "$VIEWPORT" "$SIZE" onboarding \
+              'http://127.0.0.1:8000/demo/onboarding.html?sample=1&responsiveProbe=1'
+            render_u04 "$VIEWPORT" "$SIZE" mapping \
+              'http://127.0.0.1:8000/demo/mapping.html?responsiveProbe=1'
+            render_u04 "$VIEWPORT" "$SIZE" auth \
+              'http://127.0.0.1:8000/demo/auth.html?responsiveProbe=1'
+          done
+          python scripts/validate_u04_responsive.py artifacts
+
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
             --dump-dom 'http://127.0.0.1:8000/demo/replay.html?auto=1' > artifacts/d13-replay-dom.html
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
