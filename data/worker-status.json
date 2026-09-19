@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T08 — reliability/retry test precursor analysis",
+  "currentTask": "T07 — load test precursor analysis",
   "currentGate": "TESTING",
-  "lastCompletedTask": "T03 partial API integration coverage — CI 35412297769 SUCCESS",
-  "nextTask": "Strengthen reliability/retry evidence across registry timeout/retry, import/registry idempotency and API conflicts without marking T08 GREEN while M23 remains RED.",
-  "message": "D01-D14 remain GREEN. T03 now has an evidence-backed machine-readable API integration report covering all M17-M23 dependencies, but remains RED until those tasks and deployed HTTP integration are accepted. F08/M01 remain deferred. No Vercel deploy attempted. DAVID orchestrator files untouched.",
+  "lastCompletedTask": "T08 partial reliability/retry coverage — CI 35412453600 + bound Supabase rollback PASS",
+  "nextTask": "Define and execute synthetic in-process API load budgets using existing M17-M21 handlers without claiming deployed production capacity while dependencies remain RED.",
+  "message": "D01-D14 remain GREEN. T08 now has CI plus bound-Supabase reliability/idempotency evidence but remains RED while M23 is RED. Next useful independent precursor is T07 synthetic load characterization. F08/M01 remain deferred. No Vercel deploy attempted. DAVID orchestrator files untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T04:48:00+03:00"
+  "updatedAt": "2026-09-19T04:55:00+03:00"
 }
