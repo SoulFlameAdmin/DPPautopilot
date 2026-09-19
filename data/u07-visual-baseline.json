@@ -26,53 +26,64 @@
     ],
     "animations_disabled": true,
     "reduced_motion": "reduce",
-    "full_page": false
+    "full_page": false,
+    "visual_digest": "decoded_rgba_sha256"
   },
   "review": {
     "visual_review": "pass",
     "deterministic_repeat": "10/10 byte-identical",
-    "notes": "10 core viewport screenshots reviewed from run 35468111629; intentional dashboard-only change adds the persistent BG/EN control with no clipping, overlap, broken cards/forms, empty render or visible layout regression. Other 9 approved surface hashes remain unchanged."
+    "notes": "10 core viewport screenshots reviewed from run 35468111629; intentional dashboard-only change adds the persistent BG/EN control with no clipping, overlap, broken cards/forms, empty render or visible layout regression. Other 9 approved surface hashes remain unchanged. Gate hardening on 2026-09-20: PNG encoder bytes can vary with identical pixels; decoded RGBA SHA-256 is now the visual regression identity while PNG SHA-256 remains artifact-integrity evidence."
   },
   "surfaces": {
     "dashboard": {
       "route": "/",
-      "sha256": "72b9b8a1ca217cb19b9f4ebc8757d0f4ce897895eb623b797bea49115a55f650"
+      "sha256": "72b9b8a1ca217cb19b9f4ebc8757d0f4ce897895eb623b797bea49115a55f650",
+      "pixel_sha256": "db4586c5fefcfdd5dc082f3c80c6564674a02409ee9c1400ae455676cfdd5616"
     },
     "model": {
       "route": "/demo/model.html?sample=1",
-      "sha256": "11f892e4ff512077148a54bc2ec0aed6403b8c89e7c2637193869568485443fc"
+      "sha256": "11f892e4ff512077148a54bc2ec0aed6403b8c89e7c2637193869568485443fc",
+      "pixel_sha256": "7c0c2b5c15c3bae6487b1099d327323804c43550667f436e532e4fc215b192cd"
     },
     "item": {
       "route": "/demo/item.html?sample=1",
-      "sha256": "9cf1620aa20ec318988190cfee535898b734bf65e7d0ccad169617b2b327a798"
+      "sha256": "9cf1620aa20ec318988190cfee535898b734bf65e7d0ccad169617b2b327a798",
+      "pixel_sha256": "1f739aae4ba89ce5e286b11863883d990c4c5208f2930e364608ee969c4de70a"
     },
     "import": {
       "route": "/demo/import.html?sample=1",
-      "sha256": "63b128bc121d0dcb503d4909439655ee34969a3cab04790d6c61c5d59ce713a4"
+      "sha256": "63b128bc121d0dcb503d4909439655ee34969a3cab04790d6c61c5d59ce713a4",
+      "pixel_sha256": "1b2719d3d6b0366f2ce5109eb88a3bf25f1973591a176aca9f71fa3edf190942"
     },
     "import-validation": {
       "route": "/demo/import-validation.html",
-      "sha256": "0f87a97a8a66a0d9844107c3d6baa40a60cdcf599ea551deefaae838688a35dc"
+      "sha256": "0f87a97a8a66a0d9844107c3d6baa40a60cdcf599ea551deefaae838688a35dc",
+      "pixel_sha256": "bc7de53f05bea68a6ed565786e95f46b9483c3915cf9a6042c98dea30741dd7b"
     },
     "passport": {
       "route": "/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001",
-      "sha256": "fa92cb0d11fe38ae4cc84e4ce551ca50ec690157af0590525e8eb23d79d03db1"
+      "sha256": "fa92cb0d11fe38ae4cc84e4ce551ca50ec690157af0590525e8eb23d79d03db1",
+      "pixel_sha256": "bb01a89a77e045945ce9b3f0d725a2eb0a9e1b36354641e6a93ce00bb8ab8d1d"
     },
     "settings": {
       "route": "/demo/settings.html?sample=1",
-      "sha256": "e8635e455f7e630f4711b2d7d9bab2ba3b94c6e7581299ffcd2124db3a5ef7ed"
+      "sha256": "e8635e455f7e630f4711b2d7d9bab2ba3b94c6e7581299ffcd2124db3a5ef7ed",
+      "pixel_sha256": "47a42c2ae91d65ee58903d0f885bc57f5220ef45b13d3f3506b86119f4500846"
     },
     "onboarding": {
       "route": "/demo/onboarding.html?sample=1",
-      "sha256": "1ef9383999285fbb9a8489e9ca193870e478636f604a27de20a8bcb6536a349b"
+      "sha256": "1ef9383999285fbb9a8489e9ca193870e478636f604a27de20a8bcb6536a349b",
+      "pixel_sha256": "aab1862864fbffa902481ee2a960e1b36b7bd2d6ef99f18f17c1973c3e010710"
     },
     "mapping": {
       "route": "/demo/mapping.html",
-      "sha256": "799ce8148926067d7807e41acefceb5fef1a9e9ce7de543d62611386ddb1bc73"
+      "sha256": "799ce8148926067d7807e41acefceb5fef1a9e9ce7de543d62611386ddb1bc73",
+      "pixel_sha256": "9771deeb2971a7b436b4b3166e5e8e06aea4a4cdc0009237e4d36a1f2c1f9412"
     },
     "auth": {
       "route": "/demo/auth.html",
-      "sha256": "87b82f34c2235b0a8b25d43f11a6c15839385d8148d5fdabd629fa2f0abf81b0"
+      "sha256": "87b82f34c2235b0a8b25d43f11a6c15839385d8148d5fdabd629fa2f0abf81b0",
+      "pixel_sha256": "8968ce54f66ed4a27b9fb6627cbcfa7a4a53754d8831dac9fdf04c047d3099a0"
     }
   }
 }

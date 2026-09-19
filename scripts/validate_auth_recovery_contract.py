@@ -24,5 +24,7 @@ require("accessToken=null" in html,"M01 recovery token must be cleared after pas
 require("h.type==='recovery'" in html,"R06 recovery page must require recovery type")
 require("expiresAt*1000>Date.now()" in html,"R06 recovery page must reject expired recovery sessions")
 require('<meta name="referrer" content="no-referrer">' in html,"R06 recovery page must set no-referrer policy")
+require(html.index("const h=parseHash()") < html.index("fetch('/data/auth-config.json'"),"R06 recovery fragment must be parsed before any config network request")
+require(html.index("history.replaceState") < html.index("fetch('/data/auth-config.json'"),"R06 recovery fragment must be scrubbed before any config network request")
 require(html.index("history.replaceState") < html.index("save.onclick"),"R06 recovery fragment must be cleared during init before password submission")
-print("M01_RECOVERY_CONTRACT_PASS: recovery session is fragment-only, password update uses authenticated PATCH /auth/v1/user, and token is cleared without persistence")
+print("M01_RECOVERY_CONTRACT_PASS: recovery fragment is synchronously parsed and scrubbed before network I/O, password update uses authenticated PATCH /auth/v1/user, and token is cleared without persistence")
