@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "External dependency frontier after DPP advisor hardening",
+  "currentTask": "External dependency frontier after RPC and R05 hardening",
   "currentGate": "MVP",
-  "lastCompletedTask": "DPP advisor hardening + full CI 35424726072 SUCCESS",
+  "lastCompletedTask": "Internal RPC hardening CI 35425179398 + R05 memory/privacy CI 35425334617 SUCCESS",
   "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue only dependency-safe non-deploy hardening/evidence work; M01 remains the earliest mandatory external blocker.",
-  "message": "D01-D14 remain GREEN. DPP search_path and FK-index advisor findings are cleared and exact-head full CI 35424726072 is SUCCESS. F08 and M01 remain external blockers; no Vercel deploy/redeploy was attempted, so no deploy lease was required. DAVID orchestrator files remain untouched.",
+  "message": "D01-D14 remain GREEN. Internal authenticated RPC surface is reduced and R05 process-local limiter is privacy-hashed/bounded; full CIs 35425179398 and 35425334617 are SUCCESS. F08 and M01 remain external blockers. No Vercel deploy/redeploy was attempted, so no deploy lease was required. DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path."
   ],
-  "updatedAt": "2026-09-19T08:46:00+03:00"
+  "updatedAt": "2026-09-19T09:00:00+03:00"
 }
