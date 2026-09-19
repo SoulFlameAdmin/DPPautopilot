@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T04 critical E2E suite precursor",
+  "currentTask": "T09 accessibility regression gate precursor",
   "currentGate": "TESTING",
-  "lastCompletedTask": "U07 approved visual baseline + regression enforcement + CI 35453421923 SUCCESS",
-  "nextTask": "Build a transparent T04 acceptance report that ties browser synthetic onboarding, stateful API journey and bound DB onboarding evidence together while explicitly marking deployed browser-to-DB/auth/storage acceptance as missing. Do not retry F08/M01 without new unblock evidence.",
-  "message": "U07 deterministic visual baseline is approved and hash-enforced; T05/T06 now have real suite precursor evidence. U07/T05/T06 remain RED/PARTIAL because upstream dependencies and deployed acceptance are not GREEN. No Vercel deployment occurred; DAVID orchestrator files remain untouched.",
+  "lastCompletedTask": "T04 layered E2E precursor + full CI 35453738938 SUCCESS",
+  "nextTask": "Build a dedicated fail-closed T09 accessibility CI report from the 10 U05 browser surfaces, prove it in full CI, and keep T09 RED/PARTIAL while U05/manual deployed accessibility acceptance remains non-green. Do not retry F08/M01 without new unblock evidence.",
+  "message": "T04 now has a real layered browser/API/DB precursor report and bound Supabase reproof, but final deployed browser-to-DB/auth/storage acceptance remains explicitly false. No Vercel deployment occurred; DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T19:04:00+03:00"
+  "updatedAt": "2026-09-19T19:15:00+03:00"
 }
