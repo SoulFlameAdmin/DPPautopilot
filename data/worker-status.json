@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "External dependency frontier after API security surface hardening",
-  "currentGate": "MVP",
-  "lastCompletedTask": "Tenant/R03-R05-R09 security surface hardening + full CI 35426026323 SUCCESS",
+  "currentTask": "External dependency frontier after R05 paired-budget hardening",
+  "currentGate": "SECURITY",
+  "lastCompletedTask": "R05 paired-budget/cap hardening + full CI 35426379499 SUCCESS",
   "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue only dependency-safe non-deploy hardening/evidence work; M01 remains the earliest mandatory external blocker.",
-  "message": "D01-D14 remain GREEN. All six public API handlers are inventory-guarded for R05/R09; all five body-bearing handlers are inventory-guarded for R03, with tenant/import negative coverage and exact-head full CI 35426026323 SUCCESS. R03/R05/R09 remain RED only for declared dependency/deployed acceptance gaps. F08 and M01 remain external blockers. No Vercel deploy/redeploy was attempted, so no deploy lease was required. DAVID orchestrator files remain untouched.",
+  "message": "D01-D14 remain GREEN. R05 policy v5 now blocks bearer/IP rotation bypass and preserves active network/credential buckets under memory-cap pressure; exact-head full CI 35426379499 SUCCESS. R05 remains RED only for declared dependencies plus distributed/deployed acceptance. F08/M01 remain external blockers. No Vercel deployment/redeployment occurred, so no deploy lease was required. DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T09:16:00+03:00"
+  "updatedAt": "2026-09-19T09:24:00+03:00"
 }
