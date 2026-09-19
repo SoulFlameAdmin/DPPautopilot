@@ -16,7 +16,7 @@
     <section class="card">
       <h2>1. Зареди CSV</h2>
       <div class="actions"><input id="fileInput" type="file" accept=".csv,text/csv" /><button class="btn primary" id="loadSample" type="button">Зареди synthetic sample</button></div>
-      <div id="loadStatus" class="status">Няма зареден файл.</div>
+      <div id="loadStatus" class="status" role="status" aria-live="polite">Няма зареден файл.</div>
     </section>
     <section class="card" id="mappingCard" hidden>
       <h2>2. Map-ни колоните</h2><p class="hint">Всяка CSV колона може да се свърже с canonical DPP field. Нищо не се записва към backend.</p>
@@ -28,7 +28,9 @@
       <div class="table-wrap"><table><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table></div>
     </section>
   </main>
+<script src="/demo/async-state.js"></script>
 <script>
+const u02=window.DPPAsyncState;
 const FIELD_OPTIONS=[
   ['','— Ignore —'],
   ['model.identification.manufacturer.name','Manufacturer name'],
@@ -73,13 +75,52 @@ function render(){
 }
 function updateMapped(){mappedCount.textContent=Object.values(state.mapping).filter(Boolean).length;document.body.dataset.mappedCount=mappedCount.textContent}
 async function loadText(text,label){
-  try{const parsed=parseCSV(text);state.headers=parsed.headers;state.rows=parsed.rows;state.mapping=Object.fromEntries(parsed.headers.map(h=>[h,DEFAULT_MAP[h]||'']));render();loadStatus.className='status ok';loadStatus.textContent=`Заредено: ${label} · ${parsed.rows.length} rows`;}
-  catch(e){document.body.dataset.importLoaded='false';loadStatus.className='status error';loadStatus.textContent=e.message;mappingCard.hidden=true;previewCard.hidden=true;}
+  try{
+    const parsed=parseCSV(text);
+    state.headers=parsed.headers;state.rows=parsed.rows;state.mapping=Object.fromEntries(parsed.headers.map(h=>[h,DEFAULT_MAP[h]||'']));
+    render();
+    loadStatus.className='status ok';
+    loadStatus.textContent=`Заредено: ${label} · ${parsed.rows.length} rows`;
+    u02.set('success',loadStatus);
+  }catch(e){
+    document.body.dataset.importLoaded='false';
+    loadStatus.className='status error';
+    mappingCard.hidden=true;previewCard.hidden=true;
+    u02.set('error',loadStatus,e.message);
+  }
 }
-fileInput.addEventListener('change',async e=>{const f=e.target.files?.[0];if(f)await loadText(await f.text(),f.name)});
-loadSample.addEventListener('click',async()=>{const r=await fetch('/data/sample-import.csv',{cache:'no-store'});if(!r.ok)throw new Error('sample '+r.status);await loadText(await r.text(),'sample-import.csv')});
+fileInput.addEventListener('change',async e=>{
+  const f=e.target.files?.[0];
+  if(!f)return;
+  u02.set('loading',loadStatus,`Зареждане: ${f.name}…`);
+  await loadText(await f.text(),f.name);
+});
+loadSample.addEventListener('click',async()=>{
+  try{
+    u02.set('loading',loadStatus,'Зареждане на synthetic sample…');
+    const r=await fetch('/data/sample-import.csv',{cache:'no-store'});
+    if(!r.ok)throw new Error('sample '+r.status);
+    await loadText(await r.text(),'sample-import.csv');
+  }catch(e){
+    document.body.dataset.importLoaded='false';
+    loadStatus.className='status error';
+    mappingCard.hidden=true;previewCard.hidden=true;
+    u02.set('error',loadStatus,e.message);
+  }
+});
 mappings.addEventListener('change',e=>{if(!e.target.matches('select[data-column]'))return;state.mapping[e.target.dataset.column]=e.target.value;updateMapped()});
-if(new URLSearchParams(location.search).get('sample')==='1')loadSample.click();
+const u02Query=new URLSearchParams(location.search);
+if(u02.forced&&u02.forced!=='success'){
+  u02.gate(loadStatus,{
+    loading:'Зареждане на import data…',
+    empty:'Няма зареден import файл.',
+    error:'Import data could not be loaded.'
+  });
+}else if(u02Query.get('sample')==='1'||u02.forced==='success'){
+  loadSample.click();
+}else{
+  u02.set('empty',loadStatus,'Няма зареден файл.');
+}
 </script>
 </body>
 </html>
