@@ -524,7 +524,7 @@
           "acceptanceCriteria": "Navigation supports dashboard, models, items, imports, passports, settings",
           "evidenceRequired": "E2E navigation tests",
           "status": "red",
-          "evidence": "PARTIAL application-information-architecture precursor: dashboard now exposes a Pilot onboarding entry; the deterministic onboarding surface links into existing model/item/import demo workflows and represents the passport completion step. Browser smoke `35428911661` SUCCESS proves the dashboard→onboarding route and rendered 5-step workflow. U01 remains RED because dependency M24 is RED and full core navigation still lacks a dedicated settings surface / complete E2E navigation matrix. — PARTIAL PASS"
+          "evidence": "PARTIAL application information architecture now has a browser-proven core navigation precursor. Dashboard menu exposes models, items, imports, passports, settings and onboarding; `demo/settings.html` links back into the core workflows and proves `secret-storage=false` / `persistent-write=false`. `scripts/validate_core_navigation.py` checks the dashboard route matrix and settings DOM. Exact-head full CI `35429103687` SUCCESS includes the U01 browser validator/screenshot plus onboarding, API/DB/security/restore and full browser regression. U01 remains RED because dependency M24 is RED and deployed end-to-end navigation acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "U02",
