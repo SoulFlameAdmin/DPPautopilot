@@ -917,7 +917,7 @@
           "acceptanceCriteria": "Traceability/privacy artifacts complete; unsupported compliance claims removed",
           "evidenceRequired": "Review evidence",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: F11,R07,R08."
+          "evidence": "PARTIAL fail-closed privacy/compliance acceptance precursor: data/privacy-compliance-acceptance-policy.json + verifier require F11/R07/R08 evidence, complete traceability/privacy inventory, accepted retention/deletion/export and evidence/auth lifecycle, reviewed external-recipient boundary, zero unsupported compliance claims and explicit separation from C12 legal sign-off. CI 35415910084 on 6e5c98c8b4b964530cbe4f594b2314c3915f0472 SUCCESS including C11 validator/tests and full release/API/DB/security/browser regression. C11 remains RED until R07/R08 are GREEN and complete current-scope review passes; C12 remains external legal/compliance sign-off. — PARTIAL PASS"
         },
         {
           "id": "C12",
