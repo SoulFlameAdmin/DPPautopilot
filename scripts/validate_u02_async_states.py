@@ -45,7 +45,7 @@ def main() -> None:
     root=Path(__file__).resolve().parents[1]
 
     helper=(root/"demo/async-state.js").read_text(encoding="utf-8")
-    for token in ["loading","empty","success","error","data.asyncState","aria-busy","DPPAsyncState"]:
+    for token in ["loading","empty","success","error","dataset.asyncState","aria-busy","DPPAsyncState"]:
         require(token in helper,f"U02 helper missing token: {token}")
 
     for view,meta in VIEWS.items():
