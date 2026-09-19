@@ -71,12 +71,19 @@ test('fixed window denies the request after the configured budget and exposes re
   assert.equal(decision.remaining,1);
 });
 
-test('rotating bearer values cannot bypass the network budget',()=>{
+test('rotating bearer or network identity cannot bypass the paired budgets',()=>{
   const rules={authenticated_write:{limit:1,window_seconds:60}};
   assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer a','203.0.113.1'),'models',{rules,nowMs:1000}).allowed,true);
+
+  // New bearer cannot reset the already-consumed network/IP budget.
   assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer b','203.0.113.1'),'models',{rules,nowMs:2000}).allowed,false);
   assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer c','203.0.113.1'),'models',{rules,nowMs:3000}).allowed,false);
-  assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer a','203.0.113.2'),'models',{rules,nowMs:3000}).allowed,true);
+
+  // New IP cannot reset an already-consumed credential budget.
+  assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer a','203.0.113.2'),'models',{rules,nowMs:3000}).allowed,false);
+
+  // A genuinely distinct network + credential pair still has its own budget.
+  assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer d','203.0.113.3'),'models',{rules,nowMs:3000}).allowed,true);
 });
 
 test('41st authenticated model write returns canonical 429 before validation/upstream',async()=>{
