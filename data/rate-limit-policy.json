@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "task": "R05",
   "status": "partial",
   "strategy": "process_local_fixed_window_precursor",
@@ -52,6 +52,10 @@
     },
     "export": {
       "GET": "export_read"
+    },
+    "tenant": {
+      "GET": "authenticated_read",
+      "POST": "authenticated_write"
     }
   },
   "response": {
