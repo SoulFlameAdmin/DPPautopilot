@@ -295,6 +295,16 @@ jobs:
           \i tests/db/test_evidence_attachments_subset.sql
           rollback;
           SQL
+      - name: Run R08 retention deletion subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_retention_deletion_subset.sql
+          rollback;
+          SQL
       - name: Run R04 DB tenant isolation subset
         env:
           PGPASSWORD: postgres
@@ -408,6 +418,8 @@ jobs:
         run: python scripts/validate_auth_security_review.py
       - name: Validate R07 privacy data inventory
         run: python scripts/validate_privacy_data_inventory.py
+      - name: Validate R08 retention deletion policy
+        run: python scripts/validate_retention_deletion_policy.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
       - name: Browser smoke test demo surfaces
