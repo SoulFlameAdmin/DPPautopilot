@@ -318,7 +318,7 @@
           "acceptanceCriteria": "Models/items/passports/orgs/users represented with PK/FK/check constraints",
           "evidenceRequired": "Migration + schema diff",
           "status": "green",
-          "evidence": "Supabase migration `dpp_core_schema` applied to project `frhletkiuupgksmgxoxc`; runtime verification confirmed 5 DPP-only core tables, PK/FK/check/unique constraints, tenant-safe composite FKs, RLS enabled, and no `anon`/`authenticated` table grants. Canonical migration `supabase/migrations/20260918231500_dpp_core_schema.sql`; GitHub Actions run `35390158548` on commit `575d5a7e08895aa217ff8749d2764a3533bf0954` SUCCESS including `M04_SCHEMA_CONTRACT_PASS`. Production performance hardening migration `dpp_fk_covering_indexes` adds all 16 covering indexes flagged by Supabase advisor; bound guard returned `DPP_FK_COVERING_INDEXES_PASS` and fresh performance-advisor scan reports zero DPP `unindexed_foreign_keys` findings. — PASS"
+          "evidence": "Supabase migration `dpp_core_schema` applied to project `frhletkiuupgksmgxoxc`; runtime verification confirmed 5 DPP-only core tables, PK/FK/check/unique constraints, tenant-safe composite FKs, RLS enabled, and no `anon`/`authenticated` table grants. Canonical migration `supabase/migrations/20260918231500_dpp_core_schema.sql`; GitHub Actions run `35390158548` on commit `575d5a7e08895aa217ff8749d2764a3533bf0954` SUCCESS including `M04_SCHEMA_CONTRACT_PASS`. Production performance hardening migration `dpp_fk_covering_indexes` adds all 16 covering indexes flagged by Supabase advisor; bound guard returned `DPP_FK_COVERING_INDEXES_PASS`, fresh advisor reports zero DPP `unindexed_foreign_keys`, and full exact-head CI `35424726072` (closed unmerged probe PR #9, base `49872d32b922e35b72f7421bdaf776bb7b292c1f`) SUCCESS including clean replay and the FK-index guard. — PASS"
         },
         {
           "id": "M05",
@@ -408,7 +408,7 @@
           "acceptanceCriteria": "Identifier uniqueness and lifecycle transitions enforced",
           "evidenceRequired": "Unit/integration tests",
           "status": "green",
-          "evidence": "Lifecycle migration applied in Supabase; runtime transaction allowed `original→second_life`, rejected `second_life→original`, and rejected duplicate identifier; contract + clean replay PASS in run `35391493185`. Security hardening migration `dpp_transition_helpers_search_path` now pins `public.dpp_lifecycle_transition_allowed(text,text)` to `search_path=public, pg_temp`; bound Supabase guard `DPP_TRANSITION_HELPER_SEARCH_PATH_PASS` passed and security advisor re-scan reports zero DPP mutable-search-path findings. — PASS"
+          "evidence": "Lifecycle migration applied in Supabase; runtime transaction allowed `original→second_life`, rejected `second_life→original`, and rejected duplicate identifier; contract + clean replay PASS in run `35391493185`. Security hardening migration `dpp_transition_helpers_search_path` pins `public.dpp_lifecycle_transition_allowed(text,text)` to `search_path=public, pg_temp`; bound guard returned `DPP_TRANSITION_HELPER_SEARCH_PATH_PASS`, security advisor reports zero DPP mutable-search-path findings, and full exact-head CI `35424726072` SUCCESS including clean replay and the search-path guard. — PASS"
         },
         {
           "id": "M15",
@@ -417,7 +417,7 @@
           "acceptanceCriteria": "Registry payload/status model exists without unsupported live claims",
           "evidenceRequired": "Contract tests",
           "status": "green",
-          "evidence": "Provider-neutral registry workflow abstraction migration applied in Supabase with explicit no-live-connectivity claim; contract and clean replay PASS in run `35391493185`. Security hardening migration `dpp_transition_helpers_search_path` also pins `public.dpp_registry_status_transition_allowed(text,text)` to `search_path=public, pg_temp`; bound Supabase guard `DPP_TRANSITION_HELPER_SEARCH_PATH_PASS` passed and security advisor re-scan reports zero DPP mutable-search-path findings. — PASS"
+          "evidence": "Provider-neutral registry workflow abstraction migration applied in Supabase with explicit no-live-connectivity claim; contract and clean replay PASS in run `35391493185`. Security hardening migration `dpp_transition_helpers_search_path` pins `public.dpp_registry_status_transition_allowed(text,text)` to `search_path=public, pg_temp`; bound guard returned `DPP_TRANSITION_HELPER_SEARCH_PATH_PASS`, security advisor reports zero DPP mutable-search-path findings, and full exact-head CI `35424726072` SUCCESS. — PASS"
         },
         {
           "id": "M16",
@@ -854,7 +854,7 @@
           "acceptanceCriteria": "Migration applied/verified before incompatible app release",
           "evidenceRequired": "Deployment log",
           "status": "red",
-          "evidence": "PARTIAL migration deployment gate refreshed against the real bound Supabase history: data/bound-supabase-migration-snapshot.json now covers all committed canonical migrations through dpp_fk_covering_indexes; search-path and FK-index hardening migrations are applied/verified in bound Supabase. Existing fail-closed validator, manifest SHA-256 and exact-project/commit/schema gates passed in hardened regression 35423117317; a new exact-head regression is pending for these latest hardening migrations. No deployment was attempted. C04 remains RED because C03 is RED and release-time approved deployment/application evidence does not yet exist. — PARTIAL PASS"
+          "evidence": "PARTIAL migration deployment gate refreshed against the real bound Supabase history: `data/bound-supabase-migration-snapshot.json` covers all committed canonical migrations through `dpp_fk_covering_indexes`; both advisor-hardening migrations are applied and runtime-verified in bound Supabase. Full exact-head CI `35424726072` from closed unmerged probe PR #9 on base `49872d32b922e35b72f7421bdaf776bb7b292c1f` SUCCESS, including C04 validator/manifest, clean PostgreSQL 17 replay, `DPP_TRANSITION_HELPER_SEARCH_PATH_PASS`, `DPP_FK_COVERING_INDEXES_PASS`, security/RLS/restore/browser smoke. No Vercel deployment was attempted. C04 remains RED because C03 is RED and release-time approved deployment/application evidence does not yet exist. — PARTIAL PASS"
         },
         {
           "id": "C05",
