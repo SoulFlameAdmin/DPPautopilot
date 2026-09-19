@@ -7,6 +7,8 @@ const limiter=require('../../api/_rate_limit.js');
 const models=require('../../api/models.js');
 const passport=require('../../api/passport.js');
 const tenant=require('../../api/tenant.js');
+const organizations=require('../../api/organizations.js');
+const members=require('../../api/members.js');
 
 function makeRes(){
   return {
@@ -244,4 +246,51 @@ test('active network bucket survives memory-cap credential churn',()=>{
   assert.equal(fourth.allowed,false);
   assert.equal(limiter._test.buckets.get(networkKey).count,4);
   assert.equal(limiter._test.buckets.size,3);
+});
+
+
+test('41st authenticated organization write is blocked before validation/upstream',async()=>{
+  const originalFetch=global.fetch;
+  const originalWarn=console.warn;
+  let upstream=0;
+  console.warn=()=>{};
+  global.fetch=async()=>{upstream+=1;throw new Error('upstream should not be used');};
+  try{
+    for(let i=1;i<=40;i++){
+      const res=makeRes();
+      await organizations(req('POST',{name:'',slug:'bad slug'}),res);
+      assert.equal(res.statusCode,422);
+    }
+    const blocked=makeRes();
+    await organizations(req('POST',{name:'',slug:'bad slug'}),blocked);
+    assert.equal(blocked.statusCode,429);
+    assert.equal(json(blocked).error.code,'RATE_LIMITED');
+    assert.equal(upstream,0);
+  }finally{
+    global.fetch=originalFetch;
+    console.warn=originalWarn;
+  }
+});
+
+test('41st authenticated member write is blocked before validation/upstream',async()=>{
+  const originalFetch=global.fetch;
+  const originalWarn=console.warn;
+  let upstream=0;
+  console.warn=()=>{};
+  global.fetch=async()=>{upstream+=1;throw new Error('upstream should not be used');};
+  try{
+    for(let i=1;i<=40;i++){
+      const res=makeRes();
+      await members(req('POST',{user_id:'bad',role:'viewer'}),res);
+      assert.equal(res.statusCode,422);
+    }
+    const blocked=makeRes();
+    await members(req('POST',{user_id:'bad',role:'viewer'}),blocked);
+    assert.equal(blocked.statusCode,429);
+    assert.equal(json(blocked).error.code,'RATE_LIMITED');
+    assert.equal(upstream,0);
+  }finally{
+    global.fetch=originalFetch;
+    console.warn=originalWarn;
+  }
 });
