@@ -8,6 +8,8 @@ on:
       - 'tests/browser/record_visual_deterministic.py'
       - 'requirements-browser.txt'
       - '.github/workflows/u07-visual-candidate.yml'
+      - 'data/t10-regression-gate.json'
+      - 'scripts/generate_t10_full_regression_report.py'
   workflow_dispatch:
 
 permissions:
