@@ -168,3 +168,70 @@ test('unsupported methods return 405 with Allow header', async () => {
   assert.equal(res.statusCode, 405);
   assert.equal(res.headers.allow, 'GET, POST, PATCH, DELETE');
 });
+
+
+test('PATCH requires expected_updated_at before upstream access', async () => {
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true; throw new Error('unexpected');};
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      model_identifier:'MODEL-2'
+    }),res);
+    assert.equal(res.statusCode,428);
+    assert.equal(JSON.parse(res.body).error.code,'WRITE_PRECONDITION_REQUIRED');
+    assert.equal(called,false);
+  } finally { global.fetch=original; }
+});
+
+test('PATCH forwards optimistic concurrency token to checked model RPC', async () => {
+  const original=global.fetch;
+  const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY='anon-key';
+  let seen;
+  global.fetch=async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return {id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',model_identifier:'MODEL-2'};}};
+  };
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      model_identifier:'MODEL-2',
+      expected_updated_at:'2026-09-19T04:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,200);
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_models_update_checked');
+    assert.equal(JSON.parse(seen.options.body).p_expected_updated_at,'2026-09-19T04:00:00.000Z');
+  } finally {
+    global.fetch=original;
+    if(oldUrl===undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL=oldUrl;
+    if(oldKey===undefined) delete process.env.SUPABASE_ANON_KEY; else process.env.SUPABASE_ANON_KEY=oldKey;
+  }
+});
+
+test('stale model write maps DP206 to stable 409', async () => {
+  const original=global.fetch;
+  const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY='anon-key';
+  global.fetch=async()=>({ok:false,async json(){return {code:'DP206',message:'internal stale timestamp'};}});
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      model_identifier:'MODEL-2',
+      expected_updated_at:'2026-09-19T04:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,409);
+    assert.equal(JSON.parse(res.body).error.code,'STALE_WRITE');
+    assert.equal(res.body.includes('internal stale timestamp'),false);
+  } finally {
+    global.fetch=original;
+    if(oldUrl===undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL=oldUrl;
+    if(oldKey===undefined) delete process.env.SUPABASE_ANON_KEY; else process.env.SUPABASE_ANON_KEY=oldKey;
+  }
+});
