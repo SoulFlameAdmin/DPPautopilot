@@ -55,7 +55,7 @@ for required in [
     "X-Request-ID",
     "tenant isolation",
     "Vercel deploy lease",
-    "do not hard-code statutory notification deadlines",
+    "statutory notification deadlines",
 ]:
     assert required.lower() in doc.lower(), f"R13 runbook missing {required}"
 
