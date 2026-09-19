@@ -54,7 +54,7 @@
   },
   "safety_rules": [
     "Never roll back the database merely because an application rollback is requested.",
-    "Never treat a PostgreSQL restore as evidence-object recovery.",
+    "Never treat a PostgreSQL restore as Supabase Storage/evidence-object recovery.",
     "Never execute a production rollback/redeploy without the DAVID Vercel deployment lease when a Vercel action is required.",
     "Never bypass authentication, MFA, CAPTCHA, provider permissions or approval gates.",
     "Preserve audit/log/request-ID evidence before destructive recovery.",
