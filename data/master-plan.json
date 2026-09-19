@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T09:24:00+03:00",
+  "updatedAt": "2026-09-19T09:31:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -667,7 +667,7 @@
           "acceptanceCriteria": "Structured errors and request correlation available without leaking secrets",
           "evidenceRequired": "Runtime log evidence",
           "status": "red",
-          "evidence": "PARTIAL structured logging/request correlation now covers all six discovered public API handlers, including tenant: safe `X-Request-ID` propagation/generation and one redacted `dpp_http_request` event per response with timestamp, surface, method, status/outcome, duration, auth-presence and stable public error code only. Tenant 401 correlation/redaction is executable-tested; bearer tokens, bodies, query identifiers, upstream messages and raw IPs remain excluded. `validate_observability_policy.py` dynamically inventories every non-helper `api/*.js` endpoint and fails CI on a future unobserved surface. Exact-head full CI `35426026323` from closed unmerged probe PR #15 (base `b22654fdf3e524201fd4d4d28252f6124dc7c350`) SUCCESS, including R09 redaction/policy, R10 integration, security/DB regression and browser smoke. R09 remains RED pending F08, full M17-M20 acceptance and deployed runtime log/correlation evidence. — PARTIAL PASS"
+          "evidence": "PARTIAL structured observability covers all six discovered public API handlers with safe X-Request-ID correlation, redacted dpp_http_request events and no bearer/body/query/raw-IP leakage. Policy v3 now explicitly makes telemetry fail-open: logger.info/warn/error failures are swallowed after event construction so a broken logging sink cannot block the original HTTP response. Unit coverage proves a throwing logger still returns the intended body/correlation header. Exact-head full CI 35426593849 from closed unmerged probe PR #19 (base da598f1fc3d5d343ae8627948e74d7bcc6d31805) SUCCESS including R09 redaction/fail-open suite, R09/R10 validators, clean PostgreSQL 17 replay, tenant/RLS/storage/security guards, R12 restore and browser smoke. R09 remains RED pending F08, full M17-M20 acceptance and deployed runtime log/correlation evidence. — PARTIAL PASS"
         },
         {
           "id": "R10",
