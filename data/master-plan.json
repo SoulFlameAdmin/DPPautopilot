@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T04:06:00+03:00",
+  "updatedAt": "2026-09-19T04:12:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -703,7 +703,7 @@
           "acceptanceCriteria": "Severity, triage, comms, rollback, data incident steps documented",
           "evidenceRequired": "`docs/INCIDENT_RUNBOOK.md`",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: R09-R12."
+          "evidence": "PARTIAL incident-runbook precursor: docs/INCIDENT_RUNBOOK.md + data/incident-runbook-contract.json define severity/ack targets, roles, R10 signal mapping, triage, containment, communications, R11/R12 recovery/restore, privacy/tenant-isolation incident handling, verification and post-incident learning. CI 35411303231 on b675b05deb59958baa80517c1575d2bfd216bb75 SUCCESS including R13 validator and full regression stack. R13 remains RED pending R09/R10 full acceptance and a deployed runtime incident drill. — PARTIAL PASS"
         },
         {
           "id": "R14",
