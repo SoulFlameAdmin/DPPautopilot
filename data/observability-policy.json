@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "task": "R09",
+  "status": "partial",
+  "event_name": "dpp_http_request",
+  "correlation": {
+    "request_header": "X-Request-ID",
+    "response_header": "X-Request-ID",
+    "accepted_pattern": "^[A-Za-z0-9._:-]{8,128}$",
+    "invalid_or_missing": "Generate UUID v4"
+  },
+  "logged_fields": [
+    "event",
+    "request_id",
+    "surface",
+    "method",
+    "status",
+    "outcome",
+    "duration_ms",
+    "auth_present",
+    "error_code"
+  ],
+  "prohibited_fields": [
+    "authorization header",
+    "bearer/access/refresh tokens",
+    "Supabase keys",
+    "request/response bodies",
+    "query parameters",
+    "passport identifiers",
+    "emails/phones",
+    "cookies",
+    "raw IP addresses",
+    "database payloads"
+  ],
+  "severity": {
+    "2xx_3xx": "info",
+    "4xx": "warn",
+    "5xx": "error"
+  },
+  "surfaces": [
+    "models",
+    "items",
+    "passport",
+    "imports",
+    "export"
+  ],
+  "runtime_gap": "Production/runtime log aggregation and deployed request-correlation evidence remain blocked by F08 and incomplete M17-M20 acceptance."
+}
