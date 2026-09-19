@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==4
+assert policy.get("version")==5
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
 assert policy.get("strategy")=="process_local_dual_bucket_fixed_window_precursor"
@@ -17,6 +17,7 @@ assert identity=={
     "credential_bucket_when_authorization_present":True,
     "allow_only_when_all_buckets_within_limit":True,
     "bearer_rotation_cannot_reset_network_budget":True,
+    "active_request_buckets_protected_from_cap_eviction":True,
 }
 memory=policy.get("memory_safety",{})
 assert memory=={
@@ -97,6 +98,7 @@ for token in [
     "bucket map is hard capped",
     "bucket keys do not retain raw IP",
     "rotating bearer values cannot bypass the network budget",
+    "active network bucket survives memory-cap credential churn",
 ]:
     assert token in test_text, f"R05 abuse suite missing {token}"
 
