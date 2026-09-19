@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "External dependency frontier after hardened full regression",
+  "currentTask": "External dependency frontier after DPP advisor hardening",
   "currentGate": "MVP",
-  "lastCompletedTask": "M13/M22/M23 hardening + full CI 35423117317 SUCCESS",
-  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue only dependency-safe non-deploy hardening/evidence work; M01 is the earliest mandatory external blocker.",
-  "message": "D01-D14 remain GREEN. Full hardened regression 35423117317 is SUCCESS, including M23 optimistic concurrency and M13 tenant-safe Storage registration. F08 and M01 remain external blockers; no Vercel deploy/redeploy was attempted, so no deploy lease was required. DAVID orchestrator files remain untouched.",
+  "lastCompletedTask": "DPP advisor hardening + full CI 35424726072 SUCCESS",
+  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue only dependency-safe non-deploy hardening/evidence work; M01 remains the earliest mandatory external blocker.",
+  "message": "D01-D14 remain GREEN. DPP search_path and FK-index advisor findings are cleared and exact-head full CI 35424726072 is SUCCESS. F08 and M01 remain external blockers; no Vercel deploy/redeploy was attempted, so no deploy lease was required. DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path."
   ],
-  "updatedAt": "2026-09-19T08:11:00+03:00"
+  "updatedAt": "2026-09-19T08:46:00+03:00"
 }
