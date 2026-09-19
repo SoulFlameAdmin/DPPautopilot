@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T08:10:00+03:00",
+  "updatedAt": "2026-09-19T09:24:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -631,7 +631,7 @@
           "acceptanceCriteria": "Sensitive/public endpoints have documented limits and 429 behavior",
           "evidenceRequired": "Load/abuse tests",
           "status": "red",
-          "evidence": "PARTIAL abuse control hardened to policy v3 across all six discovered public API handlers: tenant/models/items/passport/imports/export. Process-local fixed windows retain canonical 429 + Retry-After/X-RateLimit metadata; stored bucket identity is a SHA-256 digest of normalized IP + bearer digest, expired windows are evicted and active buckets are capped at 10,000. Tests now include the 41st authenticated tenant-context write returning 429 before validation/upstream, existing model/public-passport thresholds, privacy-hashed keys, expiry eviction and unique-identity flood cap. `validate_rate_limit_policy.py` dynamically inventories every non-helper `api/*.js` endpoint and fails CI on an uncovered future surface. Exact-head full CI `35426026323` from closed unmerged probe PR #15 (base `b22654fdf3e524201fd4d4d28252f6124dc7c350`) SUCCESS. R05 remains RED pending M17-M20 GREEN plus durable/distributed deployed enforcement and real-network concurrency/load evidence. — PARTIAL PASS"
+          "evidence": "PARTIAL abuse control hardened to policy v5 across all six discovered public API handlers (tenant/models/items/passport/imports/export). The process-local limiter uses paired privacy-hashed network and credential buckets: bearer rotation cannot reset an exhausted network budget, IP rotation cannot reset an exhausted credential budget, raw IP/token material is absent from bucket keys, expired buckets are evicted, and active request buckets are protected from the 10,000-entry memory cap so eviction pressure cannot reset the current network budget. Canonical 429 + Retry-After/X-RateLimit behavior remains enforced. Failed probe run 35426289938 correctly exposed a stale paired-budget test expectation; the test was corrected to the intended two-axis contract. Exact-head full CI 35426379499 from closed unmerged probe PR #18 (base 9e5fd823aef7d1d44e959d5498d160a6cf5d4619) SUCCESS, including R05 validator/abuse suite, clean PostgreSQL 17 replay, tenant/RLS/storage/security guards, R12 restore and browser smoke. Vercel documentation also confirms x-forwarded-for is overwritten by Vercel to prevent external spoofing unless Enterprise Trusted Proxy is enabled. R05 remains RED pending M17-M20 GREEN plus durable/distributed deployed enforcement and real-network concurrency/load evidence. — PARTIAL PASS"
         },
         {
           "id": "R06",
