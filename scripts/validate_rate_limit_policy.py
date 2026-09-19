@@ -65,7 +65,6 @@ for token in [
     "X-RateLimit-Limit",
     "X-RateLimit-Remaining",
     "X-RateLimit-Reset",
-    "identityDigest",
     "pruneBuckets",
     "DEFAULT_MAX_BUCKETS",
 ]:
@@ -94,7 +93,7 @@ for token in [
     "41st authenticated tenant context write",
     "RATE_LIMITED",
     "retry-after",
-    "expired buckets are evicted",
+    "expired dual buckets are evicted",
     "bucket map is hard capped",
     "bucket keys do not retain raw IP",
     "rotating bearer values cannot bypass the network budget",
