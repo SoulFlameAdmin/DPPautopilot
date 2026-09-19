@@ -5,7 +5,7 @@ const assert=require('node:assert/strict');
 const errors=require('../../api/_errors.js');
 
 test('common auth SQLSTATEs map consistently on every API surface',()=>{
-  for(const surface of ['models','items','passport','export','imports','tenant']){
+  for(const surface of ['models','items','passport','export','imports','tenant','organizations','members']){
     assert.deepEqual(errors.mapDatabaseError(surface,{code:'DP101'}),{
       status:401,code:'AUTH_REQUIRED',message:'Authentication is required.'
     });
@@ -24,6 +24,24 @@ test('surface-specific mappings preserve semantic differences',()=>{
   });
   assert.deepEqual(errors.mapDatabaseError('passport',{code:'23505'}),{
     status:409,code:'PASSPORT_CONFLICT',message:'The passport conflicts with an existing record.'
+  });
+});
+
+test('onboarding surfaces expose stable semantic errors',()=>{
+  assert.deepEqual(errors.mapDatabaseError('organizations',{code:'23505'}),{
+    status:409,code:'ORGANIZATION_CONFLICT',message:'An organization with the requested identity already exists.'
+  });
+  assert.deepEqual(errors.mapDatabaseError('organizations',{code:'DP501'}),{
+    status:422,code:'VALIDATION_ERROR',message:'The request failed validation.'
+  });
+  assert.deepEqual(errors.mapDatabaseError('members',{code:'DP502'}),{
+    status:404,code:'MEMBER_TARGET_NOT_FOUND',message:'The target user was not found.'
+  });
+  assert.deepEqual(errors.mapDatabaseError('members',{code:'DP503'}),{
+    status:404,code:'MEMBER_NOT_FOUND',message:'The membership was not found.'
+  });
+  assert.deepEqual(errors.mapDatabaseError('members',{code:'DP505'}),{
+    status:409,code:'MEMBER_CONFLICT',message:'The membership already exists.'
   });
 });
 
