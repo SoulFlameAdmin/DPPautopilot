@@ -52,14 +52,14 @@
       "source": "supabase/functions/dpp-evidence-object/index.ts",
       "verify_jwt": true,
       "auth_context": "caller Authorization header is forwarded through a publishable/anon client so Storage RLS remains authoritative",
-      "service_role_allowed": false,
       "operations": [
         "upload",
         "download",
         "delete"
       ],
       "overwrite_allowed": false,
-      "runtime_acceptance_required": true
+      "runtime_acceptance_required": true,
+      "privileged_server_key_allowed": false
     }
   }
 }
