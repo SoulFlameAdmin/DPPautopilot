@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "R08 — retention/deletion/export precursor analysis",
+  "currentTask": "R09 — logging/observability precursor analysis",
   "currentGate": "SECURITY",
-  "lastCompletedTask": "R07 partial DPP privacy data inventory — CI 35409485502 SUCCESS",
-  "nextTask": "Turn R07 retention gaps into a versioned deletion/export/retention contract and testable implementation precursor without claiming GREEN until R07 is fully accepted.",
-  "message": "D01-D14 remain GREEN. R05, R06 and R07 now have evidence-backed security/privacy precursors. F08/M01 remain deferred. No Vercel action attempted. DAVID orchestrator files were not touched.",
+  "lastCompletedTask": "R08 partial fail-closed retention/deletion/export precursor — CI 35409973551 + bound Supabase R08_RETENTION_DELETION_SUBSET_PASS",
+  "nextTask": "Build repository-level structured error/request-correlation logging that does not depend on deployment; keep R09 RED because F08 and M17-M20 acceptance/runtime evidence remain incomplete.",
+  "message": "D01-D14 remain GREEN. R08 now has an evidence-backed fail-closed retention precursor with 30-day terminal-import purge and no organization/user destructive deletion. F08/M01 remain deferred. No Vercel action attempted. DAVID orchestrator files were not touched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T03:35:00+03:00"
+  "updatedAt": "2026-09-19T03:44:00+03:00"
 }
