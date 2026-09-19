@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T04:48:00+03:00",
+  "updatedAt": "2026-09-19T04:55:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -792,7 +792,7 @@
           "acceptanceCriteria": "Retries/timeouts/idempotency survive injected failures",
           "evidenceRequired": "Reliability report",
           "status": "red",
-          "evidence": "PARTIAL reliability matrix: retry/timeout, import idempotency, registry idempotency and M17-M19 API write-conflict scenarios are versioned and executable. CI 35406140746 SUCCESS with all four scenario contracts/tests green. T08 remains RED while M23 remains RED. — PARTIAL PASS"
+          "evidence": "PARTIAL reliability/retry acceptance coverage: report generator validates 4 executable scenarios covering registry timeout/retry, import idempotency, registry idempotency and API conflicts/fail-closed behavior (15 behaviors). CI 35412453600 on 7c0aaec92f1fe958c6734eb2ff5474ca1015966e SUCCESS; artifact 10574529645. Bound Supabase frhletkiuupgksmgxoxc ran all three PostgreSQL reliability/idempotency suites in BEGIN/ROLLBACK and returned T08_BOUND_SUPABASE_RELIABILITY_ROLLBACK_PASS. T08 remains RED while M23 is RED. — PARTIAL PASS"
         },
         {
           "id": "T09",
