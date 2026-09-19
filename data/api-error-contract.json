@@ -1,7 +1,7 @@
 {
   "version": 1,
   "task": "M22",
-  "scope": "Shared HTTP error contract for current DPP serverless API precursors; M22 remains RED until M17-M20 are fully accepted and M20 has an HTTP API.",
+  "scope": "Shared HTTP error contract for current DPP serverless API precursors; M22 remains RED until M17-M23 are fully accepted and deployed end-to-end API acceptance is possible.",
   "envelope": {
     "error": {
       "code": "UPPER_SNAKE_CASE",
@@ -182,7 +182,59 @@
         "message": "The request failed validation."
       }
     },
-    "export": {}
+    "export": {},
+    "imports": {
+      "DP001": {
+        "http_status": 404,
+        "code": "IMPORT_NOT_FOUND",
+        "message": "The import was not found."
+      },
+      "DP002": {
+        "http_status": 422,
+        "code": "IMPORT_HAS_NO_ROWS",
+        "message": "The import has no staged rows."
+      },
+      "DP003": {
+        "http_status": 409,
+        "code": "IMPORT_NOT_COMMITTABLE",
+        "message": "The import is not in a committable state."
+      },
+      "DP004": {
+        "http_status": 422,
+        "code": "IMPORT_ROW_HAS_VALIDATION_ERRORS",
+        "message": "An import row still has validation errors."
+      },
+      "DP005": {
+        "http_status": 422,
+        "code": "IMPORT_ROW_MISSING_IDENTITY",
+        "message": "An import row is missing required normalized identity fields."
+      },
+      "DP006": {
+        "http_status": 409,
+        "code": "IMPORT_COMMIT_COUNT_MISMATCH",
+        "message": "Committed row count differs from the validated row count."
+      },
+      "DP007": {
+        "http_status": 409,
+        "code": "IMPORT_COMMITTED_STATE_INCONSISTENT",
+        "message": "The committed import state is inconsistent."
+      },
+      "DP008": {
+        "http_status": 409,
+        "code": "DUPLICATE_BATTERY_IDENTIFIER",
+        "message": "A battery unique identifier already exists."
+      },
+      "DP009": {
+        "http_status": 422,
+        "code": "INVALID_IMPORT_PAYLOAD",
+        "message": "The import payload is invalid."
+      },
+      "DP010": {
+        "http_status": 404,
+        "code": "IMPORT_MAPPING_NOT_FOUND",
+        "message": "The import mapping was not found."
+      }
+    }
   },
   "local_codes": {
     "AUTH_REQUIRED": {
