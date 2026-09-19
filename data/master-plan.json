@@ -300,7 +300,7 @@
           "acceptanceCriteria": "Users belong to organisations and active tenant is explicit",
           "evidenceRequired": "DB + integration tests",
           "status": "red",
-          "evidence": "PARTIAL explicit tenant implementation is now full-CI evidenced: bound Supabase M02_M03_TENANT_API_SUBSET_PASS proves caller-only memberships, explicit multi-tenant switching, non-member denial and unauthenticated fail-closed; /api/tenant exact handler tests and DB matrices pass in full GitHub Actions run 35423117317 (closed probe PR #6 head 26c0d833ae6cccd0ccdde1f5b04ae63fd8a9b07a based on exact main f194725100e939eeb0c4c9d17ae1d39e45b48f73), including clean replay/security/browser smoke. M02 remains RED because dependency M01 is BLOCKED and deployed authenticated app acceptance is unavailable. — PARTIAL PASS"
+          "evidence": "PARTIAL explicit tenant implementation is full-CI evidenced. Bound `M02_M03_TENANT_API_SUBSET_PASS` proves caller-only memberships, explicit multi-tenant switching, non-member denial and unauthenticated fail-closed. Security migration `dpp_internal_rpc_surface_hardening` removed direct authenticated EXECUTE from internal tenant helpers (`dpp_active_organization_id`, `dpp_require_active_role`, `dpp_set_active_organization`) while `DPP_INTERNAL_RPC_SURFACE_PASS` proves the public tenant API still works under `SET ROLE authenticated`. Full CI `35425179398` SUCCESS includes clean replay, tenant/RBAC/RLS/storage/security guards and browser smoke. M02 remains RED because dependency M01 is BLOCKED and deployed authenticated app acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M03",
@@ -309,7 +309,7 @@
           "acceptanceCriteria": "Owner/admin/editor/viewer permissions enforced server-side",
           "evidenceRequired": "Authorization test matrix",
           "status": "red",
-          "evidence": "PARTIAL server-side RBAC is full-CI evidenced through tenant-context API and data RPCs: dpp_require_active_role enforces owner/admin/editor/viewer against explicit active tenant; bound matrices cover allowed/denied/cross-tenant/missing-auth cases; run 35423117317 SUCCESS includes M02/M03 tenant RBAC/API subsets, global RPC/RLS guards and browser smoke. M03 remains RED because M01/M02 are not GREEN. — PARTIAL PASS"
+          "evidence": "PARTIAL server-side RBAC remains enforced behind a reduced RPC attack surface. Owner/admin/editor/viewer matrices pass; `dpp_internal_rpc_surface_hardening` revokes direct authenticated EXECUTE on internal active-tenant/RBAC helpers while top-level tenant/data APIs retain required access. Bound `DPP_INTERNAL_RPC_SURFACE_PASS`, `M02_M03_TENANT_RBAC_SUBSET_PASS`, `M02_M03_TENANT_API_SUBSET_PASS` and `DPP_SECURITY_DEFINER_RPC_GUARD_PASS` all pass. Full CI `35425179398` SUCCESS. M03 remains RED because M01/M02 are not GREEN. — PARTIAL PASS"
         },
         {
           "id": "M04",
@@ -399,7 +399,7 @@
           "acceptanceCriteria": "Allowed files upload/download under tenant policy; type/size limits enforced",
           "evidenceRequired": "Storage tests",
           "status": "red",
-          "evidence": "PARTIAL evidence/storage hardening now includes tenant-safe registration helper. Bound Supabase migration dpp_evidence_storage_registration_tenant_guard is applied; rollback runtime returned M13_EVIDENCE_STORAGE_TENANT_GUARD_PASS, proving same-tenant registered metadata is visible to allowed members while direct cross-tenant helper calls return false. Private dpp-evidence bucket remains 10 MiB with PDF/PNG/JPEG/CSV/JSON allowlist, no overwrite and no direct metadata table grants. Full run 35423117317 SUCCESS includes M13 metadata/storage RLS and exact RPC guard. M13 remains RED until M03 is GREEN and real authenticated Storage API byte upload/download/delete is proven. — PARTIAL PASS"
+          "evidence": "PARTIAL evidence/storage hardening includes tenant-safe registration and reduced helper privilege. `dpp_evidence_storage_org_id(text)` is now SECURITY INVOKER because it only parses paths; table-reading `dpp_evidence_storage_registered(text)` remains SECURITY DEFINER for Storage RLS. Bound `M13_EVIDENCE_STORAGE_RLS_SUBSET_PASS` and global RPC guard pass after `dpp_internal_rpc_surface_hardening`; private `dpp-evidence` remains 10 MiB with PDF/PNG/JPEG/CSV/JSON allowlist and no direct metadata table grants. Full CI `35425179398` SUCCESS. M13 remains RED until M03 is GREEN and real authenticated Storage API byte upload/download/delete is proven. — PARTIAL PASS"
         },
         {
           "id": "M14",
@@ -631,7 +631,7 @@
           "acceptanceCriteria": "Sensitive/public endpoints have documented limits and 429 behavior",
           "evidenceRequired": "Load/abuse tests",
           "status": "red",
-          "evidence": "PARTIAL process-local abuse control: five versioned budgets across models/items/passport/imports/export, IP + hashed bearer bucket identity, canonical 429 RATE_LIMITED with Retry-After/X-RateLimit metadata, and executable abuse tests. CI 35408889300 on be0253207df52d436a717ad3048692bf10e2fa4a SUCCESS. R05 remains RED pending full M17-M20 acceptance plus durable/distributed deployed rate limiting and concurrency/load evidence. — PARTIAL PASS"
+          "evidence": "PARTIAL process-local abuse control hardened to policy v2: five budgets across models/items/passport/imports/export keep canonical 429 + Retry-After/X-RateLimit metadata; bucket identity now stores only a SHA-256 digest of normalized IP + bearer digest (no raw IP/token), expired windows are evicted, and the in-memory Map is hard-capped at 10,000 buckets against unique-identity memory growth. Executable tests cover 41st authenticated write, 31st anonymous passport read, privacy-hashed keys, expiry eviction and hard-cap flood behavior. Full CI `35425334617` on closed unmerged probe PR #11 (base `157a11deb869e7931e31dc1710db734ab74efdec`) SUCCESS including R05 policy + abuse suite and full regression. R05 remains RED pending M17-M20 GREEN plus durable/distributed deployed rate limiting and real-network concurrency/load evidence. — PARTIAL PASS"
         },
         {
           "id": "R06",
@@ -854,7 +854,7 @@
           "acceptanceCriteria": "Migration applied/verified before incompatible app release",
           "evidenceRequired": "Deployment log",
           "status": "red",
-          "evidence": "PARTIAL migration deployment gate refreshed against the real bound Supabase history: `data/bound-supabase-migration-snapshot.json` covers all committed canonical migrations through `dpp_fk_covering_indexes`; both advisor-hardening migrations are applied and runtime-verified in bound Supabase. Full exact-head CI `35424726072` from closed unmerged probe PR #9 on base `49872d32b922e35b72f7421bdaf776bb7b292c1f` SUCCESS, including C04 validator/manifest, clean PostgreSQL 17 replay, `DPP_TRANSITION_HELPER_SEARCH_PATH_PASS`, `DPP_FK_COVERING_INDEXES_PASS`, security/RLS/restore/browser smoke. No Vercel deployment was attempted. C04 remains RED because C03 is RED and release-time approved deployment/application evidence does not yet exist. — PARTIAL PASS"
+          "evidence": "PARTIAL migration deployment gate tracks real bound Supabase history through `dpp_internal_rpc_surface_hardening`; `data/bound-supabase-migration-snapshot.json` is synchronized and the migration is runtime-verified. Full CI `35425179398` from closed unmerged probe PR #10 (base `182e2076f2cd88c169666fe5552dff2c5230b8f0`) SUCCESS including C04 validator/manifest, clean PostgreSQL 17 replay, internal RPC surface guard, tenant/RBAC/storage/security/restore/browser smoke. No Vercel deployment was attempted. C04 remains RED because C03 is RED and release-time approved deployment/application evidence does not yet exist. — PARTIAL PASS"
         },
         {
           "id": "C05",
