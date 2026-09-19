@@ -19,7 +19,7 @@
 | System | Verified object | State | Evidence / decision |
 |---|---|---|---|
 | GitHub | `SoulFlameAdmin/DPPautopilot`, branch `main` | VERIFIED | Repository exists and connected GitHub account has write/admin access. |
-| Vercel | Project `dpp` linked to controlled mirror `SoulFlameAdmin/dpp` | VERIFIED BINDING / BUILD BLOCKED | `SoulFlameAdmin/dpp` is documented as a deployment-only mirror of canonical `SoulFlameAdmin/DPPautopilot`. Mirror commit `748806ae42aa5e958a993137695818036b1022b6` received a Vercel commit status, proving the Git integration path. The status failed with `build-rate-limit`, so F07 is resolved but F08 remains blocked. Dedicated unlinked Vercel project `dpp-autopilot` also exists with no deployments. |
+| Vercel | Project `dpp` + guarded canonical-repo CLI fallback | VERIFIED BINDING / PRODUCTION RUN BLOCKED | The original Git→Vercel hook stopped creating deployments. PR #57 merged a guarded manual Vercel CLI path from canonical `SoulFlameAdmin/DPPautopilot`, locked to team `team_cKaIZfnCMzoiiq80J0MhV0A2` and project `prj_K0RSGrEkEr3XDouCTA3tdasbqH55`, with exact-SHA checkout, production confirmation, live smoke and receipt evidence. PR CI `35463559589` passed. F08 remains blocked only until a real production workflow run succeeds with authorized `VERCEL_TOKEN` and live HTTP evidence. |
 | Supabase | Project `soulflame-twins` used as shared infrastructure with isolated `dpp_` namespace | VERIFIED | Migration `bind_dpp_autopilot_namespace` created `public.dpp_app_binding`; RLS enabled, anon/authenticated privileges revoked, binding row verified for `SoulFlameAdmin/DPPautopilot`. Existing non-DPP tables remain out of scope. |
 
 ## Current implementation audit
@@ -378,3 +378,5 @@ Append evidence here only after verification.
 - Exact-head full CI `35454178109` SUCCESS; artifact `10587916127` digest `sha256:7579219d91feec1cedd790f0eb66be67b364774526071c993c4195cf48a57fc7` records 10/10 surfaces PASS with duplicate IDs, unlabeled controls, positive tabindex, focus failures, missing alt and contrast violations all equal to zero.
 - Implementation merged as `ba72ee7c6987bc6854da72dc5f01e7de4d54368b`.
 - T09 remains RED/PARTIAL because U05 is not GREEN and deployed/manual accessibility acceptance remains explicitly false.
+
+| 2026-09-19 | F08 | Guarded fallback Vercel CLI deployment lane merged via PR #57 as `a3e4f745e7bd575279dc01afcb1dde0e7f0abe88`. Exact-SHA manual preview/production workflow is project-locked, requires secret `VERCEL_TOKEN`, requires `DEPLOY_PRODUCTION` plus exact current `main` for production, performs prebuilt deploy, live home/master-plan smoke, and uploads a receipt. PR CI `35463559589` SUCCESS including `F08_VERCEL_CLI_DEPLOY_PATH_PASS`. F08 remains BLOCKED until a real production workflow dispatch succeeds and the live deployment is evidenced. | BLOCKED |
