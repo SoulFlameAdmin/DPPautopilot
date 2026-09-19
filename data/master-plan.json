@@ -533,7 +533,7 @@
           "acceptanceCriteria": "Every async core view has deterministic loading, empty, success and failure states",
           "evidenceRequired": "Component/E2E tests",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: U01."
+          "evidence": "PARTIAL deterministic async-state contract is browser-proven across all six async core views: dashboard, model, item, import, import-validation and public passport. Shared `demo/async-state.js` exposes loading/empty/success/error with `data-async-state` + `aria-busy`; real fetch paths settle to success/error while forced query states provide deterministic E2E coverage. CI generates and validates 24 browser DOM states (6 views × 4 states). Initial run `35429728149` exposed only a validator source-token typo and was not accepted; corrected exact-head full CI `35429830868` SUCCESS includes the U02 matrix plus complete API/DB/security/restore/browser regression. U02 remains RED because dependency U01 is RED pending M24/deployed E2E. — PARTIAL PASS"
         },
         {
           "id": "U03",
