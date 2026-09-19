@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "M13",
   "bucket": "dpp-evidence",
   "max_bytes": 10485760,
@@ -19,7 +19,7 @@
   ],
   "storage_path_rule": "<organization_uuid>/<object path>; '..' segments are forbidden",
   "sha256_format": "64 lowercase hexadecimal characters",
-  "note": "Project file policy, not a legal requirement. Private Storage bucket/RLS, deny-by-default metadata registration, and tenant-aware registration helper are versioned; M13 remains RED until real authenticated Storage API byte upload/download/delete is proven and M03 is GREEN.",
+  "note": "Project file policy, not a legal requirement. Private Storage bucket/RLS, deny-by-default metadata registration, tenant-aware registration helper, and a JWT-authenticated caller-context Edge Function are versioned; M13 remains RED until a real authenticated byte upload/download/delete roundtrip passes and M03 is GREEN.",
   "storage": {
     "private_bucket": true,
     "metadata_registration_required_before_upload": true,
@@ -46,6 +46,20 @@
       "supabase/migrations/20260919038000_dpp_evidence_storage_registration_tenant_guard.sql"
     ],
     "metadata_registration_helper": "public.dpp_evidence_storage_registered(text)",
-    "metadata_registration_tenant_guard": true
+    "metadata_registration_tenant_guard": true,
+    "edge_function": {
+      "name": "dpp-evidence-object",
+      "source": "supabase/functions/dpp-evidence-object/index.ts",
+      "verify_jwt": true,
+      "auth_context": "caller Authorization header is forwarded through a publishable/anon client so Storage RLS remains authoritative",
+      "operations": [
+        "upload",
+        "download",
+        "delete"
+      ],
+      "overwrite_allowed": false,
+      "runtime_acceptance_required": true,
+      "privileged_server_key_allowed": false
+    }
   }
 }
