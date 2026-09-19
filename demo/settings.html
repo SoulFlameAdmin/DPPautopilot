@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DPP Autopilot · Settings</title>
+  <style>
+    :root{--bg:#07090d;--panel:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--blue:#69a7ff;--green:#39d98a;--yellow:#f7c948}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif}.shell{max-width:980px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center}.top a{color:#cbd7e5;text-decoration:none}.badge{font-size:11px;color:var(--blue);font-weight:800;letter-spacing:.14em;text-transform:uppercase}.notice{padding:12px;border:1px solid #5a4930;background:#151108;color:#e8c982;border-radius:12px;margin:16px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:16px}.card h2{font-size:16px;margin:0 0 12px}.row{display:flex;justify-content:space-between;gap:18px;padding:10px 0;border-bottom:1px solid #18212e}.row:last-child{border-bottom:0}.label{color:var(--muted)}.value{font-weight:700;text-align:right}.pill{display:inline-block;border:1px solid #245d43;color:var(--green);border-radius:999px;padding:3px 7px;font-size:11px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.btn{border:1px solid var(--line);background:#111722;color:var(--text);padding:9px 12px;border-radius:9px;text-decoration:none}.status{margin-top:14px;color:var(--green);border:1px solid #245d43;border-radius:10px;padding:10px}@media(max-width:700px){.shell{padding:14px}.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body data-settings-ready="false" data-secret-storage="unknown" data-persistent-write="unknown">
+<main class="shell">
+  <div class="top"><div><div class="badge">DPP Autopilot · Synthetic settings</div><h1>Workspace settings</h1></div><a href="/">← Dashboard</a></div>
+  <div class="notice">Read-only synthetic settings precursor. Няма credential input, localStorage/sessionStorage write или production configuration mutation.</div>
+  <section class="grid">
+    <article class="card">
+      <h2>Tenant context</h2>
+      <div class="row"><span class="label">Active organization</span><span class="value" id="org">Pilot Battery Org</span></div>
+      <div class="row"><span class="label">Role</span><span class="value"><span class="pill" id="role">owner</span></span></div>
+      <div class="row"><span class="label">Tenant selection</span><span class="value">explicit</span></div>
+    </article>
+    <article class="card">
+      <h2>Security defaults</h2>
+      <div class="row"><span class="label">Bearer persistence</span><span class="value">disabled</span></div>
+      <div class="row"><span class="label">Cache policy</span><span class="value">no-store</span></div>
+      <div class="row"><span class="label">Private passport fields</span><span class="value">restricted</span></div>
+    </article>
+  </section>
+  <div class="actions" aria-label="Core navigation">
+    <a class="btn" href="/demo/model.html?sample=1" data-nav="models">Models</a>
+    <a class="btn" href="/demo/item.html?sample=1" data-nav="items">Items</a>
+    <a class="btn" href="/demo/import.html?sample=1" data-nav="imports">Imports</a>
+    <a class="btn" href="/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001" data-nav="passports">Passports</a>
+    <a class="btn" href="/demo/onboarding.html?sample=1" data-nav="onboarding">Onboarding</a>
+  </div>
+  <div class="status" id="status" role="status" aria-live="polite">SETTINGS PRECURSOR PASS · explicit tenant · no secret persistence · no production write</div>
+</main>
+<script>
+document.body.dataset.settingsReady='true';
+document.body.dataset.secretStorage='false';
+document.body.dataset.persistentWrite='false';
+</script>
+</body>
+</html>
