@@ -86,6 +86,26 @@ test('POST PATCH DELETE route to tenant-scoped member RPCs',async()=>{
   assert.deepEqual(calls[2].payload,{p_user_id:USER});
 });
 
+test('client organization_id cannot override active tenant member RPC payload',async()=>{
+  let seen;
+  await withEnvFetch(async(url,options)=>{
+    seen={url,payload:JSON.parse(options.body)};
+    return {ok:true,async json(){return {user_id:USER,role:'viewer'};}};
+  },async()=>{
+    const res=makeRes();
+    await handler(req('POST',{
+      user_id:USER,
+      role:'viewer',
+      organization_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+    }),res);
+    assert.equal(res.statusCode,201);
+  });
+  assert.equal(seen.url.endsWith('/dpp_api_members_add'),true);
+  assert.deepEqual(seen.payload,{p_user_id:USER,p_role:'viewer'});
+  assert.equal(Object.prototype.hasOwnProperty.call(seen.payload,'organization_id'),false);
+  assert.equal(Object.prototype.hasOwnProperty.call(seen.payload,'p_organization_id'),false);
+});
+
 test('local role validation rejects owner grant before upstream',async()=>{
   let called=false;
   await withEnvFetch(async()=>{called=true;throw new Error('should not call');},async()=>{
