@@ -66,6 +66,11 @@
         "http_status": 404,
         "code": "MODEL_NOT_FOUND",
         "message": "The battery model was not found."
+      },
+      "DP206": {
+        "http_status": 409,
+        "code": "STALE_WRITE",
+        "message": "The record changed since it was read. Refresh and retry."
       }
     },
     "items": {
@@ -123,6 +128,11 @@
         "http_status": 409,
         "code": "ITEM_HAS_PASSPORT",
         "message": "The battery item cannot be deleted because a passport exists."
+      },
+      "DP309": {
+        "http_status": 409,
+        "code": "STALE_WRITE",
+        "message": "The record changed since it was read. Refresh and retry."
       }
     },
     "passport": {
@@ -180,6 +190,11 @@
         "http_status": 422,
         "code": "VALIDATION_ERROR",
         "message": "The request failed validation."
+      },
+      "DP411": {
+        "http_status": 409,
+        "code": "STALE_WRITE",
+        "message": "The record changed since it was read. Refresh and retry."
       }
     },
     "export": {},
@@ -297,6 +312,10 @@
     "INVALID_ORGANIZATION_ID": {
       "http_status": 422,
       "message": "organization_id must be a valid UUID."
+    },
+    "WRITE_PRECONDITION_REQUIRED": {
+      "http_status": 428,
+      "message": "expected_updated_at must be a valid timestamp from the last read."
     }
   }
 }
