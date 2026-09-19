@@ -24,3 +24,11 @@ T01 is **not GREEN** yet because its declared dependency M22 (stable API validat
 - Full GitHub Actions run `35398504301` on `54fe4db25b2f65309874e3fa41a284c3bd835c7e`: T01 unit suite PASS.
 - T01 remains RED because M22 remains RED until M17-M19 expose the contract through a real API.
 
+## Evidence — acceptance coverage report
+
+- `data/unit-test-coverage-matrix.json` versions four T01 acceptance areas: identifiers, scoring/completeness, validation/public projection and stable errors.
+- `scripts/generate_unit_test_report.py` parses the referenced Python test files/classes/methods with AST and fails if the mapping drifts.
+- CI run `35411823429` on `08a6474a68dfbc2984055c9c4d4fd5fc796c7fb1` completed SUCCESS. `Run T01 green business-rule unit suite` and `Generate T01 unit acceptance coverage report` both passed.
+- The generated report maps 4 acceptance areas to 18 concrete `unittest` methods and is included in artifact `10574428789` under `artifacts/t01-unit-coverage.json`.
+- This is an acceptance-rule coverage report, not an invented statement/branch line-coverage percentage.
+- T01 remains RED because M22 is still RED.
