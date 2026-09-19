@@ -36,10 +36,18 @@ test('classifies public/authenticated/import/export budgets deterministically',(
   assert.equal(limiter.classify('export',req('GET')),'export_read');
 });
 
-test('client identity hashes bearer credentials instead of storing raw tokens',()=>{
-  const digest=limiter._test.authDigest(req('GET',null,{},'Bearer super-secret-token'));
-  assert.match(digest,/^[0-9a-f]{24}$/);
-  assert.equal(digest.includes('super-secret-token'),false);
+test('client identity hashes network and bearer material instead of storing raw values',()=>{
+  const request=req('GET',null,{},'Bearer super-secret-token','203.0.113.77');
+  const auth=limiter._test.authDigest(request);
+  const network=limiter._test.networkDigest(request);
+  assert.match(auth,/^[0-9a-f]{24}$/);
+  assert.match(network,/^[0-9a-f]{32}$/);
+  assert.equal(auth.includes('super-secret-token'),false);
+  assert.equal(network.includes('203.0.113.77'),false);
+  assert.deepEqual(limiter._test.bucketIdentities(request),[
+    `network:${network}`,
+    `credential:${auth}`
+  ]);
 });
 
 test('fixed window denies the request after the configured budget and exposes retry metadata',()=>{
@@ -63,12 +71,12 @@ test('fixed window denies the request after the configured budget and exposes re
   assert.equal(decision.remaining,1);
 });
 
-test('different bearer digests and IPs receive separate buckets',()=>{
+test('rotating bearer values cannot bypass the network budget',()=>{
   const rules={authenticated_write:{limit:1,window_seconds:60}};
   assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer a','203.0.113.1'),'models',{rules,nowMs:1000}).allowed,true);
-  assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer a','203.0.113.1'),'models',{rules,nowMs:2000}).allowed,false);
-  assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer b','203.0.113.1'),'models',{rules,nowMs:2000}).allowed,true);
-  assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer a','203.0.113.2'),'models',{rules,nowMs:2000}).allowed,true);
+  assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer b','203.0.113.1'),'models',{rules,nowMs:2000}).allowed,false);
+  assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer c','203.0.113.1'),'models',{rules,nowMs:3000}).allowed,false);
+  assert.equal(limiter.checkRateLimit(req('POST',{},{} ,'Bearer a','203.0.113.2'),'models',{rules,nowMs:3000}).allowed,true);
 });
 
 test('41st authenticated model write returns canonical 429 before validation/upstream',async()=>{
@@ -141,10 +149,13 @@ test('bucket keys do not retain raw IP or bearer material',()=>{
     nowMs:1000
   });
   const keys=[...limiter._test.buckets.keys()];
-  assert.equal(keys.length,1);
-  assert.equal(keys[0].includes('203.0.113.77'),false);
-  assert.equal(keys[0].includes('raw-secret-token'),false);
-  assert.match(keys[0],/^models\|authenticated_write\|[0-9a-f]{32}\|0$/);
+  assert.equal(keys.length,2);
+  for(const key of keys){
+    assert.equal(key.includes('203.0.113.77'),false);
+    assert.equal(key.includes('raw-secret-token'),false);
+  }
+  assert.ok(keys.some(key=>/^models\|authenticated_write\|network:[0-9a-f]{32}\|0$/.test(key)));
+  assert.ok(keys.some(key=>/^models\|authenticated_write\|credential:[0-9a-f]{24}\|0$/.test(key)));
 });
 
 test('expired buckets are evicted on later windows',()=>{
