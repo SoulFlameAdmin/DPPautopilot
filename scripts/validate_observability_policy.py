@@ -17,7 +17,7 @@ assert correlation.get("response_header")=="X-Request-ID"
 assert correlation.get("invalid_or_missing")=="Generate UUID v4"
 
 expected_fields={
-    "event","request_id","surface","method","status","outcome","duration_ms","auth_present","error_code"
+    "event","timestamp_ms","request_id","surface","method","status","outcome","duration_ms","auth_present","error_code"
 }
 assert set(policy.get("logged_fields",[]))==expected_fields
 assert policy.get("surfaces")==["models","items","passport","imports","export"]
