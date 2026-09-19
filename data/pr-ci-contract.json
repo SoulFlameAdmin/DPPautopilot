@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "task": "C01",
+  "status": "partial",
+  "workflow": ".github/workflows/ci.yml",
+  "expected": {
+    "triggers": [
+      "push:main",
+      "pull_request"
+    ],
+    "permissions": {
+      "contents": "read"
+    },
+    "job": "validate",
+    "timeout_minutes": 10,
+    "postgres_image": "postgres:17",
+    "required_steps": [
+      "Validate repository contracts",
+      "Run T01 green business-rule unit suite",
+      "Run T03 stateful API integration precursor",
+      "Run T07 synthetic handler load suite",
+      "Run T02 green database subset integration suite",
+      "Run T08 registry reliability subset",
+      "Check repository security hygiene",
+      "Browser smoke test demo surfaces"
+    ]
+  },
+  "branch_rules_evidence": {
+    "repository_rulesets_count": 0,
+    "branch_protection_read": "unavailable_to_integration_403",
+    "claim": "No merge-blocking required-check enforcement is claimed by this precursor."
+  },
+  "probe": {
+    "type": "draft_pull_request",
+    "base": "main",
+    "expected_event": "pull_request",
+    "expected_workflow": "CI",
+    "expected_job": "validate",
+    "merge": false,
+    "close_after_evidence": true
+  },
+  "remaining": [
+    "T01-T04 dependencies must be GREEN before C01 can be GREEN.",
+    "A passing pull_request-triggered run must be recorded.",
+    "Merge-blocking branch protection/ruleset requiring the CI check must be proven with authorized repository administration evidence."
+  ]
+}
