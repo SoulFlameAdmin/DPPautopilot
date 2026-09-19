@@ -2,11 +2,11 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M17-M19 — authenticated API acceptance hardening",
+  "currentTask": "M22/M23 — API contract and concurrency hardening",
   "currentGate": "MVP",
-  "lastCompletedTask": "M10 public/private runtime enforcement — bound Supabase PASS",
-  "nextTask": "Verify model/item/passport CRUD RPC boundaries against explicit active tenant, RBAC and non-enumerating cross-tenant behavior; fix real defects without marking M17-M19 GREEN while M03/M10 dependencies remain non-GREEN.",
-  "message": "D01-D14 remain GREEN. F08/M01 deferred. M02/M03 tenant context, M05 isolation, M10 access enforcement and M12 tenant-context audit now have bound runtime evidence. No Vercel deploy attempted. DAVID orchestrator files untouched.",
+  "lastCompletedTask": "M17-M19 current bound runtime regression — 3/3 PASS",
+  "nextTask": "Revalidate and strengthen stable API error/idempotency/concurrency behavior across models, items, passports and imports without falsely promoting dependency-blocked tasks.",
+  "message": "D01-D14 remain GREEN. F08/M01 deferred. Current Supabase regression confirms M17-M19 compatibility after tenant/access/audit hardening. No Vercel deploy attempted. DAVID orchestrator files untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred until new evidence.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred until deployment path exists."
