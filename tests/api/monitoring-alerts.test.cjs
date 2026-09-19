@@ -163,3 +163,21 @@ test('malformed and non-R09 events cannot influence alert calculations',()=>{
   assert.equal(result.sample_count,20);
   assert.equal(alert(result,'availability_5xx_rate').active,false);
 });
+
+
+test('rejects malformed status surface request id and outcome',()=>{
+  const baseline=Array.from({length:20},(_,i)=>event(i));
+  const poisoned=[
+    event(100,{status:999}),
+    event(101,{surface:'untrusted-surface'}),
+    event(102,{request_id:'x'}),
+    event(103,{status:500,outcome:'success',error_code:'UPSTREAM_ERROR'}),
+    event(104,{auth_present:'yes'}),
+    event(105,{error_code:'bad-code!'}),
+  ];
+  const result=monitoring.evaluateMonitoring([...baseline,...poisoned],{nowMs:NOW});
+  assert.equal(result.sample_count,20);
+  assert.equal(alert(result,'availability_5xx_rate').active,false);
+  assert.equal(alert(result,'auth_failure_rate').active,false);
+  assert.equal(alert(result,'rate_limit_pressure').active,false);
+});
