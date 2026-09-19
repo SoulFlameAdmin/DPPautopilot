@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T03:15:00+03:00",
+  "updatedAt": "2026-09-19T03:25:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -631,7 +631,7 @@
           "acceptanceCriteria": "Sensitive/public endpoints have documented limits and 429 behavior",
           "evidenceRequired": "Load/abuse tests",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M17-M20."
+          "evidence": "PARTIAL process-local abuse-control precursor across models/items/passport/imports/export: versioned budgets, SHA-256 credential bucket keys, canonical 429 RATE_LIMITED + Retry-After/X-RateLimit-* headers; CI 35408889300 on be0253207df52d436a717ad3048692bf10e2fa4a SUCCESS. Tests prove 41st authenticated model write and 31st anonymous public passport read are blocked before upstream. R05 remains RED pending full M17-M20 acceptance and distributed/provider-native runtime enforcement with deployed abuse/load evidence. — PARTIAL PASS"
         },
         {
           "id": "R06",
