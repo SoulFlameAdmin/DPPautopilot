@@ -32,6 +32,10 @@ function validUuid(value) {
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+function validTimestamp(value) {
+  return typeof value === 'string' && value.trim().length > 0 && Number.isFinite(Date.parse(value));
+}
+
 function validateCreate(body) {
   if (typeof body.model_identifier !== 'string' || body.model_identifier.trim().length < 1 || body.model_identifier.trim().length > 128) {
     return 'model_identifier must contain 1..128 characters';
@@ -132,6 +136,9 @@ async function handler(req, res) {
     if (!validUuid(id)) return send(res, 400, { error: { code: 'INVALID_MODEL_ID', message: 'A valid model UUID is required.' } });
 
     if (method === 'PATCH') {
+      if (!validTimestamp(body.expected_updated_at)) {
+        return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
+      }
       if (body.model_identifier != null && (typeof body.model_identifier !== 'string' || body.model_identifier.trim().length < 1 || body.model_identifier.trim().length > 128)) {
         return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'model_identifier must contain 1..128 characters' } });
       }
@@ -145,12 +152,13 @@ async function handler(req, res) {
         return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'canonical_data must be a JSON object' } });
       }
 
-      const model = await rpc('dpp_api_models_update', {
+      const model = await rpc('dpp_api_models_update_checked', {
         p_id: id,
         p_model_identifier: body.model_identifier == null ? null : body.model_identifier.trim(),
         p_manufacturer_name: body.manufacturer_name == null ? null : body.manufacturer_name.trim(),
         p_category: body.category == null ? null : body.category,
-        p_canonical_data: body.canonical_data == null ? null : body.canonical_data
+        p_canonical_data: body.canonical_data == null ? null : body.canonical_data,
+        p_expected_updated_at: body.expected_updated_at
       }, authorization);
       return send(res, 200, { data: model });
     }
@@ -170,4 +178,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validateCreate, mapDatabaseError, rpc };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validateCreate, mapDatabaseError, rpc };
