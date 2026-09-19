@@ -85,6 +85,10 @@ begin
   execute format('select count(*) from storage.objects where bucket_id=%L and name=%L','dpp-evidence',object_name) into v_count;
   if v_count<>1 then raise exception 'M13 viewer could not read registered object'; end if;
 
+  if not public.dpp_evidence_storage_registered(object_name) then
+    raise exception 'M13 same-tenant viewer registration helper unexpectedly returned false';
+  end if;
+
   execute format('update storage.objects set user_metadata=%L::jsonb where bucket_id=%L and name=%L','{"overwrite":true}','dpp-evidence',object_name);
   get diagnostics v_count = row_count;
   if v_count<>0 then raise exception 'M13 viewer overwrite/update unexpectedly affected % rows',v_count; end if;
@@ -109,6 +113,9 @@ begin
 
   perform set_config('request.jwt.claim.sub',u_other::text,true);
   execute 'set local role authenticated';
+  if public.dpp_evidence_storage_registered(object_name) then
+    raise exception 'M13 registration helper leaked cross-tenant metadata existence';
+  end if;
   execute format('select count(*) from storage.objects where bucket_id=%L and name=%L','dpp-evidence',object_name) into v_count;
   if v_count<>0 then raise exception 'M13 cross-tenant storage read was not denied'; end if;
   execute 'reset role';
