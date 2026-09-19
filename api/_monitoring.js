@@ -1,6 +1,15 @@
 'use strict';
 
 const policy=require('../data/monitoring-alert-policy.json');
+const observabilityPolicy=require('../data/observability-policy.json');
+
+const ALLOWED_SURFACES=new Set(observabilityPolicy.surfaces||[]);
+const REQUEST_ID_RE=new RegExp(observabilityPolicy.correlation.accepted_pattern);
+const ERROR_CODE_RE=/^[A-Z0-9_]{2,80}$/;
+
+function expectedOutcome(status){
+  return status>=500?'server_error':status>=400?'client_error':'success';
+}
 
 function percentile(values,p){
   if(!values.length) return 0;
@@ -10,10 +19,17 @@ function percentile(values,p){
 }
 
 function validEvent(event){
-  return !!event&&event.event==='dpp_http_request'&&
-    Number.isInteger(event.status)&&
-    Number.isFinite(event.duration_ms)&&event.duration_ms>=0&&
-    typeof event.request_id==='string'&&typeof event.surface==='string';
+  if(!event||event.event!=='dpp_http_request') return false;
+  if(!Number.isInteger(event.status)||event.status<100||event.status>599) return false;
+  if(!Number.isFinite(event.duration_ms)||event.duration_ms<0) return false;
+  if(typeof event.request_id!=='string'||!REQUEST_ID_RE.test(event.request_id)) return false;
+  if(typeof event.surface!=='string'||!ALLOWED_SURFACES.has(event.surface)) return false;
+  if(event.outcome!==expectedOutcome(event.status)) return false;
+  if(typeof event.auth_present!=='boolean') return false;
+  if(event.error_code!==null&&(
+    typeof event.error_code!=='string'||!ERROR_CODE_RE.test(event.error_code)
+  )) return false;
+  return true;
 }
 
 function eventsInWindow(events,nowMs,windowSeconds){
@@ -91,5 +107,5 @@ function evaluateMonitoring(events,options={}){
 
 module.exports={
   evaluateMonitoring,
-  _test:{percentile,validEvent,eventsInWindow,ratio,consecutive5xx,measure,triggered}
+  _test:{percentile,validEvent,eventsInWindow,ratio,consecutive5xx,measure,triggered,expectedOutcome,ALLOWED_SURFACES,REQUEST_ID_RE,ERROR_CODE_RE}
 };
