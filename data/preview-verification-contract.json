@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "task": "C02",
+  "status": "partial",
+  "canonical_vercel": {
+    "team_id": "team_cKaIZfnCMzoiiq80J0MhV0A2",
+    "project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "project_name": "dpp-autopilot",
+    "observed_deployments": 0,
+    "observed_at": "2026-09-19"
+  },
+  "deployment_requirements": {
+    "environment": "preview",
+    "state": "READY",
+    "commit_match": "exact",
+    "source_repo": "SoulFlameAdmin/DPPautopilot"
+  },
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "body_contains": "DPP"
+    },
+    {
+      "path": "/data/master-plan.json",
+      "status": 200,
+      "headers": {
+        "Cache-Control": "no-store, max-age=0"
+      }
+    },
+    {
+      "path": "/demo/acceptance.html",
+      "status": 200,
+      "body_contains": "acceptance"
+    },
+    {
+      "path": "/api/models",
+      "status": 401,
+      "json_error_code": "AUTH_REQUIRED",
+      "required_headers": [
+        "X-Request-ID"
+      ]
+    }
+  ],
+  "global_security_headers": [
+    "Content-Security-Policy",
+    "Strict-Transport-Security",
+    "X-Content-Type-Options",
+    "X-Frame-Options",
+    "Referrer-Policy",
+    "Permissions-Policy"
+  ],
+  "evidence_schema": {
+    "deployment_required_fields": [
+      "project_id",
+      "environment",
+      "state",
+      "commit_sha",
+      "url"
+    ],
+    "route_required_fields": [
+      "path",
+      "status",
+      "headers"
+    ]
+  },
+  "live_gap": "Read-only Vercel query returned zero deployments for canonical project prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr. No create/redeploy action was attempted.",
+  "remaining": [
+    "C01 must be GREEN.",
+    "A real preview deployment must exist and be READY.",
+    "Preview metadata must identify the exact commit under test.",
+    "Automated live HTTP/TLS/header smoke evidence must pass against that preview."
+  ]
+}
