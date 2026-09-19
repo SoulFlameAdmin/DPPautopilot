@@ -108,7 +108,8 @@ test('lifecycle transition rejection maps to stable conflict', async () => {
     const res=makeRes();
     await handler(makeReq('PATCH',{
       id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
-      lifecycle_status:'original'
+      lifecycle_status:'original',
+      expected_updated_at:'2026-09-19T04:00:00.000Z'
     }),res);
     const payload=JSON.parse(res.body);
     assert.equal(res.statusCode,409);
@@ -163,4 +164,57 @@ test('unsupported methods return 405 with Allow header', async () => {
   await handler(makeReq('PUT',{}),res);
   assert.equal(res.statusCode,405);
   assert.equal(res.headers.allow,'GET, POST, PATCH, DELETE');
+});
+
+
+test('PATCH requires expected_updated_at before upstream access', async () => {
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true; throw new Error('unexpected');};
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      lifecycle_status:'repurposed'
+    }),res);
+    assert.equal(res.statusCode,428);
+    assert.equal(JSON.parse(res.body).error.code,'WRITE_PRECONDITION_REQUIRED');
+    assert.equal(called,false);
+  } finally { global.fetch=original; }
+});
+
+test('PATCH forwards optimistic concurrency token to checked item RPC', async () => {
+  const restore=withEnv(), original=global.fetch;
+  let seen;
+  global.fetch=async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return {id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',lifecycle_status:'repurposed'};}};
+  };
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      lifecycle_status:'repurposed',
+      expected_updated_at:'2026-09-19T04:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,200);
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_items_update_checked');
+    assert.equal(JSON.parse(seen.options.body).p_expected_updated_at,'2026-09-19T04:00:00.000Z');
+  } finally { global.fetch=original; restore(); }
+});
+
+test('stale item write maps DP309 to stable 409', async () => {
+  const restore=withEnv(), original=global.fetch;
+  global.fetch=async()=>({ok:false,async json(){return {code:'DP309',message:'internal stale timestamp'};}});
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      lifecycle_status:'repurposed',
+      expected_updated_at:'2026-09-19T04:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,409);
+    assert.equal(JSON.parse(res.body).error.code,'STALE_WRITE');
+    assert.equal(res.body.includes('internal stale timestamp'),false);
+  } finally { global.fetch=original; restore(); }
 });
