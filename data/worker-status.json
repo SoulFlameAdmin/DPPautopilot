@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "C08 — runtime error review precursor analysis",
+  "currentTask": "C09 — performance acceptance precursor analysis",
   "currentGate": "RELEASE",
-  "lastCompletedTask": "C07 partial production smoke precursor — CI 35415123886 SUCCESS",
-  "nextTask": "Define and test a fail-closed production runtime error-cluster review contract over C07/R09 evidence without querying/retrying blocked deployment.",
-  "message": "D01-D14 remain GREEN. C07 now has evidence-backed production smoke rules but remains RED pending C03/C06/F08 and live smoke. F08/M01 remain deferred. No Vercel deploy or database mutation attempted. DAVID orchestrator files untouched.",
+  "lastCompletedTask": "C08 partial runtime error review precursor — CI 35415292713 SUCCESS",
+  "nextTask": "Define and test exact-deployment production-like performance acceptance evidence over T07/C07 without live deployment; keep C09 RED until dependencies/runtime evidence are GREEN.",
+  "message": "D01-D14 remain GREEN. C08 now has evidence-backed zero-unresolved-P0/P1 runtime review rules but remains RED pending C07/R09 and live runtime logs. F08/M01 remain deferred. No Vercel deploy or database mutation attempted. DAVID orchestrator files untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T06:40:00+03:00"
+  "updatedAt": "2026-09-19T06:48:00+03:00"
 }
