@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T06:23:00+03:00",
+  "updatedAt": "2026-09-19T06:31:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -872,7 +872,7 @@
           "acceptanceCriteria": "Full mandatory suite passes on staging/preview with production-like config",
           "evidenceRequired": "Acceptance report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: T10,C02."
+          "evidence": "PARTIAL fail-closed staging acceptance: exact commit must align across READY canonical preview, clean T01-T09 regression, production-like non-production config, migration/schema verification, security headers and core-route smoke. Unit tests reject wrong project/state, commit drift, missing suites, production data/database reuse, failed headers and insufficient routes. CI 35414915848 on eb25081e2d9579d9d2d3ed1ebbd5e3e05b9a0bf3 SUCCESS including C06 checks, C01-C05, T07, clean DB replay, R12 restore, security hygiene and browser smoke. No deploy performed. C06 remains RED pending T10/C02 GREEN and real staging evidence. — PARTIAL PASS"
         },
         {
           "id": "C07",
