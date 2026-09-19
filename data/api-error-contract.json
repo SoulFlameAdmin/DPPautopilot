@@ -234,7 +234,8 @@
         "code": "IMPORT_MAPPING_NOT_FOUND",
         "message": "The import mapping was not found."
       }
-    }
+    },
+    "tenant": {}
   },
   "local_codes": {
     "AUTH_REQUIRED": {
