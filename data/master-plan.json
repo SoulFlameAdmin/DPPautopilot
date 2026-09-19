@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T06:12:00+03:00",
+  "updatedAt": "2026-09-19T06:23:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -863,7 +863,7 @@
           "acceptanceCriteria": "App rollback tested; DB rollback/forward-fix strategy documented",
           "evidenceRequired": "Drill evidence",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: C03,C04."
+          "evidence": "PARTIAL fail-closed rollback/recovery precursor: three tested paths cover schema-compatible app rollback without DB mutation, tested forward-fix for migration incompatibility/irreversibility, and isolated restore→controlled recovery for data corruption/loss. Verifier rejects wrong project, incompatible/unverified rollback, DB mutation, C04 commit drift, direct production restore and missing recovery authorization. CI 35414683581 on f37b5b102022f94df0bbf591b3abb467e8573197 SUCCESS including C05 checks, C01-C04, T07, clean DB replay, R12 restore, security hygiene and browser smoke. No live rollback/deploy/DB restore executed. C05 remains RED pending C03/C04 GREEN and a real production rollback/recovery drill. — PARTIAL PASS"
         },
         {
           "id": "C06",
