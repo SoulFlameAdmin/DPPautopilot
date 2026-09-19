@@ -387,3 +387,11 @@ Append evidence here only after verification.
 - Initial CI correctly failed the C04 applied-migration gate until the bound Supabase migration/snapshot existed; a second run correctly rejected the new RPC until it was explicitly added to the global SECURITY DEFINER allowlist. Neither failure was accepted as evidence.
 - Exact-head CI `35475511177` on `eeb3573ad57e08d6b8d5bdbbbe038dcef81814c3` completed SUCCESS, including clean PostgreSQL migration replay, M02/M03/M24 onboarding DB/API tests, global RLS/RPC security guards and browser smoke. PR #66 merged as `f48f8b7884e2e3ad3e53c61374acc7a781c4bb87`.
 - M02 remains RED because declared dependency M01 is still BLOCKED and final authenticated integration acceptance is not yet available. F08 was not retried and no Vercel deployment was initiated by this work.
+
+
+### M03 authorization context precursor — 2026-09-20
+- Added authenticated `dpp_api_authorization_context()` for authoritative active-tenant role/capability discovery while preserving enforcement in existing server-side RPC/RLS rules.
+- Bound Supabase migration `dpp_authorization_context` is applied as version `20260919233507`; runtime owner/admin/editor/viewer matrix returned `M03_AUTHORIZATION_CONTEXT_PASS`.
+- Runtime ACL verification proves `SECURITY DEFINER`, fixed `search_path=public, pg_temp`, authenticated EXECUTE and anon denial.
+- Exact-head GitHub Actions CI `35476608040` on `d7c9ff0b35a773a9c4be8baf4c435a8886b9c040` completed SUCCESS, including C04 migration gate, clean PostgreSQL replay, M03 matrix and global SECURITY DEFINER RPC guard. M25 audit `35476608038` also SUCCESS.
+- PR #68 merged as `c1ae0b05b35fc6905d4442189aab1c4af9c2de67`. M03 remains RED/PARTIAL because M01/M02 are not GREEN and deployed authorization acceptance is unavailable. No Vercel deployment was attempted.
