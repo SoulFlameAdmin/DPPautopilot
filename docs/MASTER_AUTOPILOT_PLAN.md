@@ -364,3 +364,10 @@ Append evidence here only after verification.
 ### T05/T06 suite precursors — 2026-09-19
 - T05: U04 phone/tablet/desktop measured responsive matrix + U07 approved hash-enforced visual baselines form a real local/CI visual-responsive suite; dependencies remain RED and production viewport acceptance is unavailable.
 - T06: pinned Playwright Chromium/Firefox/WebKit matrix covers 30 engine/surface flows with repeated SUCCESS runs `35450988219` and `35453421922`; dependency U06 remains RED and deployed critical E2E is unavailable.
+
+
+### T04 layered E2E precursor — 2026-09-19
+- Exact-head full CI `35453738938` SUCCESS ties together the M24 stateful API onboarding journey, local PostgreSQL onboarding rollback suite, browser synthetic onboarding smoke and generated T04 report in one fail-closed job.
+- Bound Supabase project `frhletkiuupgksmgxoxc` was re-proven in `BEGIN/ROLLBACK` with marker `M02_M03_M24_ORGANIZATION_ONBOARDING_PASS`.
+- Artifact `10586914695` digest `sha256:6a3755029254b409b107921fc5e5d058982c1b71c32c64b03f9cfc8326403de9` records `precursor_pass=true` for browser synthetic/stateful API/local DB layers.
+- Final acceptance remains explicitly false for deployed browser→DB, real auth session, real Storage object roundtrip and production route. T04 therefore remains RED/PARTIAL; no Vercel deployment was attempted.
