@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T06:48:00+03:00",
+  "updatedAt": "2026-09-19T06:56:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -899,7 +899,7 @@
           "acceptanceCriteria": "Production-like latency/error budgets satisfied",
           "evidenceRequired": "Performance report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: T07,C07."
+          "evidence": "PARTIAL performance acceptance: budgets are bound exactly to T07 (>=200 requests, >=25 concurrency, 0 errors, p95<=2000ms, 1000-row import<=3000ms); verifier requires exact C07 commit, T07 PASS, HTTPS/TLS production-like non-production target, no production customer data/database and real HTTP/TLS metrics. CI 35415475988 on d4c06c49f7c7e6695cfb31afbbabc21e96acf7bf SUCCESS including C09 tests, C01-C08, T07 artifact, clean DB replay, R12 restore, security hygiene and browser smoke. No live performance run/deploy. C09 remains RED pending T07/C07 GREEN and real-network production-like metrics. — PARTIAL PASS"
         },
         {
           "id": "C10",
