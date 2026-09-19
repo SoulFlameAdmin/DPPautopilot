@@ -118,7 +118,7 @@ test('POST forwards controlled write to passport RPC', async () => {
 
 test('PATCH validates status and forwards update', async () => {
   let res=makeRes();
-  await handler(makeReq('PATCH',{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'bad'}),res);
+  await handler(makeReq('PATCH',{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'bad',expected_updated_at:'2026-09-19T04:00:00.000Z'}),res);
   assert.equal(res.statusCode,422);
 
   const restore=withEnv(), original=global.fetch;
@@ -131,15 +131,17 @@ test('PATCH validates status and forwards update', async () => {
     res=makeRes();
     await handler(makeReq('PATCH',{
       id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-      status:'active'
+      status:'active',
+      expected_updated_at:'2026-09-19T04:00:00.000Z'
     }),res);
     assert.equal(res.statusCode,200);
-    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_passport_update');
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_passport_update_checked');
     assert.deepEqual(JSON.parse(seen.options.body),{
       p_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       p_status:'active',
       p_public_payload:null,
-      p_private_payload:null
+      p_private_payload:null,
+      p_expected_updated_at:'2026-09-19T04:00:00.000Z'
     });
   } finally { global.fetch=original; restore(); }
 });
@@ -179,4 +181,37 @@ test('unsupported methods return 405', async () => {
   await handler(makeReq('DELETE',{}),res);
   assert.equal(res.statusCode,405);
   assert.equal(res.headers.allow,'GET, POST, PATCH');
+});
+
+
+test('PATCH requires expected_updated_at before upstream access', async () => {
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true; throw new Error('unexpected');};
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      status:'active'
+    }),res);
+    assert.equal(res.statusCode,428);
+    assert.equal(JSON.parse(res.body).error.code,'WRITE_PRECONDITION_REQUIRED');
+    assert.equal(called,false);
+  } finally { global.fetch=original; }
+});
+
+test('stale passport write maps DP411 to stable 409', async () => {
+  const restore=withEnv(), original=global.fetch;
+  global.fetch=async()=>({ok:false,async json(){return {code:'DP411',message:'internal stale timestamp'};}});
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      status:'active',
+      expected_updated_at:'2026-09-19T04:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,409);
+    assert.equal(JSON.parse(res.body).error.code,'STALE_WRITE');
+    assert.equal(res.body.includes('internal stale timestamp'),false);
+  } finally { global.fetch=original; restore(); }
 });
