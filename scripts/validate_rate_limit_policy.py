@@ -34,6 +34,11 @@ for name,(limit,window) in expected_rules.items():
 
 surfaces=policy.get("surfaces",{})
 assert set(surfaces)=={"tenant","models","items","passport","imports","export"}
+api_surface_inventory={
+    path.stem for path in (ROOT/"api").glob("*.js")
+    if not path.name.startswith("_")
+}
+assert set(surfaces)==api_surface_inventory, f"R05 uncovered public API surface(s): {sorted(api_surface_inventory-set(surfaces))}"
 
 response=policy.get("response",{})
 assert response.get("http_status")==429
@@ -90,4 +95,4 @@ limitations=policy.get("limitations",[])
 assert any("parallel serverless isolates" in x for x in limitations)
 assert any("shared durable limiter" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: six API surfaces have versioned process-local abuse budgets, privacy-hashed bounded buckets, canonical 429 behavior and explicit distributed-runtime limitation")
+print("R05_RATE_LIMIT_POLICY_PASS: six inventoried API surfaces have versioned process-local abuse budgets, privacy-hashed bounded buckets, canonical 429 behavior and explicit distributed-runtime limitation")
