@@ -892,6 +892,14 @@ jobs:
             --window-size=1100,1000 --screenshot=artifacts/x06-mapping-assistant.png \
             'http://127.0.0.1:8000/demo/mapping-assistant.html'
           python scripts/validate_mapping_assistant_ui.py artifacts/x06-mapping-assistant-dom.html
+      - name: Generate T09 accessibility regression report
+        run: python scripts/generate_t09_accessibility_report.py artifacts
+      - name: Upload T09 accessibility regression report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: t09-accessibility-report
+          path: artifacts/t09-accessibility-report.json
+          if-no-files-found: error
       - name: Generate T04 layered E2E precursor report
         run: python scripts/generate_t04_e2e_report.py artifacts/m24-onboarding-dom.html
       - name: Upload T04 E2E precursor report
