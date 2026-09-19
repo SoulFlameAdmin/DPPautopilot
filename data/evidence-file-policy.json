@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "task": "M13",
   "bucket": "dpp-evidence",
   "max_bytes": 10485760,
@@ -19,7 +19,7 @@
   ],
   "storage_path_rule": "<organization_uuid>/<object path>; '..' segments are forbidden",
   "sha256_format": "64 lowercase hexadecimal characters",
-  "note": "Project file policy, not a legal requirement. Private Storage bucket/RLS and deny-by-default metadata registration predicate are versioned; M13 remains RED until real authenticated Storage API byte upload/download/delete is proven and M03 is GREEN.",
+  "note": "Project file policy, not a legal requirement. Private Storage bucket/RLS, deny-by-default metadata registration, and tenant-aware registration helper are versioned; M13 remains RED until real authenticated Storage API byte upload/download/delete is proven and M03 is GREEN.",
   "storage": {
     "private_bucket": true,
     "metadata_registration_required_before_upload": true,
@@ -42,8 +42,10 @@
     "reason_no_overwrite": "Object overwrite is denied so stored SHA-256 metadata cannot silently diverge from object bytes.",
     "hosted_migrations": [
       "supabase/migrations/20260919027000_dpp_evidence_storage.sql",
-      "supabase/migrations/20260919028000_dpp_evidence_storage_policy_fix.sql"
+      "supabase/migrations/20260919028000_dpp_evidence_storage_policy_fix.sql",
+      "supabase/migrations/20260919038000_dpp_evidence_storage_registration_tenant_guard.sql"
     ],
-    "metadata_registration_helper": "public.dpp_evidence_storage_registered(text)"
+    "metadata_registration_helper": "public.dpp_evidence_storage_registered(text)",
+    "metadata_registration_tenant_guard": true
   }
 }
