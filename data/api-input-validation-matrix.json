@@ -1,9 +1,14 @@
 {
-  "version": 1,
+  "version": 2,
   "task": "R03",
   "status": "partial",
   "max_body_bytes": 1048576,
   "scenarios": [
+    {
+      "id": "oversize_parsed_tenant_body",
+      "surface": "/api/tenant",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
     {
       "id": "oversize_parsed_model_body",
       "surface": "/api/models",
@@ -31,8 +36,13 @@
     },
     {
       "id": "malformed_json",
-      "surface": "M17-M19",
+      "surface": "M02/M17-M19",
       "expected": "400 INVALID_JSON before upstream"
+    },
+    {
+      "id": "invalid_tenant_fields",
+      "surface": "/api/tenant",
+      "expected": "400/422 validation error before upstream"
     },
     {
       "id": "invalid_model_fields",
