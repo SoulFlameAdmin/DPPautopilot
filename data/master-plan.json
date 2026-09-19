@@ -498,7 +498,7 @@
           "acceptanceCriteria": "New org -> users -> import -> validate -> passport works end-to-end",
           "evidenceRequired": "E2E acceptance",
           "status": "red",
-          "evidence": "PARTIAL pilot onboarding precursor now exercises `new org -> member -> model/item -> import stage/validate/commit -> private create/public passport read` through the actual serverless handlers with a stateful mocked Supabase RPC backend. Bound DB test `M02_M03_M24_ORGANIZATION_ONBOARDING_PASS` proves real database organization creation/member RBAC/audit behavior after both onboarding migrations; HTTP contract tests cover organizations/members, R03 input bounds, R05 thresholds, R09 redaction/correlation, tenant-override rejection and M22 errors. Exact-head full CI `35428653493` SUCCESS includes `Run M24 stateful onboarding flow precursor`, `Run M02 M03 M24 organization onboarding subset`, clean PostgreSQL 17 replay, full security/restore/browser regression. M24 remains RED because dependencies M01-M22 are not all GREEN and no deployed preview E2E with real auth/storage is yet possible. — PARTIAL PASS"
+          "evidence": "PARTIAL pilot onboarding now has DB, HTTP/stateful and browser evidence. Bound `M02_M03_M24_ORGANIZATION_ONBOARDING_PASS` proves org/member RBAC/audit behavior; stateful API precursor proves `new org -> member -> model/item -> import stage/validate/commit -> passport create/public read`; `demo/onboarding.html?sample=1` adds a deterministic 5-step browser flow with `tenant-override=false` and `private-leak=false`, linked from the dashboard. Exact-head full CI `35428911661` SUCCESS includes the new onboarding browser validator/screenshot plus all prior onboarding/API/DB/security/restore/browser regressions. M24 remains RED because dependencies M01-M22 are not all GREEN and no deployed preview E2E with real auth/storage is yet possible. — PARTIAL PASS"
         },
         {
           "id": "M25",
@@ -524,7 +524,7 @@
           "acceptanceCriteria": "Navigation supports dashboard, models, items, imports, passports, settings",
           "evidenceRequired": "E2E navigation tests",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: D14,M24."
+          "evidence": "PARTIAL application-information-architecture precursor: dashboard now exposes a Pilot onboarding entry; the deterministic onboarding surface links into existing model/item/import demo workflows and represents the passport completion step. Browser smoke `35428911661` SUCCESS proves the dashboard→onboarding route and rendered 5-step workflow. U01 remains RED because dependency M24 is RED and full core navigation still lacks a dedicated settings surface / complete E2E navigation matrix. — PARTIAL PASS"
         },
         {
           "id": "U02",
