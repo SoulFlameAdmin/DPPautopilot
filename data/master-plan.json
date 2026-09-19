@@ -372,7 +372,7 @@
           "acceptanceCriteria": "Every passport field has explicit access class; API enforces it",
           "evidenceRequired": "API/security tests",
           "status": "red",
-          "evidence": "PARTIAL public/private access precursor: versioned four-class policy + reusable public projection; 42/42 fields have one valid class, public/restricted classes are disjoint, and restricted sample values are proven absent from public projection. M10 validator + unit tests PASS in full CI `35399171822`, artifact `10569812847`. M10 remains RED until M03 and real API enforcement exist. — PARTIAL PASS"
+          "evidence": "PARTIAL public/private access enforcement is now proven at the bound Supabase runtime boundary. M10_PUBLIC_PRIVATE_RUNTIME_PASS verified allowed public payloads, DP409 rejection of restricted public fields, no private payload/value leakage from anonymous public reads, authenticated private payload access, and anon-vs-authenticated RPC execute separation. Existing 42/42 field access classification remains valid. CI wiring commit 1231eb9bc40d1eaf62b94214a1d5c21260fe8183 exists but Actions PASS is not yet surfaced. M10 remains RED because M03 is not GREEN. — PARTIAL PASS"
         },
         {
           "id": "M11",
