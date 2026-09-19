@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "task": "T02",
+  "status": "partial",
+  "coverage_type": "database_acceptance_coverage",
+  "note": "Maps M04-M16 dependency behaviors to executable PostgreSQL/contract checks. Coverage does not change dependency task status.",
+  "dependencies": [
+    {
+      "id": "M04",
+      "state": "green",
+      "behavior": "Core schema, constraints, tenant-safe relations, RLS baseline",
+      "checks": [
+        "scripts/validate_core_schema_contract.py",
+        "tests/db/test_green_database_integrations.sql::T02_CURRENT_DB_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M05",
+      "state": "partial",
+      "behavior": "Tenant RLS and cross-tenant/viewer negative enforcement",
+      "checks": [
+        "tests/db/test_tenant_rls_subset.sql::M05_RLS_POLICY_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M06",
+      "state": "green",
+      "behavior": "Ordered non-destructive DPP migrations and clean replay",
+      "checks": [
+        "scripts/validate_migration_workflow.py",
+        "ci::Replay all DPP migrations on clean PostgreSQL 17"
+      ]
+    },
+    {
+      "id": "M07",
+      "state": "green",
+      "behavior": "Saved import mapping persistence/revision behavior",
+      "checks": [
+        "tests/db/test_green_database_integrations.sql::T02_CURRENT_DB_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M08",
+      "state": "green",
+      "behavior": "Import row validation rejects malformed/oversize/disallowed normalized values",
+      "checks": [
+        "tests/db/test_import_negative_validation_subset.sql::R03_M20_INPUT_VALIDATION_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M09",
+      "state": "green",
+      "behavior": "Requirement fields map to real DB typed columns/canonical JSON paths",
+      "checks": [
+        "scripts/validate_schema_traceability.py"
+      ]
+    },
+    {
+      "id": "M10",
+      "state": "partial",
+      "behavior": "Public/private policy remains explicit and public passport projection excludes restricted data",
+      "checks": [
+        "scripts/validate_access_policy.py",
+        "tests/db/test_passports_api_subset.sql::M19_PASSPORT_API_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M11",
+      "state": "green",
+      "behavior": "Passport versions append on material updates and history is immutable",
+      "checks": [
+        "tests/db/test_green_database_integrations.sql::T02_CURRENT_DB_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M12",
+      "state": "partial",
+      "behavior": "Actor/action/target/before-after audit capture is immutable",
+      "checks": [
+        "tests/db/test_audit_log_subset.sql::M12_AUDIT_LOG_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M13",
+      "state": "partial",
+      "behavior": "Evidence metadata tenant isolation, file constraints and audit capture",
+      "checks": [
+        "tests/db/test_evidence_attachments_subset.sql::M13_EVIDENCE_METADATA_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M14",
+      "state": "green",
+      "behavior": "Identifier/lifecycle transition rules enforce allowed state changes",
+      "checks": [
+        "tests/db/test_green_database_integrations.sql::T02_CURRENT_DB_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M15",
+      "state": "green",
+      "behavior": "Provider-neutral registry submission abstraction and idempotent create behavior",
+      "checks": [
+        "tests/db/test_registry_idempotency_subset.sql::M23_REGISTRY_IDEMPOTENCY_SUBSET_PASS"
+      ]
+    },
+    {
+      "id": "M16",
+      "state": "green",
+      "behavior": "Registry status/retry transitions, attempt counts and terminal-state protection",
+      "checks": [
+        "tests/db/test_green_database_integrations.sql::T02_CURRENT_DB_SUBSET_PASS",
+        "tests/db/test_registry_reliability_subset.sql::T08_REGISTRY_RELIABILITY_SUBSET_PASS"
+      ]
+    }
+  ],
+  "required_partial_blockers": [
+    "M05",
+    "M10",
+    "M12",
+    "M13"
+  ],
+  "green_blocker": "T02 remains RED until every declared M04-M16 dependency is fully accepted GREEN."
+}
