@@ -4,10 +4,12 @@
 <style>:root{--bg:#07090d;--p:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--green:#39d98a;--red:#ff6677;--amber:#ffbd52}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:1100px;margin:auto;padding:24px}.card{border:1px solid var(--line);background:var(--p);border-radius:16px;padding:18px;margin:14px 0}.ok{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}.muted{color:var(--muted)}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-top:1px solid var(--line);vertical-align:top}code{color:#cbd8e8}a.button{display:inline-block;padding:10px 14px;border:1px solid var(--line);border-radius:10px;color:var(--text);text-decoration:none}@media(max-width:720px){.shell{padding:14px}.scroll{overflow:auto}}</style></head>
 <body data-validation-ready="false" data-row-count="0" data-valid-row-count="0" data-error-count="0" data-download-ready="false">
 <main class="shell"><a href="/">← Dashboard</a><h1>M08 · Import validation / row errors</h1><p class="muted">Invalid rows are blocked and every error carries row, source column, canonical field, stable code and actionable message.</p>
-<section class="card"><div id="summary">Loading…</div><p><a id="download" class="button" download="dpp-import-errors.json">Download error report</a></p></section>
+<section class="card"><div id="summary" role="status" aria-live="polite">Loading…</div><p><a id="download" class="button" download="dpp-import-errors.json">Download error report</a></p></section>
 <section class="card scroll"><table><thead><tr><th>Row</th><th>Column</th><th>Canonical field</th><th>Code</th><th>Message</th></tr></thead><tbody id="errors"></tbody></table></section>
 </main>
+<script src="/demo/async-state.js"></script>
 <script>
+const u02=window.DPPAsyncState;
 const fieldMap={
  manufacturer_name:'model.identification.manufacturer.name',
  model_id:'model.identification.model_id',
@@ -44,14 +46,35 @@ function validate(rows,headers){
  });
  return out;
 }
+u02.set('loading',summary,'Loading…');
 (async()=>{try{
+ if(u02.gate(summary,{
+   loading:'Зареждане на validation fixture…',
+   empty:'Няма import rows за валидиране.',
+   error:'Import validation fixture could not be loaded.'
+ })) return;
  const r=await fetch('/data/sample-import-invalid.csv',{cache:'no-store'});if(!r.ok)throw new Error('invalid fixture unavailable');
- const lines=(await r.text()).trim().split(/\r?\n/),headers=lines[0].split(',').map(x=>x.trim()),rows=lines.slice(1).map(x=>x.split(','));
+ const raw=(await r.text()).trim();
+ if(!raw){
+   document.body.dataset.validationReady='false';
+   u02.set('empty',summary,'Няма import rows за валидиране.');
+   return;
+ }
+ const lines=raw.split(/\r?\n/),headers=lines[0].split(',').map(x=>x.trim()),rows=lines.slice(1).map(x=>x.split(','));
+ if(!rows.length){
+   document.body.dataset.validationReady='false';
+   u02.set('empty',summary,'Няма import rows за валидиране.');
+   return;
+ }
  const report=validate(rows,headers),invalidRows=new Set(report.map(x=>x.row)),validRows=rows.length-invalidRows.size;
  errors.innerHTML=report.map(e=>`<tr data-error-code="${esc(e.code)}" data-error-row="${e.row}"><td>${e.row}</td><td>${esc(e.column)}</td><td><code>${esc(e.canonicalField)}</code></td><td><code>${esc(e.code)}</code></td><td>${esc(e.message)}</td></tr>`).join('');
  summary.innerHTML=`<strong class="${report.length?'bad':'ok'}">${report.length} validation errors</strong> · ${validRows}/${rows.length} rows can proceed; invalid rows are blocked.`;
  const json=JSON.stringify({version:1,rowCount:rows.length,validRowCount:validRows,errorCount:report.length,errors:report},null,2);
  download.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
  document.body.dataset.validationReady='true';document.body.dataset.rowCount=String(rows.length);document.body.dataset.validRowCount=String(validRows);document.body.dataset.errorCount=String(report.length);document.body.dataset.downloadReady='true';
-}catch(e){summary.textContent=e.message}})();
+ u02.set('success',summary);
+}catch(e){
+ document.body.dataset.validationReady='false';
+ u02.set('error',summary,e.message);
+}})();
 </script></body></html>
