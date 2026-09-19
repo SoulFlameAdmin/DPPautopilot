@@ -359,6 +359,16 @@ jobs:
           \i tests/db/test_tenant_context_api_subset.sql
           rollback;
           SQL
+      - name: Run M02 M03 M24 organization onboarding subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_organization_onboarding_subset.sql
+          rollback;
+          SQL
       - name: Guard DPP internal RPC surface
         env:
           PGPASSWORD: postgres
