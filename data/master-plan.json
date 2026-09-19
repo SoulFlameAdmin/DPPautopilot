@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T03:35:00+03:00",
+  "updatedAt": "2026-09-19T03:44:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -658,7 +658,7 @@
           "acceptanceCriteria": "User/org deletion and export follow defined policy with audit-safe exceptions",
           "evidenceRequired": "Integration tests",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: R07."
+          "evidence": "PARTIAL fail-closed retention/deletion/export precursor: M21 export is required before future org deletion; terminal invalid/committed import staging may be purged only after 30 days; staged/validated and recent runs are preserved; organization/user deletion remains disabled behind explicit passport/registry/evidence/audit/auth blockers. CI 35409973551 on 3bf6a9d5ab3a40af9202bbdd3f7f4f414dbe51e9 SUCCESS; bound Supabase runtime R08_RETENTION_DELETION_SUBSET_PASS; live ACL fixed search_path, anon=false/authenticated=true. R08 remains RED pending R07 GREEN and full storage/regulatory/auth deletion policy acceptance. — PARTIAL PASS"
         },
         {
           "id": "R09",
