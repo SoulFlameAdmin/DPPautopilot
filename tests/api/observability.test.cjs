@@ -6,6 +6,8 @@ const assert=require('node:assert/strict');
 const obs=require('../../api/_observability.js');
 const models=require('../../api/models.js');
 const tenant=require('../../api/tenant.js');
+const organizations=require('../../api/organizations.js');
+const members=require('../../api/members.js');
 
 function makeRes(){
   return {
@@ -219,4 +221,38 @@ test('logging sink failure never blocks the response',()=>{
   assert.doesNotThrow(()=>res.end(JSON.stringify({data:{ok:true}})));
   assert.equal(res.body,JSON.stringify({data:{ok:true}}));
   assert.equal(res.headers['x-request-id'],'logger-fail-1234');
+});
+
+
+test('real onboarding handlers emit correlated redacted 401 events',async()=>{
+  const originalWarn=console.warn;
+  try{
+    for(const [surface,handler,method] of [
+      ['organizations',organizations,'POST'],
+      ['members',members,'GET']
+    ]){
+      const captured=[];
+      console.warn=(line)=>captured.push(String(line));
+      const res=makeRes();
+      await handler({
+        method,
+        headers:{'x-request-id':`${surface}-401-test`},
+        body:{name:'Sensitive Org',slug:'sensitive-org',user_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'},
+        query:{secret:'must-not-appear'}
+      },res);
+      assert.equal(res.statusCode,401);
+      assert.equal(res.headers['x-request-id'],`${surface}-401-test`);
+      assert.equal(captured.length,1);
+      const event=JSON.parse(captured[0]);
+      assert.equal(event.surface,surface);
+      assert.equal(event.status,401);
+      assert.equal(event.error_code,'AUTH_REQUIRED');
+      assert.equal(event.auth_present,false);
+      for(const forbidden of ['Sensitive Org','sensitive-org','must-not-appear','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa']){
+        assert.equal(captured[0].includes(forbidden),false,forbidden);
+      }
+    }
+  }finally{
+    console.warn=originalWarn;
+  }
 });
