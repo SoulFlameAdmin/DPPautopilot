@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T22:18:08+03:00",
+  "updatedAt": "2026-09-20T02:25:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -300,7 +300,7 @@
           "acceptanceCriteria": "Users belong to organisations and active tenant is explicit",
           "evidenceRequired": "DB + integration tests",
           "status": "red",
-          "evidence": "PARTIAL organization/tenant onboarding is now implemented through bound migrations `dpp_organization_onboarding` (bound version `20260919063726`) and `dpp_organization_onboarding_input_guard` (`20260919063941`). `M02_M03_M24_ORGANIZATION_ONBOARDING_PASS` proves authenticated org creation atomically creates caller owner membership + active tenant context, cross-tenant member listing is isolated, and null/invalid member role input fails closed. HTTP `/api/organizations` plus tenant/member contracts are covered in exact-head full CI `35428653493` SUCCESS (closed unmerged PR #27), including clean migration replay, RLS/RBAC/security guards and browser smoke. M02 remains RED because dependency M01 is BLOCKED and deployed authenticated app acceptance is unavailable. — PARTIAL PASS"
+          "evidence": "PARTIAL organization/tenant onboarding is implemented and now includes authenticated tenant recovery/discovery. Bound migrations `dpp_organization_onboarding`, `dpp_organization_onboarding_input_guard`, and `dpp_organizations_list` prove authenticated org creation, caller owner membership, explicit active tenant context, cross-tenant isolation, and deterministic `active=false` when no tenant is selected. `GET /api/organizations` forwards bearer auth to `dpp_api_organizations_list()` without allowing client tenant override. Exact-head CI `35475511177` on `eeb3573ad57e08d6b8d5bdbbbe038dcef81814c3` SUCCESS; PR #66 merged as `f48f8b7884e2e3ad3e53c61374acc7a781c4bb87`. M02 remains RED because dependency M01 is BLOCKED and deployed authenticated integration acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M03",

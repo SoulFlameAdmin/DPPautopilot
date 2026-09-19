@@ -377,6 +377,16 @@ jobs:
           \i tests/db/test_organization_onboarding_subset.sql
           rollback;
           SQL
+      - name: Run M03 authorization context matrix
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_m03_authorization_context.sql
+          rollback;
+          SQL
       - name: Guard DPP internal RPC surface
         env:
           PGPASSWORD: postgres
