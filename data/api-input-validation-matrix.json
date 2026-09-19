@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "task": "R03",
   "status": "partial",
   "max_body_bytes": 1048576,
@@ -25,6 +25,11 @@
       "expected": "413 PAYLOAD_TOO_LARGE before upstream"
     },
     {
+      "id": "oversize_parsed_import_body",
+      "surface": "/api/imports",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
       "id": "oversize_string_body",
       "surface": "shared request parser",
       "expected": "413 PAYLOAD_TOO_LARGE"
@@ -36,7 +41,7 @@
     },
     {
       "id": "malformed_json",
-      "surface": "M02/M17-M19",
+      "surface": "M02/M17-M20",
       "expected": "400 INVALID_JSON before upstream"
     },
     {
@@ -60,6 +65,11 @@
       "expected": "400/422 validation error"
     },
     {
+      "id": "invalid_import_fields",
+      "surface": "/api/imports",
+      "expected": "400/422 validation error before upstream"
+    },
+    {
       "id": "evidence_file_policy",
       "surface": "M13 policy",
       "expected": "10 MiB/type/path/hash metadata policy remains versioned"
@@ -71,6 +81,6 @@
     "data/evidence-file-policy.json"
   ],
   "remaining": [
-    "M13 real storage upload/download validation and M20 HTTP import payload/file boundary still await their dependent production surfaces."
+    "M13 real authenticated Storage API byte upload/download/delete validation remains required; SQL/RLS metadata tests do not substitute for byte-path acceptance."
   ]
 }
