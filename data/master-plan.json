@@ -390,7 +390,7 @@
           "acceptanceCriteria": "Actor/action/time/target/before-after metadata captured; app cannot alter past entries",
           "evidenceRequired": "DB policy tests",
           "status": "red",
-          "evidence": "PARTIAL immutable audit precursor: bound Supabase exposes `dpp_audit_log` + capture/guard functions; rollback test returned `M12_AUDIT_LOG_SUBSET_PASS`; clean replay CI step `Run M12 audit log subset` PASS in full run `35399171822`, artifact `10569812847`. M12 remains RED until M03 RBAC and app/API actor authorization are proven. — PARTIAL PASS"
+          "evidence": "PARTIAL immutable audit log now includes authorization-scope tenant-context changes. Bound Supabase execution M12_TENANT_CONTEXT_AUDIT_PASS proved actor/action/time/target/before-after for A→B tenant switch through dpp_api_tenant_context_set(), while existing audit append-only and critical-record coverage remain valid. CI gate commit 8115d9caa8073b2195015ac93b8309e03d740f3e exists but Actions PASS is not yet surfaced. M12 remains RED because M03 is not GREEN. — PARTIAL PASS"
         },
         {
           "id": "M13",
