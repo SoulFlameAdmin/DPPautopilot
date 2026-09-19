@@ -578,7 +578,7 @@
           "acceptanceCriteria": "Key routes have approved deterministic screenshots",
           "evidenceRequired": "Visual snapshot report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: U04."
+          "evidence": "PARTIAL approved deterministic visual baseline precursor: 10 key routes use pinned Chromium 153.0.8010.12 at 1440x1000 with animations disabled, reduced motion and normalized dynamic dashboard fields. Artifact `10586867949` from run `35452567110` was visually reviewed; 10/10 route screenshots were clean and pass A/B SHA-256 pairs matched byte-for-byte. Approved hashes are stored in `data/u07-visual-baseline.json` and enforced by `scripts/validate_u07_visual_regression.py`. Enforcement run `35453421926` SUCCESS; full CI `35453421923` SUCCESS; cross-browser `35453421922` SUCCESS. Implementation merged as `5c5ed0ef57fbd67e4a0b498e62954a4df0e56d4c`. U07 remains RED because dependency U04 is not GREEN and deployed production visual acceptance is unavailable. — PARTIAL PASS"
         }
       ]
     },
@@ -765,7 +765,7 @@
           "acceptanceCriteria": "Key screens pass approved viewport baselines",
           "evidenceRequired": "Screenshot diff report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: U04,U07."
+          "evidence": "PARTIAL visual/responsive suite precursor: U04 measured responsive matrix proves 10 core surfaces at phone/tablet/desktop with no root overflow/blocking overlays (CI `35448804599`), and U07 now enforces approved deterministic viewport hashes for 10 key routes (visual regression `35453421926`, full CI `35453421923`). This is a real local/CI screenshot-regression suite, but T05 remains RED because U04/U07 are not GREEN and deployed production viewport baselines are not yet proven. — PARTIAL PASS"
         },
         {
           "id": "T06",
@@ -774,7 +774,7 @@
           "acceptanceCriteria": "Critical E2E passes Chromium/Firefox/WebKit",
           "evidenceRequired": "Browser matrix",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: U06."
+          "evidence": "PARTIAL cross-browser suite precursor: dedicated pinned Playwright matrix runs Chromium/Firefox/WebKit against 10 core surfaces and produced 30/30 passes. Primary cross-browser run `35450988219` SUCCESS with artifact `10587340403`; subsequent U07 branch reproof `35453421922` also SUCCESS. Standard full CI `35450988227` and `35453421923` are SUCCESS. T06 remains RED because dependency U06 is not GREEN and deployed production critical E2E is not yet available. — PARTIAL PASS"
         },
         {
           "id": "T07",
