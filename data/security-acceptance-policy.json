@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "task": "C10",
+  "status": "partial",
+  "canonical": {
+    "source_repo": "SoulFlameAdmin/DPPautopilot",
+    "source_branch": "main",
+    "vercel_project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "environment": "production"
+  },
+  "required_security_tasks": [
+    "R01",
+    "R02",
+    "R03",
+    "R04",
+    "R05",
+    "R06",
+    "R07",
+    "R08",
+    "R09",
+    "R10",
+    "R11",
+    "R12",
+    "R13",
+    "R14"
+  ],
+  "acceptance": {
+    "require_all_security_tasks_passed": true,
+    "require_exact_c07_commit_and_deployment": true,
+    "require_live_production_evidence": true,
+    "unresolved_critical_max": 0,
+    "unresolved_high_max": 0,
+    "require_issue_inventory": true,
+    "require_repository_hygiene_pass": true
+  },
+  "issue_severities": [
+    "critical",
+    "high",
+    "medium",
+    "low"
+  ],
+  "decision": {
+    "default": "deny",
+    "note": "Missing dependency evidence, commit/deployment drift, silent issue omission, or any unresolved critical/high finding denies C10."
+  },
+  "live_state": {
+    "security_acceptance_executed": false,
+    "deployment_lease_required_for_this_precursor": false
+  },
+  "remaining": [
+    "R01-R14 must all be GREEN.",
+    "C07 must be GREEN for the exact production commit and deployment.",
+    "A live production security evidence set must be captured for the exact C07 deployment.",
+    "The issue inventory must contain all known findings and no critical/high finding may remain unresolved.",
+    "Repository security hygiene and live production security-header/auth/tenant-isolation evidence must pass."
+  ]
+}
