@@ -279,6 +279,16 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_registry_idempotency_subset.sql
+      - name: Run M23 optimistic concurrency subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_optimistic_concurrency_subset.sql
+          rollback;
+          SQL
       - name: Run M22 import error contract subset
         env:
           PGPASSWORD: postgres
