@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T10 regression precursor evidence sync",
+  "currentTask": "Dependency frontier audit after T10 precursor",
   "currentGate": "TESTING",
-  "lastCompletedTask": "T10 clean-checkout regression precursor + full CI 35454765266 SUCCESS",
-  "nextTask": "Re-prove the evidence-sync head in exact-head CI, merge PR #53 if PASS, then re-evaluate the tracker for the next safe non-final precursor. No RED task currently has all declared dependencies GREEN; do not retry F08/M01 without new unblock evidence.",
-  "message": "T10 precursor is implemented and proven: full CI 35454765266 SUCCESS and log marker T10_FULL_REGRESSION_PRECURSOR_PASS. T10 correctly remains RED/PARTIAL because T01-T09 are not GREEN and release/production acceptance is unavailable. No Vercel deployment occurred; no Supabase mutation occurred; DAVID orchestrator files remain untouched.",
+  "lastCompletedTask": "T10 clean-checkout regression precursor merged via PR #53; exact-head CI 35455189633 SUCCESS",
+  "nextTask": "No RED task currently has all declared dependencies GREEN. Preserve dependency order and do not retry F08/M01/M13 without new unblock evidence; on the next evidence change, resume from the earliest newly dependency-safe task.",
+  "message": "T10 precursor is implemented, exact-head tested and merged. It remains RED/PARTIAL by design because T01-T09 are not GREEN and release/production acceptance is unavailable. Current tracker audit found zero RED tasks whose declared dependencies are all GREEN. No Vercel deployment or Supabase mutation occurred; DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T19:29:00+03:00"
+  "updatedAt": "2026-09-19T19:35:00+03:00"
 }

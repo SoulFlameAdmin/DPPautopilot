@@ -30,3 +30,11 @@ This is a real clean-checkout regression precursor, not final production accepta
 - Included report: `artifacts/t10-full-regression-report.json`
 
 T10 remains RED/PARTIAL by design. No production/deployment acceptance is claimed.
+
+## Merge confirmation
+
+- Exact-head CI: `35455189633` — SUCCESS
+- Exact head: `d9166bbf16ab91fdac92294a5b80e3088839384c`
+- Exact-head aggregate artifact: `10588036888`, digest `sha256:fdfade06e3f3f76a4dc2074a8bcab55f6ebdc7c76f721d3505dc6781b5a9af87`
+- PR #53 merged to `main` as `9fbc356d55f902fa1f5a73a9ac16fefccef01c67`.
+- T10 remains RED/PARTIAL; no release or production acceptance is claimed.
