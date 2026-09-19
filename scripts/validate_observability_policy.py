@@ -24,7 +24,7 @@ assert policy.get("surfaces")==["models","items","passport","imports","export"]
 assert policy.get("severity")=={"2xx_3xx":"info","4xx":"warn","5xx":"error"}
 
 prohibited=" ".join(policy.get("prohibited_fields",[])).lower()
-for term in ["authorization","token","supabase","body","query","identifier","email","cookie","ip","database"]:
+for term in ["authorization","token","supabase","bodies","query","identifier","email","cookie","ip","database"]:
     assert term in prohibited, f"R09 prohibited field policy missing {term}"
 
 helper=(ROOT/"api/_observability.js").read_text(encoding="utf-8")
