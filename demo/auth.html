@@ -6,13 +6,13 @@
 <body data-auth-ready="false" data-session-state="unknown" data-input-preserved="unknown" data-form-valid="unknown">
 <main class="shell"><a href="/">← Dashboard</a><h1>M01 · Authentication</h1>
 <p class="muted">Supabase Auth client flow. Publishable key only; no service-role secret is present in the browser.</p>
-<section class="card"><div class="grid"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" placeholder="email@example.com" aria-describedby="email_help email_error" aria-invalid="false"><div id="email_help" class="muted">Use the account email address.</div><div id="email_error" class="field-error" aria-live="polite"></div></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password" aria-describedby="password_help password_error" aria-invalid="false"><div id="password_help" class="muted">Required for sign-up and sign-in.</div><div id="password_error" class="field-error" aria-live="polite"></div></div></div><div class="grid" style="margin-top:12px"><button id="signup">Sign up</button><button id="signin">Sign in</button><button id="reset">Reset password</button><button id="refresh">Refresh session</button><button id="signout">Sign out</button></div></section>
+<section class="card"><div class="grid"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" placeholder="email@example.com" aria-describedby="email_help email_error" aria-invalid="false"><div id="email_help" class="muted">Use the account email address.</div><div id="email_error" class="field-error" aria-live="polite"></div></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password" aria-describedby="password_help password_error" aria-invalid="false"><div id="password_help" class="muted">Required for sign-up and sign-in.</div><div id="password_error" class="field-error" aria-live="polite"></div></div></div><div class="grid" style="margin-top:12px"><button id="signup">Sign up</button><button id="signin">Sign in</button><button id="reset">Reset password</button><button id="signout">Sign out</button></div></section>
 <section class="card"><strong>Session</strong><pre id="session" role="status" aria-live="polite">Loading…</pre></section><section class="card"><strong>Result</strong><pre id="result" role="status" aria-live="polite">Ready.</pre></section>
 </main>
 <script src="/demo/form-ux.js"></script>
 <script>
 const formUx=window.DPPFormUX;
-let cfg,accessToken=null,refreshToken=null;
+let cfg,accessToken=null,refreshToken=null,refreshTimer=null;
 const out=(x,cls='')=>{result.className=cls;result.textContent=typeof x==='string'?x:JSON.stringify(x,null,2)};
 function validateAuth({passwordRequired=true}={}){
  const controls=[email,password],before=formUx.snapshot(controls);
@@ -34,8 +34,25 @@ async function call(path,{method='GET',body,token}={}){
  if(!r.ok) throw Object.assign(new Error(data.msg||data.message||data.error_description||('HTTP '+r.status)),{status:r.status,data});
  return data;
 }
+async function refreshSession(){
+ if(!refreshToken)return false;
+ try{
+  const d=await call('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:refreshToken}});
+  setSession(d);
+  return true;
+ }catch{
+  setSession(null);
+  return false;
+ }
+}
 function setSession(data){
+ if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null}
  accessToken=data?.access_token||null;refreshToken=data?.refresh_token||null;
+ const expiresIn=Number(data?.expires_in||0);
+ if(accessToken&&refreshToken&&expiresIn>0){
+  const refreshAfter=Math.max(1000,(expiresIn-60)*1000);
+  refreshTimer=setTimeout(refreshSession,refreshAfter);
+ }
  document.body.dataset.sessionState=accessToken?'authenticated':'anonymous';
  session.textContent=accessToken?'Authenticated session in memory only.':'No authenticated session.';
 }
@@ -48,7 +65,6 @@ signup.onclick=async()=>{if(!validateAuth())return out('Check the highlighted fi
 signin.onclick=async()=>{if(!validateAuth())return out('Check the highlighted fields.','bad');try{const d=await call('/auth/v1/token?grant_type=password',{method:'POST',body:{email:email.value.trim(),password:password.value}});setSession(d);out('Sign-in succeeded.','ok')}catch(e){out(e.message,'bad')}};
 function recoveryRedirect(){return new URL('/demo/auth-recovery.html',location.origin).href}
 reset.onclick=async()=>{if(!validateAuth({passwordRequired:false}))return out('Check the highlighted email field.','bad');try{const redirectTo=recoveryRedirect();await call('/auth/v1/recover?redirect_to='+encodeURIComponent(redirectTo),{method:'POST',body:{email:email.value.trim()}});out('If the account is eligible, a password reset email will be sent.','ok')}catch(e){out(e.message,'bad')}};
-refresh.onclick=async()=>{if(!refreshToken)return out('No refreshable session is available.','warn');try{const d=await call('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:refreshToken}});setSession(d);out('Session refreshed successfully.','ok')}catch(e){setSession(null);out(e.message,'bad')}};
 signout.onclick=async()=>{try{if(accessToken)await call('/auth/v1/logout',{method:'POST',token:accessToken});setSession(null);out('Signed out.','ok')}catch(e){setSession(null);out(e.message,'bad')}};
 init().then(()=>{
  const q=new URLSearchParams(location.search);
