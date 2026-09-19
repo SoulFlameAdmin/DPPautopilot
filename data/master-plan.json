@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T04:12:00+03:00",
+  "updatedAt": "2026-09-19T04:22:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -604,7 +604,7 @@
           "acceptanceCriteria": "Production serves TLS and required headers; unsafe defaults removed",
           "evidenceRequired": "HTTP header test",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: F08."
+          "evidence": "PARTIAL deploy-time security-header/TLS precursor: global vercel.json CSP/HSTS/X-Content-Type-Options/X-Frame-Options/Referrer-Policy/Permissions-Policy, exact same-origin + bound Supabase connect-src, /data no-store preserved, temporary unsafe-inline gap explicitly versioned. CI 35411624210 on 56a13af94d18af02d93db56431bec2054c7c7cce SUCCESS including R02 validator, API/security regressions, clean DB replay, restore and browser smoke. R02 remains RED pending F08 and live TLS/certificate/header/CSP runtime evidence. — PARTIAL PASS"
         },
         {
           "id": "R03",
