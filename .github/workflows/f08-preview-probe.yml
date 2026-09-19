@@ -1,0 +1,110 @@
+name: F08 Vercel preview probe
+
+on:
+  push:
+    branches:
+      - test/f08-vercel-preview-probe-20260919
+
+permissions:
+  contents: read
+
+concurrency:
+  group: f08-vercel-preview-probe
+  cancel-in-progress: true
+
+jobs:
+  preview-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: team_cKaIZfnCMzoiiq80J0MhV0A2
+      VERCEL_PROJECT_ID: prj_K0RSGrEkEr3XDouCTA3tdasbqH55
+      VERCEL_CLI_VERSION: 59.19.1
+
+    steps:
+      - name: Checkout probe commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Verify preview-only safety gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF_NAME" != "test/f08-vercel-preview-probe-20260919" ]]; then
+            echo "::error::Unexpected branch"
+            exit 1
+          fi
+          if [[ -z "${VERCEL_TOKEN:-}" ]]; then
+            echo "::error::GitHub Actions secret VERCEL_TOKEN is not configured"
+            exit 2
+          fi
+
+      - name: Install pinned Vercel CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global "vercel@${VERCEL_CLI_VERSION}"
+          vercel --version
+
+      - name: Pull preview environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+
+      - name: Build preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          vercel build --token="$VERCEL_TOKEN"
+
+      - name: Deploy preview only
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_output="$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")"
+          deployment_url="$(printf '%s\n' "$raw_output" | grep -Eo 'https://[^[:space:]]+\.vercel\.app' | tail -n 1)"
+          test -n "$deployment_url"
+          echo "DEPLOYMENT_URL=$deployment_url" >> "$GITHUB_ENV"
+          echo "deployment_url=$deployment_url" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location "$DEPLOYMENT_URL/" --output /tmp/home.html
+          curl --fail --silent --show-error --location "$DEPLOYMENT_URL/data/master-plan.json" --output /tmp/master-plan.json
+          grep -q "DPP Autopilot" /tmp/home.html
+          python3 -m json.tool /tmp/master-plan.json >/dev/null
+
+      - name: Write probe receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          python3 - <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          payload={
+            "kind":"F08_PREVIEW_PROBE",
+            "repository":"SoulFlameAdmin/DPPautopilot",
+            "commit":os.environ["GITHUB_SHA"],
+            "vercel_project_id":os.environ["VERCEL_PROJECT_ID"],
+            "vercel_org_id":os.environ["VERCEL_ORG_ID"],
+            "deployment_url":os.environ["DEPLOYMENT_URL"],
+            "target":"preview",
+            "smoke_pass":True,
+            "created_at":datetime.now(timezone.utc).isoformat()
+          }
+          with open("artifacts/f08-preview-probe-receipt.json","w",encoding="utf-8") as f:
+            json.dump(payload,f,indent=2,sort_keys=True)
+            f.write("\n")
+          PY
+
+      - name: Upload probe receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: f08-preview-probe-receipt
+          path: artifacts/f08-preview-probe-receipt.json
+          if-no-files-found: error
