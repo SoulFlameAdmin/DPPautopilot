@@ -379,6 +379,16 @@ jobs:
           \i tests/db/test_evidence_attachments_subset.sql
           rollback;
           SQL
+      - name: Run M13 storage RLS subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_evidence_storage_policy_subset.sql
+          rollback;
+          SQL
       - name: Run R08 retention deletion subset
         env:
           PGPASSWORD: postgres
