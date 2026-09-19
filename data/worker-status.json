@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "External dependency frontier after U01 core navigation precursor",
-  "currentGate": "MVP",
-  "lastCompletedTask": "U01 core navigation precursor + full CI 35429103687 SUCCESS",
-  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue only dependency-safe non-deploy precursors; next useful UX work is U02 deterministic async loading/empty/error states.",
-  "message": "Core dashboard navigation now exposes models/items/imports/passports/settings and settings returns to core synthetic workflows without secret persistence; full CI 35429103687 is SUCCESS. U01 remains RED only because M24/deployed E2E is unavailable. F08/M01 remain deferred; no Vercel deploy/redeploy occurred, so no deploy lease was required. DAVID orchestrator files remain untouched.",
+  "currentTask": "External dependency frontier after U02 deterministic async-state precursor",
+  "currentGate": "UX",
+  "lastCompletedTask": "U02 deterministic async-state precursor + full CI 35429830868 SUCCESS",
+  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue dependency-safe non-deploy UX precursors; strengthen U03 accessible form validation/error recovery across core write surfaces before U04.",
+  "message": "All six async core views now expose browser-proven loading/empty/success/error states; 24-state matrix and full CI 35429830868 are SUCCESS. U02 remains RED only because U01/M24/deployed E2E are not GREEN. F08/M01/M13 external gaps remain deferred; no Vercel deploy/redeploy occurred and DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T10:24:00+03:00"
+  "updatedAt": "2026-09-19T10:41:00+03:00"
 }
