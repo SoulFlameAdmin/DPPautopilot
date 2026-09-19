@@ -12,7 +12,7 @@
 <script src="/demo/form-ux.js"></script>
 <script>
 const formUx=window.DPPFormUX;
-let cfg,accessToken=null,refreshToken=null;
+let cfg,accessToken=null,refreshToken=null,refreshTimer=null;
 const out=(x,cls='')=>{result.className=cls;result.textContent=typeof x==='string'?x:JSON.stringify(x,null,2)};
 function validateAuth({passwordRequired=true}={}){
  const controls=[email,password],before=formUx.snapshot(controls);
@@ -34,8 +34,25 @@ async function call(path,{method='GET',body,token}={}){
  if(!r.ok) throw Object.assign(new Error(data.msg||data.message||data.error_description||('HTTP '+r.status)),{status:r.status,data});
  return data;
 }
+async function refreshSession(){
+ if(!refreshToken)return false;
+ try{
+  const d=await call('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:refreshToken}});
+  setSession(d);
+  return true;
+ }catch{
+  setSession(null);
+  return false;
+ }
+}
 function setSession(data){
+ if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null}
  accessToken=data?.access_token||null;refreshToken=data?.refresh_token||null;
+ const expiresIn=Number(data?.expires_in||0);
+ if(accessToken&&refreshToken&&expiresIn>0){
+  const refreshAfter=Math.max(1000,(expiresIn-60)*1000);
+  refreshTimer=setTimeout(refreshSession,refreshAfter);
+ }
  document.body.dataset.sessionState=accessToken?'authenticated':'anonymous';
  session.textContent=accessToken?'Authenticated session in memory only.':'No authenticated session.';
 }
