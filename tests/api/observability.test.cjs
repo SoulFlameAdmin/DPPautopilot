@@ -36,7 +36,7 @@ test('preserves only a safe incoming request id and emits deterministic metadata
     },
     query:{identifier:'urn:dpp:secret:identifier'}
   };
-  const times=[1000,1025];
+  const times=[1000,1025,1025];
   obs.startRequestObservability(req,res,'models',{logger:log,now:()=>times.shift()});
   res.statusCode=200;
   res.end(JSON.stringify({data:{private_payload:{secret:'never-log-me'}}}));
@@ -46,6 +46,7 @@ test('preserves only a safe incoming request id and emits deterministic metadata
   const event=JSON.parse(log.lines.info[0]);
   assert.deepEqual(event,{
     event:'dpp_http_request',
+    timestamp_ms:1025,
     request_id:'client.req-1234',
     surface:'models',
     method:'GET',
