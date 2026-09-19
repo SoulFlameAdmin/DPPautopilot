@@ -21,4 +21,8 @@ for snippet in [
 require("localStorage" not in html and "sessionStorage" not in html,"M01 recovery token must not be persisted")
 require("service_role" not in html.lower(),"M01 recovery page must not contain service-role material")
 require("accessToken=null" in html,"M01 recovery token must be cleared after password update")
+require("h.type==='recovery'" in html,"R06 recovery page must require recovery type")
+require("expiresAt*1000>Date.now()" in html,"R06 recovery page must reject expired recovery sessions")
+require('<meta name="referrer" content="no-referrer">' in html,"R06 recovery page must set no-referrer policy")
+require(html.index("history.replaceState") < html.index("save.onclick"),"R06 recovery fragment must be cleared during init before password submission")
 print("M01_RECOVERY_CONTRACT_PASS: recovery session is fragment-only, password update uses authenticated PATCH /auth/v1/user, and token is cleared without persistence")
