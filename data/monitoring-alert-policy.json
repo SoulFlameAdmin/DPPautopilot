@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "task": "R10",
   "status": "partial",
   "input_event": "dpp_http_request",
@@ -94,5 +94,16 @@
       "Run a real alert fire-and-recover drill",
       "Record acknowledgement/escalation evidence"
     ]
+  },
+  "event_contract": {
+    "source": "data/observability-policy.json",
+    "allowed_surfaces_from_r09": true,
+    "request_id_pattern_from_r09": true,
+    "status_min": 100,
+    "status_max": 599,
+    "require_outcome_status_consistency": true,
+    "require_auth_present_boolean": true,
+    "error_code_pattern": "^[A-Z0-9_]{2,80}$",
+    "invalid_events": "discard"
   }
 }
