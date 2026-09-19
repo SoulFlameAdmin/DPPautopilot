@@ -7,6 +7,7 @@ const tenant=require('../../api/tenant.js');
 const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
+const imports=require('../../api/imports.js');
 const request=require('../../api/_request.js');
 
 function makeRes(){
@@ -52,7 +53,7 @@ test('shared parser rejects malformed JSON and unserializable objects',()=>{
   );
 });
 
-for(const [name,handler] of [['tenant',tenant],['models',models],['items',items],['passport',passport]]){
+for(const [name,handler] of [['tenant',tenant],['models',models],['items',items],['passport',passport],['imports',imports]]){
   test(`${name} rejects >1 MiB parsed object before upstream DB access`,async()=>{
     const original=global.fetch;
     let called=false;
@@ -153,6 +154,30 @@ test('items rejects invalid IDs, identifier length, lifecycle and JSON shapes lo
     canonical_data:[]
   }),res);
   assertError(res,422,'VALIDATION_ERROR');
+});
+
+test('imports rejects malformed JSON and invalid normalized rows locally before upstream',async()=>{
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('upstream must not be called');};
+  try{
+    let res=makeRes();
+    await imports(req('POST','{"bad":'),res);
+    assertError(res,400,'INVALID_JSON');
+
+    res=makeRes();
+    await imports(req('POST',{rows:[]}),res);
+    assertError(res,422,'INVALID_IMPORT_PAYLOAD');
+
+    res=makeRes();
+    await imports(req('POST',{
+      rows:[{normalized_model:[],normalized_item:{}}],
+      mapping_id:null
+    }),res);
+    assertError(res,422,'INVALID_IMPORT_PAYLOAD');
+
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
 });
 
 test('passport rejects invalid identifiers, ids, status and payload shapes locally',async()=>{
