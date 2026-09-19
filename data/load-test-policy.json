@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "task": "T07",
+  "status": "partial",
+  "mode": "synthetic_in_process_serverless_handler_load",
+  "claim_boundary": "These CI targets characterize handler/contract behavior only. They are not production capacity, network, TLS, Supabase service, region, cold-start or Vercel concurrency evidence.",
+  "profiles": {
+    "multi_surface_concurrency": {
+      "total_requests": 200,
+      "concurrency": 25,
+      "requests_per_surface": 40,
+      "surfaces": [
+        "models",
+        "items",
+        "passport",
+        "imports",
+        "export"
+      ],
+      "max_error_rate": 0,
+      "max_p95_ms": 2000,
+      "max_wall_ms": 10000
+    },
+    "import_batch_volume": {
+      "rows": 1000,
+      "expected_status": 201,
+      "max_elapsed_ms": 3000
+    },
+    "same_client_read_overload": {
+      "requests": 125,
+      "configured_budget": 120,
+      "expected_successes": 120,
+      "expected_rate_limited": 5,
+      "expected_rate_limit_status": 429
+    }
+  },
+  "remaining": [
+    "M17-M21 must be fully accepted before T07 can be GREEN.",
+    "A deployed preview/staging load test must exercise real HTTP/TLS, hosting concurrency/cold starts, Supabase latency/pooling and production-like data volume.",
+    "Final capacity/latency budgets require accepted staging infrastructure and operational SLOs."
+  ]
+}
