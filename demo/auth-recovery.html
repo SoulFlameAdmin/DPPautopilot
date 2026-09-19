@@ -22,7 +22,7 @@ async function init(){
  const notExpired=!expiresAt || expiresAt*1000>Date.now();
  const isRecovery=h.type==='recovery' && !!candidate && notExpired;
  accessToken=isRecovery?candidate:null;
- history.replaceState(null,'',location.pathname);
+ history.replaceState(null,'',location.pathname+location.search);
  document.body.dataset.recoverySession=isRecovery?'valid':'missing';
  document.body.dataset.recoveryReady='true';
  setState(isRecovery?'Recovery session ready. Enter a new password.':'Missing, expired or invalid recovery session.',isRecovery?'ok':'bad');
