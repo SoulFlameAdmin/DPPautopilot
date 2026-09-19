@@ -5,15 +5,15 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 matrix=json.loads((ROOT/"data/api-input-validation-matrix.json").read_text(encoding="utf-8"))
-assert matrix.get("version")==2
+assert matrix.get("version")==3
 assert matrix.get("task")=="R03"
 assert matrix.get("status")=="partial"
 assert matrix.get("max_body_bytes")==1048576
 
 required={
-  "oversize_parsed_tenant_body","oversize_parsed_model_body","oversize_parsed_item_body","oversize_parsed_passport_body",
+  "oversize_parsed_tenant_body","oversize_parsed_model_body","oversize_parsed_item_body","oversize_parsed_passport_body","oversize_parsed_import_body",
   "oversize_string_body","oversize_buffer_body","malformed_json","invalid_tenant_fields","invalid_model_fields",
-  "invalid_item_fields","invalid_passport_fields","evidence_file_policy",
+  "invalid_item_fields","invalid_passport_fields","invalid_import_fields","evidence_file_policy",
 }
 scenarios=matrix.get("scenarios",[])
 assert {s["id"] for s in scenarios}==required, "R03 API validation scenario set drifted"
@@ -27,7 +27,7 @@ request=(ROOT/"api/_request.js").read_text(encoding="utf-8")
 for token in ["MAX_BODY_BYTES = 1024 * 1024","Buffer.isBuffer","JSON.stringify(value)","PAYLOAD_TOO_LARGE","INVALID_JSON"]:
     assert token in request, f"R03 request limiter missing {token}"
 
-for rel in ["api/tenant.js","api/models.js","api/items.js","api/passport.js"]:
+for rel in ["api/tenant.js","api/models.js","api/items.js","api/passport.js","api/imports.js"]:
     text=(ROOT/rel).read_text(encoding="utf-8")
     assert "require('./_request.js')" in text, f"{rel} is not using shared R03 body limiter"
     assert "bodyErrorResponse" in text, f"{rel} does not emit typed body errors"
@@ -47,6 +47,6 @@ assert "R03_API_INPUT_VALIDATION_SUBSET_PASS" in api_test
 assert "upstream must not be called" in api_test
 
 remaining=matrix.get("remaining",[])
-assert remaining, "R03 must retain remaining storage/import HTTP gap while partial"
+assert len(remaining)==1 and "Storage API byte" in remaining[0], "R03 must retain only the real M13 Storage byte-path gap while partial"
 
-print("R03_API_INPUT_VALIDATION_CONTRACT_PASS: 1 MiB shared body limit + 12 negative API/file-policy scenarios are versioned")
+print("R03_API_INPUT_VALIDATION_CONTRACT_PASS: 1 MiB shared body limit + 14 negative API/file-policy scenarios are versioned; M20 HTTP import bodies are covered")
