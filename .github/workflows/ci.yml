@@ -78,6 +78,16 @@ jobs:
         run: python scripts/validate_preview_verification_contract.py
       - name: Validate C03 production promotion policy
         run: python scripts/validate_production_promotion_policy.py
+      - name: Validate C04 migration deployment gate
+        run: python scripts/validate_migration_deployment_gate.py
+      - name: Generate C04 migration release manifest
+        run: python scripts/generate_migration_release_manifest.py --commit "$GITHUB_SHA"
+      - name: Upload C04 migration manifest
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: c04-migration-manifest
+          path: artifacts/c04-migration-manifest.json
+          if-no-files-found: error
       - name: Validate R04 API tenant isolation matrix
         run: python scripts/validate_api_tenant_isolation.py
       - name: Validate R03 API input validation contract
