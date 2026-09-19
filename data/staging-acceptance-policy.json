@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "task": "C06",
+  "status": "partial",
+  "canonical": {
+    "source_repo": "SoulFlameAdmin/DPPautopilot",
+    "source_branch": "main",
+    "vercel_project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "environment": "preview"
+  },
+  "required_suites": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T06",
+    "T07",
+    "T08",
+    "T09"
+  ],
+  "evidence_required": {
+    "candidate_commit_sha": true,
+    "preview": [
+      "verified",
+      "project_id",
+      "environment",
+      "state",
+      "commit_sha",
+      "deployment_id",
+      "url"
+    ],
+    "regression": [
+      "status",
+      "commit_sha",
+      "clean_checkout",
+      "suites"
+    ],
+    "environment_config": [
+      "production_like",
+      "uses_production_customer_data",
+      "uses_production_database",
+      "data_classification"
+    ],
+    "migration_schema": [
+      "status",
+      "commit_sha"
+    ],
+    "smoke": [
+      "status",
+      "commit_sha",
+      "security_headers",
+      "core_routes"
+    ]
+  },
+  "decision": {
+    "default": "deny",
+    "note": "Repository precursor validates staging evidence only; it does not create or redeploy a preview/staging deployment."
+  },
+  "live_state": {
+    "staging_acceptance_executed": false,
+    "canonical_preview_deployments_observed": 0,
+    "deployment_lease_required_for_this_precursor": false
+  },
+  "remaining": [
+    "T10 must be GREEN with all mandatory suites accepted.",
+    "C02 must be GREEN with a real READY preview deployment for the exact candidate commit.",
+    "A production-like but non-production staging configuration must be verified live.",
+    "Live migration/schema, security-header and core-route smoke evidence must pass against staging."
+  ]
+}
