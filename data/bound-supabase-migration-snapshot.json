@@ -96,6 +96,26 @@
     {
       "version": "20260919025006",
       "name": "dpp_evidence_storage"
+    },
+    {
+      "version": "20260919033025",
+      "name": "dpp_evidence_storage_policy_fix"
+    },
+    {
+      "version": "20260919044015",
+      "name": "dpp_tenant_context_api"
+    },
+    {
+      "version": "20260919044500",
+      "name": "dpp_tenant_context_audit"
+    },
+    {
+      "version": "20260919045119",
+      "name": "dpp_optimistic_concurrency"
+    },
+    {
+      "version": "20260919045204",
+      "name": "dpp_wallclock_updated_at"
     }
   ],
   "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
