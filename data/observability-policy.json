@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "task": "R09",
   "status": "partial",
   "event_name": "dpp_http_request",
@@ -40,6 +40,8 @@
   },
   "surfaces": [
     "tenant",
+    "organizations",
+    "members",
     "models",
     "items",
     "passport",
