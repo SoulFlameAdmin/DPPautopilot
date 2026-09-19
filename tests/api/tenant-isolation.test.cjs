@@ -111,7 +111,7 @@ test('guessed cross-tenant model id is non-enumerating 404',async()=>{
   global.fetch=errorFetch('DP205');
   try{
     const res=makeRes();
-    await models(req('PATCH',{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',model_identifier:'X'}),res);
+    await models(req('PATCH',{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',model_identifier:'X',expected_updated_at:'2026-09-19T04:00:00.000Z'}),res);
     const payload=JSON.parse(res.body);
     assert.equal(res.statusCode,404);
     assert.equal(payload.error.code,'MODEL_NOT_FOUND');
