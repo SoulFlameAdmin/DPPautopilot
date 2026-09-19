@@ -6,6 +6,7 @@ const assert=require('node:assert/strict');
 const limiter=require('../../api/_rate_limit.js');
 const models=require('../../api/models.js');
 const passport=require('../../api/passport.js');
+const tenant=require('../../api/tenant.js');
 
 function makeRes(){
   return {
@@ -166,4 +167,32 @@ test('bucket map is hard capped during unique-identity flood',()=>{
     );
   }
   assert.equal(limiter._test.buckets.size,3);
+});
+
+
+test('41st authenticated tenant context write is blocked before validation/upstream',async()=>{
+  const originalFetch=global.fetch;
+  const originalWarn=console.warn;
+  let upstream=0;
+  console.warn=()=>{};
+  global.fetch=async()=>{upstream+=1;throw new Error('upstream should not be used');};
+  try{
+    for(let i=1;i<=40;i++){
+      const res=makeRes();
+      await tenant(req('POST',{organization_id:'not-a-uuid'}),res);
+      assert.equal(res.statusCode,422);
+      assert.equal(json(res).error.code,'INVALID_ORGANIZATION_ID');
+    }
+    const blocked=makeRes();
+    await tenant(req('POST',{organization_id:'not-a-uuid'}),blocked);
+    assert.equal(blocked.statusCode,429);
+    assert.equal(json(blocked).error.code,'RATE_LIMITED');
+    assert.equal(blocked.headers['x-ratelimit-limit'],'40');
+    assert.equal(blocked.headers['x-ratelimit-remaining'],'0');
+    assert.ok(Number(blocked.headers['retry-after'])>=1);
+    assert.equal(upstream,0);
+  }finally{
+    global.fetch=originalFetch;
+    console.warn=originalWarn;
+  }
 });
