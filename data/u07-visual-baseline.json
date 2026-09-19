@@ -1,11 +1,11 @@
 {
   "version": 1,
   "status": "approved_precursor",
-  "approved_at": "2026-09-19T18:43:00+03:00",
-  "source_run_id": 35452567110,
-  "source_artifact_id": 10586867949,
-  "source_artifact_digest": "sha256:591feaa103ae7f377cb27534305a1e1d086a4915a60dd8ea4af51dedc0c3b6ff",
-  "source_commit": "36032b682ab649d07fab82ffb885ea168e4b5408",
+  "approved_at": "2026-09-19T23:42:00+03:00",
+  "source_run_id": 35468111629,
+  "source_artifact_id": 10592210955,
+  "source_artifact_digest": "sha256:7695ed7d4f44f81a0a25c8b3c474f2762b4e002f587fff68ab7ee0223db6be9c",
+  "source_commit": "2ec2f8886442259f6f0027b622aab9ed8d3007f5",
   "browser": "chromium",
   "browser_version": "153.0.8010.12",
   "viewport": {
@@ -31,12 +31,12 @@
   "review": {
     "visual_review": "pass",
     "deterministic_repeat": "10/10 byte-identical",
-    "notes": "10 core viewport screenshots reviewed; no clipping, overlap, broken cards/forms, empty render or visible layout regression."
+    "notes": "10 core viewport screenshots reviewed from run 35468111629; intentional dashboard-only change adds the persistent BG/EN control with no clipping, overlap, broken cards/forms, empty render or visible layout regression. Other 9 approved surface hashes remain unchanged."
   },
   "surfaces": {
     "dashboard": {
       "route": "/",
-      "sha256": "da2a59f9c8428289dd7613b90f07088bdacb9620fad4a175268777a8be9a1833"
+      "sha256": "72b9b8a1ca217cb19b9f4ebc8757d0f4ce897895eb623b797bea49115a55f650"
     },
     "model": {
       "route": "/demo/model.html?sample=1",
