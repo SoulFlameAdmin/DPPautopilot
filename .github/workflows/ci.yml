@@ -110,6 +110,8 @@ jobs:
         run: node --test tests/api/rate-limit.test.cjs
       - name: Run R09 observability redaction suite
         run: node --test tests/api/observability.test.cjs
+      - name: Run R10 monitoring alert precursor suite
+        run: node --test tests/api/monitoring-alerts.test.cjs
       - name: Validate D09 completeness and D10 warnings
         run: python scripts/validate_completeness.py
       - name: Validate M04 core database schema contract
@@ -424,6 +426,8 @@ jobs:
         run: python scripts/validate_retention_deletion_policy.py
       - name: Validate R09 observability policy
         run: python scripts/validate_observability_policy.py
+      - name: Validate R10 monitoring alert policy
+        run: python scripts/validate_monitoring_alert_policy.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
       - name: Browser smoke test demo surfaces
