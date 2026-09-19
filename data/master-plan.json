@@ -542,7 +542,7 @@
           "acceptanceCriteria": "Field and form errors are accessible and preserve user input",
           "evidenceRequired": "UI tests",
           "status": "red",
-          "evidence": "PARTIAL form validation UX: model/item forms now expose label-for associations, aria-describedby, aria-invalid, live status/error regions and explicit non-destructive input-preservation evidence. Browser validators PASS in full CI `35398504301`; artifact `10569167076`. U03 remains RED because M22 is still RED. — PARTIAL PASS"
+          "evidence": "PARTIAL form validation UX now covers model/item/auth/recovery/mapping/import write-adjacent surfaces with associated accessible errors/status and non-destructive input preservation. Shared `demo/form-ux.js` was hardened so preservation works for controls without IDs; strict recovery URL scrubbing remains intact. Failed U03 probes were not accepted. Exact-head full CI `35448135007` SUCCESS on main `7ae81bf7731eae04566816a8039f12e111e232c1` includes the U03 browser validation matrix plus all API/DB/security/restore/browser regressions; UI artifact `10585941329`. U03 remains RED because dependency M22 is RED and deployed production E2E acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "U04",
