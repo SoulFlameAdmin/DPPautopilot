@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "blocked",
-  "currentTask": "Dependency frontier re-audit complete; no dependency-safe RED task is currently available",
-  "currentGate": "MVP",
-  "lastCompletedTask": "Re-audited source-of-truth after M25 merge: dependency frontier is empty; Vercel projects dpp and dpp-autopilot both still report 0 deployments; Supabase connector still exposes no Storage object upload/download/delete action",
-  "nextTask": "Resume the earliest task only when new unblock evidence exists for F08, M01, or M13; otherwise do not churn blocked tasks",
-  "message": "D01-D14 remain GREEN. M25/T10 precursor evidence is already merged. Current blockers form the active dependency cut: F08 has no deployment, M01 final recovery completion still needs a deployable redirect, and M13 still lacks real authenticated Storage object roundtrip capability. No Vercel deploy, Supabase mutation, DAVID infrastructure edit, or protected-file change was performed during this re-audit.",
+  "currentTask": "F08 fallback deployment lane merged and CI-proven; awaiting authorized real production dispatch",
+  "currentGate": "FOUNDATION",
+  "lastCompletedTask": "Merged PR #57 guarded Vercel CLI deployment fallback; PR CI 35463559589 SUCCESS with F08 validator and full regression",
+  "nextTask": "Run the DPP Vercel deploy workflow for exact current main using an authorized VERCEL_TOKEN; verify live / and /data/master-plan.json; then advance F08 and unblock M01/M13-dependent acceptance",
+  "message": "A real, guarded deployment mechanism now exists in the canonical repository. The previous inactive Git→Vercel hook is no longer the only delivery path. No production deployment is claimed yet because this session cannot dispatch the workflow or supply the repository VERCEL_TOKEN. F08 stays BLOCKED until live production evidence exists.",
   "deferredBlockers": [
-    "F08 — Vercel project dpp (prj_K0RSGrEkEr3XDouCTA3tdasbqH55) still has 0 deployments; dpp-autopilot also has 0 deployments. No new deploy was attempted.",
-    "M01 — final runtime recovery password-update acceptance still requires a real deployed DPP recovery redirect; F08 remains blocking.",
-    "M13 — Supabase connector still has no real Storage object upload/download/delete action; SQL/RLS metadata is not accepted as substitute evidence."
+    "F08 — requires an authorized GitHub Actions VERCEL_TOKEN and a real manual production workflow dispatch; no live deployment receipt exists yet.",
+    "M01 — final runtime recovery password-update acceptance remains downstream of F08.",
+    "M13 — real authenticated Storage API byte roundtrip remains unproven with the currently exposed Supabase connector actions."
   ],
-  "updatedAt": "2026-09-19T21:17:00+03:00"
+  "updatedAt": "2026-09-19T22:20:00+03:00"
 }
