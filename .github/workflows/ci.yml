@@ -80,6 +80,8 @@ jobs:
         run: python scripts/validate_production_promotion_policy.py
       - name: Validate C04 migration deployment gate
         run: python scripts/validate_migration_deployment_gate.py
+      - name: Validate C05 rollback policy
+        run: python scripts/validate_rollback_policy.py
       - name: Generate C04 migration release manifest
         run: python scripts/generate_migration_release_manifest.py --commit "$GITHUB_SHA"
       - name: Upload C04 migration manifest
@@ -106,6 +108,8 @@ jobs:
         run: python scripts/validate_identifiers.py
       - name: Run T01 green business-rule unit suite
         run: python -m unittest discover -s tests/unit -p 'test_*.py' -v
+      - name: Run C05 rollback decision tests
+        run: python -m unittest tests.unit.test_rollback_evidence -v
       - name: Generate T01 unit acceptance coverage report
         run: python scripts/generate_unit_test_report.py
       - name: Run M17 models HTTP contract unit tests
