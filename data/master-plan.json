@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T05:55:00+03:00",
+  "updatedAt": "2026-09-19T06:03:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -845,7 +845,7 @@
           "acceptanceCriteria": "Production only from defined branch/release condition",
           "evidenceRequired": "Config/document evidence",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: F10,C02."
+          "evidence": "PARTIAL fail-closed production promotion precursor: policy + verifier require canonical repo/main branch/project and exact candidate commit alignment across successful CI, verified preview, migration gate, security/browser smoke and READY production deployment evidence. Unit tests deny non-main, commit drift, missing gates, wrong target/state. CI 35414115623 on 02689582f581ec42c2cacc7c0a651e90326bc008 SUCCESS including full regression/browser smoke. No deploy/promotion attempted. C03 remains RED pending C02 GREEN and real production promotion/post-promotion smoke evidence. — PARTIAL PASS"
         },
         {
           "id": "C04",
