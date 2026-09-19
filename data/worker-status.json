@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "External dependency frontier after U04 responsive precursor",
+  "currentTask": "U06 cross-browser compatibility precursor",
   "currentGate": "UX",
-  "lastCompletedTask": "U04 responsive precursor + full CI 35448804599 SUCCESS",
-  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue dependency-safe non-deploy UX precursors; next useful work is U05 automated accessibility coverage.",
-  "message": "U04 measured phone/tablet/desktop responsive matrix is browser-proven across 10 core surfaces; full CI 35448804599 is SUCCESS. U04 remains RED because U01-U03/deployed E2E are not GREEN. No Vercel deployment occurred; DAVID orchestrator files remain untouched.",
+  "lastCompletedTask": "U05 automated accessibility precursor + full CI 35450600111 SUCCESS",
+  "nextTask": "Do not retry F08/M01 without new unblock evidence. Reprove U06 Chromium/Firefox/WebKit on current main, then continue U07 visual-regression precursor if safe.",
+  "message": "U05 automated browser accessibility matrix is proven across 10 core surfaces and exact-head full CI 35450600111 is SUCCESS. U05 remains RED/PARTIAL because U01-U04 and manual/deployed accessibility acceptance are not GREEN. No Vercel deployment occurred; DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T17:35:00+03:00"
+  "updatedAt": "2026-09-19T18:14:00+03:00"
 }
