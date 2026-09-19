@@ -406,6 +406,8 @@ jobs:
         run: python scripts/validate_auth_recovery_contract.py
       - name: Validate R06 auth security review
         run: python scripts/validate_auth_security_review.py
+      - name: Validate R07 privacy data inventory
+        run: python scripts/validate_privacy_data_inventory.py
       - name: Check repository security hygiene
         run: python scripts/security_hygiene.py
       - name: Browser smoke test demo surfaces
