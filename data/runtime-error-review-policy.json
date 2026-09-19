@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "task": "C08",
+  "status": "partial",
+  "source_required": "vercel_runtime_logs",
+  "canonical": {
+    "project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "environment": "production"
+  },
+  "severity": [
+    "P0",
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "acceptance": {
+    "minimum_window_minutes": 30,
+    "unresolved_p0_max": 0,
+    "unresolved_p1_max": 0,
+    "require_exact_deployment": true,
+    "require_request_id_or_fingerprint": true,
+    "require_redaction_attestation": true
+  },
+  "forbidden_cluster_fields": [
+    "authorization",
+    "access_token",
+    "refresh_token",
+    "password",
+    "cookie",
+    "supabase_key",
+    "request_body",
+    "response_body",
+    "email",
+    "phone",
+    "raw_ip"
+  ],
+  "live_state": {
+    "runtime_review_executed": false,
+    "production_deployments_observed": 0
+  },
+  "remaining": [
+    "C07 and R09 must be GREEN.",
+    "A real canonical READY production deployment and Vercel runtime logs must exist.",
+    "A production acceptance window of at least 30 minutes must be reviewed.",
+    "All P0/P1 clusters must be resolved or the acceptance gate remains denied."
+  ]
+}
