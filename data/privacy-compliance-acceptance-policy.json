@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "task": "C11",
+  "status": "partial",
+  "dependencies": [
+    "F11",
+    "R07",
+    "R08"
+  ],
+  "required_artifacts": [
+    "docs/REQUIREMENTS_TRACEABILITY.md",
+    "data/dpp-field-catalog.json",
+    "docs/PRIVACY_DATA_INVENTORY.md",
+    "data/privacy-data-inventory.json",
+    "data/retention-deletion-policy.json"
+  ],
+  "acceptance": {
+    "require_dependency_evidence": true,
+    "require_traceability_complete": true,
+    "require_privacy_inventory_complete": true,
+    "require_retention_deletion_export_complete": true,
+    "require_external_recipient_scope_reviewed": true,
+    "require_unsupported_claims_zero": true,
+    "require_legal_signoff_separate": true
+  },
+  "unsupported_claim_examples": [
+    "fully EU compliant",
+    "certified compliant with Regulation (EU) 2023/1542",
+    "legally approved",
+    "production compliant"
+  ],
+  "decision": {
+    "default": "deny",
+    "note": "C11 is an evidence/review gate, not legal sign-off. Missing lifecycle/recipient decisions or unsupported claims deny acceptance."
+  },
+  "live_state": {
+    "privacy_compliance_acceptance_executed": false,
+    "legal_signoff_executed": false
+  },
+  "remaining": [
+    "R07 must be GREEN with complete privacy inventory and accepted processor/recipient scope.",
+    "R08 must be GREEN with accepted retention/deletion/export rules and proven evidence-object/auth lifecycle.",
+    "All unsupported compliance claims must be removed or qualified before acceptance.",
+    "C12 remains the separate qualified legal/compliance sign-off gate."
+  ]
+}
