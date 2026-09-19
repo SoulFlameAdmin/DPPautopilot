@@ -12,9 +12,9 @@ from import_error_contract import load_import_error_contract, map_import_sqlstat
 
 
 class ImportErrorContractUnitTests(unittest.TestCase):
-    def test_catalog_contains_exact_dp001_dp008_set(self) -> None:
+    def test_catalog_contains_exact_dp001_dp010_set(self) -> None:
         contract = load_import_error_contract()
-        self.assertEqual(set(contract), {f"DP{i:03d}" for i in range(1, 9)})
+        self.assertEqual(set(contract), {f"DP{i:03d}" for i in range(1, 11)})
 
     def test_semantic_mapping_is_stable(self) -> None:
         expected = {
@@ -26,6 +26,8 @@ class ImportErrorContractUnitTests(unittest.TestCase):
             "DP006": ("import_commit_count_mismatch", 409),
             "DP007": ("import_committed_state_inconsistent", 409),
             "DP008": ("duplicate_battery_identifier", 409),
+            "DP009": ("invalid_import_payload", 422),
+            "DP010": ("import_mapping_not_found", 404),
         }
         for sqlstate, (code, status) in expected.items():
             with self.subTest(sqlstate=sqlstate):
