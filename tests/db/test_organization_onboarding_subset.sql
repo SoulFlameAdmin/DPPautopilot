@@ -44,6 +44,24 @@ begin
     raise exception 'M03 organization creator was not persisted as owner';
   end if;
 
+  members:=public.dpp_api_organizations_list();
+  if jsonb_array_length(members)<>1
+     or members->0->>'organization_id'<>org_a::text
+     or members->0->>'role'<>'owner'
+     or (members->0->>'active')::boolean is not true then
+    raise exception 'M02 organization discovery did not return the caller active tenant';
+  end if;
+
+  delete from public.dpp_user_tenant_context where user_id=u_owner;
+  members:=public.dpp_api_organizations_list();
+  if jsonb_array_length(members)<>1
+     or members->0->>'organization_id'<>org_a::text
+     or members->0 ? 'active' is false
+     or members->0->'active' <> 'false'::jsonb then
+    raise exception 'M02 organization discovery must return explicit active=false without tenant context';
+  end if;
+  perform public.dpp_api_tenant_context_set(org_a);
+
   perform public.dpp_api_members_add(u_admin,'admin');
   perform public.dpp_api_members_add(u_editor,'editor');
   perform public.dpp_api_members_add(u_viewer,'viewer');
@@ -118,6 +136,12 @@ begin
   members:=public.dpp_api_members_list();
   if jsonb_array_length(members)<>1 or members->0->>'user_id'<>u_outsider::text then
     raise exception 'M02 member list leaked cross-tenant membership';
+  end if;
+  members:=public.dpp_api_organizations_list();
+  if jsonb_array_length(members)<>1
+     or members->0->>'organization_id'<>org_b::text
+     or (members->0->>'active')::boolean is not true then
+    raise exception 'M02 organization discovery leaked another tenant or lost active state';
   end if;
 
   perform set_config('request.jwt.claim.sub',u_owner::text,true);
