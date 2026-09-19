@@ -76,6 +76,8 @@ jobs:
         run: python scripts/validate_pr_ci_contract.py
       - name: Validate C02 preview verification contract
         run: python scripts/validate_preview_verification_contract.py
+      - name: Validate F08 Vercel CLI deployment path
+        run: python scripts/validate_vercel_deploy_path.py
       - name: Validate C03 production promotion policy
         run: python scripts/validate_production_promotion_policy.py
       - name: Validate C04 migration deployment gate
