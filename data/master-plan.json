@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T04:22:00+03:00",
+  "updatedAt": "2026-09-19T04:31:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -729,7 +729,7 @@
           "acceptanceCriteria": "Deterministic business-rule tests cover identifiers, scoring, validation, errors",
           "evidenceRequired": "Coverage/test report",
           "status": "red",
-          "evidence": "PARTIAL extension: `scripts/import_error_contract.py` maps DP001-DP008 to stable semantic code/message/HTTP status; unit tests verify exact mappings, mutation isolation and unknown-code fail-safe behavior. T01 unit suite PASS in full CI `35398504301` on `54fe4db25b2f65309874e3fa41a284c3bd835c7e`. T01 remains RED while M22 is RED. — PARTIAL PASS"
+          "evidence": "PARTIAL unit-suite acceptance coverage: versioned matrix maps identifiers, completeness/scoring, validation/public projection and stable errors to 18 concrete Python unittest methods; AST report generator fails on missing/drifted references and emits artifacts/t01-unit-coverage.json. CI 35411823429 on 08a6474a68dfbc2984055c9c4d4fd5fc796c7fb1 SUCCESS; artifact 10574428789 contains report. T01 remains RED because M22 is RED. — PARTIAL PASS"
         },
         {
           "id": "T02",
