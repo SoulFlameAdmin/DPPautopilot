@@ -788,6 +788,9 @@ jobs:
             'http://127.0.0.1:8000/demo/auth.html'
           python scripts/validate_auth_ui.py artifacts/m01-auth-dom.html
 
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+            --dump-dom 'http://127.0.0.1:8000/demo/auth.html?invalid=1' > artifacts/u03-auth-invalid-dom.html
+
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2000 \
             --dump-dom 'http://127.0.0.1:8000/demo/auth-recovery.html' > artifacts/m01-recovery-dom.html
           python - <<'PY'
@@ -799,12 +802,24 @@ jobs:
           print("M01_RECOVERY_UI_PASS: recovery page loads safely and blocks password update without a valid recovery session")
           PY
 
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+            --dump-dom 'http://127.0.0.1:8000/demo/auth-recovery.html?invalid=1#access_token=synthetic&type=recovery' > artifacts/u03-recovery-invalid-dom.html
+
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
             --dump-dom 'http://127.0.0.1:8000/demo/mapping.html' > artifacts/m07-mapping-dom.html
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
             --window-size=1000,1000 --screenshot=artifacts/m07-mapping.png \
             'http://127.0.0.1:8000/demo/mapping.html'
           python scripts/validate_mapping_wizard.py artifacts/m07-mapping-dom.html
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/mapping.html?invalid=1' > artifacts/u03-mapping-invalid-dom.html
+
+          python scripts/validate_u03_form_ux.py \
+            artifacts/d04-model-valid-dom.html artifacts/d04-model-invalid-dom.html \
+            artifacts/d05-item-valid-dom.html artifacts/d05-item-invalid-dom.html \
+            artifacts/u03-auth-invalid-dom.html artifacts/u03-recovery-invalid-dom.html \
+            artifacts/u03-mapping-invalid-dom.html artifacts/d03-import-dom.html
 
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
             --dump-dom 'http://127.0.0.1:8000/demo/import-validation.html' > artifacts/m08-import-validation-dom.html
