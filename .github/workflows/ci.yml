@@ -120,6 +120,14 @@ jobs:
         run: node --test tests/api/observability.test.cjs
       - name: Run R10 monitoring alert precursor suite
         run: node --test tests/api/monitoring-alerts.test.cjs
+      - name: Run T07 synthetic handler load suite
+        run: node --test tests/api/load.test.cjs
+      - name: Upload T07 load report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: t07-load-report
+          path: artifacts/t07-load-report.json
+          if-no-files-found: error
       - name: Validate D09 completeness and D10 warnings
         run: python scripts/validate_completeness.py
       - name: Validate M04 core database schema contract
