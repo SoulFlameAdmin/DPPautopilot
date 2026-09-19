@@ -37,6 +37,24 @@ for surface,mapping in contract.get("surfaces",{}).items():
 
 assert seen_surface_entries>=20, "M22 API error catalog unexpectedly small"
 
+api_names=["models","items","passport","export","imports","tenant"]
+declared_codes={
+    entry["code"]
+    for entry in contract.get("common_sqlstate",{}).values()
+} | {
+    entry["code"]
+    for mapping in contract.get("surfaces",{}).values()
+    for entry in mapping.values()
+} | set(contract.get("local_codes",{})) | {contract["default"]["code"]}
+
+literal_code_re=re.compile(r"""code\s*:\s*['"]([A-Z][A-Z0-9_]+)['"]""")
+for name in api_names:
+    text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
+    literal_codes=set(literal_code_re.findall(text))
+    undeclared=sorted(literal_codes-declared_codes)
+    assert not undeclared, f"{name} API emits undeclared public error codes: {undeclared}"
+
+
 helper=(ROOT/"api/_errors.js").read_text(encoding="utf-8")
 for token in ["api-error-contract.json","mapDatabaseError","localError","errorBody","contract.default"]:
     assert token in helper, f"shared error helper missing {token}"
