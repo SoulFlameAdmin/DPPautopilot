@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T03:56:00+03:00",
+  "updatedAt": "2026-09-19T04:06:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -667,7 +667,7 @@
           "acceptanceCriteria": "Structured errors and request correlation available without leaking secrets",
           "evidenceRequired": "Runtime log evidence",
           "status": "red",
-          "evidence": "PARTIAL structured logging/request-correlation precursor across models/items/passport/imports/export: safe X-Request-ID propagation/generation plus one redacted JSON dpp_http_request event per response. Tests prove no bearer tokens, bodies, query identifiers or upstream messages are logged; stable public error_code only. CI 35410509953 on b3392128bed7c559ff2c8eac0a185b8de4d8b9e9 SUCCESS including R09 suite/validator, all API regressions, clean DB replay, security guards and browser smoke. R09 remains RED pending F08, full M17-M20 acceptance and deployed runtime log/correlation evidence. — PARTIAL PASS"
+          "evidence": "PARTIAL structured logging/request-correlation precursor across models/items/passport/imports/export: safe X-Request-ID propagation/generation plus one redacted JSON dpp_http_request event per response; event contract now includes timestamp_ms for monitoring windows. Tests prove no bearer tokens, bodies, query identifiers or upstream messages are logged; stable public error_code only. Latest full CI 35411014485 on fc6990908e9ed0946ef60f4e898f04f4c602f104 SUCCESS including timestamp/redaction and R10 integration. R09 remains RED pending F08, full M17-M20 acceptance and deployed runtime log/correlation evidence. — PARTIAL PASS"
         },
         {
           "id": "R10",
@@ -676,7 +676,7 @@
           "acceptanceCriteria": "Critical availability/error signals have thresholds and owners",
           "evidenceRequired": "Alert test evidence",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: R09."
+          "evidence": "PARTIAL monitoring/alerting precursor: versioned 5-minute R09-event signals with owners and thresholds for 5xx rate, consecutive 5xx, p95 latency, auth failures and RATE_LIMITED pressure; deterministic evaluator + fire/clear/minimum-sample/window tests. CI 35411014485 on fc6990908e9ed0946ef60f4e898f04f4c602f104 SUCCESS including R09 timestamp/redaction, R10 suite/validator, clean DB replay, security guards and browser smoke. R10 remains RED pending R09 GREEN and deployed log ingestion, live notification destination and fire/recover acknowledgement evidence. — PARTIAL PASS"
         },
         {
           "id": "R11",
