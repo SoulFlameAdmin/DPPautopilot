@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "task": "C15",
+  "status": "partial",
+  "required_gates": [
+    "FOUNDATION",
+    "DEMO",
+    "MVP",
+    "UX",
+    "SECURITY",
+    "TESTING",
+    "RELEASE"
+  ],
+  "release_tasks_through": "C14",
+  "excluded_gates": [
+    "EXPANSION"
+  ],
+  "acceptance": {
+    "require_every_mandatory_task_green": true,
+    "require_c14_green": true,
+    "require_production_evidence_pack_ready": true,
+    "require_no_blocked_mandatory_tasks": true,
+    "require_no_red_mandatory_tasks": true,
+    "require_no_failing_mandatory_ci": true,
+    "require_production_verified": true
+  },
+  "output": "artifacts/c15-final-audit.json",
+  "decision": {
+    "complete": "PROJECT_100_PERCENT_COMPLETE",
+    "incomplete": "NOT_COMPLETE",
+    "default": "NOT_COMPLETE"
+  },
+  "boundaries": [
+    "Expansion X01-X14 is post-production scope and is not part of C15 production acceptance.",
+    "C15 may not override BLOCKED/RED mandatory tasks or synthesize external legal/UAT evidence.",
+    "Repository tests/configuration alone do not prove production verification.",
+    "The C14 evidence pack must be READY for the exact accepted production identity."
+  ]
+}
