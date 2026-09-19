@@ -1,9 +1,9 @@
 {
-  "version": 1,
+  "version": 2,
   "task": "R05",
   "status": "partial",
   "strategy": "process_local_fixed_window_precursor",
-  "privacy": "Client keys combine normalized IP with a truncated SHA-256 digest of the Authorization header; raw bearer credentials are never stored in limiter buckets or response metadata.",
+  "privacy": "Limiter keys store only a truncated SHA-256 digest of normalized IP plus Authorization digest; raw IP addresses and raw bearer credentials are not stored in bucket keys or response metadata.",
   "rules": {
     "public_passport_read": {
       "limit": 30,
@@ -68,5 +68,11 @@
   "limitations": [
     "Process-local buckets do not coordinate across parallel serverless isolates or regions.",
     "Production acceptance requires a shared durable limiter/backend or provider-native distributed rate limiting plus deployed abuse/load evidence."
-  ]
+  ],
+  "memory_safety": {
+    "max_buckets": 10000,
+    "prune_interval_ms": 10000,
+    "expired_bucket_eviction": true,
+    "active_bucket_cap": true
+  }
 }
