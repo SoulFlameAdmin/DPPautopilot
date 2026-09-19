@@ -85,22 +85,16 @@ begin
   execute format('select count(*) from storage.objects where bucket_id=%L and name=%L','dpp-evidence',object_name) into v_count;
   if v_count<>1 then raise exception 'M13 viewer could not read registered object'; end if;
 
-  v_denied:=false;
-  begin
-    execute format('update storage.objects set user_metadata=%L::jsonb where bucket_id=%L and name=%L','{"overwrite":true}','dpp-evidence',object_name);
-  exception when insufficient_privilege then v_denied:=true;
-  end;
-  if not v_denied then raise exception 'M13 overwrite/update was not denied'; end if;
+  execute format('update storage.objects set user_metadata=%L::jsonb where bucket_id=%L and name=%L','{"overwrite":true}','dpp-evidence',object_name);
+  get diagnostics v_count = row_count;
+  if v_count<>0 then raise exception 'M13 viewer overwrite/update unexpectedly affected % rows',v_count; end if;
   execute 'reset role';
 
   perform set_config('request.jwt.claim.sub',u_editor::text,true);
   execute 'set local role authenticated';
-  v_denied:=false;
-  begin
-    execute format('delete from storage.objects where bucket_id=%L and name=%L','dpp-evidence',object_name);
-  exception when insufficient_privilege then v_denied:=true;
-  end;
-  if not v_denied then raise exception 'M13 editor object delete was not denied'; end if;
+  execute format('delete from storage.objects where bucket_id=%L and name=%L','dpp-evidence',object_name);
+  get diagnostics v_count = row_count;
+  if v_count<>0 then raise exception 'M13 editor delete unexpectedly affected % rows',v_count; end if;
 
   v_denied:=false;
   begin
@@ -121,12 +115,18 @@ begin
 
   perform set_config('request.jwt.claim.sub',u_owner::text,true);
   execute 'set local role authenticated';
-  execute format('delete from storage.objects where bucket_id=%L and name=%L','dpp-evidence',object_name);
+  v_denied:=false;
+  begin
+    execute format('delete from storage.objects where bucket_id=%L and name=%L','dpp-evidence',object_name);
+  exception when insufficient_privilege then v_denied:=true;
+  end;
+  if not v_denied then
+    raise exception 'M13 direct SQL delete unexpectedly bypassed Supabase Storage protection';
+  end if;
   execute 'reset role';
 
-  select count(*) into v_count from storage.objects where bucket_id='dpp-evidence' and name=object_name;
-  if v_count<>0 then raise exception 'M13 owner/admin storage delete failed'; end if;
-
+  -- Supabase protects direct storage.objects deletion even for an authorized owner.
+  -- Real owner/admin delete acceptance must be exercised through the authenticated Storage API.
   raise notice 'M13_EVIDENCE_STORAGE_RLS_SUBSET_PASS';
 end
 $storage_test$;
