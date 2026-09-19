@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "blocked",
-  "currentTask": "F08 guarded Vercel CLI deployment lane merged and fully validated; awaiting authorized real deployment execution",
+  "currentTask": "F08 — production deployment exists but public acceptance is blocked by Vercel Deployment Protection",
   "currentGate": "FOUNDATION",
-  "lastCompletedTask": "PR #57 merged as a3e4f745e7bd575279dc01afcb1dde0e7f0abe88; PR CI 35463559589 SUCCESS and post-merge main CI 35463752080 SUCCESS",
-  "nextTask": "When VERCEL_TOKEN and workflow dispatch authorization are available, run DPP Vercel deploy for the exact current main SHA, verify live home/master-plan HTTP smoke and receipt, then continue M01/M13 dependent production acceptance",
-  "message": "A real fallback deployment mechanism now exists and is merged: manual exact-SHA Vercel CLI deployment, locked to the DPP Vercel team/project, production-confirmed, smoke-tested and receipt-producing. F08 is intentionally still BLOCKED because neither this connector session nor the repository has proven an authorized VERCEL_TOKEN workflow execution, and Vercel still has no real DPP deployment evidence.",
+  "lastCompletedTask": "Verified Vercel production deployment dpl_9y7hWGAJoZpSszbEWjY8ixQUR3os READY on commit 2c4b21364a9aaac889b1ad2cacd6eac67a80850b",
+  "nextTask": "When the production alias is intentionally public for required routes, verify HTTP 200 on / and /data/master-plan.json; then complete M01 recovery password-update runtime acceptance and continue M02→M03 dependency chain.",
+  "message": "New evidence supersedes the stale 'no deployment' blocker: dpp-autopilot has a real READY production deployment. F08 is still not GREEN because dpp-autopilot.vercel.app is protected and returns 302 to Vercel SSO instead of the required public 200. No deployment or protection-setting mutation was attempted.",
   "deferredBlockers": [
-    "F08 — deployment code path is ready and CI-proven, but a credentialed real Vercel workflow execution is still required; no production deployment is claimed.",
-    "M01 — final runtime recovery password-update acceptance requires the real deployed DPP recovery redirect produced after F08.",
-    "M13 — real authenticated Storage API byte upload/download/delete acceptance still lacks an available direct Storage object action in the current Supabase connector."
+    "F08 — READY production deployment exists, but Vercel Deployment Protection prevents required public HTTP 200 acceptance.",
+    "M01 — real recovery redirect/password-update completion remains blocked by the protected production route.",
+    "M13 — authenticated Storage bridge exists, but real authenticated byte upload/download/delete acceptance still requires a usable authenticated DPP tenant session."
   ],
-  "updatedAt": "2026-09-19T22:18:08+03:00"
+  "updatedAt": "2026-09-19T23:51:00+03:00"
 }
