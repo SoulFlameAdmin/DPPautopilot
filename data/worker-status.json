@@ -1,16 +1,16 @@
 {
   "worker": "DAVID",
   "mode": "BUILD",
-  "state": "working",
-  "currentTask": "M25 acceptance audit precursor evidence finalized",
+  "state": "blocked",
+  "currentTask": "Dependency frontier re-audit complete; no dependency-safe RED task is currently available",
   "currentGate": "MVP",
-  "lastCompletedTask": "M25 acceptance audit precursor merged via PR #54; exact-head audit 35455555115 SUCCESS and full CI 35455555085 SUCCESS",
-  "nextTask": "Re-audit dependency frontier after M25 evidence merge. Do not retry F08/M01/M13 without new unblock evidence.",
-  "message": "M25 precursor is implemented on current main and fail-closed by design: it inventories M01-M24 evidence and explicitly keeps final MVP acceptance false until dependencies, preview E2E, and zero P0/P1 evidence are proven. No Vercel deployment or Supabase mutation occurred; DAVID orchestrator files remain untouched.",
+  "lastCompletedTask": "Re-audited source-of-truth after M25 merge: dependency frontier is empty; Vercel projects dpp and dpp-autopilot both still report 0 deployments; Supabase connector still exposes no Storage object upload/download/delete action",
+  "nextTask": "Resume the earliest task only when new unblock evidence exists for F08, M01, or M13; otherwise do not churn blocked tasks",
+  "message": "D01-D14 remain GREEN. M25/T10 precursor evidence is already merged. Current blockers form the active dependency cut: F08 has no deployment, M01 final recovery completion still needs a deployable redirect, and M13 still lacks real authenticated Storage object roundtrip capability. No Vercel deploy, Supabase mutation, DAVID infrastructure edit, or protected-file change was performed during this re-audit.",
   "deferredBlockers": [
-    "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
-    "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
-    "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
+    "F08 — Vercel project dpp (prj_K0RSGrEkEr3XDouCTA3tdasbqH55) still has 0 deployments; dpp-autopilot also has 0 deployments. No new deploy was attempted.",
+    "M01 — final runtime recovery password-update acceptance still requires a real deployed DPP recovery redirect; F08 remains blocking.",
+    "M13 — Supabase connector still has no real Storage object upload/download/delete action; SQL/RLS metadata is not accepted as substitute evidence."
   ],
-  "updatedAt": "2026-09-19T19:42:00+03:00"
+  "updatedAt": "2026-09-19T21:17:00+03:00"
 }
