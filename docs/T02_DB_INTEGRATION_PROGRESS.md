@@ -31,3 +31,12 @@ T02 is **not GREEN** yet because its declared dependency range M04–M16 still i
 - The report explicitly preserves dependency state: M05, M10, M12 and M13 remain partial/RED, so T02 cannot become GREEN yet.
 - The combined SQL suite already covers schema, mapping revision, passport version immutability, lifecycle rules, audit capture/immutability, evidence metadata/file policy, registry transitions, transactional import and deny-by-default/RLS regressions.
 - A fresh bound-Supabase rollback run is required before this block is recorded as proven evidence.
+
+## Evidence — current M04-M16 integration coverage
+
+- `data/db-integration-coverage-matrix.json` maps all 13 declared T02 dependencies M04–M16 to executable PostgreSQL or repository contract checks.
+- `scripts/generate_db_integration_report.py` verifies every referenced SQL marker/file and emits `artifacts/t02-db-integration-report.json`.
+- GitHub Actions run `35412095340` on `a19b72f487cd8e53196d5da7289b0871ab69c40d` completed SUCCESS. The combined T02 DB subset, the generated T02 report, clean PostgreSQL replay, M05/M12/M13 subsets, API/security regressions, restore drill and browser smoke all passed.
+- Artifact `10574319218` contains the generated T02 report together with the workflow evidence bundle.
+- The same `tests/db/test_green_database_integrations.sql` suite was executed against bound Supabase project `frhletkiuupgksmgxoxc` inside `BEGIN/ROLLBACK` and returned `T02_BOUND_SUPABASE_ROLLBACK_PASS`; no persistent test data was kept.
+- T02 remains RED because M05, M10, M12 and M13 are still partial/RED dependencies even though their current implemented database behaviors are covered.
