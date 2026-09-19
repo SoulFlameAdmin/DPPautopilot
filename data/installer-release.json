@@ -1,0 +1,30 @@
+{
+  "product": "DPP Autopilot",
+  "deliveryStrategy": "installer-first",
+  "currentVersion": "0.1.0-dev.1",
+  "channel": "dev",
+  "status": "prototype",
+  "sourceCommit": "b4bb1d9c57889a1ee7ca57c3ae0a7e8f7aa88088",
+  "installerEntry": "installer/index.html",
+  "language": [
+    "bg",
+    "en"
+  ],
+  "releaseRules": {
+    "dev": "May advance after applicable CI passes.",
+    "stable": "Requires signed package, clean-machine install, self-update, rollback and client-flow acceptance."
+  },
+  "nextMilestones": [
+    "Package local DPP site into Windows desktop shell",
+    "Build test DPP-Setup.exe",
+    "Persist local data/config outside app binaries",
+    "Implement signed DEV/STABLE update manifest",
+    "Prove v0.1.0-dev.1 -> next-version self-update",
+    "Prove failed-update rollback",
+    "Run clean-Windows acceptance"
+  ],
+  "secondaryDistribution": [
+    "Vercel download/update hosting when quota/access allows"
+  ],
+  "updatedAt": "2026-09-19T22:55:00+03:00"
+}
