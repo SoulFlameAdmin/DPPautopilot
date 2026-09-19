@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T03:44:00+03:00",
+  "updatedAt": "2026-09-19T03:56:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -667,7 +667,7 @@
           "acceptanceCriteria": "Structured errors and request correlation available without leaking secrets",
           "evidenceRequired": "Runtime log evidence",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: F08,M17-M20."
+          "evidence": "PARTIAL structured logging/request-correlation precursor across models/items/passport/imports/export: safe X-Request-ID propagation/generation plus one redacted JSON dpp_http_request event per response. Tests prove no bearer tokens, bodies, query identifiers or upstream messages are logged; stable public error_code only. CI 35410509953 on b3392128bed7c559ff2c8eac0a185b8de4d8b9e9 SUCCESS including R09 suite/validator, all API regressions, clean DB replay, security guards and browser smoke. R09 remains RED pending F08, full M17-M20 acceptance and deployed runtime log/correlation evidence. — PARTIAL PASS"
         },
         {
           "id": "R10",
