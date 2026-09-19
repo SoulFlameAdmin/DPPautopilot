@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T19:35:00+03:00",
+  "updatedAt": "2026-09-19T19:42:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -507,7 +507,7 @@
           "acceptanceCriteria": "Mandatory MVP tests all pass on preview with no P0/P1 defect",
           "evidenceRequired": "Test report + preview evidence",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M01-M24."
+          "evidence": "PARTIAL fail-closed MVP acceptance audit precursor is merged on current main via PR #54 as commit `3ccd0449422e6170f98a684de65c66a4ee0dfc26`. Exact-head M25 acceptance audit run `35455555115` SUCCESS and full CI run `35455555085` SUCCESS. The generated report inventories concrete M01-M24 evidence/blockers and keeps `final_acceptance.pass=false`, `preview_e2e_pass=false`, and P0/P1 counts unproven until real preview acceptance exists. M25 remains RED because M01-M24 are not all GREEN and preview/P0/P1 final evidence is unavailable. — PARTIAL PASS"
         }
       ]
     },
