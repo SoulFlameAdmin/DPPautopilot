@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T06:40:00+03:00",
+  "updatedAt": "2026-09-19T06:48:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -890,7 +890,7 @@
           "acceptanceCriteria": "No unresolved P0/P1 runtime error clusters during acceptance window",
           "evidenceRequired": "Vercel runtime evidence",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: C07,R09."
+          "evidence": "PARTIAL fail-closed runtime review: exact production deployment/C07 identity + R09, >=30-minute timezone-aware Vercel runtime window, correlation/redaction evidence and zero unresolved P0/P1. Unit tests reject short windows, unresolved P0/P1, deployment drift and sensitive cluster fields. CI 35415292713 on b5ba70ed7e62284b0de18f20b0f1d183e50524ec SUCCESS including C08 checks, C01-C07, T07, clean DB replay, R12 restore, security hygiene and browser smoke. No live runtime logs claimed. C08 remains RED pending C07/R09 GREEN and real production runtime evidence. — PARTIAL PASS"
         },
         {
           "id": "C09",
