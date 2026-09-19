@@ -19,5 +19,9 @@ for endpoint in ["/auth/v1/signup","/auth/v1/token?grant_type=password","/auth/v
     require(endpoint in html,f"missing auth flow endpoint {endpoint}")
 for marker in ['data-auth-ready="false"','data-session-state="unknown"',"sb_publishable_"]:
     require(marker in html or marker in json.dumps(cfg),f"missing M01 contract marker {marker}")
-require("localStorage" not in html,"M01 demo must not persist auth tokens to localStorage")
+require("localStorage" not in html and "sessionStorage" not in html,"M01 demo must not persist auth tokens")
+require("new URL('/demo/auth-recovery.html',location.origin).href" in html,"R06 recovery redirect must be fixed same-origin")
+require("redirect_to='+encodeURIComponent(redirectTo)" in html,"R06 recovery redirect must be URL-encoded")
+require("If the account is eligible, a password reset email will be sent." in html,"R06 reset response must be account-enumeration resistant")
+require('<meta name="referrer" content="no-referrer">' in html,"R06 auth page must set no-referrer policy")
 print("M01_AUTH_CONTRACT_PASS: signup/signin/reset/signout/session client flows exist, use only the verified publishable key, and do not persist tokens")
