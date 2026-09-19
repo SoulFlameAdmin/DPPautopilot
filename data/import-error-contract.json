@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "scope": "M20 import database boundary; future API must preserve semantic code mapping",
+  "scope": "M20 import database/API boundary; serverless API preserves semantic code mapping",
   "errors": [
     {
       "sqlstate": "DP001",
@@ -49,6 +49,18 @@
       "code": "duplicate_battery_identifier",
       "message": "A battery unique identifier already exists.",
       "intended_http_status": 409
+    },
+    {
+      "sqlstate": "DP009",
+      "code": "invalid_import_payload",
+      "message": "Import rows payload is malformed or outside supported limits.",
+      "intended_http_status": 422
+    },
+    {
+      "sqlstate": "DP010",
+      "code": "import_mapping_not_found",
+      "message": "Import mapping does not exist in the active organization.",
+      "intended_http_status": 404
     }
   ]
 }
