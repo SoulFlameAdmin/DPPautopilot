@@ -378,3 +378,12 @@ Append evidence here only after verification.
 - Exact-head full CI `35454178109` SUCCESS; artifact `10587916127` digest `sha256:7579219d91feec1cedd790f0eb66be67b364774526071c993c4195cf48a57fc7` records 10/10 surfaces PASS with duplicate IDs, unlabeled controls, positive tabindex, focus failures, missing alt and contrast violations all equal to zero.
 - Implementation merged as `ba72ee7c6987bc6854da72dc5f01e7de4d54368b`.
 - T09 remains RED/PARTIAL because U05 is not GREEN and deployed/manual accessibility acceptance remains explicitly false.
+
+
+### M02 organization discovery precursor — 2026-09-20
+- Added authenticated `dpp_api_organizations_list()` and `GET /api/organizations` so a caller can discover only their own organisation memberships, role and explicit active-tenant state without requiring an already-selected tenant.
+- Edge case hardened: callers with memberships but no active tenant receive `active=false` rather than null, enabling deterministic tenant recovery/switch UX.
+- Bound Supabase migration `dpp_organizations_list` applied successfully as version `20260919231144`; runtime guard verified `SECURITY DEFINER`, fixed `search_path=public, pg_temp`, authenticated EXECUTE granted and anon EXECUTE denied.
+- Initial CI correctly failed the C04 applied-migration gate until the bound Supabase migration/snapshot existed; a second run correctly rejected the new RPC until it was explicitly added to the global SECURITY DEFINER allowlist. Neither failure was accepted as evidence.
+- Exact-head CI `35475511177` on `eeb3573ad57e08d6b8d5bdbbbe038dcef81814c3` completed SUCCESS, including clean PostgreSQL migration replay, M02/M03/M24 onboarding DB/API tests, global RLS/RPC security guards and browser smoke. PR #66 merged as `f48f8b7884e2e3ad3e53c61374acc7a781c4bb87`.
+- M02 remains RED because declared dependency M01 is still BLOCKED and final authenticated integration acceptance is not yet available. F08 was not retried and no Vercel deployment was initiated by this work.
