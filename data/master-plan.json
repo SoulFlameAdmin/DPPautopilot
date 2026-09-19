@@ -569,7 +569,7 @@
           "acceptanceCriteria": "Latest stable Chromium/Firefox/WebKit core flows pass",
           "evidenceRequired": "Cross-browser E2E report",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: U04."
+          "evidence": "PARTIAL cross-browser precursor: pinned Playwright 1.63.0 runs the 10 core DPP surfaces on Chromium 153.0.8010.12, Firefox 155.0 and WebKit 26.6. Cross-browser run `35450988219` SUCCESS; artifact `10587340403` proves 30/30 surface-engine flows with one main landmark, one H1, no horizontal overflow, readiness markers true where applicable and no page errors. Standard full CI `35450988227` SUCCESS, including clean DB replay, security/RLS/restore and browser smoke. U06 implementation merged as `52437f8d404e2a643bcea219914f54ccf1d3a874`. U06 remains RED because dependency U04 is not GREEN and deployed production cross-browser acceptance is not yet available. — PARTIAL PASS"
         },
         {
           "id": "U07",
