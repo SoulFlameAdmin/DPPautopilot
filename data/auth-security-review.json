@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "task": "R06",
+  "status": "partial",
+  "scope": "Repository-level auth/session/redirect/password-recovery security review. R06 remains RED until M01/M03 are fully accepted and deployed recovery/session behavior is proven.",
+  "controls": [
+    {
+      "id": "publishable_key_only",
+      "surface": "auth_config",
+      "expected": "Browser config contains only Supabase publishable key and no service-role material",
+      "evidence": [
+        "data/auth-config.json",
+        "scripts/validate_auth_contract.py"
+      ]
+    },
+    {
+      "id": "memory_only_session",
+      "surface": "auth",
+      "expected": "Access/refresh tokens remain memory-only; no localStorage/sessionStorage persistence",
+      "evidence": [
+        "demo/auth.html",
+        "scripts/validate_auth_contract.py"
+      ]
+    },
+    {
+      "id": "generic_reset_response",
+      "surface": "auth",
+      "expected": "Reset success text does not disclose whether an account exists",
+      "evidence": [
+        "demo/auth.html"
+      ]
+    },
+    {
+      "id": "fixed_same_origin_recovery_redirect",
+      "surface": "auth",
+      "expected": "Reset redirect is constructed from location.origin plus fixed /demo/auth-recovery.html and URL-encoded",
+      "evidence": [
+        "demo/auth.html"
+      ]
+    },
+    {
+      "id": "no_referrer_auth_pages",
+      "surface": "auth",
+      "expected": "Auth and recovery pages set no-referrer policy",
+      "evidence": [
+        "demo/auth.html",
+        "demo/auth-recovery.html"
+      ]
+    },
+    {
+      "id": "recovery_type_gate",
+      "surface": "recovery",
+      "expected": "Only type=recovery with an access token is accepted",
+      "evidence": [
+        "demo/auth-recovery.html"
+      ]
+    },
+    {
+      "id": "recovery_expiry_gate",
+      "surface": "recovery",
+      "expected": "expires_at is checked when supplied and expired recovery sessions fail closed",
+      "evidence": [
+        "demo/auth-recovery.html"
+      ]
+    },
+    {
+      "id": "fragment_consumed_immediately",
+      "surface": "recovery",
+      "expected": "Recovery URL fragment is removed immediately after parsing while token remains memory-only",
+      "evidence": [
+        "demo/auth-recovery.html"
+      ]
+    },
+    {
+      "id": "password_update_authenticated",
+      "surface": "recovery",
+      "expected": "Password update uses PATCH /auth/v1/user with bearer recovery access token",
+      "evidence": [
+        "demo/auth-recovery.html",
+        "scripts/validate_auth_recovery_contract.py"
+      ]
+    },
+    {
+      "id": "token_cleared_after_update",
+      "surface": "recovery",
+      "expected": "In-memory access token is cleared after successful password update",
+      "evidence": [
+        "demo/auth-recovery.html",
+        "scripts/validate_auth_recovery_contract.py"
+      ]
+    }
+  ],
+  "external_runtime_evidence_required": [
+    "The deployed recovery URL must be present in Supabase Auth allowed redirect URLs.",
+    "A real reset email must redirect to the deployed recovery page with a valid recovery session.",
+    "A real password update must complete successfully and the consumed session must not remain reusable.",
+    "M01 and M03 must be fully accepted before R06 can become GREEN."
+  ],
+  "documentation_basis": [
+    "Supabase Auth documentation: resetPasswordForEmail redirectTo/RedirectTo must target an allowlisted redirect URL.",
+    "Supabase Auth documentation: recovery sessions may be delivered in URL fragments; client-side recovery handling is required for fragment sessions."
+  ]
+}
