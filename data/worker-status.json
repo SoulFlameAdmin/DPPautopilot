@@ -1,16 +1,15 @@
 {
   "worker": "DAVID",
   "mode": "BUILD",
-  "state": "blocked",
-  "currentTask": "F08 guarded Vercel CLI deployment lane merged and fully validated; awaiting authorized real deployment execution",
-  "currentGate": "FOUNDATION",
-  "lastCompletedTask": "PR #57 merged as a3e4f745e7bd575279dc01afcb1dde0e7f0abe88; PR CI 35463559589 SUCCESS and post-merge main CI 35463752080 SUCCESS",
-  "nextTask": "When VERCEL_TOKEN and workflow dispatch authorization are available, run DPP Vercel deploy for the exact current main SHA, verify live home/master-plan HTTP smoke and receipt, then continue M01/M13 dependent production acceptance",
-  "message": "A real fallback deployment mechanism now exists and is merged: manual exact-SHA Vercel CLI deployment, locked to the DPP Vercel team/project, production-confirmed, smoke-tested and receipt-producing. F08 is intentionally still BLOCKED because neither this connector session nor the repository has proven an authorized VERCEL_TOKEN workflow execution, and Vercel still has no real DPP deployment evidence.",
+  "state": "active",
+  "currentTask": "Installer-first delivery: package the existing DPP site + installer UI into the first versioned local Windows desktop shell",
+  "currentGate": "INSTALLER",
+  "lastCompletedTask": "Standalone installer UI merged; M13 Storage bridge work also advanced independently on main.",
+  "nextTask": "Read data/installer-release.json, build the dependency-safe desktop-shell precursor, test local/offline launch and BG/EN persistence, then advance the DEV version only with concrete evidence.",
+  "message": "Delivery strategy changed by owner to installer-first. Vercel remains a secondary distribution/update channel and must not block dependency-safe local installer work. Track every installer version through data/installer-release.json and preserve DEV/STABLE update + rollback requirements.",
   "deferredBlockers": [
-    "F08 — deployment code path is ready and CI-proven, but a credentialed real Vercel workflow execution is still required; no production deployment is claimed.",
-    "M01 — final runtime recovery password-update acceptance requires the real deployed DPP recovery redirect produced after F08.",
-    "M13 — real authenticated Storage API byte upload/download/delete acceptance still lacks an available direct Storage object action in the current Supabase connector."
+    "Vercel deployment/quota/credential issues — secondary distribution blocker only; do not stop local installer work.",
+    "Production legal/UAT/customer-data gates remain external and are not bypassed."
   ],
-  "updatedAt": "2026-09-19T22:18:08+03:00"
+  "updatedAt": "2026-09-19T22:55:00+03:00"
 }
