@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "approved_candidate": {
+    "workflow_run": 35451176656,
+    "artifact_id": 10587200789,
+    "artifact_digest": "sha256:a5d66ee08baeae4867c3f428512959b9a84e8b0a7fbaf19289ba505fd829b900",
+    "source_head": "21df8cf7fd4d518f002e5e9c211ae5dee152f2e4",
+    "browser_version": "153.0.8010.12",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "review": "10/10 candidate screenshots reviewed for nonblank rendering, expected route content/layout and absence of obvious error/overflow artifacts before baseline approval"
+  },
+  "surfaces": {
+    "dashboard": {
+      "route": "/",
+      "sha256": "0d833789648cc6c3c7211c40905a9cbe6c8dba42102338958b803d47dd4234a5",
+      "width": 1440,
+      "height": 1717
+    },
+    "model": {
+      "route": "/demo/model.html?sample=1",
+      "sha256": "5e677035dedea1e6703fda8aa48caa5c9ae754a81da63e9c85ec3d9e65a40b03",
+      "width": 1440,
+      "height": 3650
+    },
+    "item": {
+      "route": "/demo/item.html?sample=1",
+      "sha256": "5c529b0d92d54735279fa0f66d848b902f21d643bb7de858c4c5e28fdbbfbfea",
+      "width": 1440,
+      "height": 1918
+    },
+    "import": {
+      "route": "/demo/import.html?sample=1",
+      "sha256": "198c0510031b270039518010f59981f9481c1fd180ff3c1b0ec37ee735ce1200",
+      "width": 1440,
+      "height": 1413
+    },
+    "import-validation": {
+      "route": "/demo/import-validation.html",
+      "sha256": "1b8d6d37769623af30204ea17dbf94f057d13d0019cd75963be2c423b7bc6868",
+      "width": 1440,
+      "height": 1000
+    },
+    "passport": {
+      "route": "/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001",
+      "sha256": "90b078482475b68bcaddacebd5057d39693f64f38663882974db87c5fefb8d3f",
+      "width": 1440,
+      "height": 3461
+    },
+    "settings": {
+      "route": "/demo/settings.html?sample=1",
+      "sha256": "e8635e455f7e630f4711b2d7d9bab2ba3b94c6e7581299ffcd2124db3a5ef7ed",
+      "width": 1440,
+      "height": 1000
+    },
+    "onboarding": {
+      "route": "/demo/onboarding.html?sample=1",
+      "sha256": "0391f88ce7c6e8594d4ed3216ff0da88d467821fc470f3c5e5b0101483540187",
+      "width": 1440,
+      "height": 1119
+    },
+    "mapping": {
+      "route": "/demo/mapping.html",
+      "sha256": "0987a3df13395d6f9d734f3f922a09480c135dc6a69a4722b23265382df7fe7e",
+      "width": 1440,
+      "height": 1438
+    },
+    "auth": {
+      "route": "/demo/auth.html",
+      "sha256": "87b82f34c2235b0a8b25d43f11a6c15839385d8148d5fdabd629fa2f0abf81b0",
+      "width": 1440,
+      "height": 1000
+    }
+  }
+}
