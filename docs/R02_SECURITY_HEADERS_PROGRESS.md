@@ -1,31 +1,25 @@
 # R02 Security Headers / TLS — Partial Progress
 
-R02 remains **RED** because its declared dependency F08 is blocked and no live production endpoint exists for TLS/header verification.
+R02 remains **RED** because F08 is blocked and no live production endpoint exists for TLS/header verification.
 
 ## Deploy-time header policy
 
-`vercel.json` now applies these headers to all routes:
+`vercel.json` now applies these controls globally:
 
-- **Content-Security-Policy**
-  - same-origin default, base URI, forms and executable assets;
-  - plugins/objects disabled;
-  - framing disabled;
-  - images/fonts may use local `data:` assets and images/workers may use `blob:` where required by the current static UI;
-  - network connections are limited to same-origin plus HTTPS/WSS Supabase project hosts;
-  - insecure subresource requests are upgraded.
+- **Content-Security-Policy** with same-origin defaults, disabled objects/framing, same-origin forms, local scripts/styles, local/data/blob asset allowances where the current static UI requires them, exact HTTPS connectivity to the bound Supabase endpoint, and `upgrade-insecure-requests`.
 - **Strict-Transport-Security:** `max-age=31536000`.
 - **X-Content-Type-Options:** `nosniff`.
 - **X-Frame-Options:** `DENY`.
 - **Referrer-Policy:** `no-referrer`.
-- **Permissions-Policy:** same-origin camera is allowed for future QR scanning; microphone, geolocation, payment and USB are denied.
-- `/data/*` continues to use `Cache-Control: no-store, max-age=0`.
+- **Permissions-Policy:** camera, microphone, geolocation, payment and USB are denied.
+- `/data/*` keeps `Cache-Control: no-store, max-age=0`.
 
-## Deliberate CSP compatibility exceptions
+The CSP does not allow plaintext HTTP sources or `'unsafe-eval'`. `connect-src` is restricted to same-origin plus the exact bound Supabase endpoint `https://frhletkiuupgksmgxoxc.supabase.co`.
 
-The current static demo contains inline scripts/styles, so `script-src` and `style-src` temporarily retain `'unsafe-inline'`. This is explicitly tracked for a later nonce/hash or external-asset refactor. `'unsafe-eval'` and plaintext HTTP sources are not allowed.
+## Deliberate compatibility exception
 
-Supabase connectivity uses `https://*.supabase.co` and `wss://*.supabase.co` so the same deploy-time policy can work with production and approved preview/staging Supabase projects without broad `https:` or `wss:` source allowances.
+The current static prototype still contains inline script/style content, so `script-src` and `style-src` temporarily require `'unsafe-inline'`. This is explicitly recorded as a remaining hardening gap; a future nonce/hash or external-asset refactor should remove it before final production hardening.
 
-## What is not claimed yet
+## Before GREEN
 
-No live TLS or response-header evidence is claimed while F08 remains blocked. R02 cannot become GREEN until a READY production deployment exists, HTTPS is reachable, certificate/hostname validation succeeds, live HTML/`data`/`api` responses match the versioned policy, and the core auth/API/UI journey runs without CSP violations.
+No live TLS/header claim is made by this precursor. R02 requires a real READY production deployment, reachable HTTPS hostname, passing certificate/hostname validation, live HTML/`data`/`api` header verification, and a CSP-compatible auth/API/UI smoke flow before it can become GREEN. F08 is not retried here.
