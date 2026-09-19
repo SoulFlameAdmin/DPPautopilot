@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "task": "C03",
+  "status": "partial",
+  "canonical": {
+    "source_repo": "SoulFlameAdmin/DPPautopilot",
+    "source_branch": "main",
+    "vercel_team_id": "team_cKaIZfnCMzoiiq80J0MhV0A2",
+    "vercel_project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "vercel_project_name": "dpp-autopilot"
+  },
+  "promotion_conditions": [
+    "source_branch_is_main",
+    "candidate_commit_matches_preview_verified_commit",
+    "pull_request_ci_passed",
+    "preview_verification_passed",
+    "migration_gate_passed_or_no_migrations",
+    "security_and_browser_smoke_passed",
+    "production_target_is_canonical_project",
+    "production_deployment_state_READY"
+  ],
+  "evidence_schema": {
+    "required_fields": [
+      "source_repo",
+      "source_branch",
+      "candidate_commit_sha",
+      "ci",
+      "preview",
+      "migration_gate",
+      "security_smoke",
+      "production_target"
+    ],
+    "ci_required": [
+      "status",
+      "commit_sha"
+    ],
+    "preview_required": [
+      "verified",
+      "commit_sha",
+      "deployment_id"
+    ],
+    "migration_required": [
+      "status",
+      "commit_sha"
+    ],
+    "security_required": [
+      "status",
+      "commit_sha"
+    ],
+    "target_required": [
+      "team_id",
+      "project_id",
+      "environment",
+      "state",
+      "commit_sha",
+      "deployment_id"
+    ]
+  },
+  "decision": {
+    "default": "deny",
+    "on_missing_or_mismatch": "deny",
+    "note": "This repository precursor validates evidence only. It does not create, promote or redeploy a Vercel deployment."
+  },
+  "live_state": {
+    "observed_deployments_for_canonical_project": 0,
+    "promotion_executed": false,
+    "deployment_lease_required": false
+  },
+  "remaining": [
+    "C02 must be GREEN with real preview deployment evidence.",
+    "C01/T01-T04 release prerequisites must be GREEN as required by source of truth.",
+    "A real production promotion must be executed only after all gates pass and under the DAVID Vercel deployment lease.",
+    "Post-promotion production smoke and immutable deployment evidence must be captured."
+  ]
+}
