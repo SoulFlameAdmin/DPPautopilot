@@ -560,7 +560,7 @@
           "acceptanceCriteria": "Keyboard flow, labels, landmarks, focus, contrast and critical axe rules pass",
           "evidenceRequired": "Automated + manual evidence",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: U01-U04."
+          "evidence": "PARTIAL automated accessibility precursor: browser-native probe covers dashboard/model/item/import/import-validation/passport/settings/onboarding/mapping/auth. It asserts main landmark + exactly one H1, duplicate IDs=0, all visible interactive controls have accessible names, no positive tabindex, programmatic focus succeeds, visible images have alt, and measured text/control contrast passes. Concrete fixes included mapping select labels plus import-validation/mapping/auth back-link contrast. Exact-head PR-only full CI `35450600111` SUCCESS from `main@e61fcf2c8fbbee5e6d587a5c52081581d83f5bb5`, including browser step PASS and full API/DB/security/restore regression. U05 remains RED because dependencies U01-U04 are not GREEN and required manual/deployed accessibility acceptance is not yet proven. — PARTIAL PASS"
         },
         {
           "id": "U06",
