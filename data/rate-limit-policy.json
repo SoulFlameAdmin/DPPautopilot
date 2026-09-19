@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "task": "R05",
+  "status": "partial",
+  "strategy": "process_local_fixed_window_precursor",
+  "privacy": "Client keys combine normalized IP with a truncated SHA-256 digest of the Authorization header; raw bearer credentials are never stored in limiter buckets or response metadata.",
+  "rules": {
+    "public_passport_read": {
+      "limit": 30,
+      "window_seconds": 60
+    },
+    "authenticated_read": {
+      "limit": 120,
+      "window_seconds": 60
+    },
+    "authenticated_write": {
+      "limit": 40,
+      "window_seconds": 60
+    },
+    "export_read": {
+      "limit": 20,
+      "window_seconds": 60
+    },
+    "import_write": {
+      "limit": 20,
+      "window_seconds": 60
+    }
+  },
+  "surfaces": {
+    "models": {
+      "GET": "authenticated_read",
+      "POST": "authenticated_write",
+      "PATCH": "authenticated_write",
+      "DELETE": "authenticated_write"
+    },
+    "items": {
+      "GET": "authenticated_read",
+      "POST": "authenticated_write",
+      "PATCH": "authenticated_write",
+      "DELETE": "authenticated_write"
+    },
+    "passport": {
+      "public_GET": "public_passport_read",
+      "private_GET": "authenticated_read",
+      "POST": "authenticated_write",
+      "PATCH": "authenticated_write"
+    },
+    "imports": {
+      "GET": "authenticated_read",
+      "POST": "import_write",
+      "PATCH": "import_write"
+    },
+    "export": {
+      "GET": "export_read"
+    }
+  },
+  "response": {
+    "http_status": 429,
+    "code": "RATE_LIMITED",
+    "message": "Too many requests. Retry later.",
+    "headers": [
+      "Retry-After",
+      "X-RateLimit-Limit",
+      "X-RateLimit-Remaining",
+      "X-RateLimit-Reset"
+    ]
+  },
+  "limitations": [
+    "Process-local buckets do not coordinate across parallel serverless isolates or regions.",
+    "Production acceptance requires a shared durable limiter/backend or provider-native distributed rate limiting plus deployed abuse/load evidence."
+  ]
+}
