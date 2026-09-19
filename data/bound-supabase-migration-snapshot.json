@@ -128,6 +128,10 @@
     {
       "version": "20260919054211",
       "name": "dpp_fk_covering_indexes"
+    },
+    {
+      "version": "20260919055239",
+      "name": "dpp_internal_rpc_surface_hardening"
     }
   ],
   "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
