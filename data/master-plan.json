@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T05:49:00+03:00",
+  "updatedAt": "2026-09-19T05:55:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -836,7 +836,7 @@
           "acceptanceCriteria": "Each releasable change gets preview and automated smoke test",
           "evidenceRequired": "Vercel deployment + test",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: F07,C01."
+          "evidence": "PARTIAL no-deploy preview verification precursor: read-only Vercel discovery found canonical dpp-autopilot project prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr with zero deployments. Contract + fail-closed verifier require exact project, preview env, READY state, exact commit and route/security-header/cache evidence; 5 unit tests reject wrong project/commit/state/environment/routes/headers. CI 35413805729 on cc6ecbfa54f87ce4f4c5f2201caf435900b05cfb SUCCESS including full regression/browser smoke. No deploy/redeploy attempted. C02 remains RED pending C01 GREEN and real preview deployment/live smoke. — PARTIAL PASS"
         },
         {
           "id": "C03",
