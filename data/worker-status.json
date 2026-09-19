@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "C01 — pull-request CI precursor analysis",
+  "currentTask": "C02 — preview deployment verification precursor analysis",
   "currentGate": "RELEASE",
-  "lastCompletedTask": "T07 partial synthetic load precursor — CI 35413316603 + artifact 10575440649",
-  "nextTask": "Validate and harden the existing pull_request CI contract and required evidence flow without marking C01 GREEN while T01-T04 dependencies remain incomplete.",
-  "message": "D01-D14 remain GREEN. T07 now has evidence-backed synthetic handler load characterization but remains RED pending M17-M21 and deployed staging capacity evidence. No fully GREEN-dependency RED task remains; next useful precursor is C01 pull-request CI. F08/M01 remain deferred. No Vercel deploy attempted. DAVID orchestrator files untouched.",
+  "lastCompletedTask": "C01 partial pull-request CI precursor — PR #1 run 35413530121 SUCCESS, closed unmerged",
+  "nextTask": "Define a no-deploy preview verification contract and checks for commit/deployment identity, HTTP routes and security headers; keep C02 RED while C01 is RED and no authorized preview deployment evidence exists.",
+  "message": "D01-D14 remain GREEN. C01 now has a real pull_request-triggered full CI proof, but remains RED pending T01-T04 and merge-blocking branch-rule evidence. Next useful precursor is C02 preview verification contract. F08/M01 remain deferred. No Vercel deploy attempted. DAVID orchestrator files untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T05:44:00+03:00"
+  "updatedAt": "2026-09-19T05:49:00+03:00"
 }
