@@ -264,6 +264,10 @@
     "PAYLOAD_TOO_LARGE": {
       "http_status": 413,
       "message": "Request body exceeds the 1 MiB limit."
+    },
+    "RATE_LIMITED": {
+      "http_status": 429,
+      "message": "Too many requests. Retry later."
     }
   }
 }
