@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "task": "T04",
+  "title": "Critical E2E suite precursor",
+  "critical_journey": [
+    "organization_create",
+    "member_add",
+    "model_create",
+    "item_create",
+    "import_stage",
+    "import_validate",
+    "import_commit",
+    "passport_create",
+    "passport_public_read"
+  ],
+  "evidence_layers": {
+    "browser_synthetic": {
+      "file": "demo/onboarding.html",
+      "validator": "scripts/validate_onboarding_demo.py",
+      "required_markers": [
+        "M24 SYNTHETIC FLOW PASS",
+        "data-onboarding-valid=\"true\"",
+        "data-private-leak=\"false\""
+      ]
+    },
+    "stateful_api_handler": {
+      "file": "tests/api/onboarding-flow.test.cjs",
+      "required_marker": "M24_ONBOARDING_FLOW_PRECURSOR_PASS"
+    },
+    "local_db_replay": {
+      "file": "tests/db/test_organization_onboarding_subset.sql",
+      "required_marker": "M02_M03_M24_ORGANIZATION_ONBOARDING_PASS"
+    },
+    "bound_supabase": {
+      "observed_marker": "M02_M03_M24_ORGANIZATION_ONBOARDING_PASS",
+      "evidence_type": "manual bound rollback acceptance",
+      "project_id": "frhletkiuupgksmgxoxc"
+    }
+  },
+  "final_acceptance": {
+    "deployed_browser_to_db": false,
+    "real_auth_session": false,
+    "real_storage_object_roundtrip": false,
+    "production_route": false,
+    "status": "blocked_by_external_delivery_and_dependency_chain"
+  }
+}
