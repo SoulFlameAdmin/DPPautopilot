@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T05:44:00+03:00",
+  "updatedAt": "2026-09-19T05:49:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -827,7 +827,7 @@
           "acceptanceCriteria": "Validation/tests required before merge",
           "evidenceRequired": "Branch/rules evidence + passing run",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: F09,T01-T04."
+          "evidence": "PARTIAL real pull-request CI precursor: data/pr-ci-contract.json + validator lock pull_request trigger, read-only permissions and required validation/test steps. Draft probe PR #1 from head ef80bdee845ac23d25ab1ea44e391ec1771fd7a4 triggered event=pull_request run 35413530121 and the full validate job SUCCESS; PR then closed unmerged. GitHub rulesets returned [] and classic main branch protection read is unavailable to the integration (403), so merge-blocking enforcement is not claimed. C01 remains RED pending T01-T04 GREEN and authorized required-check branch-rule evidence. — PARTIAL PASS"
         },
         {
           "id": "C02",
