@@ -551,7 +551,7 @@
           "acceptanceCriteria": "Core workflows pass mobile/tablet/desktop without overflow/blockers",
           "evidenceRequired": "Visual tests",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: U01-U03."
+          "evidence": "PARTIAL measured responsive UX: runtime probe covers dashboard/model/item/import/import-validation/passport/settings/onboarding/mapping/auth across phone/tablet/desktop, asserting no root horizontal overflow and no blocking overlays. Initial U04 probe exposed tablet model-field and validation-table overflow; fixes landed in `b1e3c22f2b6a657bea8dce5aa4e89a6e7d5addbc` and `5e629a7ca4fba800c2c3cd49acda941350b27cc7`. Exact-head full CI `35448804599` SUCCESS includes measured responsive browser matrix plus all API/DB/security/restore/browser regressions. U04 remains RED because dependencies U01-U03 are not GREEN and deployed E2E acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "U05",
