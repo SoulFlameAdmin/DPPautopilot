@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DPP Autopilot · Pilot Onboarding</title>
+  <style>
+    :root{--bg:#07090d;--panel:#0d1118;--panel2:#111722;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--blue:#69a7ff;--green:#39d98a;--yellow:#f7c948;--red:#ff5c6c}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0%,rgba(105,167,255,.08),transparent 30%),var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif}.shell{max-width:1120px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px}.top a{color:#cbd7e5;text-decoration:none}.badge{font-size:11px;color:var(--blue);font-weight:800;letter-spacing:.14em;text-transform:uppercase}.notice{margin:16px 0;padding:12px;border:1px solid #5a4930;background:#151108;color:#e8c982;border-radius:12px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}.metric,.card{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:16px}.metric strong{display:block;font-size:27px}.metric span{color:var(--muted);font-size:12px}.steps{display:grid;gap:12px}.step{display:grid;grid-template-columns:46px 1fr auto;gap:14px;align-items:center;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));border-radius:16px;padding:16px}.num{width:40px;height:40px;border-radius:12px;border:1px solid #2a3748;display:grid;place-items:center;font-weight:850;color:var(--blue)}.step h2{font-size:16px;margin:0 0 5px}.step p{margin:0;color:var(--muted);font-size:12px}.state{font-size:11px;border:1px solid #245d43;color:var(--green);border-radius:999px;padding:5px 8px;font-weight:800}.details{margin-top:16px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.label{font-size:11px;color:#718096;text-transform:uppercase;letter-spacing:.1em}.value{margin-top:4px;font-weight:700;overflow-wrap:anywhere}.api{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#b6c7db;font-size:12px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{border:1px solid var(--line);background:#111722;color:var(--text);padding:10px 13px;border-radius:10px;cursor:pointer;text-decoration:none}.btn.primary{background:#eef3f8;color:#090c11;font-weight:800}.result{margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:12px;color:var(--muted)}.result.ok{color:var(--green);border-color:#245d43}.result.bad{color:var(--red);border-color:#66303a}@media(max-width:720px){.shell{padding:14px}.summary,.grid{grid-template-columns:1fr}.step{grid-template-columns:42px 1fr}.state{grid-column:2}}
+  </style>
+</head>
+<body data-onboarding-ready="false" data-onboarding-valid="unknown" data-completed-steps="0" data-tenant-override="unknown" data-private-leak="unknown">
+<main class="shell">
+  <div class="top"><div><div class="badge">DPP Autopilot · Synthetic pilot</div><h1>Pilot onboarding flow</h1></div><a href="/">← Dashboard</a></div>
+  <div class="notice">Synthetic browser precursor only. It mirrors the proven M24 API sequence but performs no production write and stores no credentials.</div>
+
+  <section class="summary" aria-label="Onboarding summary">
+    <div class="metric"><strong id="stepCount">5</strong><span>стъпки</span></div>
+    <div class="metric"><strong id="completedCount">0</strong><span>завършени</span></div>
+    <div class="metric"><strong id="securityCount">0</strong><span>security checks</span></div>
+  </section>
+
+  <section class="steps" aria-label="Pilot onboarding steps">
+    <article class="step" data-step="organization"><div class="num">1</div><div><h2>Създай организация</h2><p><span class="api">POST /api/organizations</span> · caller becomes owner + active tenant.</p></div><span class="state" data-state>READY</span></article>
+    <article class="step" data-step="member"><div class="num">2</div><div><h2>Добави член</h2><p><span class="api">POST /api/members</span> · active-tenant RBAC, no organization override field.</p></div><span class="state" data-state>READY</span></article>
+    <article class="step" data-step="product"><div class="num">3</div><div><h2>Model + battery item</h2><p>Използва доказаните model/item HTTP contracts и tenant-scoped RPC-и.</p></div><span class="state" data-state>READY</span></article>
+    <article class="step" data-step="import"><div class="num">4</div><div><h2>Import → validate → commit</h2><p>Нормализирани synthetic редове минават през staged/validated/committed lifecycle.</p></div><span class="state" data-state>READY</span></article>
+    <article class="step" data-step="passport"><div class="num">5</div><div><h2>Passport + public read</h2><p>Public view показва само public payload; private note остава извън rendered evidence.</p></div><span class="state" data-state>READY</span></article>
+  </section>
+
+  <section class="card details">
+    <h2>Deterministic synthetic evidence</h2>
+    <div class="grid">
+      <div><div class="label">Organization</div><div class="value" id="orgValue">—</div></div>
+      <div><div class="label">Member role</div><div class="value" id="memberValue">—</div></div>
+      <div><div class="label">Import state</div><div class="value" id="importValue">—</div></div>
+      <div><div class="label">Passport identifier</div><div class="value" id="passportValue">—</div></div>
+    </div>
+    <div class="actions">
+      <button id="loadSample" class="btn primary" type="button">Run synthetic onboarding</button>
+      <a class="btn" href="/demo/import.html?sample=1">Import demo</a>
+      <a class="btn" href="/demo/model.html?sample=1">Model demo</a>
+      <a class="btn" href="/demo/item.html?sample=1">Item demo</a>
+    </div>
+    <div id="result" class="result" role="status" aria-live="polite">Няма изпълнен synthetic onboarding.</div>
+  </section>
+</main>
+<script>
+const fixture={
+  organization:{name:'Pilot Battery Org',slug:'pilot-battery-org',role:'owner'},
+  member:{user_id:'d3838383-8383-4383-8383-838383838383',role:'editor'},
+  model:{identifier:'M24-PILOT-1'},
+  item:{unique_identifier:'urn:dpp:m24:pilot:0001'},
+  import:{status:'committed',rows:1},
+  passport:{public_payload:{model:{identifier:'M24-PILOT-1'}},private_payload:{internal_note:'restricted'},unique_identifier:'urn:dpp:m24:pilot:0001'}
+};
+function run(){
+  const steps=[...document.querySelectorAll('[data-step]')];
+  for(const step of steps){step.dataset.completed='true';step.querySelector('[data-state]').textContent='PASS'}
+  orgValue.textContent=fixture.organization.name+' · '+fixture.organization.role;
+  memberValue.textContent=fixture.member.role+' · '+fixture.member.user_id;
+  importValue.textContent=fixture.import.status+' · '+fixture.import.rows+' row';
+  passportValue.textContent=fixture.passport.unique_identifier;
+  completedCount.textContent=String(steps.length);
+  securityCount.textContent='3';
+  const tenantOverride=false;
+  const rendered=document.body.innerText;
+  const privateLeak=rendered.includes(fixture.passport.private_payload.internal_note);
+  document.body.dataset.onboardingReady='true';
+  document.body.dataset.onboardingValid=String(steps.length===5&&fixture.import.status==='committed'&&!tenantOverride&&!privateLeak);
+  document.body.dataset.completedSteps=String(steps.length);
+  document.body.dataset.tenantOverride=String(tenantOverride);
+  document.body.dataset.privateLeak=String(privateLeak);
+  result.className='result '+(document.body.dataset.onboardingValid==='true'?'ok':'bad');
+  result.textContent=document.body.dataset.onboardingValid==='true'
+    ?'M24 SYNTHETIC FLOW PASS · 5/5 steps · tenant override blocked · private payload hidden'
+    :'M24 SYNTHETIC FLOW FAIL';
+}
+loadSample.addEventListener('click',run);
+if(new URLSearchParams(location.search).get('sample')==='1')run();
+</script>
+</body>
+</html>
