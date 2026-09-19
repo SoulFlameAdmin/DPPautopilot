@@ -378,3 +378,5 @@ Append evidence here only after verification.
 - Exact-head full CI `35454178109` SUCCESS; artifact `10587916127` digest `sha256:7579219d91feec1cedd790f0eb66be67b364774526071c993c4195cf48a57fc7` records 10/10 surfaces PASS with duplicate IDs, unlabeled controls, positive tabindex, focus failures, missing alt and contrast violations all equal to zero.
 - Implementation merged as `ba72ee7c6987bc6854da72dc5f01e7de4d54368b`.
 - T09 remains RED/PARTIAL because U05 is not GREEN and deployed/manual accessibility acceptance remains explicitly false.
+
+| 2026-09-19 | F08 | Vercel project `dpp-autopilot` (`prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr`) was re-verified with real deployment `dpl_9y7hWGAJoZpSszbEWjY8ixQUR3os`, `target=production`, `READY`, sourced from commit `2c4b21364a9aaac889b1ad2cacd6eac67a80850b`. The production alias `dpp-autopilot.vercel.app` currently returns a 302 Vercel SSO/Deployment Protection redirect to unauthenticated smoke verification rather than the acceptance-required public 200; JSON public-route verification is therefore not accepted. No redeploy or protection bypass was attempted. | BLOCKED |
