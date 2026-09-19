@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "task": "R10",
+  "status": "partial",
+  "input_event": "dpp_http_request",
+  "evaluation_window_seconds": 300,
+  "owners": {
+    "primary": "DPP operations owner",
+    "secondary": "DPP platform owner"
+  },
+  "signals": [
+    {
+      "id": "availability_5xx_rate",
+      "description": "Server-error rate across DPP API requests",
+      "severity": "critical",
+      "owner": "DPP operations owner",
+      "minimum_requests": 20,
+      "threshold": {
+        "metric": "ratio",
+        "status_class": "5xx",
+        "operator": ">=",
+        "value": 0.05
+      },
+      "clear_below": 0.02
+    },
+    {
+      "id": "consecutive_5xx",
+      "description": "Consecutive server errors indicate acute availability failure",
+      "severity": "critical",
+      "owner": "DPP operations owner",
+      "minimum_requests": 5,
+      "threshold": {
+        "metric": "consecutive_status_class",
+        "status_class": "5xx",
+        "operator": ">=",
+        "value": 5
+      },
+      "clear_below": 1
+    },
+    {
+      "id": "latency_p95",
+      "description": "High API response latency",
+      "severity": "warning",
+      "owner": "DPP platform owner",
+      "minimum_requests": 20,
+      "threshold": {
+        "metric": "p95_duration_ms",
+        "operator": ">=",
+        "value": 2000
+      },
+      "clear_below": 1200
+    },
+    {
+      "id": "auth_failure_rate",
+      "description": "High authentication/authorization failure rate",
+      "severity": "warning",
+      "owner": "DPP operations owner",
+      "minimum_requests": 20,
+      "threshold": {
+        "metric": "error_code_ratio",
+        "error_codes": [
+          "AUTH_REQUIRED",
+          "FORBIDDEN",
+          "INSUFFICIENT_ROLE"
+        ],
+        "operator": ">=",
+        "value": 0.3
+      },
+      "clear_below": 0.15
+    },
+    {
+      "id": "rate_limit_pressure",
+      "description": "Sustained abuse/rate-limit pressure",
+      "severity": "warning",
+      "owner": "DPP platform owner",
+      "minimum_requests": 20,
+      "threshold": {
+        "metric": "error_code_ratio",
+        "error_codes": [
+          "RATE_LIMITED"
+        ],
+        "operator": ">=",
+        "value": 0.2
+      },
+      "clear_below": 0.1
+    }
+  ],
+  "delivery": {
+    "live_delivery_configured": false,
+    "reason": "R09 has no deployed runtime/log aggregation evidence while F08 is blocked.",
+    "required_before_green": [
+      "Deploy runtime and verify R09 log ingestion",
+      "Connect alerts to an approved notification destination",
+      "Run a real alert fire-and-recover drill",
+      "Record acknowledgement/escalation evidence"
+    ]
+  }
+}
