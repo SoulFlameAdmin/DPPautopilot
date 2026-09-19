@@ -207,3 +207,34 @@ test('41st authenticated tenant context write is blocked before validation/upstr
     console.warn=originalWarn;
   }
 });
+
+
+test('active network bucket survives memory-cap credential churn',()=>{
+  const rules={authenticated_write:{limit:2,window_seconds:60}};
+  const ip='203.0.113.44';
+
+  assert.equal(limiter.checkRateLimit(
+    req('POST',{},{} ,'Bearer a',ip),'models',{rules,nowMs:1000,maxBuckets:3}
+  ).allowed,true);
+  assert.equal(limiter.checkRateLimit(
+    req('POST',{},{} ,'Bearer b',ip),'models',{rules,nowMs:2000,maxBuckets:3}
+  ).allowed,true);
+
+  const third=limiter.checkRateLimit(
+    req('POST',{},{} ,'Bearer c',ip),'models',{rules,nowMs:3000,maxBuckets:3}
+  );
+  assert.equal(third.allowed,false);
+  assert.equal(third.remaining,0);
+  assert.equal(limiter._test.buckets.size,3);
+
+  const networkKey=[...limiter._test.buckets.keys()].find(key=>key.includes('|network:'));
+  assert.ok(networkKey);
+  assert.equal(limiter._test.buckets.get(networkKey).count,3);
+
+  const fourth=limiter.checkRateLimit(
+    req('POST',{},{} ,'Bearer d',ip),'models',{rules,nowMs:4000,maxBuckets:3}
+  );
+  assert.equal(fourth.allowed,false);
+  assert.equal(limiter._test.buckets.get(networkKey).count,4);
+  assert.equal(limiter._test.buckets.size,3);
+});
