@@ -30,3 +30,8 @@ This controls known dependency/action risk. It does not claim protection against
 ## Upgrade rule
 
 Dependency/action upgrades are explicit changes: update the version/SHA, run audit + full regression, review upstream release/security notes, then merge. Silent floating upgrades are not accepted for production-critical CI.
+
+
+## Cross-browser test tooling
+
+U06 browser tooling is isolated in `requirements-browser.txt` with exact version pins. The dedicated cross-browser workflow audits that requirements file before installing the Playwright Chromium, Firefox and WebKit browser bundles. All GitHub Actions references across workflow files remain immutable commit-SHA pinned.
