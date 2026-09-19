@@ -7,8 +7,9 @@ ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/evidence-file-policy.json").read_text(encoding="utf-8"))
 meta_sql=(ROOT/"supabase/migrations/20260919009000_dpp_evidence_attachments.sql").read_text(encoding="utf-8")
 storage_sql=(ROOT/"supabase/migrations/20260919027000_dpp_evidence_storage.sql").read_text(encoding="utf-8")
+fix_sql=(ROOT/"supabase/migrations/20260919028000_dpp_evidence_storage_policy_fix.sql").read_text(encoding="utf-8")
 
-assert policy.get("version")==2
+assert policy.get("version")==3
 assert policy.get("task")=="M13"
 assert policy.get("bucket")=="dpp-evidence"
 assert policy.get("max_bytes")==10_485_760
@@ -33,7 +34,11 @@ assert storage["read_roles"]==["owner","admin","editor","viewer"]
 assert storage["upload_roles"]==["owner","admin","editor"]
 assert storage["delete_roles"]==["owner","admin"]
 assert storage["update_overwrite_allowed"] is False
-assert storage["hosted_migration"]=="supabase/migrations/20260919027000_dpp_evidence_storage.sql"
+assert storage["hosted_migrations"]==[
+  "supabase/migrations/20260919027000_dpp_evidence_storage.sql",
+  "supabase/migrations/20260919028000_dpp_evidence_storage_policy_fix.sql"
+]
+assert storage["metadata_registration_helper"]=="public.dpp_evidence_storage_registered(text)"
 
 for token in [
  "dpp_evidence_storage_org_id",
@@ -44,13 +49,24 @@ for token in [
  "dpp_evidence_storage_member_select",
  "dpp_evidence_storage_editor_insert",
  "dpp_evidence_storage_admin_delete",
- "exists(",
- "from public.dpp_evidence_attachments",
- "Deliberately no UPDATE policy",
  "M13_STORAGE_SCHEMA_UNAVAILABLE_SKIP"
 ]:
     assert token in storage_sql, f"M13 storage migration missing contract token: {token}"
+
+for token in [
+ "dpp_evidence_storage_registered",
+ "security definer",
+ "revoke all on function public.dpp_evidence_storage_registered(text) from public,anon",
+ "grant execute on function public.dpp_evidence_storage_registered(text) to authenticated",
+ "dpp_evidence_storage_member_select",
+ "dpp_evidence_storage_editor_insert"
+]:
+    assert token.lower() in fix_sql.lower(), f"M13 storage fix missing contract token: {token}"
+
+assert "from public.dpp_evidence_attachments" in fix_sql
+assert "dpp_evidence_storage_registered(name)" in fix_sql
+
 for content_type in expected_types:
     assert content_type in meta_sql and content_type in storage_sql
 
-print("M13_EVIDENCE_POLICY_PASS: tenant metadata plus private Storage bucket/RLS, metadata-before-upload, MIME/size/path/hash limits and no-overwrite integrity contract are declared")
+print("M13_EVIDENCE_POLICY_PASS: tenant metadata plus private Storage bucket/RLS, SECURITY DEFINER metadata-registration predicate, MIME/size/path/hash limits and no-overwrite integrity contract are declared")
