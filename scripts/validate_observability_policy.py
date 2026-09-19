@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/observability-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==3
+assert policy.get("version")==4
 assert policy.get("task")=="R09"
 assert policy.get("status")=="partial"
 assert policy.get("event_name")=="dpp_http_request"
@@ -20,7 +20,7 @@ expected_fields={
     "event","timestamp_ms","request_id","surface","method","status","outcome","duration_ms","auth_present","error_code"
 }
 assert set(policy.get("logged_fields",[]))==expected_fields
-assert policy.get("surfaces")==["tenant","models","items","passport","imports","export"]
+assert policy.get("surfaces")==["tenant","organizations","members","models","items","passport","imports","export"]
 api_surface_inventory={
     path.stem for path in (ROOT/"api").glob("*.js")
     if not path.name.startswith("_")
@@ -73,4 +73,4 @@ for token in [
 assert "F08" in policy.get("runtime_gap","")
 assert "M02" in policy.get("runtime_gap","")
 assert "M17-M20" in policy.get("runtime_gap","")
-print("R09_OBSERVABILITY_POLICY_PASS: six inventoried API surfaces emit correlated structured metadata with explicit secret/payload redaction; deployed runtime evidence remains intentionally unclaimed")
+print("R09_OBSERVABILITY_POLICY_PASS: eight inventoried API surfaces emit correlated structured metadata with explicit secret/payload redaction; deployed runtime evidence remains intentionally unclaimed")
