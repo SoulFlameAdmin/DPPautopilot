@@ -1,9 +1,9 @@
 {
-  "version": 3,
+  "version": 4,
   "task": "R05",
   "status": "partial",
-  "strategy": "process_local_fixed_window_precursor",
-  "privacy": "Limiter keys store only a truncated SHA-256 digest of normalized IP plus Authorization digest; raw IP addresses and raw bearer credentials are not stored in bucket keys or response metadata.",
+  "strategy": "process_local_dual_bucket_fixed_window_precursor",
+  "privacy": "Limiter keys store only truncated SHA-256 digests. Every request consumes a hashed network/IP bucket; requests carrying Authorization also consume a separate hashed credential bucket. Raw IP addresses and raw bearer credentials are never stored in bucket keys or response metadata.",
   "rules": {
     "public_passport_read": {
       "limit": 30,
@@ -78,5 +78,11 @@
     "prune_interval_ms": 10000,
     "expired_bucket_eviction": true,
     "active_bucket_cap": true
+  },
+  "identity_safety": {
+    "network_bucket_always_enforced": true,
+    "credential_bucket_when_authorization_present": true,
+    "allow_only_when_all_buckets_within_limit": true,
+    "bearer_rotation_cannot_reset_network_budget": true
   }
 }
