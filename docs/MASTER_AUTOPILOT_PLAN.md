@@ -371,3 +371,10 @@ Append evidence here only after verification.
 - Bound Supabase project `frhletkiuupgksmgxoxc` was re-proven in `BEGIN/ROLLBACK` with marker `M02_M03_M24_ORGANIZATION_ONBOARDING_PASS`.
 - Artifact `10586914695` digest `sha256:6a3755029254b409b107921fc5e5d058982c1b71c32c64b03f9cfc8326403de9` records `precursor_pass=true` for browser synthetic/stateful API/local DB layers.
 - Final acceptance remains explicitly false for deployed browser→DB, real auth session, real Storage object roundtrip and production route. T04 therefore remains RED/PARTIAL; no Vercel deployment was attempted.
+
+
+### T09 accessibility regression gate precursor — 2026-09-19
+- Dedicated T09 report runs after the existing browser smoke/U05 validator and re-validates 10 core DOM surfaces fail-closed.
+- Exact-head full CI `35454178109` SUCCESS; artifact `10587916127` digest `sha256:7579219d91feec1cedd790f0eb66be67b364774526071c993c4195cf48a57fc7` records 10/10 surfaces PASS with duplicate IDs, unlabeled controls, positive tabindex, focus failures, missing alt and contrast violations all equal to zero.
+- Implementation merged as `ba72ee7c6987bc6854da72dc5f01e7de4d54368b`.
+- T09 remains RED/PARTIAL because U05 is not GREEN and deployed/manual accessibility acceptance remains explicitly false.
