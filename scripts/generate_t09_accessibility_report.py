@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -69,6 +70,22 @@ def main() -> None:
     OUT.parent.mkdir(parents=True,exist_ok=True)
     OUT.write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
     print(f"T09_ACCESSIBILITY_GATE_PASS: {len(rows)} core surfaces have zero critical automated accessibility regressions")
+
+    # T10 executes here because CI has already produced the T01/T02/T03/T07/T08
+    # precursor reports and browser evidence by this point. T04 is generated
+    # immediately before T10 so the aggregate always sees the complete local set.
+    onboarding=ROOT/"artifacts/m24-onboarding-dom.html"
+    require(onboarding.is_file(),"T10 prerequisite onboarding DOM missing")
+    subprocess.run(
+        [sys.executable,str(ROOT/"scripts/generate_t04_e2e_report.py"),str(onboarding)],
+        check=True,
+        cwd=ROOT
+    )
+    subprocess.run(
+        [sys.executable,str(ROOT/"scripts/generate_t10_regression_report.py")],
+        check=True,
+        cwd=ROOT
+    )
 
 if __name__=="__main__":
     main()

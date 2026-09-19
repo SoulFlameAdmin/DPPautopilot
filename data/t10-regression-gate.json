@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "task": "T10",
+  "mode": "precursor",
+  "required_dependencies": ["T01","T02","T03","T04","T05","T06","T07","T08","T09"],
+  "local_reports": {
+    "T01": "artifacts/t01-unit-coverage.json",
+    "T02": "artifacts/t02-db-integration-report.json",
+    "T03": "artifacts/t03-api-integration-report.json",
+    "T04": "artifacts/t04-e2e-report.json",
+    "T07": "artifacts/t07-load-report.json",
+    "T08": "artifacts/t08-reliability-report.json",
+    "T09": "artifacts/t09-accessibility-report.json"
+  },
+  "repository_evidence": {
+    "T05": ["data/u07-visual-baseline.json", ".github/workflows/u07-visual-candidate.yml"],
+    "T06": [".github/workflows/cross-browser.yml", "tests/browser/test_cross_browser.py"]
+  },
+  "final_acceptance_requires": {
+    "all_t01_t09_green": true,
+    "approved_release_ci_run": true
+  },
+  "claim_boundary": "This aggregate proves the clean-checkout precursor layers execute together. It must remain non-final until T01-T09 are GREEN and an approved release CI run exists."
+}

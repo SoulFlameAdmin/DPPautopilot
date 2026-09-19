@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T09:36:00+03:00",
+  "updatedAt": "2026-09-19T19:28:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -810,7 +810,7 @@
           "acceptanceCriteria": "All mandatory suites pass from clean checkout",
           "evidenceRequired": "CI release run",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: T01-T09."
+          "evidence": "PARTIAL clean-checkout full-regression precursor: PR #53 head `e1cec128e9a147b65b8bd8b299608e22beacf250` ran full CI `35454765266` SUCCESS. The T10 aggregate executed inside the existing CI job after T01/T02/T03/T07/T08 reports and browser evidence were produced; log marker `T10_FULL_REGRESSION_PRECURSOR_PASS` confirms T01-T09 precursor evidence aggregated cleanly with final acceptance explicitly false. Artifact `10588191022` (`demo-ui-smoke`, digest `sha256:6aa41c8e3b24a5b3c13443d8a2811b36450214937542ca5e3fcf07f14983a2b0`) contains `artifacts/t10-full-regression-report.json`. T10 remains RED because T01-T09 are not GREEN and no approved release-CI production acceptance run exists. — PARTIAL PASS"
         }
       ]
     },
