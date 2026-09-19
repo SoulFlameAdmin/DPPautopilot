@@ -109,8 +109,9 @@ function makeBackend(){
       };
       return ok(state.passport);
     }
-    if(rpc==='dpp_api_passport_update'){
+    if(rpc==='dpp_api_passport_update_checked'){
       if(!state.passport||body.p_id!==IDS.passport) return fail('DP403');
+      if(body.p_expected_updated_at!==state.passport.updated_at) return fail('DP411');
       state.passport={...state.passport,
         status:body.p_status??state.passport.status,
         public_payload:body.p_public_payload??state.passport.public_payload,
@@ -248,9 +249,14 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     }),res);
     assert.equal(res.statusCode,201);
     assert.equal(json(res).data.passport_id,IDS.passport);
+    const passportUpdatedAt=json(res).data.updated_at;
 
     res=makeRes();
-    await passport(req('PATCH',{id:IDS.passport,status:'active'}),res);
+    await passport(req('PATCH',{
+      id:IDS.passport,
+      status:'active',
+      expected_updated_at:passportUpdatedAt
+    }),res);
     assert.equal(res.statusCode,200);
     assert.equal(json(res).data.status,'active');
 
