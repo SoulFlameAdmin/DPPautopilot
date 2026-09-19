@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "task": "C07",
+  "status": "partial",
+  "canonical": {
+    "source_repo": "SoulFlameAdmin/DPPautopilot",
+    "source_branch": "main",
+    "vercel_team_id": "team_cKaIZfnCMzoiiq80J0MhV0A2",
+    "vercel_project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "environment": "production"
+  },
+  "required_checks": [
+    "home",
+    "auth_ui",
+    "core_api_auth_boundary",
+    "public_passport"
+  ],
+  "global_security_headers": [
+    "content-security-policy",
+    "strict-transport-security",
+    "x-content-type-options",
+    "x-frame-options",
+    "referrer-policy",
+    "permissions-policy"
+  ],
+  "public_passport_forbidden_keys": [
+    "private_payload",
+    "created_by",
+    "organization_id",
+    "tenant_id",
+    "email",
+    "phone",
+    "access_token",
+    "refresh_token"
+  ],
+  "decision": {
+    "default": "deny",
+    "require_tls_verified": true,
+    "require_exact_commit_alignment": true,
+    "require_smoke_after_deployment_ready": true
+  },
+  "live_state": {
+    "production_smoke_executed": false,
+    "production_deployments_observed": 0,
+    "deployment_lease_required_for_this_precursor": false
+  },
+  "remaining": [
+    "C03 and C06 must be GREEN.",
+    "F08 must produce a real READY production deployment on the canonical project.",
+    "Timestamped live HTTPS smoke evidence must be captured after deployment readiness.",
+    "Home, auth UI, protected core API boundary and a real public passport endpoint must pass with production security headers."
+  ]
+}
