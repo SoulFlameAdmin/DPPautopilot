@@ -1,0 +1,182 @@
+name: DPP Vercel deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Exact 40-character commit SHA to deploy
+        required: true
+        type: string
+      target:
+        description: Deployment target
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - production
+      production_confirmation:
+        description: For production only, enter DEPLOY_PRODUCTION
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dpp-vercel-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RELEASE_SHA: ${{ inputs.release_sha }}
+      TARGET: ${{ inputs.target }}
+      PRODUCTION_CONFIRMATION: ${{ inputs.production_confirmation }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: team_cKaIZfnCMzoiiq80J0MhV0A2
+      VERCEL_PROJECT_ID: prj_K0RSGrEkEr3XDouCTA3tdasbqH55
+      VERCEL_CLI_VERSION: 59.19.1
+
+    steps:
+      - name: Checkout exact release commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.release_sha }}
+          fetch-depth: 0
+
+      - name: Verify release identity and production gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::release_sha must be an exact lowercase 40-character commit SHA"
+            exit 1
+          fi
+          checked_out="$(git rev-parse HEAD)"
+          if [[ "$checked_out" != "$RELEASE_SHA" ]]; then
+            echo "::error::Checked-out commit does not match release_sha"
+            exit 1
+          fi
+          if [[ "$TARGET" == "production" ]]; then
+            if [[ "$PRODUCTION_CONFIRMATION" != "DEPLOY_PRODUCTION" ]]; then
+              echo "::error::Production deployment requires DEPLOY_PRODUCTION confirmation"
+              exit 1
+            fi
+            git fetch --no-tags origin main
+            main_sha="$(git rev-parse origin/main)"
+            if [[ "$main_sha" != "$RELEASE_SHA" ]]; then
+              echo "::error::Production deployment is allowed only for the exact current main commit"
+              exit 1
+            fi
+          fi
+
+      - name: Verify deployment credential availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${VERCEL_TOKEN:-}" ]]; then
+            echo "::error::GitHub Actions secret VERCEL_TOKEN is not configured"
+            exit 1
+          fi
+
+      - name: Install pinned Vercel CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global "vercel@${VERCEL_CLI_VERSION}"
+          vercel --version
+
+      - name: Pull Vercel environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          vercel pull --yes --environment="$TARGET" --token="$VERCEL_TOKEN"
+
+      - name: Build exact release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$TARGET" == "production" ]]; then
+            vercel build --prod --token="$VERCEL_TOKEN"
+          else
+            vercel build --token="$VERCEL_TOKEN"
+          fi
+
+      - name: Deploy prebuilt output
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$TARGET" == "production" ]]; then
+            raw_output="$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")"
+          else
+            raw_output="$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")"
+          fi
+          deployment_url="$(printf '%s\n' "$raw_output" | grep -Eo 'https://[^[:space:]]+\.vercel\.app' | tail -n 1)"
+          if [[ -z "$deployment_url" ]]; then
+            echo "::error::Vercel deployment URL was not found in CLI output"
+            exit 1
+          fi
+          echo "DEPLOYMENT_URL=$deployment_url" >> "$GITHUB_ENV"
+          echo "deployment_url=$deployment_url" >> "$GITHUB_OUTPUT"
+
+      - name: Live smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location "$DEPLOYMENT_URL/" --output /tmp/dpp-home.html
+          curl --fail --silent --show-error --location "$DEPLOYMENT_URL/data/master-plan.json" --output /tmp/dpp-master-plan.json
+          grep -q "DPP Autopilot" /tmp/dpp-home.html
+          python3 -m json.tool /tmp/dpp-master-plan.json >/dev/null
+
+      - name: Write deployment receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          python3 - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          receipt = {
+              "project": "DPP Autopilot",
+              "repository": "SoulFlameAdmin/DPPautopilot",
+              "vercel_project_id": os.environ["VERCEL_PROJECT_ID"],
+              "vercel_org_id": os.environ["VERCEL_ORG_ID"],
+              "target": os.environ["TARGET"],
+              "release_sha": os.environ["RELEASE_SHA"],
+              "deployment_url": os.environ["DEPLOYMENT_URL"],
+              "workflow_run_id": os.environ["GITHUB_RUN_ID"],
+              "smoke": {
+                  "home_200": True,
+                  "master_plan_json_200": True,
+                  "master_plan_json_parseable": True
+              },
+              "created_at": datetime.now(timezone.utc).isoformat()
+          }
+          with open("artifacts/f08-vercel-deployment-receipt.json", "w", encoding="utf-8") as handle:
+              json.dump(receipt, handle, indent=2, sort_keys=True)
+              handle.write("\n")
+          PY
+
+      - name: Upload deployment receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: f08-vercel-deployment-receipt-${{ inputs.target }}
+          path: artifacts/f08-vercel-deployment-receipt.json
+          if-no-files-found: error
+
+      - name: Deployment summary
+        shell: bash
+        run: |
+          {
+            echo "## DPP Vercel deployment"
+            echo
+            echo "- Target: `$TARGET`"
+            echo "- Release SHA: `$RELEASE_SHA`"
+            echo "- URL: $DEPLOYMENT_URL"
+            echo "- Smoke: home PASS; master-plan JSON PASS"
+          } >> "$GITHUB_STEP_SUMMARY"
