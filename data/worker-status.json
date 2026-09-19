@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M02 organization discovery precursor merged and evidenced; continue earliest dependency-safe MVP precursor while F08/M01 remain deferred external blockers",
+  "currentTask": "M03 authorization context precursor merged and evidenced; continue earliest dependency-safe non-deploy MVP/security precursor while F08/M01 remain deferred external blockers",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #66 merged as f48f8b7884e2e3ad3e53c61374acc7a781c4bb87; exact-head CI 35475511177 SUCCESS; canonical evidence recorded in f8efd58f703750c5e7dae2593ae1db414aa2f953",
-  "nextTask": "Continue dependency-safe non-deploy MVP hardening in task order; do not retry F08 without new quota/access evidence. Prefer M03/RBAC or another RED task whose implementation can advance without M01 deployment acceptance.",
-  "message": "F08 and M01 remain external blockers, but they do not stop independent project work. D01-D14 are GREEN. M02/M03 and downstream API/security tasks have substantial partial evidence; continue real implementation/tests without status inflation, and only revisit Vercel when new evidence shows deployment can proceed.",
+  "lastCompletedTask": "PR #68 merged as c1ae0b05b35fc6905d4442189aab1c4af9c2de67; bound M03 runtime matrix PASS; exact-head CI 35476608040 SUCCESS; M25 audit 35476608038 SUCCESS",
+  "nextTask": "Continue dependency-safe non-deploy hardening without status inflation. Prefer M05/RLS or another RED task whose implementation can advance despite M01/M02 final acceptance blockers; do not retry F08 without new rate-limit/access evidence.",
+  "message": "D01-D14 are GREEN. M03 now has authoritative active-tenant role/capability discovery with bound Supabase and clean-CI proof, but remains RED by dependency because M01/M02 are not GREEN. Continue independent implementation/tests rather than stopping on F08/M01.",
   "deferredBlockers": [
     "F08 — Vercel production acceptance remains externally blocked; do not retry without new quota/access evidence and always obey the global Supabase deployment lease law.",
     "M01 — final runtime recovery password-update acceptance remains blocked on a usable deployed recovery redirect.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T02:25:00+03:00"
+  "updatedAt": "2026-09-20T02:45:00+03:00"
 }
