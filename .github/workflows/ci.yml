@@ -384,7 +384,7 @@ jobs:
         run: |
           psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
           begin;
-          \\i tests/db/test_m03_authorization_context.sql
+          \i tests/db/test_m03_authorization_context.sql
           rollback;
           SQL
       - name: Guard DPP internal RPC surface
