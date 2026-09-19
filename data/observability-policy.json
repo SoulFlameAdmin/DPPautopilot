@@ -11,6 +11,7 @@
   },
   "logged_fields": [
     "event",
+    "timestamp_ms",
     "request_id",
     "surface",
     "method",
