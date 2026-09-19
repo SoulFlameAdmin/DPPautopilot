@@ -7,10 +7,17 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==1
+assert policy.get("version")==2
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
 assert policy.get("strategy")=="process_local_fixed_window_precursor"
+memory=policy.get("memory_safety",{})
+assert memory=={
+    "max_buckets":10000,
+    "prune_interval_ms":10000,
+    "expired_bucket_eviction":True,
+    "active_bucket_cap":True,
+}
 
 rules=policy.get("rules",{})
 expected_rules={
@@ -44,6 +51,9 @@ for token in [
     "X-RateLimit-Limit",
     "X-RateLimit-Remaining",
     "X-RateLimit-Reset",
+    "identityDigest",
+    "pruneBuckets",
+    "DEFAULT_MAX_BUCKETS",
 ]:
     assert token in helper, f"R05 helper missing {token}"
 
@@ -69,6 +79,9 @@ for token in [
     "31st anonymous public passport read",
     "RATE_LIMITED",
     "retry-after",
+    "expired buckets are evicted",
+    "bucket map is hard capped",
+    "bucket keys do not retain raw IP",
 ]:
     assert token in test_text, f"R05 abuse suite missing {token}"
 
@@ -76,4 +89,4 @@ limitations=policy.get("limitations",[])
 assert any("parallel serverless isolates" in x for x in limitations)
 assert any("shared durable limiter" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: five API surfaces have versioned process-local abuse budgets, canonical 429 behavior and explicit distributed-runtime limitation")
+print("R05_RATE_LIMIT_POLICY_PASS: five API surfaces have versioned process-local abuse budgets, privacy-hashed bounded buckets, canonical 429 behavior and explicit distributed-runtime limitation")
