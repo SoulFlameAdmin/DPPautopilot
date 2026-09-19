@@ -158,14 +158,14 @@ test('bucket keys do not retain raw IP or bearer material',()=>{
   assert.ok(keys.some(key=>/^models\|authenticated_write\|credential:[0-9a-f]{24}\|0$/.test(key)));
 });
 
-test('expired buckets are evicted on later windows',()=>{
+test('expired dual buckets are evicted on later windows',()=>{
   const rules={authenticated_write:{limit:2,window_seconds:60}};
   limiter.checkRateLimit(req('POST',{},{} ,'Bearer a','203.0.113.1'),'models',{rules,nowMs:1000,maxBuckets:10});
   limiter.checkRateLimit(req('POST',{},{} ,'Bearer b','203.0.113.2'),'models',{rules,nowMs:2000,maxBuckets:10});
-  assert.equal(limiter._test.buckets.size,2);
+  assert.equal(limiter._test.buckets.size,4);
 
   limiter.checkRateLimit(req('POST',{},{} ,'Bearer c','203.0.113.3'),'models',{rules,nowMs:61000,maxBuckets:10});
-  assert.equal(limiter._test.buckets.size,1);
+  assert.equal(limiter._test.buckets.size,2);
 });
 
 test('bucket map is hard capped during unique-identity flood',()=>{
