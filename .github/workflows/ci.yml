@@ -321,6 +321,16 @@ jobs:
           \i tests/db/test_tenant_context_api_subset.sql
           rollback;
           SQL
+      - name: Run M05 active tenant API isolation
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_active_tenant_api_isolation_subset.sql
+          rollback;
+          SQL
       - name: Run M17 models RPC tenant/RBAC subset
         env:
           PGPASSWORD: postgres
