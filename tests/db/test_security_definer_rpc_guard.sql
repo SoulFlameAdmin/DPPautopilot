@@ -96,7 +96,7 @@ begin
       'dpp_evidence_storage_org_id(text)',
       'dpp_evidence_storage_registered(text)',
       'dpp_has_org_role(uuid,text[])',
-      'dpp_request_user_id()',
+      'dpp_request_user_id()'
     );
 
   if v_auth_extra is not null then
@@ -105,7 +105,6 @@ begin
 
   with required(signature) as (
     values
-      ('dpp_active_organization_id()'),
       ('dpp_api_models_create(text,text,text,jsonb)'),
       ('dpp_api_models_delete(uuid)'),
       ('dpp_api_models_list()'),
@@ -130,9 +129,7 @@ begin
       ('dpp_evidence_storage_org_id(text)'),
       ('dpp_evidence_storage_registered(text)'),
       ('dpp_has_org_role(uuid,text[])'),
-      ('dpp_request_user_id()'),
-      ('dpp_require_active_role(text[])'),
-      ('dpp_set_active_organization(uuid)')
+      ('dpp_request_user_id()')
   )
   select string_agg(r.signature,', ' order by r.signature)
     into v_auth_missing
