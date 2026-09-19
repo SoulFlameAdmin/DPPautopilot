@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "task": "T10",
+  "title": "Full regression gate precursor",
+  "suites": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T06",
+    "T07",
+    "T08",
+    "T09"
+  ],
+  "rule": "CI report may be generated only after the full clean-checkout workflow reaches the end successfully.",
+  "final_acceptance": {
+    "all_suite_tasks_green": false,
+    "release_ci_run": false
+  }
+}
