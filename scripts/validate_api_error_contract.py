@@ -26,7 +26,7 @@ for sqlstate,entry in contract.get("common_sqlstate",{}).items():
     seen_surface_entries+=1
 
 for surface,mapping in contract.get("surfaces",{}).items():
-    assert surface in {"models","items","passport","export"}, f"unexpected surface {surface}"
+    assert surface in {"models","items","passport","export","imports"}, f"unexpected surface {surface}"
     for sqlstate,entry in mapping.items():
         assert sql_re.match(sqlstate), f"invalid {surface} SQLSTATE {sqlstate}"
         assert entry["http_status"] in valid_status
@@ -40,11 +40,11 @@ helper=(ROOT/"api/_errors.js").read_text(encoding="utf-8")
 for token in ["api-error-contract.json","mapDatabaseError","localError","errorBody","contract.default"]:
     assert token in helper, f"shared error helper missing {token}"
 
-for name in ["models","items","passport","export"]:
+for name in ["models","items","passport","export","imports"]:
     text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
     assert "require('./_errors.js')" in text, f"{name} API does not import shared M22 error helper"
     assert f"mapSharedDatabaseError('{name}'" in text, f"{name} API does not declare its shared error surface"
     assert "error.publicMessage" in text, f"{name} API does not preserve canonical public message"
     assert not re.search(r"if\s*\(\s*code\s*===?\s*['\"]DP\d{3}",text), f"{name} API still hardcodes DP SQLSTATE mapping"
 
-print(f"M22_API_ERROR_CONTRACT_PASS: {seen_surface_entries} SQLSTATE mappings centralized across 4 API surfaces")
+print(f"M22_API_ERROR_CONTRACT_PASS: {seen_surface_entries} SQLSTATE mappings centralized across 5 API surfaces")
