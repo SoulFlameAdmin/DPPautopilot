@@ -3,6 +3,7 @@
 
 const test=require('node:test');
 const assert=require('node:assert/strict');
+const tenant=require('../../api/tenant.js');
 const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
@@ -51,7 +52,7 @@ test('shared parser rejects malformed JSON and unserializable objects',()=>{
   );
 });
 
-for(const [name,handler] of [['models',models],['items',items],['passport',passport]]){
+for(const [name,handler] of [['tenant',tenant],['models',models],['items',items],['passport',passport]]){
   test(`${name} rejects >1 MiB parsed object before upstream DB access`,async()=>{
     const original=global.fetch;
     let called=false;
@@ -65,6 +66,23 @@ for(const [name,handler] of [['models',models],['items',items],['passport',passp
     }finally{global.fetch=original;}
   });
 }
+
+test('tenant rejects malformed JSON and invalid organization id locally before upstream',async()=>{
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('upstream must not be called');};
+  try{
+    let res=makeRes();
+    await tenant(req('POST','{"bad":'),res);
+    assertError(res,400,'INVALID_JSON');
+
+    res=makeRes();
+    await tenant(req('POST',{organization_id:'not-a-uuid'}),res);
+    assertError(res,422,'INVALID_ORGANIZATION_ID');
+
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
+});
 
 test('models rejects malformed JSON and oversized/invalid fields locally',async()=>{
   let res=makeRes();
