@@ -60,7 +60,11 @@ test('availability alert stays clear below threshold and below minimum sample si
   let result=monitoring.evaluateMonitoring(events,{nowMs:NOW});
   assert.equal(alert(result,'availability_5xx_rate').active,false);
 
-  events=Array.from({length:10},(_,i)=>event(i,{status:i===9?500:200}));
+  events=Array.from({length:10},(_,i)=>event(i,{
+    status:i===9?500:200,
+    outcome:i===9?'server_error':'success',
+    error_code:i===9?'UPSTREAM_ERROR':null
+  }));
   result=monitoring.evaluateMonitoring(events,{nowMs:NOW});
   const a=alert(result,'availability_5xx_rate');
   assert.equal(a.value,0.1);
@@ -82,11 +86,11 @@ test('five consecutive 5xx failures fire the acute critical signal',()=>{
 
 test('an intervening successful response breaks a 5xx streak',()=>{
   const events=[
-    event(0,{status:500}),
-    event(1,{status:500}),
-    event(2,{status:200}),
-    event(3,{status:500}),
-    event(4,{status:500})
+    event(0,{status:500,outcome:'server_error',error_code:'UPSTREAM_ERROR'}),
+    event(1,{status:500,outcome:'server_error',error_code:'UPSTREAM_ERROR'}),
+    event(2,{status:200,outcome:'success',error_code:null}),
+    event(3,{status:500,outcome:'server_error',error_code:'UPSTREAM_ERROR'}),
+    event(4,{status:500,outcome:'server_error',error_code:'UPSTREAM_ERROR'})
   ];
   const result=monitoring.evaluateMonitoring(events,{nowMs:NOW});
   const a=alert(result,'consecutive_5xx');
