@@ -645,6 +645,24 @@ jobs:
             'http://127.0.0.1:8000/demo/settings.html?sample=1'
           python scripts/validate_core_navigation.py artifacts/d01-dom.html artifacts/u01-settings-dom.html
 
+          # U02 deterministic async-state evidence: every async core view must expose
+          # loading / empty / success / error states in a real browser.
+          for STATE in loading empty success error; do
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --dump-dom "http://127.0.0.1:8000/?state=${STATE}" > "artifacts/u02-dashboard-${STATE}.html"
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --dump-dom "http://127.0.0.1:8000/demo/model.html?state=${STATE}&sample=1" > "artifacts/u02-model-${STATE}.html"
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --dump-dom "http://127.0.0.1:8000/demo/item.html?state=${STATE}&sample=1" > "artifacts/u02-item-${STATE}.html"
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --dump-dom "http://127.0.0.1:8000/demo/import.html?state=${STATE}&sample=1" > "artifacts/u02-import-${STATE}.html"
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --dump-dom "http://127.0.0.1:8000/demo/import-validation.html?state=${STATE}" > "artifacts/u02-import-validation-${STATE}.html"
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+              --dump-dom "http://127.0.0.1:8000/demo/passport.html?state=${STATE}&id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001" > "artifacts/u02-passport-${STATE}.html"
+          done
+          python scripts/validate_u02_async_states.py artifacts
+
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
             --dump-dom 'http://127.0.0.1:8000/demo/import.html?sample=1' > artifacts/d03-import-dom.html
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
