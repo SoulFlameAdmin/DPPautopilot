@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "task": "C09",
+  "status": "partial",
+  "source_budget": "data/load-test-policy.json",
+  "performance_target": {
+    "environment": "preview",
+    "production_like": true,
+    "uses_production_customer_data": false,
+    "uses_production_database": false
+  },
+  "budgets": {
+    "multi_surface": {
+      "minimum_requests": 200,
+      "minimum_concurrency": 25,
+      "max_error_rate": 0,
+      "max_p95_ms": 2000
+    },
+    "import_volume": {
+      "minimum_rows": 1000,
+      "max_elapsed_ms": 3000
+    }
+  },
+  "decision": {
+    "default": "deny",
+    "require_exact_c07_commit": true,
+    "require_t07_pass": true
+  },
+  "live_state": {
+    "performance_acceptance_executed": false,
+    "deployment_lease_required_for_this_precursor": false
+  },
+  "remaining": [
+    "T07 and C07 must be GREEN.",
+    "A real production-like non-production preview/staging environment must exist for the exact C07 commit.",
+    "Real HTTP/TLS/Vercel/Supabase/cold-start performance metrics must satisfy the versioned budgets.",
+    "Final operational SLOs may tighten these precursor budgets before production acceptance."
+  ]
+}
