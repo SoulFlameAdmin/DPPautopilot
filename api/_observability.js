@@ -67,6 +67,7 @@ function startRequestObservability(req,res,surface,options={}){
       const status=Number.isInteger(res.statusCode)?res.statusCode:200;
       const event={
         event:'dpp_http_request',
+        timestamp_ms:now(),
         request_id:requestId,
         surface,
         method:context.method,
