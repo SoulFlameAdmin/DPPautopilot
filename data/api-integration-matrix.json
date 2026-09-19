@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "task": "T03",
+  "status": "partial",
+  "dependencies": [
+    "M17",
+    "M18",
+    "M19",
+    "M20",
+    "M21",
+    "M22",
+    "M23"
+  ],
+  "scope": "In-process stateful integration of DPP serverless handlers and shared contracts. T03 remains RED until dependencies are GREEN and deployed HTTP integration is proven.",
+  "scenarios": [
+    {
+      "id": "protected_auth_boundary",
+      "covers": [
+        "M17",
+        "M18",
+        "M19",
+        "M20",
+        "M21"
+      ],
+      "expected": "protected handlers reject missing bearer before upstream"
+    },
+    {
+      "id": "model_item_passport_journey",
+      "covers": [
+        "M17",
+        "M18",
+        "M19"
+      ],
+      "expected": "create model -> create item -> create/activate passport -> public/private reads"
+    },
+    {
+      "id": "import_transaction_journey",
+      "covers": [
+        "M20",
+        "M22",
+        "M23"
+      ],
+      "expected": "stage -> validate -> commit -> repeated commit -> get preserves idempotent state"
+    },
+    {
+      "id": "export_journey",
+      "covers": [
+        "M21"
+      ],
+      "expected": "authenticated export reflects stateful model/item/passport records"
+    },
+    {
+      "id": "semantic_not_found_errors",
+      "covers": [
+        "M18",
+        "M19",
+        "M20",
+        "M22"
+      ],
+      "expected": "missing linked/model/passport/import resources map to stable 404 codes"
+    },
+    {
+      "id": "conflicting_write_errors",
+      "covers": [
+        "M17",
+        "M22",
+        "M23"
+      ],
+      "expected": "duplicate model write maps to stable 409 without upstream detail leak"
+    },
+    {
+      "id": "invalid_import_commit",
+      "covers": [
+        "M20",
+        "M22"
+      ],
+      "expected": "validated-invalid import cannot commit and maps to stable 409"
+    },
+    {
+      "id": "public_privacy_boundary",
+      "covers": [
+        "M19"
+      ],
+      "expected": "public passport response strips backend-only private/tenant metadata"
+    }
+  ],
+  "executable_test": "tests/api/integration.test.cjs",
+  "validator": "scripts/validate_api_integration_matrix.py",
+  "remaining": [
+    "Deployed preview/production HTTP integration awaits a functioning Git→Vercel deployment path and full acceptance of M17-M23 dependencies."
+  ]
+}
