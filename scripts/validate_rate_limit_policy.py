@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==2
+assert policy.get("version")==3
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
 assert policy.get("strategy")=="process_local_fixed_window_precursor"
@@ -33,7 +33,7 @@ for name,(limit,window) in expected_rules.items():
     assert rules[name]["window_seconds"]==window
 
 surfaces=policy.get("surfaces",{})
-assert set(surfaces)=={"models","items","passport","imports","export"}
+assert set(surfaces)=={"tenant","models","items","passport","imports","export"}
 
 response=policy.get("response",{})
 assert response.get("http_status")==429
@@ -57,7 +57,7 @@ for token in [
 ]:
     assert token in helper, f"R05 helper missing {token}"
 
-for surface in ["models","items","passport","imports","export"]:
+for surface in ["tenant","models","items","passport","imports","export"]:
     text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
     assert "require('./_rate_limit.js')" in text, f"{surface} does not import R05 limiter"
     call=f"enforceRateLimit(req,res,'{surface}')"
@@ -77,6 +77,7 @@ for token in [
     "R05_RATE_LIMIT_PRECURSOR_PASS",
     "41st authenticated model write",
     "31st anonymous public passport read",
+    "41st authenticated tenant context write",
     "RATE_LIMITED",
     "retry-after",
     "expired buckets are evicted",
@@ -89,4 +90,4 @@ limitations=policy.get("limitations",[])
 assert any("parallel serverless isolates" in x for x in limitations)
 assert any("shared durable limiter" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: five API surfaces have versioned process-local abuse budgets, privacy-hashed bounded buckets, canonical 429 behavior and explicit distributed-runtime limitation")
+print("R05_RATE_LIMIT_POLICY_PASS: six API surfaces have versioned process-local abuse budgets, privacy-hashed bounded buckets, canonical 429 behavior and explicit distributed-runtime limitation")
