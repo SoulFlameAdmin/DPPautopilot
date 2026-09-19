@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "C04 — database migration deployment gate precursor analysis",
+  "currentTask": "C05 — rollback procedure precursor analysis",
   "currentGate": "RELEASE",
-  "lastCompletedTask": "C03 partial production promotion precursor — CI 35414115623 SUCCESS",
-  "nextTask": "Version and validate a fail-closed migration release gate that binds migration inventory/checksum/application evidence to the exact release commit without deploying; keep C04 RED while C03 is RED.",
-  "message": "D01-D14 remain GREEN. C03 now has evidence-backed fail-closed production promotion rules but remains RED pending C02 and live promotion evidence. Next useful precursor is C04 migration deployment gate. F08/M01 remain deferred. No Vercel deploy attempted. DAVID orchestrator files untouched.",
+  "lastCompletedTask": "C04 partial migration deployment gate precursor — CI 35414390408 SUCCESS",
+  "nextTask": "Define and test fail-closed application rollback plus database forward-fix/restore decision procedure without production deployment; keep C05 RED while C03/C04 are RED and no live rollback drill exists.",
+  "message": "D01-D14 remain GREEN. C04 now has evidence-backed commit-bound migration gating but remains RED pending C03 and release-time deployment evidence. F08/M01 remain deferred. No Vercel deploy or database mutation attempted. DAVID orchestrator files untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T06:03:00+03:00"
+  "updatedAt": "2026-09-19T06:12:00+03:00"
 }
