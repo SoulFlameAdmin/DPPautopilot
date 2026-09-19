@@ -327,7 +327,7 @@
           "acceptanceCriteria": "Cross-tenant reads/writes are denied by database policy",
           "evidenceRequired": "Negative security tests",
           "status": "red",
-          "evidence": "PARTIAL tenant/RBAC RLS precursor: policies applied to bound Supabase while direct `anon`/`authenticated` table grants remain revoked. Real rollback security matrix returned `M05_RLS_POLICY_SUBSET_PASS` with owner own-tenant visibility, cross-tenant read/write denial, viewer read-only behavior and other-tenant isolation; synthetic auth users rolled back to zero. Clean PostgreSQL full CI `35399659669` on `c2514191a5558a06b8332b61c81c54b293d9d093` SUCCESS after fixing test transaction semantics; artifact `10569033696`. M05 remains RED until M02/M03 are GREEN and policies are exercised through real authenticated app/API paths. — PARTIAL PASS"
+          "evidence": "PARTIAL RLS/tenant isolation now includes bound Supabase multi-membership active-context regression M05_ACTIVE_TENANT_API_ISOLATION_PASS: same user in two organisations sees exactly the selected tenant through models/items/export RPCs and no previous-tenant leakage after switching. Existing table-RLS negative matrix remains valid. CI wiring commit c78f78c3e1074dd2dd19b0f8b7afd4ec12877788 exists but Actions PASS is not yet surfaced. M05 remains RED because M02/M03 are not GREEN. — PARTIAL PASS"
         },
         {
           "id": "M06",
