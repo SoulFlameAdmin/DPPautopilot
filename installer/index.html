@@ -16,16 +16,25 @@
  ];
  const toEn=new Map(pairs.map(([bg,en])=>[bg,en])),toBg=new Map(pairs.flatMap(([bg,en])=>[[en,bg],[bg,bg]]));
  function mapText(v,lang){const t=v.trim();if(!t)return v;const m=(lang==="en"?toEn:toBg).get(t);return m?v.replace(t,m):v}
+ let obs=null,applying=false;
  function apply(lang){
-   document.documentElement.lang=lang;localStorage.setItem("dpp-language",lang);
-   const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
-   while((n=w.nextNode())){const tag=n.parentElement?.tagName;if(tag==="SCRIPT"||tag==="STYLE")continue;n.nodeValue=mapText(n.nodeValue,lang)}
-   document.querySelectorAll("[data-lang-toggle]").forEach(b=>{b.textContent=lang==="bg"?"BG / EN":"EN / BG";b.title=lang==="bg"?"Смени на English":"Switch to Български"});
+   if(applying)return;
+   applying=true;
+   if(obs)obs.disconnect();
+   try{
+     document.documentElement.lang=lang;localStorage.setItem("dpp-language",lang);
+     const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
+     while((n=w.nextNode())){const tag=n.parentElement?.tagName;if(tag==="SCRIPT"||tag==="STYLE")continue;const next=mapText(n.nodeValue,lang);if(next!==n.nodeValue)n.nodeValue=next}
+     document.querySelectorAll("[data-lang-toggle]").forEach(b=>{const text=lang==="bg"?"BG / EN":"EN / BG",title=lang==="bg"?"Смени на English":"Switch to Български";if(b.textContent!==text)b.textContent=text;if(b.title!==title)b.title=title});
+   }finally{
+     applying=false;
+     if(obs)obs.observe(document.body,{childList:true,subtree:true});
+   }
  }
  const initial=localStorage.getItem("dpp-language")==="en"?"en":"bg";
  document.addEventListener("click",e=>{if(e.target.closest("[data-lang-toggle]"))apply(document.documentElement.lang==="bg"?"en":"bg")});
- const obs=new MutationObserver(()=>apply(document.documentElement.lang==="en"?"en":"bg"));
- window.addEventListener("DOMContentLoaded",()=>{apply(initial);obs.observe(document.body,{childList:true,subtree:true});});
+ obs=new MutationObserver(()=>apply(document.documentElement.lang==="en"?"en":"bg"));
+ window.addEventListener("DOMContentLoaded",()=>apply(initial));
 })();
 </script>
 </body></html>
