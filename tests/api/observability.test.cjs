@@ -5,6 +5,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const obs=require('../../api/_observability.js');
 const models=require('../../api/models.js');
+const tenant=require('../../api/tenant.js');
 
 function makeRes(){
   return {
@@ -170,4 +171,32 @@ test('real models validation path never logs bearer or submitted payload',async(
   for(const forbidden of ['ultra-secret-token','Sensitive Manufacturer','secret-payload','model_identifier']){
     assert.equal(raw.includes(forbidden),false,forbidden);
   }
+});
+
+
+test('real tenant handler emits correlated redacted 401 structured event',async()=>{
+  const res=makeRes();
+  const originalWarn=console.warn;
+  const captured=[];
+  console.warn=(line)=>captured.push(String(line));
+  try{
+    await tenant({
+      method:'GET',
+      headers:{'x-request-id':'tenant-401-test'},
+      query:{organization_id:'must-not-appear'}
+    },res);
+  }finally{
+    console.warn=originalWarn;
+  }
+
+  assert.equal(res.statusCode,401);
+  assert.equal(res.headers['x-request-id'],'tenant-401-test');
+  assert.equal(captured.length,1);
+  const event=JSON.parse(captured[0]);
+  assert.equal(event.surface,'tenant');
+  assert.equal(event.status,401);
+  assert.equal(event.error_code,'AUTH_REQUIRED');
+  assert.equal(event.auth_present,false);
+  assert.equal(captured[0].includes('must-not-appear'),false);
+  assert.equal(captured[0].includes('Bearer authentication'),false);
 });
