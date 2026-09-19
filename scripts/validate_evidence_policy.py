@@ -47,7 +47,7 @@ edge=storage["edge_function"]
 assert edge["name"]=="dpp-evidence-object"
 assert edge["source"]=="supabase/functions/dpp-evidence-object/index.ts"
 assert edge["verify_jwt"] is True
-assert edge["service_role_allowed"] is False
+assert edge["privileged_server_key_allowed"] is False
 assert edge["operations"]==["upload","download","delete"]
 assert edge["overwrite_allowed"] is False
 assert edge["runtime_acceptance_required"] is True
