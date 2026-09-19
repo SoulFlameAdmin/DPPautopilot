@@ -289,6 +289,10 @@ jobs:
           \i tests/db/test_optimistic_concurrency_subset.sql
           rollback;
           SQL
+      - name: Guard DPP transition helper search paths
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_transition_helper_search_path.sql
       - name: Run M22 import error contract subset
         env:
           PGPASSWORD: postgres
