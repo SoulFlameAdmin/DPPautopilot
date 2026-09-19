@@ -352,3 +352,15 @@ Append evidence here only after verification.
 - Cross-browser run `35450988219` SUCCESS; artifact `10587340403` records 30/30 engine/surface passes with one main landmark, one H1, no horizontal overflow, readiness markers true where applicable and no page errors.
 - Standard full CI `35450988227` SUCCESS; U06 implementation merged as `52437f8d404e2a643bcea219914f54ccf1d3a874`.
 - U06 remains RED/PARTIAL because U04 is not GREEN and deployed production cross-browser acceptance is not yet available. No Vercel deployment was attempted.
+
+
+### U07 deterministic visual regression precursor — 2026-09-19
+- Pinned Chromium 153.0.8010.12 renders 10 key routes at 1440×1000 with animations disabled, reduced motion and explicit dashboard dynamic-field normalization.
+- Visual candidate artifact `10586867949` from run `35452567110` was reviewed; all 10 key routes were visually clean and pass A/B SHA-256 pairs matched byte-for-byte.
+- Approved hashes live in `data/u07-visual-baseline.json`; `scripts/validate_u07_visual_regression.py` rejects route/browser/viewport/normalization/hash drift.
+- Enforcement run `35453421926` SUCCESS; full CI `35453421923` SUCCESS; cross-browser `35453421922` SUCCESS. Implementation merged as `5c5ed0ef57fbd67e4a0b498e62954a4df0e56d4c`.
+- U07 remains RED/PARTIAL because U04 is not GREEN and deployed production visual acceptance is unavailable.
+
+### T05/T06 suite precursors — 2026-09-19
+- T05: U04 phone/tablet/desktop measured responsive matrix + U07 approved hash-enforced visual baselines form a real local/CI visual-responsive suite; dependencies remain RED and production viewport acceptance is unavailable.
+- T06: pinned Playwright Chromium/Firefox/WebKit matrix covers 30 engine/surface flows with repeated SUCCESS runs `35450988219` and `35453421922`; dependency U06 remains RED and deployed critical E2E is unavailable.
