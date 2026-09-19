@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "Dependency frontier audit after T10 precursor",
-  "currentGate": "TESTING",
-  "lastCompletedTask": "T10 clean-checkout regression precursor merged via PR #53; exact-head CI 35455189633 SUCCESS",
-  "nextTask": "No RED task currently has all declared dependencies GREEN. Preserve dependency order and do not retry F08/M01/M13 without new unblock evidence; on the next evidence change, resume from the earliest newly dependency-safe task.",
-  "message": "T10 precursor is implemented, exact-head tested and merged. It remains RED/PARTIAL by design because T01-T09 are not GREEN and release/production acceptance is unavailable. Current tracker audit found zero RED tasks whose declared dependencies are all GREEN. No Vercel deployment or Supabase mutation occurred; DAVID orchestrator files remain untouched.",
+  "currentTask": "M25 acceptance audit precursor evidence finalized",
+  "currentGate": "MVP",
+  "lastCompletedTask": "M25 acceptance audit precursor merged via PR #54; exact-head audit 35455555115 SUCCESS and full CI 35455555085 SUCCESS",
+  "nextTask": "Re-audit dependency frontier after M25 evidence merge. Do not retry F08/M01/M13 without new unblock evidence.",
+  "message": "M25 precursor is implemented on current main and fail-closed by design: it inventories M01-M24 evidence and explicitly keeps final MVP acceptance false until dependencies, preview E2E, and zero P0/P1 evidence are proven. No Vercel deployment or Supabase mutation occurred; DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T19:35:00+03:00"
+  "updatedAt": "2026-09-19T19:42:00+03:00"
 }
