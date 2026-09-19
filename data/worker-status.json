@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "R10 monitoring event-contract hardening",
-  "currentGate": "SECURITY",
-  "lastCompletedTask": "R09 fail-open observability hardening + full CI 35426593849 SUCCESS",
-  "nextTask": "Harden R10 evaluator against malformed R09 event poisoning, test it, then return to the external dependency frontier.",
-  "message": "R09 policy v3 is fail-open and full CI 35426593849 is SUCCESS. Continuing dependency-safe non-deploy hardening on R10 event validation. F08/M01 remain deferred external blockers; no Vercel deployment occurred and DAVID orchestrator files remain untouched.",
+  "currentTask": "External dependency frontier after R10 event-contract hardening",
+  "currentGate": "MVP",
+  "lastCompletedTask": "R10 strict event-contract hardening + full CI 35426858786 SUCCESS",
+  "nextTask": "Do not retry F08/M01 without new unblock evidence. Continue dependency-safe non-deploy product/security precursors; prioritize real onboarding gaps over cosmetic work.",
+  "message": "R10 now rejects malformed R09 events before monitoring calculations and full CI 35426858786 is SUCCESS. R05 paired network/credential limiter evidence is also current. F08/M01 remain external blockers; no Vercel deploy/redeploy occurred, so no deploy lease was required. DAVID orchestrator files remain untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment path/hook evidence; deferred until new Vercel/Git integration evidence exists.",
     "M01 — final runtime recovery password-update acceptance requires a real deployed recovery redirect; deferred while F08 blocks the delivery path.",
     "M13 — real authenticated Storage API byte upload/download/delete acceptance remains unproven because no direct Storage object action is available in the current Supabase connector; SQL/RLS metadata evidence is not treated as a substitute."
   ],
-  "updatedAt": "2026-09-19T09:31:00+03:00"
+  "updatedAt": "2026-09-19T09:36:00+03:00"
 }
