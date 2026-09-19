@@ -24,7 +24,7 @@ begin
         'name',o.name,
         'slug',o.slug,
         'role',m.role,
-        'active',(ctx.active_organization_id=o.id)
+        'active',coalesce(ctx.active_organization_id=o.id,false)
       )
       order by
         case when ctx.active_organization_id=o.id then 0 else 1 end,
