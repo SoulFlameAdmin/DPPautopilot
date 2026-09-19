@@ -161,7 +161,8 @@ test('passport rejects invalid identifiers, ids, status and payload shapes local
   res=makeRes();
   await passport(req('PATCH',{
     id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-    status:'invalid'
+    status:'invalid',
+    expected_updated_at:'2026-09-19T04:00:00.000Z'
   }),res);
   assertError(res,422,'VALIDATION_ERROR');
 });
