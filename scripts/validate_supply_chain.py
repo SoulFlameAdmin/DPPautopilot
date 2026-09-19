@@ -5,8 +5,12 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
-requirements = (ROOT / "requirements-ci.txt").read_text(encoding="utf-8").splitlines()
+workflow_dir = ROOT / ".github" / "workflows"
+workflow_paths = sorted(workflow_dir.glob("*.yml"))
+requirement_paths = [
+    ROOT / "requirements-ci.txt",
+    ROOT / "requirements-browser.txt",
+]
 doc = (ROOT / "docs/R14_SUPPLY_CHAIN.md").read_text(encoding="utf-8")
 
 EXPECTED = {
@@ -19,8 +23,11 @@ def require(condition: bool, message: str) -> None:
     if not condition:
         raise AssertionError(message)
 
-uses = re.findall(r"^\s*uses:\s*([^\s#]+)", workflow, flags=re.MULTILINE)
-require(uses, "R14 workflow has no external action references")
+require(workflow_paths, "R14 workflow inventory is empty")
+workflow_texts={path:path.read_text(encoding="utf-8") for path in workflow_paths}
+combined_workflows="\n".join(workflow_texts.values())
+uses = re.findall(r"^\s*uses:\s*([^\s#]+)", combined_workflows, flags=re.MULTILINE)
+require(uses, "R14 workflows have no external action references")
 
 for ref in uses:
     require("@" in ref, f"R14 malformed action reference: {ref}")
@@ -30,18 +37,31 @@ for ref in uses:
         require(revision == EXPECTED[action], f"R14 unexpected pin for {action}: {revision}")
 
 for action, sha in EXPECTED.items():
-    require(f"{action}@{sha}" in workflow, f"R14 expected action pin missing: {action}@{sha}")
+    require(f"{action}@{sha}" in combined_workflows, f"R14 expected action pin missing: {action}@{sha}")
 
-pins = [line.strip() for line in requirements if line.strip() and not line.lstrip().startswith("#")]
-require(pins, "R14 requirements-ci.txt is empty")
-for line in pins:
-    require("==" in line, f"R14 Python dependency must use exact == pin: {line}")
-    name, version = line.split("==", 1)
-    require(name.strip() and version.strip(), f"R14 malformed requirement pin: {line}")
+all_pins=[]
+for path in requirement_paths:
+    require(path.is_file(), f"R14 requirements file missing: {path.name}")
+    lines=path.read_text(encoding="utf-8").splitlines()
+    pins=[line.strip() for line in lines if line.strip() and not line.lstrip().startswith("#")]
+    require(pins, f"R14 {path.name} is empty")
+    for line in pins:
+        require("==" in line, f"R14 Python dependency must use exact == pin in {path.name}: {line}")
+        name, version = line.split("==", 1)
+        require(name.strip() and version.strip(), f"R14 malformed requirement pin in {path.name}: {line}")
+    all_pins.extend(pins)
 
-require("pip-audit==2.10.1" in pins, "R14 pinned pip-audit dependency missing")
-require("qrcode[pil]==8.2" in pins, "R14 pinned QR dependency missing")
-require("python -m pip_audit -r requirements-ci.txt" in workflow, "R14 CI dependency audit step missing")
+require("pip-audit==2.10.1" in all_pins, "R14 pinned pip-audit dependency missing")
+require("qrcode[pil]==8.2" in all_pins, "R14 pinned QR dependency missing")
+require("playwright==1.63.0" in all_pins, "R14 pinned U06 Playwright dependency missing")
+require("python -m pip_audit -r requirements-ci.txt" in combined_workflows, "R14 CI dependency audit step missing")
+require("python -m pip_audit -r requirements-browser.txt" in combined_workflows, "R14 browser dependency audit step missing")
+require("python -m playwright install --with-deps chromium firefox webkit" in combined_workflows,
+        "R14 U06 browser install contract missing")
 require("immutable" in doc.lower() and "known vulnerability" in doc.lower(), "R14 documentation incomplete")
 
-print(f"R14_SUPPLY_CHAIN_PASS: {len(uses)} GitHub Action references are immutable-SHA pinned and {len(pins)} Python CI dependencies are exact-version pinned with pip-audit enforcement")
+print(
+    f"R14_SUPPLY_CHAIN_PASS: {len(uses)} action references across {len(workflow_paths)} workflows "
+    f"are immutable-SHA pinned and {len(all_pins)} exact Python pins across {len(requirement_paths)} "
+    "requirements files are dependency-audited"
+)
