@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "C03 — production promotion policy precursor analysis",
+  "currentTask": "C04 — database migration deployment gate precursor analysis",
   "currentGate": "RELEASE",
-  "lastCompletedTask": "C02 partial no-deploy preview verification precursor — CI 35413805729 SUCCESS",
-  "nextTask": "Version and validate a fail-closed production promotion policy using existing branch/environment/migration evidence without deploying; keep C03 RED while C02 is RED.",
-  "message": "D01-D14 remain GREEN. C02 now has a fail-closed preview evidence verifier and read-only proof that canonical dpp-autopilot currently has zero deployments; it remains RED pending C01 and real preview smoke. Next useful precursor is C03 promotion policy. F08/M01 remain deferred. No Vercel deploy attempted. DAVID orchestrator files untouched.",
+  "lastCompletedTask": "C03 partial production promotion precursor — CI 35414115623 SUCCESS",
+  "nextTask": "Version and validate a fail-closed migration release gate that binds migration inventory/checksum/application evidence to the exact release commit without deploying; keep C04 RED while C03 is RED.",
+  "message": "D01-D14 remain GREEN. C03 now has evidence-backed fail-closed production promotion rules but remains RED pending C02 and live promotion evidence. Next useful precursor is C04 migration deployment gate. F08/M01 remain deferred. No Vercel deploy attempted. DAVID orchestrator files untouched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T05:55:00+03:00"
+  "updatedAt": "2026-09-19T06:03:00+03:00"
 }
