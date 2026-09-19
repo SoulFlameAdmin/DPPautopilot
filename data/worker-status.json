@@ -2,14 +2,14 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "R06 — auth security review precursor",
+  "currentTask": "R07 — privacy data inventory precursor",
   "currentGate": "SECURITY",
-  "lastCompletedTask": "R05 partial rate-limit/abuse-control precursor — CI 35408889300 SUCCESS",
-  "nextTask": "Review and test auth/session/recovery/redirect security defaults without marking R06 GREEN until M01/M03 are fully accepted and runtime recovery is deployed.",
-  "message": "D01-D14 remain GREEN. R05 has an evidence-backed process-local limiter precursor and remains RED for distributed runtime proof. F08/M01 remain deferred. No Vercel action attempted. DAVID orchestrator files were not touched.",
+  "lastCompletedTask": "R06 partial auth security review — CI 35409227727 SUCCESS",
+  "nextTask": "Build a repository-grounded personal/business data inventory with purpose, storage location, processor and retention status; keep R07 RED until M01-M13 are fully accepted and retention/legal decisions are complete.",
+  "message": "D01-D14 remain GREEN. R05/R06 have evidence-backed security precursors and remain RED only for declared dependency/runtime gaps. F08/M01 remain deferred. No Vercel action attempted. DAVID orchestrator files were not touched.",
   "deferredBlockers": [
     "F08 — inactive/missing Git→Vercel deployment hook; deferred by instruction.",
     "M01 — runtime password-update completion awaits a real deployed recovery redirect; deferred by instruction."
   ],
-  "updatedAt": "2026-09-19T03:21:00+03:00"
+  "updatedAt": "2026-09-19T03:29:00+03:00"
 }
