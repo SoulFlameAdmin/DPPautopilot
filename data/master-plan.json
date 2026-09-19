@@ -944,7 +944,7 @@
           "acceptanceCriteria": "Links to commits, migrations, tests, deployments, backups, runbooks and sign-offs collected",
           "evidenceRequired": "`docs/PRODUCTION_EVIDENCE.md`",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: C07-C13."
+          "evidence": "PARTIAL fail-closed production evidence-pack precursor: docs/PRODUCTION_EVIDENCE.md indexes source/CI, migrations, tests, deployment/release, backup/restore, runbooks, security/privacy and sign-offs; generator/validator/unit tests require all C07-C13 GREEN before READY and preserve C12 external legal sign-off, C13 real pilot UAT and F08 production deployment as non-synthesizable boundaries. CI 35416175065 on 11ec530717be8d97713870b9e4d03b0f8c550b82 SUCCESS including C14 validator/tests and full release/API/DB/security/browser regression. C14 remains RED until C07-C13 are GREEN for the exact final production commit/deployment and the pack is refreshed. — PARTIAL PASS"
         },
         {
           "id": "C15",
