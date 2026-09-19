@@ -3,6 +3,7 @@
 const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
+const { startRequestObservability } = require('./_observability.js');
 
 const LIFECYCLE = new Set([
   'original','repurposed','remanufactured','second_life','waste','retired'
@@ -82,6 +83,7 @@ async function rpc(name, payload, authorization, env = process.env, fetchImpl = 
 }
 
 async function handler(req, res) {
+  startRequestObservability(req,res,'items');
   const rateLimit=enforceRateLimit(req,res,'items');
   if(!rateLimit.allowed) return send(res,429,rateLimitBody());
   const authorization = bearer(req);
