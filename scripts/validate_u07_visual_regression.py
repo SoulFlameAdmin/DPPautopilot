@@ -22,7 +22,7 @@ def main() -> None:
     candidate=json.loads(candidate_path.read_text(encoding="utf-8"))
 
     require(baseline.get("status")=="approved_precursor","U07 baseline is not approved")
-    require(candidate.get("version")==2,"U07 candidate report version drift")
+    require(candidate.get("version")==3,"U07 candidate report version drift")
     require(candidate.get("browser")==baseline.get("browser"),"U07 browser family drift")
     require(candidate.get("browser_version")==baseline.get("browser_version"),"U07 browser version drift")
     require(candidate.get("viewport")==baseline.get("viewport"),"U07 viewport drift")
@@ -37,13 +37,14 @@ def main() -> None:
         actual=csurfaces[name]
         if actual.get("route")!=expected.get("route"):
             mismatches.append(f"{name}: route")
-        if actual.get("sha256")!=expected.get("sha256"):
-            mismatches.append(f"{name}: sha256")
+        require(actual.get("sha256"),f"{name}: PNG artifact SHA-256 missing")
+        if actual.get("pixel_sha256")!=expected.get("pixel_sha256"):
+            mismatches.append(f"{name}: pixel_sha256")
 
     require(not mismatches,"U07 visual regression detected: "+", ".join(mismatches))
     print(
         f"U07_VISUAL_REGRESSION_PASS: {len(bsurfaces)} approved deterministic Chromium "
-        "viewport baselines matched exactly"
+        "viewport baselines matched exactly by decoded RGBA pixel digest"
     )
 
 if __name__=="__main__":
