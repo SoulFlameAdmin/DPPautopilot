@@ -55,17 +55,24 @@ function classify(surface,req){
   return method==='GET'?'authenticated_read':'authenticated_write';
 }
 
-function pruneBuckets(nowMs,maxBuckets=DEFAULT_MAX_BUCKETS,force=false){
+function pruneBuckets(nowMs,maxBuckets=DEFAULT_MAX_BUCKETS,force=false,protectedKeys=[]){
   if(!force&&buckets.size<maxBuckets&&nowMs-lastPruneMs<PRUNE_INTERVAL_MS) return;
 
+  const protectedSet=new Set(protectedKeys);
   for(const [key,state] of buckets){
+    if(protectedSet.has(key)) continue;
     if(!state||!Number.isFinite(state.resetAt)||state.resetAt<=nowMs) buckets.delete(key);
   }
 
   while(buckets.size>maxBuckets){
-    const oldest=buckets.keys().next().value;
-    if(oldest===undefined) break;
-    buckets.delete(oldest);
+    let evicted=false;
+    for(const key of buckets.keys()){
+      if(protectedSet.has(key)) continue;
+      buckets.delete(key);
+      evicted=true;
+      break;
+    }
+    if(!evicted) break;
   }
   lastPruneMs=nowMs;
 }
@@ -88,18 +95,19 @@ function checkRateLimit(req,surface,options={}){
   const windowMs=rule.window_seconds*1000;
   const windowStart=Math.floor(nowMs/windowMs)*windowMs;
   const resetAt=windowStart+windowMs;
-  const maxBuckets=Number.isInteger(options.maxBuckets)&&options.maxBuckets>0
+  const requestedMaxBuckets=Number.isInteger(options.maxBuckets)&&options.maxBuckets>0
     ?options.maxBuckets
     :DEFAULT_MAX_BUCKETS;
+  const identityKeys=bucketIdentities(req).map(
+    identity=>`${surface}|${ruleName}|${identity}|${windowStart}`
+  );
+  const maxBuckets=Math.max(requestedMaxBuckets,identityKeys.length);
 
-  pruneBuckets(nowMs,maxBuckets,false);
+  pruneBuckets(nowMs,maxBuckets,false,identityKeys);
 
-  const counts=bucketIdentities(req).map(identity=>{
-    const key=`${surface}|${ruleName}|${identity}|${windowStart}`;
-    return incrementBucket(key,resetAt);
-  });
+  const counts=identityKeys.map(key=>incrementBucket(key,resetAt));
 
-  if(buckets.size>maxBuckets) pruneBuckets(nowMs,maxBuckets,true);
+  if(buckets.size>maxBuckets) pruneBuckets(nowMs,maxBuckets,true,identityKeys);
 
   const highestCount=Math.max(...counts);
   const remaining=Math.max(0,rule.limit-highestCount);
