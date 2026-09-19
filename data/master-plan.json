@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-19T06:03:00+03:00",
+  "updatedAt": "2026-09-19T06:12:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -854,7 +854,7 @@
           "acceptanceCriteria": "Migration applied/verified before incompatible app release",
           "evidenceRequired": "Deployment log",
           "status": "red",
-          "evidence": "Unfinished in canonical source-of-truth; dependencies: M06,C03."
+          "evidence": "PARTIAL fail-closed migration deployment gate: bound Supabase read-only migration snapshot + commit-bound SHA-256 release manifest + exact candidate/schema/database verifier. Unit tests reject commit/checksum drift, missing applied migrations, wrong database project and failed/mismatched schema verification. CI 35414390408 on 7e9e7a6f634bead55234551c6bb828cbcac00b67 SUCCESS including C04 checks, full API/DB/security regression, clean replay, restore and browser smoke. No database mutation/deploy performed. C04 remains RED while C03 is RED and until approved release-time migration/application evidence exists. — PARTIAL PASS"
         },
         {
           "id": "C05",
