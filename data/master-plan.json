@@ -408,7 +408,7 @@
           "acceptanceCriteria": "Identifier uniqueness and lifecycle transitions enforced",
           "evidenceRequired": "Unit/integration tests",
           "status": "green",
-          "evidence": "Lifecycle migration applied in Supabase; runtime transaction allowed `original→second_life`, rejected `second_life→original`, and rejected duplicate identifier; contract + clean replay PASS in run `35391493185`. — PASS"
+          "evidence": "Lifecycle migration applied in Supabase; runtime transaction allowed `original→second_life`, rejected `second_life→original`, and rejected duplicate identifier; contract + clean replay PASS in run `35391493185`. Security hardening migration `dpp_transition_helpers_search_path` now pins `public.dpp_lifecycle_transition_allowed(text,text)` to `search_path=public, pg_temp`; bound Supabase guard `DPP_TRANSITION_HELPER_SEARCH_PATH_PASS` passed and security advisor re-scan reports zero DPP mutable-search-path findings. — PASS"
         },
         {
           "id": "M15",
@@ -417,7 +417,7 @@
           "acceptanceCriteria": "Registry payload/status model exists without unsupported live claims",
           "evidenceRequired": "Contract tests",
           "status": "green",
-          "evidence": "Provider-neutral registry workflow abstraction migration applied in Supabase with explicit no-live-connectivity claim; contract and clean replay PASS in run `35391493185`. — PASS"
+          "evidence": "Provider-neutral registry workflow abstraction migration applied in Supabase with explicit no-live-connectivity claim; contract and clean replay PASS in run `35391493185`. Security hardening migration `dpp_transition_helpers_search_path` also pins `public.dpp_registry_status_transition_allowed(text,text)` to `search_path=public, pg_temp`; bound Supabase guard `DPP_TRANSITION_HELPER_SEARCH_PATH_PASS` passed and security advisor re-scan reports zero DPP mutable-search-path findings. — PASS"
         },
         {
           "id": "M16",
@@ -854,7 +854,7 @@
           "acceptanceCriteria": "Migration applied/verified before incompatible app release",
           "evidenceRequired": "Deployment log",
           "status": "red",
-          "evidence": "PARTIAL migration deployment gate refreshed against the real bound Supabase history: data/bound-supabase-migration-snapshot.json now covers all committed canonical migrations through dpp_evidence_storage_registration_tenant_guard; fail-closed validator, manifest SHA-256 and exact-project/commit/schema gates pass in full run 35423117317. No deployment was attempted. C04 remains RED because C03 is RED and release-time approved deployment/application evidence does not yet exist. — PARTIAL PASS"
+          "evidence": "PARTIAL migration deployment gate refreshed against the real bound Supabase history: data/bound-supabase-migration-snapshot.json now covers all committed canonical migrations through dpp_transition_helpers_search_path; fail-closed validator, manifest SHA-256 and exact-project/commit/schema gates previously passed in full run 35423117317, and the new search-path migration is applied/verified in bound Supabase. No deployment was attempted. C04 remains RED because C03 is RED and release-time approved deployment/application evidence does not yet exist. — PARTIAL PASS"
         },
         {
           "id": "C05",
