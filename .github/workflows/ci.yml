@@ -908,6 +908,14 @@ jobs:
           name: t04-e2e-precursor-report
           path: artifacts/t04-e2e-report.json
           if-no-files-found: error
+      - name: Generate T10 full regression aggregate report
+        run: python scripts/generate_t10_full_regression_report.py
+      - name: Upload T10 full regression aggregate report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: t10-full-regression-report
+          path: artifacts/t10-full-regression-report.json
+          if-no-files-found: error
       - name: Upload demo UI evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
