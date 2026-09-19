@@ -7,10 +7,17 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==3
+assert policy.get("version")==4
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
-assert policy.get("strategy")=="process_local_fixed_window_precursor"
+assert policy.get("strategy")=="process_local_dual_bucket_fixed_window_precursor"
+identity=policy.get("identity_safety",{})
+assert identity=={
+    "network_bucket_always_enforced":True,
+    "credential_bucket_when_authorization_present":True,
+    "allow_only_when_all_buckets_within_limit":True,
+    "bearer_rotation_cannot_reset_network_budget":True,
+}
 memory=policy.get("memory_safety",{})
 assert memory=={
     "max_buckets":10000,
@@ -51,7 +58,9 @@ assert "X-RateLimit-Reset" in response.get("headers",[])
 helper=(ROOT/"api/_rate_limit.js").read_text(encoding="utf-8")
 for token in [
     "createHash('sha256')",
-    "process_local_fixed_window_precursor" if False else "checkRateLimit",
+    "checkRateLimit",
+    "networkDigest",
+    "bucketIdentities",
     "Retry-After",
     "X-RateLimit-Limit",
     "X-RateLimit-Remaining",
@@ -88,6 +97,7 @@ for token in [
     "expired buckets are evicted",
     "bucket map is hard capped",
     "bucket keys do not retain raw IP",
+    "rotating bearer values cannot bypass the network budget",
 ]:
     assert token in test_text, f"R05 abuse suite missing {token}"
 
@@ -95,4 +105,4 @@ limitations=policy.get("limitations",[])
 assert any("parallel serverless isolates" in x for x in limitations)
 assert any("shared durable limiter" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: six inventoried API surfaces have versioned process-local abuse budgets, privacy-hashed bounded buckets, canonical 429 behavior and explicit distributed-runtime limitation")
+print("R05_RATE_LIMIT_POLICY_PASS: six inventoried API surfaces have versioned process-local abuse budgets, dual privacy-hashed network/credential buckets, bounded memory, canonical 429 behavior and explicit distributed-runtime limitation")
