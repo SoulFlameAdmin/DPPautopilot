@@ -18,3 +18,15 @@ The repository now contains a strict aggregate policy and generator:
 ## Claim boundary
 
 This is a real clean-checkout regression precursor, not final production acceptance. T10 remains RED while any of T01-T09 is not GREEN and until release-CI acceptance exists.
+
+## Proven CI evidence
+
+- PR: #53, head `e1cec128e9a147b65b8bd8b299608e22beacf250`
+- Full CI run: `35454765266` — SUCCESS
+- Job: `validate` — SUCCESS
+- Log marker: `T10_FULL_REGRESSION_PRECURSOR_PASS: T01-T09 precursor evidence aggregates cleanly; dependency_green=0/9; final acceptance remains false`
+- Aggregate artifact container: `demo-ui-smoke` artifact `10588191022`
+- Artifact digest: `sha256:6aa41c8e3b24a5b3c13443d8a2811b36450214937542ca5e3fcf07f14983a2b0`
+- Included report: `artifacts/t10-full-regression-report.json`
+
+T10 remains RED/PARTIAL by design. No production/deployment acceptance is claimed.
