@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M19/M22/M23 passport create idempotency merged and evidenced; continue earliest dependency-safe non-deploy hardening",
+  "currentTask": "T03/T08 passport retry coverage merged and evidenced; continue earliest dependency-safe non-deploy M21/M22/M23 hardening",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #88 merged as 4a5325209a8834c57940babf52e8a653f1324281; bound dpp_passport_create_idempotency version 20260920021507; runtime M23_PASSPORT_CREATE_IDEMPOTENCY_PASS; exact-head CI 35483523966 SUCCESS",
-  "nextTask": "Inspect remaining independent M21/M22/M23/API-security gaps that can advance without M01/M03/M10/M13 final deployed acceptance; do not retry F08 without new evidence.",
-  "message": "Passport creation retries are now deterministic and fail closed on divergent content. M19/M22/M23 remain RED only by upstream/final acceptance dependencies; continue independent implementation/tests without status inflation.",
+  "lastCompletedTask": "PR #93 merged as 25608199d232beeeae2b963159135ec4c48ccc44 with exact-head CI 35484156404 SUCCESS; PR #91 merged as babdbb03dfff9e1cd8da2095625c5c965d07e158 with CI 35483949394 SUCCESS",
+  "nextTask": "Inspect M21 export integrity/privacy and M22 stable error coverage for an independent gap that can advance without M01/M03/M10/M13 final deployed acceptance; do not retry F08 without new evidence.",
+  "message": "Passport create retry semantics are now covered at DB/reliability and stateful API-integration layers. T03/T08 remain RED only by dependency/final deployed acceptance.",
   "deferredBlockers": [
     "F08 — Vercel production acceptance remains externally blocked; do not retry without new quota/access evidence and always obey the global Supabase deployment lease law.",
     "M01 — final runtime recovery password-update acceptance remains blocked on a usable deployed recovery redirect.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T05:22:00+03:00"
+  "updatedAt": "2026-09-20T15:52:00+03:00"
 }
