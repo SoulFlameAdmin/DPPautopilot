@@ -49,6 +49,19 @@ assert observed=={
     'commit_ref':'m21-export-shape-fresh-main-20260920',
     'url':'dpp-autopilot-95xeakbem-dimitar-lambovs-projects.vercel.app',
 }
+prod=live['observed_ready_production']
+assert prod['deployment_id']=='dpl_75FRys3F48iXFpMoHRjte5YLT3sz'
+assert prod['project_id']=='prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr'
+assert prod['state']=='READY'
+assert prod['environment']=='production'
+assert prod['target']=='production'
+assert prod['source']=='git'
+assert prod['commit_sha']=='510527d6e1d63fbc63b1c919c3d8e67240456f8f'
+assert prod['commit_ref']=='main'
+assert prod['url']=='dpp-autopilot-kd65y2n33-dimitar-lambovs-projects.vercel.app'
+assert prod['http_acceptance']['verified'] is False
+assert prod['http_acceptance']['observed_status']==302
+assert 'SSO' in prod['http_acceptance']['reason']
 assert live['promotion_executed'] is False
 assert live['deployment_lease_required'] is False
 
@@ -78,6 +91,7 @@ for token in [
 remaining=' '.join(policy['remaining'])
 assert 'C02 must be GREEN' in remaining
 assert 'DAVID Vercel deployment lease' in remaining
+assert 'F08 app and data JSON HTTP 200 acceptance' in remaining
 assert 'Post-promotion production smoke' in remaining
 
-print('C03_PROMOTION_POLICY_PASS: READY preview is observed, but production promotion remains fail-closed to prerequisite/commit/lease/target gates; no live promotion is claimed')
+print('C03_PROMOTION_POLICY_PASS: READY preview and READY Git production deployment are observed, but promotion and F08 HTTP acceptance remain fail-closed; no SSO bypass or orchestrator deploy is claimed')
