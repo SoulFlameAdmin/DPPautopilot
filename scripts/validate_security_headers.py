@@ -61,7 +61,30 @@ assert len(cache)==1, "R02 data cache rule missing"
 cache_headers={h["key"]:h["value"] for h in cache[0].get("headers",[])}
 assert cache_headers.get(policy["cache_policy"]["header"])==policy["cache_policy"]["value"]
 
+preview=policy["preview_observation"]
+assert preview["deployment_id"]=="dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q"
+assert preview["project_id"]=="prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr"
+assert preview["commit_sha"]=="77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7"
+assert preview["path"]=="/demo/auth-recovery.html"
+assert preview["https_reachable"] is True
+assert preview["status"]==200
+assert preview["certificate_chain_verified"] is False
+observed_headers=preview["headers"]
+for key,value in required.items():
+    if key=="Content-Security-Policy":
+        continue
+    assert observed_headers.get(key)==value, f"R02 live preview header mismatch: {key}"
+observed_csp=observed_headers["Content-Security-Policy"]
+for token in [
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "connect-src 'self' https://frhletkiuupgksmgxoxc.supabase.co",
+    "upgrade-insecure-requests",
+]:
+    assert token in observed_csp, f"R02 live preview CSP missing token: {token}"
+
 tls=policy.get("tls",{})
+assert tls.get("preview_runtime_verified") is True
 assert tls.get("runtime_verified") is False
 assert "F08" in tls.get("claim","")
 assert len(tls.get("required_before_green",[]))>=5
@@ -72,4 +95,4 @@ gap=csp_policy["known_gap"]
 assert "unsafe-inline" in gap
 assert "nonce" in gap.lower() or "hash" in gap.lower()
 
-print("R02_SECURITY_HEADERS_POLICY_PASS: exact deploy-time CSP/HSTS/MIME/frame/referrer/permissions controls are versioned; live TLS/header verification remains intentionally unclaimed")
+print("R02_SECURITY_HEADERS_POLICY_PASS: deploy-time policy plus live preview HTTPS/security headers are evidenced; production TLS/certificate-chain acceptance remains intentionally unclaimed")
