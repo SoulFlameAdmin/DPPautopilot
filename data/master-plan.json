@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T19:36:00+03:00",
+  "updatedAt": "2026-09-20T21:09:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -676,7 +676,7 @@
           "acceptanceCriteria": "Critical availability/error signals have thresholds and owners",
           "evidenceRequired": "Alert test evidence",
           "status": "red",
-          "evidence": "PARTIAL monitoring/alerting hardening now binds R10 strictly to the R09 `dpp_http_request` event contract. The evaluator discards malformed/non-R09 events, invalid status/range, negative duration, invalid request IDs, unknown surfaces, status/outcome mismatches, non-boolean auth markers and malformed error codes before calculating availability, consecutive-5xx, p95 latency, auth-failure or rate-limit signals. Initial full CI `35426774516` correctly exposed two legacy fixtures that used `status=500` with stale `outcome=success`; fixtures were corrected to valid R09 events without weakening production validation. Exact-head full CI `35426858786` from closed unmerged probe PR #22 (base `484ec8f715c479d6e8a06696e3460bee00564273`) SUCCESS, including R10 monitoring suite/validator, clean PostgreSQL 17 replay, tenant/RLS/storage/security guards, R12 restore and browser smoke. R10 remains RED because dependency R09 is RED and deployed log ingestion, live notification destination, fire/recover drill and acknowledgement evidence remain unavailable while F08 blocks production runtime. — PARTIAL PASS"
+          "evidence": "PARTIAL monitoring/alerting now includes an executable synthetic fire→recover operational drill on top of the strict R09 event contract. PR #129 adds `data/monitoring-incident-drill.json` + `tests/api/monitoring-incident-drill.test.cjs`: 20 valid R09 events with one 503 produce exactly 5% 5xx and fire `availability_5xx_rate` as critical for the DPP operations owner; the signal maps to R13 SEV1, a synthetic 5-minute acknowledgement is proven inside the 15-minute target, every required runbook phase is exercised, then a later healthy monitoring window clears the alert. Artifact generation is wired into CI. Exact-head `b5fa74129184b5c328915074d4a675be8c346c36` completed full CI `35523442803` SUCCESS and merged as `5d224975672a56fa028f9942d8cacd41e6decca1`. R10 remains RED because R09 is RED and deployed ingestion, approved live notification delivery and human acknowledgement/escalation evidence remain unproven. — PARTIAL PASS"
         },
         {
           "id": "R11",
@@ -703,7 +703,7 @@
           "acceptanceCriteria": "Severity, triage, comms, rollback, data incident steps documented",
           "evidenceRequired": "`docs/INCIDENT_RUNBOOK.md`",
           "status": "red",
-          "evidence": "PARTIAL incident-runbook precursor: docs/INCIDENT_RUNBOOK.md + data/incident-runbook-contract.json define severity/ack targets, roles, R10 signal mapping, triage, containment, communications, R11/R12 recovery/restore, privacy/tenant-isolation incident handling, verification and post-incident learning. CI 35411303231 on b675b05deb59958baa80517c1575d2bfd216bb75 SUCCESS including R13 validator and full regression stack. R13 remains RED pending R09/R10 full acceptance and a deployed runtime incident drill. — PARTIAL PASS"
+          "evidence": "PARTIAL incident-runbook acceptance now includes an executable CI-only fire→SEV1 mapping→ack-target→recover drill in addition to the documented severity, ownership, triage, containment, communications, recovery/restore, privacy incident and closure procedures. PR #129 proves the critical availability signal maps to SEV1/DPP operations owner, synthetic acknowledgement occurs at minute 5 within the 15-minute target, all required phases execute in order, and healthy later-window traffic clears the alert. Exact-head `b5fa74129184b5c328915074d4a675be8c346c36` completed full CI `35523442803` SUCCESS and merged as `5d224975672a56fa028f9942d8cacd41e6decca1`. Live notification, human acknowledgement, deployed runtime, production rollback and real incident recovery remain explicitly unclaimed; R13 stays RED pending R09/R10 plus deployed incident-drill acceptance. — PARTIAL PASS"
         },
         {
           "id": "R14",
