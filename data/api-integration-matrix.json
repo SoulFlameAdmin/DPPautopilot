@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "task": "T03",
   "status": "partial",
   "dependencies": [
@@ -91,12 +91,21 @@
         "M23"
       ],
       "expected": "identical passport create retry returns the same resource without another write; divergent retry maps to stable 409 PASSPORT_CONFLICT"
+    },
+    {
+      "id": "export_manifest_drift",
+      "covers": [
+        "M21",
+        "M22"
+      ],
+      "expected": "page 2 with a stale evidence_manifest_sha256 fails closed with stable 409 EVIDENCE_EXPORT_MANIFEST_CHANGED before another evidence object download"
     }
   ],
   "executable_test": "tests/api/integration.test.cjs",
   "validator": "scripts/validate_api_integration_matrix.py",
   "remaining": [
     "Deployed preview/production HTTP integration awaits a functioning accepted production path and full acceptance of M17-M23 dependencies.",
-    "Real authenticated Storage byte roundtrip, manifest-drift behavior over live data, and final signed/archive/streaming large-tenant package acceptance remain outside this in-process precursor."
+    "Real authenticated Storage byte roundtrip and live deployed manifest-drift behavior remain outside this in-process precursor.",
+    "Final signed/archive/streaming large-tenant package acceptance remains pending."
   ]
 }
