@@ -67,6 +67,7 @@ for token in [
     "preserved imports were incorrectly deleted",
     "immutable audit trail missing purge deletes",
     "viewer purge was not denied",
+    "destructive org deletion surface unexpectedly available",
 ]:
     assert token in test, f"R08 integration test missing {token}"
 
