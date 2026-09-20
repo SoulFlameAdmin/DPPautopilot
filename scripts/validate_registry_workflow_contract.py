@@ -4,6 +4,7 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 sql=(ROOT/"supabase/migrations/20260918234000_dpp_registry_workflow.sql").read_text(encoding="utf-8").lower()
+privacy_sql=(ROOT/"supabase/migrations/20260920183000_dpp_registry_payload_credential_guard.sql").read_text(encoding="utf-8").lower()
 
 def require(c,m):
     if not c: raise AssertionError(m)
@@ -27,3 +28,20 @@ for snippet in [
 
 require("does not claim live connectivity" in sql,"M15 must explicitly avoid unsupported live-registry claims")
 print("M15_M16_CONTRACT_PASS: registry workflow abstraction, status graph, timestamps, retries, tenant-safe FKs and deny-by-default access are present")
+
+
+for snippet in [
+    "create or replace function public.dpp_json_contains_credential_key",
+    "create or replace function public.dpp_guard_registry_payload_credentials",
+    "dpp_registry_payload_credential_guard",
+    "before insert or update of request_payload,response_payload",
+    "access_token",
+    "refresh_token",
+    "authorization",
+    "client_secret",
+    "revoke all on function public.dpp_json_contains_credential_key(jsonb)",
+    "revoke all on function public.dpp_guard_registry_payload_credentials()",
+]:
+    require(snippet in privacy_sql,f"R07 registry payload minimization missing: {snippet}")
+
+print("R07_REGISTRY_PAYLOAD_GUARD_PASS: registry request/response JSON fails closed on obvious credential-bearing key names without claiming provider/legal schema acceptance")
