@@ -12,13 +12,14 @@ assert matrix.get("task") == "T08", "matrix must belong to T08"
 assert matrix.get("status") == "partial", "T08 must remain partial while M23 is RED"
 
 scenarios = matrix.get("scenarios", [])
-assert len(scenarios) == 4, f"expected 4 reliability scenarios, got {len(scenarios)}"
+assert len(scenarios) == 5, f"expected 5 reliability scenarios, got {len(scenarios)}"
 
 required_ids = {
     "registry_timeout_retry",
     "import_duplicate_commit",
     "registry_duplicate_submission",
     "api_write_conflicts",
+    "passport_create_retry_idempotency",
 }
 assert {s["id"] for s in scenarios} == required_ids, "T08 reliability scenario set changed unexpectedly"
 
@@ -33,4 +34,4 @@ for scenario in scenarios:
 remaining = matrix.get("remaining", [])
 assert remaining, "T08 remaining dependency note is required while task is partial"
 
-print("T08_RELIABILITY_MATRIX_PASS: retry, import/registry idempotency and API conflict coverage are versioned and linked to executable tests")
+print("T08_RELIABILITY_MATRIX_PASS: retry, import/registry/passport idempotency and API conflict coverage are versioned and linked to executable tests")
