@@ -13,7 +13,7 @@ OUTPUT=ROOT/"artifacts/t03-api-integration-report.json"
 matrix=json.loads(MATRIX.read_text(encoding="utf-8"))
 test_text=TEST.read_text(encoding="utf-8")
 
-assert matrix.get("version")==1
+assert matrix.get("version")==2
 assert matrix.get("task")=="T03"
 assert matrix.get("status")=="partial"
 
@@ -56,6 +56,10 @@ required_tokens=[
     "signed_url",
     "passport_versions",
     "evidence_manifest",
+    "include_evidence",
+    "evidence_objects",
+    "sha256_verified",
+    "content_base64",
 ]
 for token in required_tokens:
     assert token in test_text, f"T03 integration suite missing token {token}"
