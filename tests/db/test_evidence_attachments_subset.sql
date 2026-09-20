@@ -125,4 +125,55 @@ end
 $audit$;
 
 revoke select,insert,update,delete on public.dpp_evidence_attachments from authenticated;
+
+do $metadata_rpc$
+declare
+  v_meta jsonb;
+begin
+  if has_table_privilege('authenticated','public.dpp_evidence_attachments','SELECT') then
+    raise exception 'M13 direct authenticated evidence metadata SELECT unexpectedly granted';
+  end if;
+
+  perform set_config('request.jwt.claim.sub','81818181-8181-4181-8181-818181818181',true);
+  execute 'set local role authenticated';
+  select public.dpp_api_evidence_object_metadata(
+    '84848484-8484-4484-8484-848484848484/evidence/model-a/report.pdf'
+  ) into v_meta;
+  if v_meta is null
+     or (v_meta->>'byte_size')::bigint<>1024
+     or v_meta->>'sha256_hex'<>repeat('a',64)
+     or v_meta->>'content_type'<>'application/pdf' then
+    raise exception 'M13 minimal metadata RPC did not return expected integrity tuple: %',v_meta;
+  end if;
+  execute 'reset role';
+
+  perform set_config('request.jwt.claim.sub','82828282-8282-4282-8282-828282828282',true);
+  execute 'set local role authenticated';
+  select public.dpp_api_evidence_object_metadata(
+    '84848484-8484-4484-8484-848484848484/evidence/model-a/report.pdf'
+  ) into v_meta;
+  if v_meta is null then
+    raise exception 'M13 same-tenant viewer metadata RPC unexpectedly denied';
+  end if;
+  execute 'reset role';
+
+  perform set_config('request.jwt.claim.sub','83838383-8383-4383-8383-838383838383',true);
+  execute 'set local role authenticated';
+  select public.dpp_api_evidence_object_metadata(
+    '84848484-8484-4484-8484-848484848484/evidence/model-a/report.pdf'
+  ) into v_meta;
+  if v_meta is not null then
+    raise exception 'M13 cross-tenant metadata RPC leaked object integrity metadata: %',v_meta;
+  end if;
+  execute 'reset role';
+
+  if has_function_privilege('anon','public.dpp_api_evidence_object_metadata(text)','EXECUTE') then
+    raise exception 'M13 anon unexpectedly has metadata RPC EXECUTE';
+  end if;
+  if not has_function_privilege('authenticated','public.dpp_api_evidence_object_metadata(text)','EXECUTE') then
+    raise exception 'M13 authenticated metadata RPC EXECUTE missing';
+  end if;
+end
+$metadata_rpc$;
+
 select 'M13_EVIDENCE_METADATA_SUBSET_PASS' as result;
