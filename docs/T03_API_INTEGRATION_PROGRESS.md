@@ -26,3 +26,11 @@ The report is in-process API integration evidence only. It deliberately does not
 - The fake backend serves the same evidence bytes through the Edge Function route shape used by production code.
 - Assertions prove manifest SHA-256 and byte size match, `evidence_export.integrity=sha256_verified`, one verified `evidence_objects` entry is returned, and its base64 decodes to the expected bytes.
 - This is still in-process integration evidence; real authenticated Storage and deployed HTTP acceptance remain required before T03 can be GREEN.
+
+
+## Resumable paged evidence export integration — 2026-09-20
+
+- The stateful model→item→passport→export journey now includes two private evidence objects.
+- Page 1 requests `evidence_offset=0&evidence_limit=1`, validates SHA-256/base64 integrity, and captures `manifest_sha256` + `next_offset`.
+- Page 2 reuses that exact `manifest_sha256` through `evidence_manifest_sha256` and proves stable resume to the second evidence object through the production-shaped Edge Function route.
+- This remains in-process integration evidence; live authenticated Storage, live manifest-drift behavior and deployed HTTP acceptance remain pending.
