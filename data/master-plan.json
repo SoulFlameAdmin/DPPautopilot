@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T04:12:00+03:00",
+  "updatedAt": "2026-09-20T05:22:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -453,7 +453,7 @@
           "acceptanceCriteria": "Public/private read and controlled write endpoints",
           "evidenceRequired": "API/security tests",
           "status": "red",
-          "evidence": "PARTIAL passport API now enforces privacy at DB/RPC and HTTP boundaries. Public GET is catalog-sanitized; POST/PATCH locally reject legitimate-interest or authority-only fields before any upstream request while catalog-public fields pass. PATCH retains `expected_updated_at` optimistic concurrency via `dpp_api_passport_update_checked`; stale DP411 maps to 409 STALE_WRITE, and public/private/tenant/RBAC/non-enumerating tests remain PASS. Fresh-main exact-head CI `35480591789` on `d752fe19f98b368916014c5f9662e9e5ef0e4699` completed SUCCESS; PR #86 merged as `97c65011e28a973fde58306e5d541ebbb4dd6bc7`. M19 remains RED because M03/M10 are not GREEN and deployed authenticated HTTP acceptance is unavailable. — PARTIAL PASS"
+          "evidence": "PARTIAL passport API now enforces privacy at DB/RPC and HTTP boundaries and has deterministic create retry semantics. Public GET is catalog-sanitized; POST/PATCH locally reject non-public catalog fields; PATCH uses checked optimistic concurrency. Bound migration `dpp_passport_create_idempotency` version `20260920021507` makes battery-item-scoped draft creation idempotent: identical retries return the existing passport while divergent state/payload retries raise DP412. Bound runtime returned `M23_PASSPORT_CREATE_IDEMPOTENCY_PASS`. Exact-head CI `35483523966` on `7a930da73cadfa9bc218abcbebd4e4fe52efca92` completed SUCCESS, including clean migration replay, M19 passport privacy/tenant subset, M19 HTTP contract and full browser/security regressions. PR #88 merged as `4a5325209a8834c57940babf52e8a653f1324281`. M19 remains RED because M03/M10 are not GREEN and final deployed authenticated acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M20",
@@ -480,7 +480,7 @@
           "acceptanceCriteria": "API returns stable machine-readable error codes/messages",
           "evidenceRequired": "Contract tests",
           "status": "red",
-          "evidence": "PARTIAL shared API error contract now covers eight serverless surfaces: tenant, organizations, members, models, items, passport, imports and export. Onboarding SQLSTATEs map to stable public responses (`ORGANIZATION_CONFLICT`, `VALIDATION_ERROR`, `MEMBER_TARGET_NOT_FOUND`, `MEMBER_NOT_FOUND`, `MEMBER_CONFLICT`) and the M22 validator inventories all eight surfaces. Failed probe `35428578555` exposed the stale six-surface validator allowlist and was not accepted; it was fixed in `9e77f09a95503f62f1ca8b90ecf74bef823f621c`. Exact-head full CI `35428653493` SUCCESS includes M22 validator + error mapper tests and all onboarding/API regressions. M22 remains RED until M17-M20 are fully accepted and deployed end-to-end API acceptance is proven. — PARTIAL PASS"
+          "evidence": "PARTIAL shared API error contract now covers stable passport idempotency conflicts in addition to the existing eight serverless surfaces. `DP412` maps to HTTP 409 `PASSPORT_CONFLICT` without leaking database detail; exact-head CI `35483523966` SUCCESS includes the M19 HTTP contract and M22 contract validations. Existing onboarding/model/item/import error mappings remain valid. M22 remains RED until M17-M20 are fully accepted and deployed end-to-end API acceptance is proven. — PARTIAL PASS"
         },
         {
           "id": "M23",
@@ -489,7 +489,7 @@
           "acceptanceCriteria": "Duplicate import/submission and conflicting writes are safely handled",
           "evidenceRequired": "Concurrency tests",
           "status": "red",
-          "evidence": "PARTIAL idempotency/concurrency hardening now covers lost-update protection for model PATCH/DELETE and item PATCH/DELETE plus passport PATCH and import/registry idempotency. Checked item DELETE locks the active-tenant row, requires the last observed updated_at, rejects stale deletes with DP309, preserves passport-protection behavior, and authenticated callers cannot bypass through unchecked item delete. Bound migration `dpp_items_delete_checked` first applied as version `20260920004250`; exact-head CI `35479650181` SUCCESS includes `M23_OPTIMISTIC_CONCURRENCY_PASS`, clean replay, HTTP stale-delete contracts, tenant isolation and global RPC bypass guard. PR #82 merged as `8f8e24497edc02f3050fa236b0a453e6fefe8534`. M23 remains RED until M17-M20 are fully accepted. — PARTIAL PASS"
+          "evidence": "PARTIAL idempotency/concurrency hardening now covers import/registry idempotency, model PATCH/DELETE and item PATCH/DELETE optimistic concurrency, passport PATCH optimistic concurrency, and passport CREATE retry idempotency. Bound `dpp_passport_create_idempotency` version `20260920021507` uses tenant battery item as the natural idempotency key: identical draft retries return the same passport and do not create a duplicate row; divergent retry content/state raises stable DP412. Bound runtime `M23_PASSPORT_CREATE_IDEMPOTENCY_PASS`; exact-head CI `35483523966` SUCCESS with clean migration replay and M19 DB/HTTP suites. PR #88 merged as `4a5325209a8834c57940babf52e8a653f1324281`. M23 remains RED until M17-M20 are fully accepted. — PARTIAL PASS"
         },
         {
           "id": "M24",
