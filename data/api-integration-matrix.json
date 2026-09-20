@@ -82,6 +82,15 @@
         "M19"
       ],
       "expected": "public passport response strips backend-only private/tenant metadata"
+    },
+    {
+      "id": "passport_create_retry",
+      "covers": [
+        "M19",
+        "M22",
+        "M23"
+      ],
+      "expected": "identical passport create retry returns the same resource without another write; divergent retry maps to stable 409 PASSPORT_CONFLICT"
     }
   ],
   "executable_test": "tests/api/integration.test.cjs",
