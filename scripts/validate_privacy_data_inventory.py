@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 inventory=json.loads((ROOT/"data/privacy-data-inventory.json").read_text(encoding="utf-8"))
 doc=(ROOT/"docs/PRIVACY_DATA_INVENTORY.md").read_text(encoding="utf-8")
 
-assert inventory.get("version")==2
+assert inventory.get("version")==3
 assert inventory.get("task")=="R07"
 assert inventory.get("status")=="partial"
 assert "DPP Autopilot only" in inventory.get("scope","")
@@ -60,6 +60,11 @@ import_store=next(s for s in stores if s["id"]=="import_staging")
 assert import_store["retention"]["status"]=="implemented_precursor"
 assert "30 days" in import_store["retention"]["current_behavior"]
 
+audit_store=next(s for s in stores if s["id"]=="audit_history")
+assert "credential-bearing" in audit_store["retention"]["current_behavior"]
+assert any("recursive audit-only credential-key redaction" in x for x in audit_store["controls"])
+assert any("source rows are not modified" in x for x in audit_store["controls"])
+
 processors=inventory.get("processors_and_recipients",[])
 names={p["name"] for p in processors}
 assert {"Supabase","Vercel","GitHub","EU DPP registry provider"} <= names
@@ -85,4 +90,4 @@ for token in [
 ]:
     assert token in doc, f"R07 document missing {token}"
 
-print(f"R07_PRIVACY_DATA_INVENTORY_PASS: {len(migration_tables)} DPP migration tables have complete inventory coverage with current deployed Storage/Edge controls and fail-closed deletion/export lifecycle state")
+print(f"R07_PRIVACY_DATA_INVENTORY_PASS: {len(migration_tables)} DPP migration tables have complete inventory coverage with deployed Storage/Edge controls, fail-closed deletion/export lifecycle state and audit credential-key minimization precursor")
