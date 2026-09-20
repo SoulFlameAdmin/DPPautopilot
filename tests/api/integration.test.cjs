@@ -42,7 +42,8 @@ function makeBackend(){
   const state={
     model:null,item:null,passport:null,
     imports:new Map(),
-    exportCalls:0
+    exportCalls:0,
+    passportCreateWrites:0
   };
   const fetchImpl=async(url,options)=>{
     const rpc=rpcName(url);
@@ -98,6 +99,15 @@ function makeBackend(){
 
     if(rpc==='dpp_api_passport_create'){
       if(!state.item||body.p_battery_item_id!==IDS.item) return fail('DP405');
+      if(state.passport){
+        const sameDraft=
+          state.passport.status==='draft' &&
+          state.passport.battery_item_id===body.p_battery_item_id &&
+          JSON.stringify(state.passport.public_payload)===JSON.stringify(body.p_public_payload) &&
+          JSON.stringify(state.passport.private_payload)===JSON.stringify(body.p_private_payload);
+        if(sameDraft) return ok(state.passport);
+        return fail('DP412','duplicate passport internal');
+      }
       state.passport={
         passport_id:IDS.passport,
         battery_item_id:IDS.item,
@@ -107,6 +117,7 @@ function makeBackend(){
         private_payload:body.p_private_payload,
         updated_at:'2026-09-19T00:00:00Z'
       };
+      state.passportCreateWrites+=1;
       return ok(state.passport);
     }
     if(rpc==='dpp_api_passport_update_checked'){
@@ -249,8 +260,30 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     }),res);
     assert.equal(res.statusCode,201);
     assert.equal(json(res).data.passport_id,IDS.passport);
-    const passportUpdatedAt=json(res).data.updated_at;
+    assert.equal(backend.state.passportCreateWrites,1);
 
+    res=makeRes();
+    await passport(req('POST',{
+      battery_item_id:IDS.item,
+      public_payload:{item:{unique_identifier:'urn:dpp:t03:item:1'},model:{name:'INT-MODEL-1'}},
+      private_payload:{state_of_health:{percent:96}}
+    }),res);
+    assert.equal(res.statusCode,201);
+    assert.equal(json(res).data.passport_id,IDS.passport);
+    assert.equal(backend.state.passportCreateWrites,1);
+
+    res=makeRes();
+    await passport(req('POST',{
+      battery_item_id:IDS.item,
+      public_payload:{item:{unique_identifier:'urn:dpp:t03:item:1'},model:{name:'INT-MODEL-1'}},
+      private_payload:{state_of_health:{percent:12}}
+    }),res);
+    assert.equal(res.statusCode,409);
+    assert.equal(json(res).error.code,'PASSPORT_CONFLICT');
+    assert.equal(res.body.includes('duplicate passport internal'),false);
+    assert.equal(backend.state.passportCreateWrites,1);
+
+    const passportUpdatedAt=backend.state.passport.updated_at;
     res=makeRes();
     await passport(req('PATCH',{
       id:IDS.passport,
