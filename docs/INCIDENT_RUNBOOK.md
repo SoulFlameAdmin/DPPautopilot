@@ -171,7 +171,13 @@ Record:
 
 Do not close merely because an alert stopped firing if user/data impact is unresolved.
 
-## 12. Current gaps before R13 GREEN
+## 12. Synthetic CI drill boundary
+
+A repository-level drill now exercises the R09 event contract through R10 `availability_5xx_rate`, maps the critical signal to `SEV1` and the DPP operations owner, verifies a synthetic 5-minute acknowledgement against the 15-minute target, walks every required runbook phase, and proves recovery clears the alert in a later monitoring window.
+
+This is deliberately not live incident evidence: there is no deployed log ingestion, notification destination, human acknowledgement, production rollback or production incident recovery claim.
+
+## 13. Current gaps before R13 GREEN
 
 R13 cannot be GREEN until:
 
