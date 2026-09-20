@@ -26,3 +26,13 @@ M12 remains RED until M03 RBAC is implemented and authenticated actor/authorizat
 - Full run `35399171822` is SUCCESS; UI artifact `10569812847`.
 - M12 remains RED because M03 RBAC is still RED and authenticated actor/authorization behavior is not yet proven through the application/API layer.
 
+
+
+## Audit snapshot credential-key redaction precursor
+
+- `dpp_redact_audit_json(jsonb)` recursively redacts obvious credential-bearing keys before immutable snapshot insertion.
+- `dpp_capture_audit_event()` uses redacted JSON for `before_data` / `after_data`, while actor/tenant/target derivation still uses the original row representation.
+- Source rows are unchanged; only the immutable audit copy is minimized.
+- Direct `anon` / `authenticated` EXECUTE on the redaction helper is revoked.
+- Regression coverage proves nested secret-like values do not appear in audit rows while safe business values remain visible.
+- M12 remains RED pending M03 and final authenticated/deployed acceptance; this precursor does not define legal retention.
