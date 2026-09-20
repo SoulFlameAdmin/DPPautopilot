@@ -2,7 +2,7 @@
 
 const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { parseBody, bodyErrorResponse } = require('./_request.js');
-const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
+const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
 const { sanitizePublicPayload, findRestrictedPublicPaths } = require('./_access_policy.js');
 
@@ -127,6 +127,9 @@ async function handler(req, res) {
       if (!authorization) {
         return send(res, 401, { error: { code: 'AUTH_REQUIRED', message: 'Bearer authentication is required.' } });
       }
+      const sharedPrivateRateLimit=await enforceSharedRateLimit(req,res,'passport',authorization,{ruleName:'authenticated_read'});
+      if(sharedPrivateRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
+      if(!sharedPrivateRateLimit.allowed) return send(res,429,rateLimitBody());
       const passport = await rpc('dpp_api_passport_private', { p_id: id }, authorization);
       return send(res, 200, { data: passport });
     }
@@ -135,6 +138,10 @@ async function handler(req, res) {
     if (!authorization) {
       return send(res, 401, { error: { code: 'AUTH_REQUIRED', message: 'Bearer authentication is required.' } });
     }
+
+    const sharedWriteRateLimit=await enforceSharedRateLimit(req,res,'passport',authorization,{ruleName:'authenticated_write'});
+    if(sharedWriteRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
+    if(!sharedWriteRateLimit.allowed) return send(res,429,rateLimitBody());
 
     if (method === 'POST') {
       if (!validUuid(body.battery_item_id)) {
