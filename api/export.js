@@ -1,7 +1,7 @@
 'use strict';
 
 const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
-const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
+const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
 
 function send(res,status,body){
@@ -66,6 +66,9 @@ async function handler(req,res){
   if(!authorization){
     return send(res,401,{error:{code:'AUTH_REQUIRED',message:'Bearer authentication is required.'}});
   }
+  const sharedRateLimit=await enforceSharedRateLimit(req,res,'export',authorization);
+  if(sharedRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
+  if(!sharedRateLimit.allowed) return send(res,429,rateLimitBody());
   try{
     const bundle=await rpc(authorization);
     return send(res,200,{data:bundle});

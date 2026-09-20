@@ -13,8 +13,12 @@ assert contract.get("default",{}).get("code")=="UPSTREAM_ERROR"
 assert contract.get("default",{}).get("http_status")==502
 assert contract.get("local_codes",{}).get("PAYLOAD_TOO_LARGE",{}).get("http_status")==413
 assert contract.get("local_codes",{}).get("RATE_LIMITED",{}).get("http_status")==429
+assert contract.get("local_codes",{}).get("RATE_LIMIT_BACKEND_UNAVAILABLE",{})=={
+    "http_status":503,
+    "message":"Request protection is temporarily unavailable."
+}
 
-valid_status={400,401,403,404,405,409,413,422,428,429,500,502}
+valid_status={400,401,403,404,405,409,413,422,428,429,500,502,503}
 code_re=re.compile(r"^[A-Z][A-Z0-9_]*$")
 sql_re=re.compile(r"^(?:DP\d{3}|23\d{3})$")
 

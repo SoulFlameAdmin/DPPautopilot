@@ -26,7 +26,7 @@ Development uses synthetic data and local placeholders. Preview/staging must use
 
 ### Serverless Supabase runtime contract
 
-DPP serverless APIs use `DPP_SUPABASE_URL` and `DPP_SUPABASE_PUBLISHABLE_KEY` as the canonical runtime names. During migration they retain backward-compatible fallback to `SUPABASE_URL` and `SUPABASE_ANON_KEY`. The committed `.env.example` intentionally contains placeholders only. Missing runtime values fail closed with `SERVER_CONFIGURATION_MISSING`; production acceptance must verify the values are actually present in the hosting environment without exposing them.
+DPP serverless APIs use `DPP_SUPABASE_URL` and `DPP_SUPABASE_PUBLISHABLE_KEY` as the canonical runtime names. `DPP_SHARED_RATE_LIMIT_ENABLED` is a non-secret server runtime feature gate; only the exact value `true` enables the shared authenticated limiter, otherwise request handling keeps the local precursor behavior. During migration they retain backward-compatible fallback to `SUPABASE_URL` and `SUPABASE_ANON_KEY`. The committed `.env.example` intentionally contains placeholders only. Missing runtime values fail closed with `SERVER_CONFIGURATION_MISSING`; production acceptance must verify the values are actually present in the hosting environment without exposing them.
 
 ## Rotation and incident rule
 
