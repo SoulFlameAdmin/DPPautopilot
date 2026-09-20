@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sql=(ROOT/"supabase/migrations/20260918234000_dpp_registry_workflow.sql").read_text(encoding="utf-8").lower()
 privacy_sql=(ROOT/"supabase/migrations/20260920183000_dpp_registry_payload_credential_guard.sql").read_text(encoding="utf-8").lower()
+cleanup_sql=(ROOT/"supabase/migrations/20260920183500_dpp_registry_payload_guard_cleanup.sql").read_text(encoding="utf-8").lower()
 
 def require(c,m):
     if not c: raise AssertionError(m)
@@ -45,3 +46,13 @@ for snippet in [
     require(snippet in privacy_sql,f"R07 registry payload minimization missing: {snippet}")
 
 print("R07_REGISTRY_PAYLOAD_GUARD_PASS: registry request/response JSON fails closed on obvious credential-bearing key names without claiming provider/legal schema acceptance")
+
+for snippet in [
+    "drop trigger if exists dpp_registry_request_payload_privacy_guard",
+    "drop function if exists public.dpp_reject_registry_payload_credentials()",
+    "drop function if exists public.dpp_json_has_credential_key(jsonb)",
+    "comment on trigger dpp_registry_payload_credential_guard",
+]:
+    require(snippet in cleanup_sql,f"R07 registry guard cleanup missing: {snippet}")
+
+print("R07_REGISTRY_GUARD_CONSOLIDATION_PASS: superseded request-only guard is removed while canonical request+response fail-closed guard remains")
