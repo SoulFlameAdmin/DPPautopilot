@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/retention-deletion-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==2
+assert policy.get("version")==3
 assert policy.get("task")=="R08"
 assert policy.get("status")=="partial"
 assert policy.get("scope","").startswith("DPP Autopilot")
@@ -45,6 +45,20 @@ org=policy.get("org_deletion",{})
 assert org.get("enabled") is False
 assert org.get("fail_closed") is True
 assert org.get("readiness_rpc")=="dpp_api_retention_status()"
+assert org.get("impact_preview_rpc")=="dpp_api_org_deletion_impact()"
+impact=org.get("impact_preview",{})
+assert impact.get("destructive") is False
+assert impact.get("roles")==["owner","admin"]
+assert impact.get("external_storage_enumeration_required") is True
+assert impact.get("auth_users_deleted_by_org_delete") is False
+assert impact.get("ready_for_destructive_delete") is False
+for field in [
+    "organization_members","distinct_member_users","active_tenant_contexts",
+    "battery_models","battery_items","passports","passport_versions",
+    "import_mappings","import_runs","import_rows","registry_submissions",
+    "evidence_metadata","evidence_declared_bytes","audit_rows",
+]:
+    assert field in impact.get("counts",[]), f"R08 impact preview missing {field}"
 assert len(org.get("blockers",[]))>=6
 assert any("evidence-byte export/package acceptance" in x for x in org.get("blockers",[]))
 
@@ -99,4 +113,4 @@ for token in [
 ]:
     assert token in export_test, f"R08/M21 export regression missing {token}"
 
-print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; terminal staging purge and bounded integrity-checked evidence-byte export precursors are implemented while regulatory/storage/audit/auth acceptance blockers remain explicit")
+print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; terminal staging purge, bounded evidence-byte export and owner/admin non-destructive deletion-impact preview are implemented while regulatory/storage/audit/auth acceptance blockers remain explicit")
