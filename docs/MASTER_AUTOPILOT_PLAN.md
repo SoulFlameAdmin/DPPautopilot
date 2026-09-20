@@ -569,3 +569,10 @@ Append evidence here only after verification.
 - Both pages verify SHA-256/base64 integrity through the production-shaped `dpp-evidence-object` route and keep a stable manifest digest.
 - The first PR run correctly failed on an outdated integration-report matrix-version assertion; that drift was fixed before acceptance.
 - T03 remains RED/PARTIAL pending M17–M23 GREEN plus real authenticated Storage, live manifest-drift and deployed HTTP integration acceptance.
+
+
+### T03 fail-closed manifest drift integration — 2026-09-21
+- PR #142 exact head `f18cfef8e8b56b41f06cace2cb8289f5c253459c` completed full CI `35531761114` SUCCESS and merged as `d2bcd50f3d60291625c417f05bc4c389173b9cc2`.
+- T03 now has 10 stateful integration scenarios. The new scenario mutates the evidence manifest between page 1 and page 2.
+- Reusing the stale `evidence_manifest_sha256` returns stable `409 EVIDENCE_EXPORT_MANIFEST_CHANGED` and proves no second evidence object is downloaded.
+- T03 remains RED/PARTIAL pending M17–M23 GREEN plus real authenticated Storage/live-data/deployed HTTP acceptance.
