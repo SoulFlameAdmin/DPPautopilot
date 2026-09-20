@@ -164,6 +164,10 @@
     {
       "version": "20260920151744",
       "name": "dpp_shared_rate_limit_backend"
+    },
+    {
+      "version": "20260920162228",
+      "name": "dpp_org_deletion_impact_preview"
     }
   ],
   "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
