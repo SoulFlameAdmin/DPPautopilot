@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T03 fail-closed manifest-drift integration merged and evidenced",
+  "currentTask": "M13 deployed download-integrity hardening evidenced",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #142 merged as d2bcd50f3d60291625c417f05bc4c389173b9cc2 after exact-head full CI 35531761114 SUCCESS; stale manifest token now fails 409 before second evidence object download",
-  "nextTask": "Validate/merge T03 manifest-drift evidence sync, then select the earliest dependency-safe non-deploy precursor from current main.",
-  "message": "T03 now covers positive resume and negative manifest drift in-process. It remains RED/PARTIAL pending M17-M23 and live authenticated/deployed integration.",
+  "lastCompletedTask": "PR #144 exact-head CI 35544246411 SUCCESS; merged as 7ff3492e3fa62e480c786bc60b93fb83e914c126; Supabase dpp-evidence-object deployed ACTIVE v4 with verified download integrity source readback",
+  "nextTask": "Merge this evidence sync after exact-head CI, then continue earliest dependency-safe non-deploy precursor while F08/M01/M13 final runtime blockers remain deferred.",
+  "message": "M13 GET now verifies metadata, bytes, SHA-256 and content type in deployed v4. M13 remains RED/PARTIAL pending M03 and real authenticated byte lifecycle acceptance.",
   "deferredBlockers": [
-    "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
-    "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
-    "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
+    "F08 — lease-governed production attempt for main@7ff3492e3fa62e480c786bc60b93fb83e914c126 returned Vercel build-rate-limit; provider supplied no retry timestamp. Existing protected data JSON acceptance is also incomplete. Do not spin retry.",
+    "M01 — final recovery-session password-update acceptance remains unproven; no auth/SSO bypass allowed.",
+    "M13 — deployed integrity hardening is ACTIVE v4, but final real authenticated upload→download/content verification→delete roundtrip remains pending and M03 is non-GREEN."
   ],
-  "updatedAt": "2026-09-21T02:18:00+03:00"
+  "updatedAt": "2026-09-21T02:23:00+03:00"
 }
