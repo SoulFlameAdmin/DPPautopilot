@@ -24,6 +24,18 @@ function deletePath(root, segments) {
   }
 }
 
+function pruneEmptyObjects(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+  for (const key of Object.keys(value)) {
+    const child = value[key];
+    if (child && typeof child === 'object' && !Array.isArray(child)) {
+      pruneEmptyObjects(child);
+      if (Object.keys(child).length === 0) delete value[key];
+    }
+  }
+  return value;
+}
+
 function restrictedCatalogPaths() {
   return (catalog.fields || [])
     .filter(field => !PUBLIC_ACCESS.has(field.access))
@@ -37,12 +49,12 @@ function sanitizePublicPayload(payload) {
   const out = cloneJson(payload);
   if (!out || typeof out !== 'object' || Array.isArray(out)) return out;
   for (const parts of RESTRICTED_PATHS) deletePath(out, parts);
-  return out;
+  return pruneEmptyObjects(out);
 }
 
 module.exports = {
   PUBLIC_ACCESS,
   RESTRICTED_PATHS,
   sanitizePublicPayload,
-  _test: { deletePath, restrictedCatalogPaths, cloneJson }
+  _test: { deletePath, restrictedCatalogPaths, cloneJson, pruneEmptyObjects }
 };
