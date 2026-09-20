@@ -113,7 +113,7 @@ async function handler(req, res) {
 
       if (identifier) {
         if (typeof identifier !== 'string' || identifier.trim().length < 1 || identifier.trim().length > 300) {
-          return send(res, 400, { error: { code: 'INVALID_IDENTIFIER', message: 'identifier must contain 1..300 characters' } });
+          return send(res, 400, { error: { code: 'INVALID_IDENTIFIER', message: 'identifier must contain 1..300 characters.' } });
         }
         const passport = await rpc('dpp_api_passport_public', { p_unique_identifier: identifier.trim() }, null);
         return send(res, 200, { data: sanitizePublicPassport(passport) });
