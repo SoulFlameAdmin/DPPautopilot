@@ -89,6 +89,81 @@ function incrementBucket(key,resetAt){
   return count;
 }
 
+function sharedLimiterEnabled(env=process.env){
+  return String(env&&env.DPP_SHARED_RATE_LIMIT_ENABLED||'').toLowerCase()==='true';
+}
+
+async function checkSharedRateLimit(req,surface,authorization,options={}){
+  const env=options.env||process.env;
+  const fetchImpl=options.fetchImpl||fetch;
+  if(!authorization||!sharedLimiterEnabled(env)){
+    return {enforced:false,allowed:true,reason:!authorization?'no_authorization':'feature_disabled'};
+  }
+
+  const ruleName=options.ruleName||classify(surface,req);
+  if(ruleName==='public_passport_read'){
+    return {enforced:false,allowed:true,reason:'public_anonymous_scope'};
+  }
+  const rule=(options.rules||policy.rules)[ruleName];
+  if(!rule) return {enforced:true,allowed:false,error:true,status:503,code:'RATE_LIMIT_BACKEND_UNAVAILABLE'};
+
+  const base=env.DPP_SUPABASE_URL||env.SUPABASE_URL;
+  const key=env.DPP_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
+  if(!base||!key){
+    return {enforced:true,allowed:false,error:true,status:503,code:'RATE_LIMIT_BACKEND_UNAVAILABLE'};
+  }
+
+  const now=new Date(Number.isFinite(options.nowMs)?options.nowMs:Date.now()).toISOString();
+  const keys=sharedBucketKeys(req,surface,ruleName);
+  try{
+    const rows=await Promise.all(keys.map(async bucketKey=>{
+      const response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/dpp_rate_limit_consume`,{
+        method:'POST',
+        headers:{
+          apikey:key,
+          Authorization:authorization,
+          'Content-Type':'application/json',
+          Accept:'application/json'
+        },
+        body:JSON.stringify({
+          p_bucket_key:bucketKey,
+          p_window_seconds:rule.window_seconds,
+          p_limit:rule.limit,
+          p_now:now
+        })
+      });
+      if(!response.ok) throw new Error('SHARED_RATE_LIMIT_RPC_FAILED');
+      const data=await response.json();
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row||typeof row.allowed!=='boolean') throw new Error('SHARED_RATE_LIMIT_RESPONSE_INVALID');
+      return row;
+    }));
+
+    return {
+      enforced:true,
+      allowed:rows.every(row=>row.allowed),
+      ruleName,
+      limit:rule.limit,
+      remaining:Math.min(...rows.map(row=>Number(row.remaining)||0)),
+      resetEpochSeconds:Math.max(...rows.map(row=>Number(row.reset_epoch_seconds)||0)),
+      retryAfterSeconds:Math.max(...rows.map(row=>Number(row.retry_after_seconds)||0)),
+      sharedBuckets:rows.length
+    };
+  }catch(_){
+    return {enforced:true,allowed:false,error:true,status:503,code:'RATE_LIMIT_BACKEND_UNAVAILABLE'};
+  }
+}
+
+async function enforceSharedRateLimit(req,res,surface,authorization,options={}){
+  const decision=await checkSharedRateLimit(req,surface,authorization,options);
+  if(decision.enforced&&!decision.error) applyRateLimitHeaders(res,decision);
+  return decision;
+}
+
+function sharedRateLimitUnavailableBody(){
+  return {error:{code:'RATE_LIMIT_BACKEND_UNAVAILABLE',message:'Request protection is temporarily unavailable.'}};
+}
+
 function checkRateLimit(req,surface,options={}){
   const ruleName=options.ruleName||classify(surface,req);
   const rules=options.rules||policy.rules;
@@ -155,6 +230,9 @@ module.exports={
   classify,
   checkRateLimit,
   enforceRateLimit,
+  checkSharedRateLimit,
+  enforceSharedRateLimit,
+  sharedRateLimitUnavailableBody,
   rateLimitBody,
   _test:{
     normalizedIp,
@@ -162,6 +240,7 @@ module.exports={
     networkDigest,
     bucketIdentities,
     sharedBucketKeys,
+    sharedLimiterEnabled,
     pruneBuckets,
     resetForTests,
     buckets,
