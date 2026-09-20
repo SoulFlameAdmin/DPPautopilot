@@ -7,10 +7,10 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==7
+assert policy.get("version")==8
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
-assert policy.get("strategy")=="dual_layer_process_local_plus_shared_authenticated_precursor"
+assert policy.get("strategy")=="dual_layer_local_plus_feature_gated_shared_authenticated_runtime"
 identity=policy.get("identity_safety",{})
 assert identity=={
     "network_bucket_always_enforced":True,
@@ -105,7 +105,7 @@ for token in [
     assert token in test_text, f"R05 abuse suite missing {token}"
 
 shared=policy.get("shared_backend",{})
-assert shared.get("status")=="implemented_not_runtime_wired"
+assert shared.get("status")=="runtime_wired_feature_gated"
 assert shared.get("table")=="dpp_rate_limit_buckets"
 assert shared.get("rpc")=="dpp_rate_limit_consume(text,integer,integer,timestamptz)"
 assert shared.get("scope")=="authenticated network/credential budgets only"
@@ -115,6 +115,9 @@ assert shared.get("direct_table_grants") is False
 assert shared.get("anon_rpc_execute") is False
 assert shared.get("authenticated_rpc_execute") is True
 assert "10 minutes" in shared.get("stale_row_retention","")
+assert shared.get("runtime_gate")=="DPP_SHARED_RATE_LIMIT_ENABLED=true"
+assert shared.get("failure_mode")=="fail_closed_503"
+assert "public passport" in shared.get("public_anonymous_scope","")
 
 migration=(ROOT/"supabase/migrations/20260920152000_dpp_shared_rate_limit_backend.sql").read_text(encoding="utf-8")
 for token in [
@@ -141,12 +144,27 @@ for token in [
 ]:
     assert token in db_test, f"R05 shared backend regression missing {token}"
 
-assert "sharedBucketKeys" in helper
+for token in [
+    "sharedBucketKeys",
+    "sharedLimiterEnabled",
+    "checkSharedRateLimit",
+    "enforceSharedRateLimit",
+    "RATE_LIMIT_BACKEND_UNAVAILABLE",
+    "DPP_SHARED_RATE_LIMIT_ENABLED",
+]:
+    assert token in helper, f"R05 shared runtime helper missing {token}"
 assert "shared backend keys match the DB-safe pseudonymous contract" in test_text
+assert "feature-gated shared limiter consumes both pseudonymous buckets" in test_text
+assert "shared limiter fails closed when its backend is unavailable" in test_text
+
+for surface in ["tenant","organizations","members","models","items","passport","imports","export"]:
+    surface_text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
+    assert "enforceSharedRateLimit" in surface_text, f"{surface} does not import shared R05 limiter"
+    assert f"enforceSharedRateLimit(req,res,'{surface}'" in surface_text, f"{surface} does not wire shared R05 limiter"
 
 limitations=policy.get("limitations",[])
-assert any("not yet wired" in x for x in limitations)
+assert any("production enablement" in x for x in limitations)
 assert any("Anonymous public passport" in x for x in limitations)
 assert any("multi-isolate" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: eight API surfaces keep local abuse budgets while an atomic RLS-protected shared authenticated Supabase counter backend is versioned/tested; deployed/public distributed enforcement remains explicit")
+print("R05_RATE_LIMIT_POLICY_PASS: eight API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")
