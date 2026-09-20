@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T16:45:00+03:00",
+  "updatedAt": "2026-09-20T16:55:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -658,7 +658,7 @@
           "acceptanceCriteria": "User/org deletion and export follow defined policy with audit-safe exceptions",
           "evidenceRequired": "Integration tests",
           "status": "red",
-          "evidence": "PARTIAL fail-closed retention/deletion/export precursor: M21 export is required before future org deletion; terminal invalid/committed import staging may be purged only after 30 days; staged/validated and recent runs are preserved; organization/user deletion remains disabled behind explicit passport/registry/evidence/audit/auth blockers. CI 35409973551 on 3bf6a9d5ab3a40af9202bbdd3f7f4f414dbe51e9 SUCCESS; bound Supabase runtime R08_RETENTION_DELETION_SUBSET_PASS; live ACL fixed search_path, anon=false/authenticated=true. R08 remains RED pending R07 GREEN and full storage/regulatory/auth deletion policy acceptance. — PARTIAL PASS"
+          "evidence": "PARTIAL fail-closed retention/deletion/export precursor now includes an explicit destructive-organization-delete guard. Bound Supabase ACL verification returned authenticated DELETE=false and anon DELETE=false on `public.dpp_organizations`, with no `dpp_api_organizations_delete(uuid)` RPC present. PR #103 added this exact regression to `test_retention_deletion_subset.sql`; exact-head CI `35514662542` completed SUCCESS with the R08 DB subset, retention-policy validator and full regression suite. PR #103 merged as `84ca5cf6241c714e68609d09e3c67472b6ad4bbd`. Existing 30-day auditable terminal-import purge remains implemented; passport/registry/evidence/audit/auth retention periods and evidence-object-byte export remain unresolved blockers, so R08 stays RED. — PARTIAL PASS"
         },
         {
           "id": "R09",
@@ -845,7 +845,7 @@
           "acceptanceCriteria": "Production only from defined branch/release condition",
           "evidenceRequired": "Config/document evidence",
           "status": "red",
-          "evidence": "PARTIAL fail-closed production promotion precursor: policy + verifier require canonical repo/main branch/project and exact candidate commit alignment across successful CI, verified preview, migration gate, security/browser smoke and READY production deployment evidence. Unit tests deny non-main, commit drift, missing gates, wrong target/state. CI 35414115623 on 02689582f581ec42c2cacc7c0a651e90326bc008 SUCCESS including full regression/browser smoke. No deploy/promotion attempted. C03 remains RED pending C02 GREEN and real production promotion/post-promotion smoke evidence. — PARTIAL PASS"
+          "evidence": "PARTIAL fail-closed production promotion policy now reflects the real canonical READY preview instead of stale zero-deployment state. Observed preview identity is deployment `dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q`, project `prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr`, preview target, source `git`, commit `77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7`. Promotion remains `false` and the verifier still requires C02/C01/test/migration/security prerequisites, exact commit alignment, canonical production target and a lease-governed READY production deployment. C03 remains RED. — PARTIAL PASS"
         },
         {
           "id": "C04",
@@ -872,7 +872,7 @@
           "acceptanceCriteria": "Full mandatory suite passes on staging/preview with production-like config",
           "evidenceRequired": "Acceptance report",
           "status": "red",
-          "evidence": "PARTIAL fail-closed staging acceptance: exact commit must align across READY canonical preview, clean T01-T09 regression, production-like non-production config, migration/schema verification, security headers and core-route smoke. Unit tests reject wrong project/state, commit drift, missing suites, production data/database reuse, failed headers and insufficient routes. CI 35414915848 on eb25081e2d9579d9d2d3ed1ebbd5e3e05b9a0bf3 SUCCESS including C06 checks, C01-C05, T07, clean DB replay, R12 restore, security hygiene and browser smoke. No deploy performed. C06 remains RED pending T10/C02 GREEN and real staging evidence. — PARTIAL PASS"
+          "evidence": "PARTIAL staging acceptance policy now reflects one observed canonical READY preview with exact deployment/project/commit identity instead of stale zero-preview state. `staging_acceptance_executed=false` remains unchanged; C06 still requires T10 GREEN, C02 GREEN with complete route/TLS/header acceptance, production-like non-production configuration, migration/schema proof, security headers and core-route smoke on the exact preview. C06 remains RED. — PARTIAL PASS"
         },
         {
           "id": "C07",
