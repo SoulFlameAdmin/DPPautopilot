@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "R08 organization-delete fail-closed merged; C03/C06 READY preview state synchronized and awaiting exact-head CI",
+  "currentTask": "F08 canonical READY production deployment is evidenced; HTTP 200 acceptance remains blocked by Vercel SSO",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #103 merged as 84ca5cf6241c714e68609d09e3c67472b6ad4bbd with exact-head CI 35514662542 SUCCESS; live Supabase ACL proves org DELETE remains closed",
-  "nextTask": "Validate and merge combined C03/C06 release preview state sync; then continue earliest independent non-deploy release/security precursor. Do not retry Vercel before 2026-09-21T13:42:48Z / 16:42:48 Europe/Sofia.",
-  "message": "R08 destructive org deletion is now regression-guarded. C03/C06 no longer claim zero previews, but production/staging decisions remain deny until their dependency and live acceptance gates are satisfied.",
+  "lastCompletedTask": "PR #111 merged as 4440605f4eda88b1ebf086f06eccb97ae89673be after exact-head CI 35518399765 SUCCESS; C03 records READY production deployment without falsely accepting F08",
+  "nextTask": "Synchronize F08 canonical source-of-truth evidence, validate in CI, then continue earliest independent non-deploy precursor.",
+  "message": "Canonical Vercel production deployment dpl_75FRys3F48iXFpMoHRjte5YLT3sz is READY for main@510527d6e1d63fbc63b1c919c3d8e67240456f8f. Exact deployment root returned Vercel SSO 302, so required app/data JSON HTTP 200 acceptance remains unproven.",
   "deferredBlockers": [
-    "F08 — Vercel production deployment acceptance blocked by `api-deployments-free-per-day`; latest provider instruction on 2026-09-20T13:42:48Z says retry in 1 day. Do not retry before 2026-09-21T13:42:48Z (16:42:48 Europe/Sofia); obey the global Supabase deployment lease law on any future attempt.",
+    "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T16:55:00+03:00"
+  "updatedAt": "2026-09-20T18:10:00+03:00"
 }

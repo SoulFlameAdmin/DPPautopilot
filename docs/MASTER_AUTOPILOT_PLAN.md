@@ -456,3 +456,10 @@ Append evidence here only after verification.
 - R08 now has an explicit fail-closed regression proving authenticated/anon roles cannot DELETE `public.dpp_organizations` and no public organization-delete RPC exists while retention blockers remain unresolved. Bound Supabase ACL matched this state; PR #103 exact-head CI `35514662542` SUCCESS and merge `84ca5cf6241c714e68609d09e3c67472b6ad4bbd`.
 - C03/C06 release policies are being synchronized from stale “0 preview deployments” state to the observed canonical READY preview `dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q`, commit `77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7`.
 - This does not promote production or accept staging: C03 remains default-deny with `promotion_executed=false`; C06 remains `staging_acceptance_executed=false`; all existing prerequisite, commit-alignment, live smoke and deployment-lease gates remain mandatory.
+
+
+### F08 production READY / HTTP acceptance blocker — 2026-09-20
+- Canonical Vercel project `prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr` now has READY production deployment `dpl_75FRys3F48iXFpMoHRjte5YLT3sz`, source `git`, exact `main@510527d6e1d63fbc63b1c919c3d8e67240456f8f`.
+- Read-only verification of the exact deployment root returned HTTP 302 to Vercel SSO. F08 requires the app and data JSON to return HTTP 200, so F08 remains BLOCKED/PARTIAL; no SSO/login/MFA bypass was attempted.
+- This worker did not create/update/redeploy Vercel. Any future explicit deployment remains subject to the global DAVID Vercel deploy lease.
+- Fail-closed C03 evidence contract for this observation passed exact-head CI `35518399765`; PR #111 merged as `4440605f4eda88b1ebf086f06eccb97ae89673be`. `promotion_executed=false` remains until its declared prerequisites and production acceptance are satisfied.
