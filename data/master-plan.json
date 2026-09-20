@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T02:45:00+03:00",
+  "updatedAt": "2026-09-20T02:58:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -327,7 +327,7 @@
           "acceptanceCriteria": "Cross-tenant reads/writes are denied by database policy",
           "evidenceRequired": "Negative security tests",
           "status": "red",
-          "evidence": "PARTIAL RLS/tenant isolation is full-CI evidenced: bound active-tenant tests prove same-user multi-organisation switching with no previous-tenant leakage across models/items/export; negative table/RPC matrices and global grants guard pass. Full run 35423117317 SUCCESS includes M05 RLS, M05 active tenant isolation, R04 DB/API isolation and security guards. M05 remains RED because M02/M03 are not GREEN. — PARTIAL PASS"
+          "evidence": "PARTIAL RLS/tenant isolation now also proves membership-revocation invalidation. Existing active-tenant and negative isolation matrices remain PASS. `M05_MEMBERSHIP_REVOCATION_ISOLATION_PASS` proves production member removal cascades away stale active tenant context, then model API and authorization-context access fail closed with DP103 and organization discovery returns no membership. Exact-head CI `35476988177` on `63561536b1d3d162f43ff7a57b732e97937a3520` SUCCESS; PR #70 merged as `a9fb4c1006aafe9a2a3bcc210c9fe0085e002eb3`. M05 remains RED because M02/M03 are not GREEN. — PARTIAL PASS"
         },
         {
           "id": "M06",
