@@ -14,6 +14,9 @@ declare
   v_submitted timestamptz;
   v_accepted timestamptz;
   invalid_terminal_rejected boolean := false;
+  request_secret_rejected boolean := false;
+  response_secret_rejected boolean := false;
+  v_guard_submission uuid := '67676767-6767-4767-8767-676767676767';
 begin
   insert into public.dpp_organizations(id,name,slug)
   values(v_org,'T08 Reliability Org','t08-reliability');
@@ -40,8 +43,23 @@ begin
     id,organization_id,battery_item_id,passport_id,environment,provider,status,request_payload
   ) values(
     v_submission,v_org,v_item,v_passport,'test','eu_dpp_registry','draft',
-    '{"suite":"T08","synthetic":true}'::jsonb
+    '{"suite":"T08","synthetic":true,"product":{"serial":"SAFE-001"}}'::jsonb
   );
+
+  -- R07 registry request payload credential guard: nested credential-like keys fail closed.
+  begin
+    insert into public.dpp_registry_submissions(
+      id,organization_id,battery_item_id,passport_id,environment,provider,status,request_payload
+    ) values(
+      v_guard_submission,v_org,v_item,v_passport,'test','eu_dpp_registry','draft',
+      '{"product":{"serial":"SAFE-002"},"transport":[{"access_token":"must-not-persist"}]}'::jsonb
+    );
+  exception when check_violation then
+    request_secret_rejected:=true;
+  end;
+  if not request_secret_rejected then
+    raise exception 'R07 registry request payload allowed credential-bearing key';
+  end if;
 
   update public.dpp_registry_submissions set status='queued' where id=v_submission;
   update public.dpp_registry_submissions set status='submitted' where id=v_submission;
@@ -71,10 +89,21 @@ begin
     raise exception 'T08 submitted_at missing after retry';
   end if;
 
+  begin
+    update public.dpp_registry_submissions
+    set response_payload='{"accepted":true,"provider_meta":{"api_key":"must-not-persist"}}'::jsonb
+    where id=v_submission;
+  exception when check_violation then
+    response_secret_rejected:=true;
+  end;
+  if not response_secret_rejected then
+    raise exception 'R07 registry response payload allowed credential-bearing key';
+  end if;
+
   update public.dpp_registry_submissions
   set status='accepted',
       external_reference='T08-ACCEPTED',
-      response_payload='{"accepted":true}'::jsonb
+      response_payload='{"accepted":true,"provider_meta":{"code":"OK"}}'::jsonb
   where id=v_submission;
 
   select accepted_at into v_accepted
@@ -92,6 +121,40 @@ begin
 
   if not invalid_terminal_rejected then
     raise exception 'T08 terminal accepted state incorrectly allowed retry_wait';
+  end if;
+
+  -- R07 canonical registry credential guard consolidation.
+  if exists(
+    select 1
+    from pg_trigger t
+    join pg_class c on c.oid=t.tgrelid
+    join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public'
+      and c.relname='dpp_registry_submissions'
+      and not t.tgisinternal
+      and t.tgname='dpp_registry_request_payload_privacy_guard'
+  ) then
+    raise exception 'R07 superseded request-only registry guard trigger still exists';
+  end if;
+
+  if to_regprocedure('public.dpp_reject_registry_payload_credentials()') is not null
+     or to_regprocedure('public.dpp_json_has_credential_key(jsonb)') is not null then
+    raise exception 'R07 superseded request-only registry guard helper still exists';
+  end if;
+
+  if not exists(
+    select 1
+    from pg_trigger t
+    join pg_class c on c.oid=t.tgrelid
+    join pg_namespace n on n.oid=c.relnamespace
+    join pg_proc p on p.oid=t.tgfoid
+    where n.nspname='public'
+      and c.relname='dpp_registry_submissions'
+      and not t.tgisinternal
+      and t.tgname='dpp_registry_payload_credential_guard'
+      and p.proname='dpp_guard_registry_payload_credentials'
+  ) then
+    raise exception 'R07 canonical request+response registry guard is missing';
   end if;
 end
 $t08$;

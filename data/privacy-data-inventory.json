@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
@@ -189,14 +189,17 @@
       "fields": "request/response payloads, external reference, provider/environment/status, errors/retries, creator ID, timestamps",
       "retention": {
         "status": "pending_policy",
-        "current_behavior": "Submission history persists; legal/operational retention and external-recipient terms are not yet accepted"
+        "current_behavior": "Submission history persists; obvious credential-bearing JSON keys are technically blocked from request/response payload storage. Legal/operational retention and external-recipient terms are not yet accepted."
       },
       "controls": [
         "test/live environment flag",
         "idempotency",
         "retry contract",
-        "tenant linkage"
-      ]
+        "tenant linkage",
+        "recursive fail-closed credential-key guard on request_payload/response_payload",
+        "guard helper and trigger function not client-executable"
+      ],
+      "minimization_note": "Registry request/response JSON must not persist obvious credential-bearing keys. Provider/legal payload scope and retention terms still require acceptance before live delivery."
     },
     {
       "id": "evidence_metadata_objects",
