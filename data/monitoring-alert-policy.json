@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "task": "R10",
   "status": "partial",
   "input_event": "dpp_http_request",
@@ -105,5 +105,12 @@
     "require_auth_present_boolean": true,
     "error_code_pattern": "^[A-Z0-9_]{2,80}$",
     "invalid_events": "discard"
+  },
+  "synthetic_drill": {
+    "contract": "data/monitoring-incident-drill.json",
+    "executable_test": "tests/api/monitoring-incident-drill.test.cjs",
+    "scenario": "critical availability fire -> SEV1 owner/ack target mapping -> clear/recovery",
+    "artifact": "artifacts/r10-r13-monitoring-incident-drill.json",
+    "live_delivery_claimed": false
   }
 }
