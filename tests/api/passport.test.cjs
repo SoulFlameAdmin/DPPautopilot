@@ -331,3 +331,20 @@ test('POST allows catalog-public fields through to upstream', async () => {
     assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_passport_create');
   } finally { global.fetch=original; restore(); }
 });
+
+
+test('passport create conflict DP412 maps to stable 409', async () => {
+  const restore=withEnv(), original=global.fetch;
+  global.fetch=async()=>({ok:false,async json(){return {code:'DP412',message:'internal duplicate detail'};}});
+  try {
+    const res=makeRes();
+    await handler(makeReq('POST',{
+      battery_item_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      public_payload:{item:{unique_identifier:'urn:dpp:1'}},
+      private_payload:{}
+    }),res);
+    assert.equal(res.statusCode,409);
+    assert.equal(JSON.parse(res.body).error.code,'PASSPORT_CONFLICT');
+    assert.equal(res.body.includes('internal duplicate detail'),false);
+  } finally { global.fetch=original; restore(); }
+});
