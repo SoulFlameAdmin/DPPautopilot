@@ -530,3 +530,10 @@ Append evidence here only after verification.
 - Twenty valid R09 events with one HTTP 503 fire `availability_5xx_rate` at exactly 5%, map to R13 `SEV1` / DPP operations owner, and prove a synthetic minute-5 acknowledgement inside the 15-minute target.
 - Every required incident phase is exercised and a later healthy monitoring window clears the alert; CI emits `r10-r13-monitoring-incident-drill.json`.
 - This is synthetic CI evidence only. R10/R13 remain RED/PARTIAL pending deployed R09 ingestion, approved live delivery, human acknowledgement/escalation and deployed production-like incident recovery evidence.
+
+
+### M12/R07 audit snapshot credential redaction — 2026-09-20
+- PR #132 exact head `d4b19cd997bb054f95e4df2e57207d258600133f` completed full CI `35528258200` SUCCESS and merged as `db3cd9adf6bf9d6d66ff2f3e2cb70ac0bccb56df`.
+- Bound migration `dpp_audit_snapshot_secret_redaction` is applied as `20260920181053`; BEGIN/ROLLBACK regression returned `M12_AUDIT_LOG_SUBSET_PASS`.
+- Immutable audit copies recursively redact obvious credential-bearing JSON keys while source rows are unchanged; direct client EXECUTE on the helper is revoked.
+- M12/R07/R08 remain RED/PARTIAL pending declared dependencies and broader accepted audit retention/minimization/deployed acceptance.
