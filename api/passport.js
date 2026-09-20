@@ -4,7 +4,7 @@ const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
-const { sanitizePublicPayload } = require('./_access_policy.js');
+const { sanitizePublicPayload, findRestrictedPublicPaths } = require('./_access_policy.js');
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -30,6 +30,12 @@ function validTimestamp(value) {
 
 function validObject(value) {
   return value == null || (!Array.isArray(value) && typeof value === 'object');
+}
+
+function validatePublicPayloadAccess(value) {
+  const restricted = findRestrictedPublicPaths(value);
+  if (restricted.length === 0) return null;
+  return 'public_payload contains fields that are not public';
 }
 
 function sanitizePublicPassport(value) {
@@ -137,6 +143,10 @@ async function handler(req, res) {
       if (!validObject(body.public_payload)) {
         return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'public_payload must be a JSON object' } });
       }
+      const publicAccessProblem = validatePublicPayloadAccess(body.public_payload);
+      if (publicAccessProblem) {
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: publicAccessProblem } });
+      }
       if (!validObject(body.private_payload)) {
         return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'private_payload must be a JSON object' } });
       }
@@ -161,6 +171,10 @@ async function handler(req, res) {
     }
     if (!validObject(body.public_payload)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'public_payload must be a JSON object' } });
+    }
+    const publicAccessProblem = validatePublicPayloadAccess(body.public_payload);
+    if (publicAccessProblem) {
+      return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: publicAccessProblem } });
     }
     if (!validObject(body.private_payload)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'private_payload must be a JSON object' } });
@@ -187,4 +201,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, sanitizePublicPassport, mapDatabaseError, rpc };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, validatePublicPayloadAccess, sanitizePublicPassport, mapDatabaseError, rpc };
