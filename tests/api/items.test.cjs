@@ -134,7 +134,7 @@ test('cross-tenant item not-found maps to 404 without detail leak', async () => 
   global.fetch=async()=>({ok:false,async json(){return {code:'DP306',message:'internal detail'};}});
   try {
     const res=makeRes();
-    await handler(makeReq('DELETE',{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'}),res);
+    await handler(makeReq('DELETE',{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',expected_updated_at:'2026-09-20T00:00:00.000Z'}),res);
     const payload=JSON.parse(res.body);
     assert.equal(res.statusCode,404);
     assert.equal(payload.error.code,'ITEM_NOT_FOUND');
