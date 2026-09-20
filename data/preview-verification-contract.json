@@ -6,8 +6,8 @@
     "team_id": "team_cKaIZfnCMzoiiq80J0MhV0A2",
     "project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
     "project_name": "dpp-autopilot",
-    "observed_deployments": 0,
-    "observed_at": "2026-09-19"
+    "observed_deployments": 1,
+    "observed_at": "2026-09-20"
   },
   "deployment_requirements": {
     "environment": "preview",
@@ -64,11 +64,24 @@
       "headers"
     ]
   },
-  "live_gap": "Read-only Vercel query returned zero deployments for canonical project prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr. No create/redeploy action was attempted.",
+  "live_gap": "A real READY preview is now observed for the canonical project and exact Git commit. Read-only recovery-route verification returned HTTP 200, but complete C02 route/TLS/header evidence remains unavailable because protected preview requests redirect through Vercel SSO in the connector path. No login/MFA/SSO bypass was attempted. No create/redeploy action was attempted.",
   "remaining": [
     "C01 must be GREEN.",
-    "A real preview deployment must exist and be READY.",
-    "Preview metadata must identify the exact commit under test.",
-    "Automated live HTTP/TLS/header smoke evidence must pass against that preview."
-  ]
+    "Automated live HTTP/TLS/header smoke evidence must pass against the observed exact-commit preview.",
+    "Protected preview route verification must use an authorized access path; Vercel SSO must not be bypassed."
+  ],
+  "observed_preview": {
+    "deployment_id": "dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q",
+    "project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "project_name": "dpp-autopilot",
+    "environment": "preview",
+    "state": "READY",
+    "target": null,
+    "source": "git",
+    "commit_sha": "77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7",
+    "commit_ref": "m21-export-shape-fresh-main-20260920",
+    "url": "dpp-autopilot-95xeakbem-dimitar-lambovs-projects.vercel.app",
+    "created_at_ms": 1789909106722,
+    "ready_at_ms": 1789909130680
+  }
 }
