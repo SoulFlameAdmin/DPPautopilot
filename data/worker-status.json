@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T03 fail-closed manifest-drift integration merged and evidenced",
+  "currentTask": "M13 download integrity hardening merged, deployed to Supabase Edge Function v3 and evidenced",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #142 merged as d2bcd50f3d60291625c417f05bc4c389173b9cc2 after exact-head full CI 35531761114 SUCCESS; stale manifest token now fails 409 before second evidence object download",
-  "nextTask": "Validate/merge T03 manifest-drift evidence sync, then select the earliest dependency-safe non-deploy precursor from current main.",
-  "message": "T03 now covers positive resume and negative manifest drift in-process. It remains RED/PARTIAL pending M17-M23 and live authenticated/deployed integration.",
+  "lastCompletedTask": "PR #144 merged as 7ff3492e3fa62e480c786bc60b93fb83e914c126 after exact-head full CI 35544246411 SUCCESS; dpp-evidence-object v3 ACTIVE verify_jwt=true with source-readback-verified pre-response SHA-256/size/type checks",
+  "nextTask": "Validate/merge M13 v3 evidence sync, then continue earliest dependency-safe non-deploy hardening precursor; do not promote M13 until a real authenticated roundtrip is proven.",
+  "message": "M13 now verifies object integrity on upload and download, but real authenticated upload/download/delete acceptance and M03 remain unresolved; M13 stays RED/PARTIAL.",
   "deferredBlockers": [
     "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-21T02:18:00+03:00"
+  "updatedAt": "2026-09-21T02:24:00+03:00"
 }
