@@ -122,6 +122,40 @@ begin
   if not invalid_terminal_rejected then
     raise exception 'T08 terminal accepted state incorrectly allowed retry_wait';
   end if;
+
+  -- R07 canonical registry credential guard consolidation.
+  if exists(
+    select 1
+    from pg_trigger t
+    join pg_class c on c.oid=t.tgrelid
+    join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public'
+      and c.relname='dpp_registry_submissions'
+      and not t.tgisinternal
+      and t.tgname='dpp_registry_request_payload_privacy_guard'
+  ) then
+    raise exception 'R07 superseded request-only registry guard trigger still exists';
+  end if;
+
+  if to_regprocedure('public.dpp_reject_registry_payload_credentials()') is not null
+     or to_regprocedure('public.dpp_json_has_credential_key(jsonb)') is not null then
+    raise exception 'R07 superseded request-only registry guard helper still exists';
+  end if;
+
+  if not exists(
+    select 1
+    from pg_trigger t
+    join pg_class c on c.oid=t.tgrelid
+    join pg_namespace n on n.oid=c.relnamespace
+    join pg_proc p on p.oid=t.tgfoid
+    where n.nspname='public'
+      and c.relname='dpp_registry_submissions'
+      and not t.tgisinternal
+      and t.tgname='dpp_registry_payload_credential_guard'
+      and p.proname='dpp_guard_registry_payload_credentials'
+  ) then
+    raise exception 'R07 canonical request+response registry guard is missing';
+  end if;
 end
 $t08$;
 
