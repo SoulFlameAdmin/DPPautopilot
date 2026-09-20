@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T18:24:00+03:00",
+  "updatedAt": "2026-09-20T18:37:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -631,7 +631,7 @@
           "acceptanceCriteria": "Sensitive/public endpoints have documented limits and 429 behavior",
           "evidenceRequired": "Load/abuse tests",
           "status": "red",
-          "evidence": "PARTIAL shared authenticated rate-limit backend is now implemented, applied and regression-tested. Bound Supabase migration `dpp_shared_rate_limit_backend` applied as version `20260920151744`; `public.dpp_rate_limit_buckets` has RLS enabled with no direct anon/authenticated table grants. `dpp_rate_limit_consume(text,integer,integer,timestamptz)` is authenticated-only SECURITY DEFINER with fixed `search_path=public, pg_temp`, atomic fixed-window increments, validated pseudonymous network/credential bucket keys, and stale-row cleanup after reset+10 minutes. Bound runtime ACL probe confirmed rls_enabled=true, anon_select=false, auth_select=false, anon_exec=false, auth_exec=true, security_definer=true. Exact-head CI `35519149174` on `7dd12e8dba2905c5a4bd946ae804341a7a544071` completed SUCCESS including clean migration replay, R05 policy/API tests, `R05_SHARED_RATE_LIMIT_BACKEND_PASS`, SECURITY DEFINER/RLS guards, restore and browser regressions. PR #113 merged as `95bed9142570591f16f8fbb4eecf213fd633fb24`. R05 remains RED because M17-M20 are not all GREEN; deployed runtime is still process-local, anonymous public passport distributed protection is not solved, and multi-isolate/real-network load acceptance remains unproven. — PARTIAL PASS"
+          "evidence": "PARTIAL shared authenticated rate limiting now has both an applied atomic Supabase backend and feature-gated runtime wiring across all eight serverless API surfaces. Bound migration `dpp_shared_rate_limit_backend` is applied as `20260920151744`; table/RPC ACL and RLS probes passed. PR #115 exact-head `cfe8302c3000a1757d3c7e6939627995a6315515` passed full CI `35520015959` including API contracts, R05 abuse suite, clean PostgreSQL replay, shared DB limiter subset, global RLS/SECURITY DEFINER guards, restore and browser regression, then merged as `00ea0345448758a70087f9deaf9c61ae235ec0c6`. Runtime gate is explicit `DPP_SHARED_RATE_LIMIT_ENABLED=true`; authenticated requests consume network+credential shared budgets and fail closed with canonical HTTP 503 if the backend is unavailable; anonymous public passport identifier GET remains local-only. R05 remains RED because M17-M20 are not all GREEN and production enablement, anonymous distributed protection, multi-isolate and real-network load acceptance remain unproven. — PARTIAL PASS"
         },
         {
           "id": "R06",
