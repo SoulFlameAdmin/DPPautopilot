@@ -31,7 +31,7 @@ expected_tests=[
 assert test_names==expected_tests, f"T03 executable test set drifted: {test_names!r}"
 
 scenarios=matrix.get("scenarios",[])
-assert len(scenarios)==8
+assert len(scenarios)==9
 covered=set()
 for scenario in scenarios:
     covers=scenario.get("covers",[])
@@ -51,6 +51,8 @@ required_tokens=[
     "IMPORT_NOT_COMMITTABLE",
     "private_payload",
     "already_committed",
+    "PASSPORT_CONFLICT",
+    "passportCreateWrites",
 ]
 for token in required_tokens:
     assert token in test_text, f"T03 integration suite missing token {token}"
