@@ -47,7 +47,7 @@
       "covers": [
         "M21"
       ],
-      "expected": "authenticated export reflects stateful model/item/passport records"
+      "expected": "authenticated export mirrors production bundle shape with records/history/audit/evidence metadata and excludes object bytes/access URLs"
     },
     {
       "id": "semantic_not_found_errors",

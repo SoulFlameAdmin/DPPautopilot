@@ -53,6 +53,9 @@ required_tokens=[
     "already_committed",
     "PASSPORT_CONFLICT",
     "passportCreateWrites",
+    "signed_url",
+    "passport_versions",
+    "evidence_manifest",
 ]
 for token in required_tokens:
     assert token in test_text, f"T03 integration suite missing token {token}"
