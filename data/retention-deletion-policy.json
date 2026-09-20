@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "task": "R08",
   "status": "partial",
   "scope": "DPP Autopilot only; shared Supabase non-dpp_* data is excluded.",
@@ -94,7 +94,34 @@
       "evidence storage deletion lifecycle not accepted",
       "audit snapshot retention/minimization exception not accepted",
       "auth account deletion workflow not accepted"
-    ]
+    ],
+    "impact_preview_rpc": "dpp_api_org_deletion_impact()",
+    "impact_preview": {
+      "destructive": false,
+      "roles": [
+        "owner",
+        "admin"
+      ],
+      "counts": [
+        "organization_members",
+        "distinct_member_users",
+        "active_tenant_contexts",
+        "battery_models",
+        "battery_items",
+        "passports",
+        "passport_versions",
+        "import_mappings",
+        "import_runs",
+        "import_rows",
+        "registry_submissions",
+        "evidence_metadata",
+        "evidence_declared_bytes",
+        "audit_rows"
+      ],
+      "external_storage_enumeration_required": true,
+      "auth_users_deleted_by_org_delete": false,
+      "ready_for_destructive_delete": false
+    }
   },
   "implemented_actions": {
     "import_staging_purge_rpc": "dpp_api_purge_import_staging(timestamptz)",
@@ -103,6 +130,7 @@
       "admin"
     ],
     "minimum_age_days": 30,
-    "auditable": true
+    "auditable": true,
+    "org_deletion_impact_preview_rpc": "dpp_api_org_deletion_impact()"
   }
 }
