@@ -62,12 +62,22 @@
     "note": "This repository precursor validates evidence only. It does not create, promote or redeploy a Vercel deployment."
   },
   "live_state": {
-    "observed_deployments_for_canonical_project": 0,
+    "observed_deployments_for_canonical_project": 1,
+    "observed_ready_preview": {
+      "deployment_id": "dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q",
+      "state": "READY",
+      "environment": "preview",
+      "target": null,
+      "source": "git",
+      "commit_sha": "77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7",
+      "commit_ref": "m21-export-shape-fresh-main-20260920",
+      "url": "dpp-autopilot-95xeakbem-dimitar-lambovs-projects.vercel.app"
+    },
     "promotion_executed": false,
     "deployment_lease_required": false
   },
   "remaining": [
-    "C02 must be GREEN with real preview deployment evidence.",
+    "C02 must be GREEN with complete live preview route/TLS/header evidence.",
     "C01/T01-T04 release prerequisites must be GREEN as required by source of truth.",
     "A real production promotion must be executed only after all gates pass and under the DAVID Vercel deployment lease.",
     "Post-promotion production smoke and immutable deployment evidence must be captured."
