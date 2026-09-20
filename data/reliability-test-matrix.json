@@ -49,9 +49,20 @@
         "passport_unique_conflict_409",
         "unexpected_db_error_fail_closed"
       ]
+    },
+    {
+      "id": "passport_create_retry_idempotency",
+      "source_task": "M19/M23-partial",
+      "test": "tests/db/test_passports_api_subset.sql",
+      "expected_marker": "M23_PASSPORT_CREATE_IDEMPOTENCY_PASS",
+      "covers": [
+        "same_item_same_payload_same_passport",
+        "no_duplicate_passport_row",
+        "same_item_different_payload_conflict"
+      ]
     }
   ],
   "remaining": [
-    "M17-M20 must become fully accepted before M23 can become GREEN; API conflict behavior is now explicitly covered for M17-M19 while import and registry idempotency remain DB-proven."
+    "M17-M20 must become fully accepted before M23 can become GREEN; T08 now directly covers passport create retry idempotency in addition to import/registry retry behavior and API conflict handling."
   ]
 }
