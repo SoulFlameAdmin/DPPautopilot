@@ -9,6 +9,7 @@ R08 remains **RED** because R07 is not GREEN and several regulatory/storage/auth
 - Terminal import staging (`invalid` or `committed`) may be purged only after a minimum of 30 days.
 - `staged` and `validated` imports are preserved regardless of age by this precursor.
 - `dpp_api_retention_status()` reports the active tenant's deletion-readiness blockers and eligible import-staging count.
+- `dpp_api_org_deletion_impact()` is an owner/admin-only, non-destructive preview that counts tenant-scoped memberships, contexts, product/passport/import/registry/evidence/audit records and declared evidence bytes, while explicitly keeping destructive deletion unavailable.
 - `dpp_api_purge_import_staging(timestamptz)` is owner/admin-only, rejects cutoffs younger than 30 days, and preserves immutable audit DELETE events.
 
 ## Fail-closed deletion blockers
@@ -22,8 +23,8 @@ Organization deletion remains disabled until all of these are accepted and teste
 - audit snapshot retention/minimization exception;
 - Auth account deletion workflow.
 
-No legal/regulatory retention period is invented for those stores by this precursor.
+The deletion-impact preview also marks external Storage enumeration as required, keeps Auth users outside organization deletion, and returns machine-readable blocker codes. No legal/regulatory retention period is invented for those stores by this precursor.
 
 ## Evidence target
 
-`tests/db/test_retention_deletion_subset.sql` proves eligible terminal imports are removed, their child staging rows cascade, old non-terminal/recent terminal imports are preserved, viewer access is denied, owner/admin access is allowed, too-recent cutoffs fail closed, and audit delete events survive. `tests/api/export.test.cjs` additionally proves the bounded evidence-byte export happy path, SHA-256 mismatch denial, aggregate-size fail-closed behavior and unavailable-object error mapping without leaking bytes.
+`tests/db/test_retention_deletion_subset.sql` proves eligible terminal imports are removed, their child staging rows cascade, old non-terminal/recent terminal imports are preserved, viewer access is denied, owner/admin access is allowed, too-recent cutoffs fail closed, audit delete events survive, and the non-destructive deletion-impact preview reports exact tenant-scoped counts while keeping destructive deletion unavailable. `tests/api/export.test.cjs` additionally proves the bounded evidence-byte export happy path, SHA-256 mismatch denial, aggregate-size fail-closed behavior and unavailable-object error mapping without leaking bytes.
