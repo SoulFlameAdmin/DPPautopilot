@@ -156,6 +156,7 @@ for token in [
 assert "shared backend keys match the DB-safe pseudonymous contract" in test_text
 assert "feature-gated shared limiter consumes both pseudonymous buckets" in test_text
 assert "shared limiter fails closed when its backend is unavailable" in test_text
+assert "all authenticated API surfaces honor shared limiter 429 before business RPC" in test_text
 
 for surface in ["tenant","organizations","members","models","items","passport","imports","export"]:
     surface_text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
