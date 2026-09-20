@@ -22,6 +22,13 @@ Each signal also defines a lower clear threshold to avoid treating the fire thre
 - `tests/api/monitoring-alerts.test.cjs` proves trigger and clear/non-trigger behavior, minimum-sample guards, time-window exclusion and malformed-event rejection.
 - R09 now includes `timestamp_ms` in each structured request event so the window calculation is part of the real event contract rather than depending on an unstated external timestamp.
 
+## Synthetic fire/recover incident drill
+
+- `data/monitoring-incident-drill.json` and `tests/api/monitoring-incident-drill.test.cjs` drive a deterministic critical availability scenario through the real R10 evaluator.
+- 20 valid R09 events with one 503 produce exactly 5% 5xx and fire `availability_5xx_rate` as critical for the DPP operations owner.
+- The drill maps that signal to R13 `SEV1`, proves the synthetic acknowledgement timestamp (5 minutes) is within the 15-minute target, exercises every required runbook phase in order, then advances beyond the 5-minute window and proves the alert clears on healthy traffic.
+- The test emits `artifacts/r10-r13-monitoring-incident-drill.json`. This is CI evidence only; it does not claim live delivery, human acknowledgement or production recovery.
+
 ## Remaining before GREEN
 
 No notification destination is claimed as live. Production acceptance still requires deployed R09 log ingestion, an approved alert destination, a real alert fire-and-recover drill, and acknowledgement/escalation evidence. F08 is not retried by this precursor.
