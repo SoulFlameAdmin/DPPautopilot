@@ -304,3 +304,107 @@ test('41st authenticated member write is blocked before validation/upstream',asy
     console.warn=originalWarn;
   }
 });
+
+
+test('feature-gated shared limiter consumes both pseudonymous buckets',async()=>{
+  const calls=[];
+  const fetchImpl=async(url,options)=>{
+    calls.push({url,options});
+    const index=calls.length;
+    return {
+      ok:true,
+      async json(){
+        return [{
+          allowed:index===1,
+          request_count:index,
+          remaining:index===1?1:0,
+          reset_epoch_seconds:1900000000,
+          retry_after_seconds:index===1?0:12
+        }];
+      }
+    };
+  };
+  const decision=await limiter.checkSharedRateLimit(
+    req('POST',{},{} ,'Bearer shared-runtime','203.0.113.91'),
+    'models',
+    'Bearer shared-runtime',
+    {
+      env:{
+        DPP_SHARED_RATE_LIMIT_ENABLED:'true',
+        DPP_SUPABASE_URL:'https://example.supabase.co',
+        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+      },
+      fetchImpl,
+      nowMs:1000
+    }
+  );
+  assert.equal(decision.enforced,true);
+  assert.equal(decision.allowed,false);
+  assert.equal(decision.remaining,0);
+  assert.equal(decision.retryAfterSeconds,12);
+  assert.equal(decision.sharedBuckets,2);
+  assert.equal(calls.length,2);
+  for(const call of calls){
+    assert.equal(call.url,'https://example.supabase.co/rest/v1/rpc/dpp_rate_limit_consume');
+    assert.equal(call.options.headers.Authorization,'Bearer shared-runtime');
+    const body=JSON.parse(call.options.body);
+    assert.match(body.p_bucket_key,/^models\|authenticated_write\|(network:[0-9a-f]{32}|credential:[0-9a-f]{24})$/);
+    assert.equal(body.p_window_seconds,60);
+    assert.equal(body.p_limit,40);
+  }
+  assert.equal(calls.map(call=>call.options.body).join('|').includes('203.0.113.91'),false);
+  assert.equal(calls.map(call=>call.options.body).join('|').includes('shared-runtime'),false);
+});
+
+test('shared limiter fails closed when its backend is unavailable',async()=>{
+  const decision=await limiter.checkSharedRateLimit(
+    req('GET',null,{} ,'Bearer shared-runtime','203.0.113.92'),
+    'models',
+    'Bearer shared-runtime',
+    {
+      env:{
+        DPP_SHARED_RATE_LIMIT_ENABLED:'true',
+        DPP_SUPABASE_URL:'https://example.supabase.co',
+        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+      },
+      fetchImpl:async()=>({ok:false,async json(){return {message:'nope'};}})
+    }
+  );
+  assert.equal(decision.enforced,true);
+  assert.equal(decision.allowed,false);
+  assert.equal(decision.error,true);
+  assert.equal(decision.status,503);
+  assert.equal(decision.code,'RATE_LIMIT_BACKEND_UNAVAILABLE');
+  assert.deepEqual(limiter.sharedRateLimitUnavailableBody(),{
+    error:{code:'RATE_LIMIT_BACKEND_UNAVAILABLE',message:'Request protection is temporarily unavailable.'}
+  });
+});
+
+test('shared limiter is inert unless explicitly enabled and skips public anonymous scope',async()=>{
+  let calls=0;
+  const fetchImpl=async()=>{calls+=1;throw new Error('must not call');};
+  const disabled=await limiter.checkSharedRateLimit(
+    req('GET',null,{} ,'Bearer a','203.0.113.93'),
+    'models',
+    'Bearer a',
+    {env:{DPP_SHARED_RATE_LIMIT_ENABLED:'false'},fetchImpl}
+  );
+  assert.equal(disabled.enforced,false);
+
+  const publicDecision=await limiter.checkSharedRateLimit(
+    req('GET',null,{identifier:'urn:dpp:r05:public'},'Bearer a','203.0.113.93'),
+    'passport',
+    'Bearer a',
+    {
+      env:{
+        DPP_SHARED_RATE_LIMIT_ENABLED:'true',
+        DPP_SUPABASE_URL:'https://example.supabase.co',
+        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+      },
+      fetchImpl
+    }
+  );
+  assert.equal(publicDecision.enforced,false);
+  assert.equal(publicDecision.reason,'public_anonymous_scope');
+  assert.equal(calls,0);
+});
