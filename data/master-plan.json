@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T19:10:00+03:00",
+  "updatedAt": "2026-09-20T19:18:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -399,7 +399,7 @@
           "acceptanceCriteria": "Allowed files upload/download under tenant policy; type/size limits enforced",
           "evidenceRequired": "Storage tests",
           "status": "red",
-          "evidence": "PARTIAL evidence/storage hardening now includes a live caller-JWT object bridge. Bound Supabase Edge Function `dpp-evidence-object` is ACTIVE version 1 with `verify_jwt=true`, deployed bundle SHA-256 `9ca527828da04bec19fba8e4b6afd82a710fe09b418e5f31112bacfe51f0e6ef`, and source implements caller Authorization forwarding through the anon client so Storage RLS remains authoritative; no service-role key is used. Existing private bucket, 10 MiB, MIME allowlist, no-overwrite, path and tenant-registration guards remain PASS. M13 remains RED because M03 is not GREEN and the available connector has no normal authenticated Edge Function/Storage invocation path to prove a real user byte upload/download/delete roundtrip without bypassing auth. — PARTIAL PASS / EXTERNAL ACCEPTANCE BLOCKED"
+          "evidence": "PARTIAL evidence object lifecycle now has private Storage/RLS, caller-JWT Edge bridge, bounded export bytes, and deployed pre-upload integrity verification. PR #123 exact-head `60c7c5e0d6d9a1fb811031d2e2cab5b219bb9c19` completed full CI `35521896483` SUCCESS and merged as `194d4a68bb3dbf89046c67fb6adbed6a28dbdde6`. Bound Supabase Edge Function `dpp-evidence-object` was deployed as ACTIVE version 2 with `verify_jwt=true`; source readback confirms caller-RLS lookup from `dpp_evidence_attachments`, SHA-256 computation, exact byte_size/hash/content_type comparison, `403 EVIDENCE_METADATA_NOT_AVAILABLE` / `409 EVIDENCE_METADATA_MISMATCH`, and verification before Storage upload. M13 remains RED pending M03 GREEN plus a real authenticated upload→download/content verification→delete roundtrip against the deployed function. — PARTIAL PASS"
         },
         {
           "id": "M14",
