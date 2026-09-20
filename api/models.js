@@ -122,7 +122,7 @@ async function handler(req, res) {
 
     if (method === 'POST') {
       const problem = validateCreate(body);
-      if (problem) return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: problem } });
+      if (problem) return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       const model = await rpc('dpp_api_models_create', {
         p_model_identifier: body.model_identifier.trim(),
         p_manufacturer_name: body.manufacturer_name.trim(),
@@ -140,16 +140,16 @@ async function handler(req, res) {
         return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
       }
       if (body.model_identifier != null && (typeof body.model_identifier !== 'string' || body.model_identifier.trim().length < 1 || body.model_identifier.trim().length > 128)) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'model_identifier must contain 1..128 characters' } });
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
       if (body.manufacturer_name != null && (typeof body.manufacturer_name !== 'string' || body.manufacturer_name.trim().length < 1 || body.manufacturer_name.trim().length > 250)) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'manufacturer_name must contain 1..250 characters' } });
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
       if (body.category != null && !CATEGORIES.has(body.category)) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'unsupported battery category' } });
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
       if (body.canonical_data != null && (Array.isArray(body.canonical_data) || typeof body.canonical_data !== 'object')) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'canonical_data must be a JSON object' } });
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
 
       const model = await rpc('dpp_api_models_update_checked', {
