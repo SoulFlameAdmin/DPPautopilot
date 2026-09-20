@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M05 revocation-isolation precursor merged and evidenced; continue earliest dependency-safe non-deploy MVP/security task while F08/M01 remain deferred external blockers",
+  "currentTask": "M10 catalog-driven public sanitizer merged and evidenced; continue earliest dependency-safe non-deploy MVP/security precursor",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #70 merged as a9fb4c1006aafe9a2a3bcc210c9fe0085e002eb3; M05_MEMBERSHIP_REVOCATION_ISOLATION_PASS; exact-head CI 35476988177 SUCCESS",
-  "nextTask": "Continue dependency-safe non-deploy hardening. Prefer M10/M12/M13/M17/M18 precursors whose code/tests can advance without M01 deployment acceptance; do not retry F08 without new evidence.",
-  "message": "M05 now additionally proves membership revocation clears stale tenant context and fails closed across API/RBAC. M05 remains RED by upstream dependency; continue independent implementation/tests without status inflation.",
+  "lastCompletedTask": "PR #75 merged as 18388cad9030a281550d9c03feccb8d496b32903; exact-head CI 35478636516 SUCCESS",
+  "nextTask": "Continue with M12 audit-log hardening or another earliest RED precursor whose implementation/tests can advance without M01/M03 deployed acceptance; do not retry F08 without new evidence.",
+  "message": "M10 now has DB/RPC enforcement plus catalog-driven HTTP defense-in-depth against nested restricted-field leakage. M10 remains RED by dependency; continue independent implementation/tests without status inflation.",
   "deferredBlockers": [
     "F08 — Vercel production acceptance remains externally blocked; do not retry without new quota/access evidence and always obey the global Supabase deployment lease law.",
     "M01 — final runtime recovery password-update acceptance remains blocked on a usable deployed recovery redirect.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T02:58:00+03:00"
+  "updatedAt": "2026-09-20T03:05:00+03:00"
 }
