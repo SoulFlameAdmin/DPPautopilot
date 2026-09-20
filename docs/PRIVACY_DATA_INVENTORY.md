@@ -27,7 +27,7 @@ R07 remains **RED/PARTIAL** until M01–M13 are fully accepted and retention/del
 | Evidence | Evidence integrity and attachment metadata | `dpp_evidence_attachments`; planned `dpp-evidence` Storage bucket | Filenames/metadata/files may contain personal or confidential data | Object lifecycle/deletion not yet accepted |
 | Audit | Accountability and security trail | `dpp_audit_log` | Actor UUID + before/after snapshots | Append-only; audit-safe retention/deletion exception pending |
 | App binding | DPP namespace binding | `dpp_app_binding` | Non-personal configuration | Application binding lifetime |
-| Rate-limit metadata | Abuse prevention | Process-local API memory | Client IP + truncated bearer digest/counters | Non-durable; stale-window pruning follow-up required |
+| Rate-limit metadata | Abuse prevention | Process-local API memory + `dpp_rate_limit_buckets` for shared authenticated counters | Truncated SHA-256 network/credential bucket digests + counters/window timestamps; raw IP/bearer values are not stored | Local buckets are pruned/capped; shared rows older than reset+10 min are opportunistically deleted; deployed/public distributed acceptance pending |
 
 ## Data minimization rules
 
@@ -45,7 +45,7 @@ R07 remains **RED/PARTIAL** until M01–M13 are fully accepted and retention/del
 - Complete M13 Storage lifecycle and evidence deletion behavior.
 - Define audit-safe deletion/retention exceptions for immutable snapshots.
 - Implement accepted organization/user deletion and export policy under R08.
-- Add stale-window pruning to the process-local R05 limiter before production.
+- Complete R05 runtime wiring for the shared authenticated limiter and define a safe distributed identity path for anonymous public passport traffic.
 
 ## Shared Supabase boundary
 
