@@ -88,7 +88,7 @@ async function handler(req,res){
     }
 
     const problem=validateWrite(body,method!=='DELETE');
-    if(problem) return send(res,422,{error:{code:'VALIDATION_ERROR',message:problem}});
+    if(problem) return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
 
     if(method==='POST'){
       const member=await rpc('dpp_api_members_add',{p_user_id:body.user_id,p_role:body.role},authorization);
