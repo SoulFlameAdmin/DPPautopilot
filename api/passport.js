@@ -4,6 +4,7 @@ const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
+const { sanitizePublicPayload } = require('./_access_policy.js');
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -36,7 +37,7 @@ function sanitizePublicPassport(value) {
   const allowed = ['passport_id','unique_identifier','status','public_payload','updated_at'];
   const out = {};
   for (const key of allowed) {
-    if (Object.prototype.hasOwnProperty.call(value, key)) out[key] = value[key];
+    if (Object.prototype.hasOwnProperty.call(value, key)) out[key] = key === 'public_payload' ? sanitizePublicPayload(value[key]) : value[key];
   }
   return out;
 }
