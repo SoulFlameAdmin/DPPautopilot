@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T02:58:00+03:00",
+  "updatedAt": "2026-09-20T03:05:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -372,7 +372,7 @@
           "acceptanceCriteria": "Every passport field has explicit access class; API enforces it",
           "evidenceRequired": "API/security tests",
           "status": "red",
-          "evidence": "PARTIAL public/private access enforcement is full-CI evidenced: bound M10_PUBLIC_PRIVATE_RUNTIME_PASS proves restricted public fields rejected, anonymous public reads exclude private/tenant data, authenticated private access works and anon/auth RPC separation holds. Full run 35423117317 SUCCESS includes M10 runtime subset plus API/security/browser regressions. M10 remains RED because M03 is not GREEN. — PARTIAL PASS"
+          "evidence": "PARTIAL public/private access enforcement now includes catalog-driven HTTP defense-in-depth in addition to the bound DB/RPC controls. `api/_access_policy.js` removes every nested field whose canonical field-catalog access class is not `public` or `public_identifier`, so a regressed upstream public RPC cannot leak legitimate-interest or authority-only fields through `/api/passport`. Exact-head CI `35478636516` on `e83be5d5efc094d1468a38c52a0f59bb1145c93d` completed SUCCESS, including `Validate M10 access-class policy`, `Run M19 passport HTTP contract unit tests`, and `Run M10 public private runtime subset`. PR #75 merged as `18388cad9030a281550d9c03feccb8d496b32903`. Existing bound `M10_PUBLIC_PRIVATE_RUNTIME_PASS` remains valid. M10 remains RED because M03 is not GREEN and deployed acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M11",
