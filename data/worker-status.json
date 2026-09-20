@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T07/R05 shared limiter concurrency merged and evidenced; continuing next independent non-deploy precursor",
+  "currentTask": "M13 pre-upload integrity hardening merged, deployed to Supabase Edge Function v2 and evidenced",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #121 merged as 79abc50529909d7213806947b91d0d95613ac1fd after exact-head full CI 35521547459 SUCCESS; shared concurrency profile proves 40 allowed / 10 denied with zero backend errors",
-  "nextTask": "Validate/merge T07/R05 evidence sync, then continue the earliest dependency-safe precursor reducing remaining internal acceptance gaps.",
-  "message": "Shared limiter concurrency is now covered in CI, but R05/T07 remain RED pending declared dependencies and real deployed multi-isolate/network load acceptance.",
+  "lastCompletedTask": "PR #123 merged as 194d4a68bb3dbf89046c67fb6adbed6a28dbdde6 after exact-head full CI 35521896483 SUCCESS; dpp-evidence-object v2 ACTIVE verify_jwt=true with source-readback-verified SHA-256/size/type checks before upload",
+  "nextTask": "Continue earliest dependency-safe precursor outside M01/F08/M13 runtime blockers; do not promote M13 until authenticated deployed roundtrip is proven.",
+  "message": "M13 integrity gap is reduced materially, but final authenticated deployed Storage roundtrip remains unproven; M13 stays RED/PARTIAL.",
   "deferredBlockers": [
     "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T19:10:00+03:00"
+  "updatedAt": "2026-09-20T19:18:00+03:00"
 }
