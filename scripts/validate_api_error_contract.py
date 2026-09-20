@@ -51,11 +51,25 @@ declared_codes={
 } | set(contract.get("local_codes",{})) | {contract["default"]["code"]}
 
 literal_code_re=re.compile(r"""code\s*:\s*['"]([A-Z][A-Z0-9_]+)['"]""")
+direct_error_pair_re=re.compile(
+    r"""code\s*:\s*['"]([A-Z][A-Z0-9_]+)['"]\s*,\s*message\s*:\s*['"]([^'"]*)['"]"""
+)
 for name in api_names:
     text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
     literal_codes=set(literal_code_re.findall(text))
     undeclared=sorted(literal_codes-declared_codes)
     assert not undeclared, f"{name} API emits undeclared public error codes: {undeclared}"
+
+    for code,message in direct_error_pair_re.findall(text):
+        local=contract.get("local_codes",{}).get(code)
+        if local:
+            assert message==local["message"], (
+                f"{name} API public message drift for {code}: {message!r} != {local['message']!r}"
+            )
+    assert not re.search(
+        r"""code\s*:\s*['"]VALIDATION_ERROR['"]\s*,\s*message\s*:\s*(?:problem|publicAccessProblem)\b""",
+        text,
+    ), f"{name} API emits dynamic VALIDATION_ERROR public messages"
 
 
 helper=(ROOT/"api/_errors.js").read_text(encoding="utf-8")

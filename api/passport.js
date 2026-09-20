@@ -113,7 +113,7 @@ async function handler(req, res) {
 
       if (identifier) {
         if (typeof identifier !== 'string' || identifier.trim().length < 1 || identifier.trim().length > 300) {
-          return send(res, 400, { error: { code: 'INVALID_IDENTIFIER', message: 'identifier must contain 1..300 characters' } });
+          return send(res, 400, { error: { code: 'INVALID_IDENTIFIER', message: 'identifier must contain 1..300 characters.' } });
         }
         const passport = await rpc('dpp_api_passport_public', { p_unique_identifier: identifier.trim() }, null);
         return send(res, 200, { data: sanitizePublicPassport(passport) });
@@ -138,17 +138,17 @@ async function handler(req, res) {
 
     if (method === 'POST') {
       if (!validUuid(body.battery_item_id)) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'battery_item_id must be a valid UUID' } });
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
       if (!validObject(body.public_payload)) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'public_payload must be a JSON object' } });
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
       const publicAccessProblem = validatePublicPayloadAccess(body.public_payload);
       if (publicAccessProblem) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: publicAccessProblem } });
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
       if (!validObject(body.private_payload)) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'private_payload must be a JSON object' } });
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
 
       const passport = await rpc('dpp_api_passport_create', {
@@ -167,17 +167,17 @@ async function handler(req, res) {
       return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
     }
     if (body.status != null && !['draft','active','suspended','retired'].includes(body.status)) {
-      return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'unsupported passport status' } });
+      return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
     }
     if (!validObject(body.public_payload)) {
-      return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'public_payload must be a JSON object' } });
+      return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
     }
     const publicAccessProblem = validatePublicPayloadAccess(body.public_payload);
     if (publicAccessProblem) {
-      return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: publicAccessProblem } });
+      return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
     }
     if (!validObject(body.private_payload)) {
-      return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'private_payload must be a JSON object' } });
+      return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
     }
 
     const passport = await rpc('dpp_api_passport_update_checked', {
