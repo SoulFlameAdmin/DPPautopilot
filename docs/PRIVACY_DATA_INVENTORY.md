@@ -23,7 +23,7 @@ R07 remains **RED/PARTIAL** until M01–M13 are fully accepted and retention/del
 | Battery product records | Canonical model/item data | `dpp_battery_models`, `dpp_battery_items` | Product/business data + creator user UUID | No time expiry; policy pending |
 | Passports/history | Public/private DPP projection and history | `dpp_passports`, `dpp_passport_versions` | Regulatory product data, tenant-confidential payload, actor UUID | Version history persists; period pending |
 | Import staging | Mapping/validation/transactional import | `dpp_import_mappings`, `dpp_import_runs`, `dpp_import_rows` | Product/business staging + creator UUID | Owner/admin terminal `invalid`/`committed` purge after minimum 30 days is implemented; final policy acceptance pending |
-| Registry submissions | External registry workflow/retry evidence | `dpp_registry_submissions` | Request/response payload, refs/errors, actor UUID | Operational/legal period pending |
+| Registry submissions | External registry workflow/retry evidence | `dpp_registry_submissions` | Request/response payload, refs/errors, actor UUID | Credential-like request keys are rejected before persistence; operational/legal period pending |
 | Evidence | Evidence integrity and attachment metadata | `dpp_evidence_attachments` + private `dpp-evidence` Storage via caller-JWT `dpp-evidence-object` Edge Function | Filenames/metadata/files may contain personal or confidential data | Pre-upload size/SHA-256/type integrity is deployed; final authenticated upload→download→delete acceptance and retention period remain pending |
 | Audit | Accountability and security trail | `dpp_audit_log` | Actor UUID + before/after snapshots | Append-only; audit copies now redact obvious credential-bearing JSON keys; broader minimization + retention/deletion exception pending |
 | App binding | DPP namespace binding | `dpp_app_binding` | Non-personal configuration | Application binding lifetime |
@@ -67,3 +67,11 @@ The live Supabase project contains unrelated non-DPP application tables. DPP mig
 - This affects only the audit copy; source business/regulatory rows are not modified.
 - The helper is not executable by `anon` or `authenticated`.
 - This does **not** define the final audit retention period or broader personal/confidential-field minimization policy.
+
+
+## Registry request credential minimization precursor
+
+- `dpp_registry_submissions.request_payload` now fails closed before persistence when obvious credential-bearing JSON key names are found recursively, including nested arrays/objects.
+- The guard covers password/passwd, secret/token variants, authorization, API-key variants, client secret and credential(s).
+- The detection/trigger helpers have no direct `anon` / `authenticated` EXECUTE grants.
+- This is a technical minimization boundary only; final provider-specific field allowlist, live payload scope, legal basis and external-recipient terms remain pending.
