@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M03 authorization context precursor merged and evidenced; continue earliest dependency-safe non-deploy MVP/security precursor while F08/M01 remain deferred external blockers",
+  "currentTask": "M05 revocation-isolation precursor merged and evidenced; continue earliest dependency-safe non-deploy MVP/security task while F08/M01 remain deferred external blockers",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #68 merged as c1ae0b05b35fc6905d4442189aab1c4af9c2de67; bound M03 runtime matrix PASS; exact-head CI 35476608040 SUCCESS; M25 audit 35476608038 SUCCESS",
-  "nextTask": "Continue dependency-safe non-deploy hardening without status inflation. Prefer M05/RLS or another RED task whose implementation can advance despite M01/M02 final acceptance blockers; do not retry F08 without new rate-limit/access evidence.",
-  "message": "D01-D14 are GREEN. M03 now has authoritative active-tenant role/capability discovery with bound Supabase and clean-CI proof, but remains RED by dependency because M01/M02 are not GREEN. Continue independent implementation/tests rather than stopping on F08/M01.",
+  "lastCompletedTask": "PR #70 merged as a9fb4c1006aafe9a2a3bcc210c9fe0085e002eb3; M05_MEMBERSHIP_REVOCATION_ISOLATION_PASS; exact-head CI 35476988177 SUCCESS",
+  "nextTask": "Continue dependency-safe non-deploy hardening. Prefer M10/M12/M13/M17/M18 precursors whose code/tests can advance without M01 deployment acceptance; do not retry F08 without new evidence.",
+  "message": "M05 now additionally proves membership revocation clears stale tenant context and fails closed across API/RBAC. M05 remains RED by upstream dependency; continue independent implementation/tests without status inflation.",
   "deferredBlockers": [
     "F08 — Vercel production acceptance remains externally blocked; do not retry without new quota/access evidence and always obey the global Supabase deployment lease law.",
     "M01 — final runtime recovery password-update acceptance remains blocked on a usable deployed recovery redirect.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T02:45:00+03:00"
+  "updatedAt": "2026-09-20T02:58:00+03:00"
 }

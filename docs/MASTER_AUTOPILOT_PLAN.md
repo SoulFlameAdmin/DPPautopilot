@@ -395,3 +395,10 @@ Append evidence here only after verification.
 - Runtime ACL verification proves `SECURITY DEFINER`, fixed `search_path=public, pg_temp`, authenticated EXECUTE and anon denial.
 - Exact-head GitHub Actions CI `35476608040` on `d7c9ff0b35a773a9c4be8baf4c435a8886b9c040` completed SUCCESS, including C04 migration gate, clean PostgreSQL replay, M03 matrix and global SECURITY DEFINER RPC guard. M25 audit `35476608038` also SUCCESS.
 - PR #68 merged as `c1ae0b05b35fc6905d4442189aab1c4af9c2de67`. M03 remains RED/PARTIAL because M01/M02 are not GREEN and deployed authorization acceptance is unavailable. No Vercel deployment was attempted.
+
+
+### M05 membership revocation isolation — 2026-09-20
+- Added transaction-only regression coverage proving that production member removal invalidates stale active tenant context.
+- `M05_MEMBERSHIP_REVOCATION_ISOLATION_PASS` proves the removed member can no longer access model data or authorization context and no longer discovers the organization.
+- Exact-head GitHub Actions CI `35476988177` on `63561536b1d3d162f43ff7a57b732e97937a3520` completed SUCCESS; PR #70 merged as `a9fb4c1006aafe9a2a3bcc210c9fe0085e002eb3`.
+- M05 remains RED/PARTIAL because M02/M03 are not GREEN. No Vercel deployment was attempted.
