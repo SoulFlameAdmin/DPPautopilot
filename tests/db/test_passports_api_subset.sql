@@ -56,6 +56,7 @@ declare
   item_b uuid := 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
   passport_a uuid;
   passport_b uuid;
+  retry_passport uuid;
   payload jsonb;
   seen boolean;
 begin
@@ -77,6 +78,34 @@ begin
   );
   passport_a:=(payload->>'passport_id')::uuid;
   if payload->>'status'<>'draft' then raise exception 'M19 create did not start draft'; end if;
+
+  -- M23 idempotency: an identical retry must return the same draft, not create a duplicate.
+  payload:=public.dpp_api_passport_create(
+    item_a,
+    '{"model":{"identification":{"model_id":"M19-MODEL-A","manufacturer":{"name":"Maker A"}}},"item":{"unique_identifier":"urn:dpp:m19:a:1"}}'::jsonb,
+    '{"state_of_health":{"percent":97},"internal_note":"private-only"}'::jsonb
+  );
+  retry_passport:=(payload->>'passport_id')::uuid;
+  if retry_passport<>passport_a then
+    raise exception 'M23 identical passport create retry changed identity';
+  end if;
+  if (select count(*) from public.dpp_passports where organization_id=org_a and battery_item_id=item_a)<>1 then
+    raise exception 'M23 identical passport create retry produced duplicate rows';
+  end if;
+
+  -- A retry with different content must fail with a stable conflict instead of raw 23505.
+  seen:=false;
+  begin
+    perform public.dpp_api_passport_create(
+      item_a,
+      '{"model":{"identification":{"model_id":"M19-MODEL-A","manufacturer":{"name":"Maker A"}}},"item":{"unique_identifier":"urn:dpp:m19:a:1"}}'::jsonb,
+      '{"state_of_health":{"percent":12},"internal_note":"different"}'::jsonb
+    );
+  exception when sqlstate 'DP412' then seen:=true;
+  end;
+  if not seen then
+    raise exception 'M23 divergent passport create retry was not rejected with DP412';
+  end if;
 
   -- M10 enforcement: restricted catalog keys cannot enter public payload.
   seen:=false;
