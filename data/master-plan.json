@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T18:22:00+03:00",
+  "updatedAt": "2026-09-20T18:24:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -649,7 +649,7 @@
           "acceptanceCriteria": "Personal/business data, purpose, location, processor and retention recorded",
           "evidenceRequired": "`docs/PRIVACY_DATA_INVENTORY.md`",
           "status": "red",
-          "evidence": "PARTIAL DPP-only privacy inventory in docs/PRIVACY_DATA_INVENTORY.md + data/privacy-data-inventory.json records purpose/location/processor/retention state across auth linkage and all DPP stores. Validator derives CREATE TABLE public.dpp_* from migrations and proves full table coverage. CI 35409485502 on edaf0c4349d34e2c27ba944383795a6e578201f2 SUCCESS. R07 remains RED pending M01-M13 full acceptance plus concrete retention/deletion/external-recipient policy implementation. — PARTIAL PASS"
+          "evidence": "PARTIAL DPP-only privacy inventory in `docs/PRIVACY_DATA_INVENTORY.md` + `data/privacy-data-inventory.json` records purpose/location/processor/retention state across auth linkage and all DPP stores. Inventory now also covers the shared R05 pseudonymous counter table `dpp_rate_limit_buckets`, its Supabase processor/location, raw-IP/bearer minimization, revoked direct client access and reset+10-minute stale-row cleanup. Validator derives `CREATE TABLE public.dpp_*` from migrations and proves full table coverage; exact-head CI `35519149174` on `7dd12e8dba2905c5a4bd946ae804341a7a544071` completed SUCCESS and PR #113 merged as `95bed9142570591f16f8fbb4eecf213fd633fb24`. R07 remains RED pending M01-M13 full acceptance plus final retention/deletion/external-recipient policy implementation. — PARTIAL PASS"
         },
         {
           "id": "R08",
