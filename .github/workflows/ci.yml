@@ -188,6 +188,14 @@ jobs:
         run: node --test tests/api/observability.test.cjs
       - name: Run R10 monitoring alert precursor suite
         run: node --test tests/api/monitoring-alerts.test.cjs
+      - name: Run R10 R13 synthetic fire recover drill
+        run: node --test tests/api/monitoring-incident-drill.test.cjs
+      - name: Upload R10 R13 synthetic drill report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: r10-r13-monitoring-incident-drill
+          path: artifacts/r10-r13-monitoring-incident-drill.json
+          if-no-files-found: error
       - name: Run T07 synthetic handler load suite
         run: node --test tests/api/load.test.cjs
       - name: Upload T07 load report

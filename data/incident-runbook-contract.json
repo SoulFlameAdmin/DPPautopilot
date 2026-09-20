@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "task": "R13",
   "status": "partial",
   "runbook": "docs/INCIDENT_RUNBOOK.md",
@@ -69,9 +69,21 @@
     "Treat suspected tenant isolation or data disclosure as a privacy/security incident immediately."
   ],
   "runtime_gaps": [
-    "No deployed R09 log ingestion evidence while F08 is blocked.",
-    "No live R10 notification destination or acknowledgement drill.",
-    "No production C05 rollback procedure accepted yet.",
+    "R09 deployed log ingestion/correlation evidence is still unavailable while F08/runtime acceptance remains blocked.",
+    "R10 has no approved live notification destination; the CI fire/recover drill is synthetic and does not count as human acknowledgement evidence.",
+    "C05 production rollback procedure is not accepted yet.",
+    "A deployed incident drill using production-like runtime evidence has not been executed.",
     "Legal/privacy notification obligations require applicable-jurisdiction review and are not hard-coded by this precursor."
-  ]
+  ],
+  "synthetic_drill": {
+    "contract": "data/monitoring-incident-drill.json",
+    "executable_test": "tests/api/monitoring-incident-drill.test.cjs",
+    "mapped_signal": "availability_5xx_rate",
+    "mapped_severity": "SEV1",
+    "synthetic_ack_minutes": 5,
+    "target_ack_minutes": 15,
+    "required_phases_exercised": true,
+    "live_notification_claimed": false,
+    "deployed_runtime_claimed": false
+  }
 }

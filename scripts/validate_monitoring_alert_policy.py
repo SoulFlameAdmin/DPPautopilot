@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/monitoring-alert-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==2
+assert policy.get("version")==3
 assert policy.get("task")=="R10"
 assert policy.get("status")=="partial"
 assert policy.get("input_event")=="dpp_http_request"
@@ -60,6 +60,22 @@ for signal in signals.values():
     assert signal["clear_below"] < signal["threshold"]["value"]
     assert signal["owner"] in owners.values()
 
+drill=policy.get("synthetic_drill",{})
+assert drill.get("contract")=="data/monitoring-incident-drill.json"
+assert drill.get("executable_test")=="tests/api/monitoring-incident-drill.test.cjs"
+assert drill.get("artifact")=="artifacts/r10-r13-monitoring-incident-drill.json"
+assert drill.get("live_delivery_claimed") is False
+
+drill_contract=json.loads((ROOT/"data/monitoring-incident-drill.json").read_text(encoding="utf-8"))
+assert drill_contract.get("version")==1
+assert drill_contract.get("status")=="partial"
+assert drill_contract.get("input_event")=="dpp_http_request"
+assert drill_contract["scenario"]["signal_id"]=="availability_5xx_rate"
+assert drill_contract["scenario"]["incident_severity"]=="SEV1"
+assert drill_contract["scenario"]["synthetic_timeline_minutes"]["acknowledge"]<=drill_contract["scenario"]["ack_target_minutes"]
+assert drill_contract["safety"]["live_delivery_configured"] is False
+assert drill_contract["safety"]["production_runtime_claimed"] is False
+
 delivery=policy.get("delivery",{})
 assert delivery.get("live_delivery_configured") is False
 assert "R09" in delivery.get("reason","")
@@ -99,4 +115,8 @@ for token in [
 ]:
     assert token in test, f"R10 alert suite missing {token}"
 
-print("R10_MONITORING_POLICY_PASS: critical availability/error and warning latency/auth/abuse signals have versioned thresholds, owners and executable fire/clear tests; live delivery remains intentionally unclaimed")
+drill_test=(ROOT/"tests/api/monitoring-incident-drill.test.cjs").read_text(encoding="utf-8")
+for token in ["R10_R13_SYNTHETIC_FIRE_RECOVER_DRILL_PASS","synthetic critical availability drill fires","r10-r13-monitoring-incident-drill.json"]:
+    assert token in drill_test, f"R10/R13 synthetic drill missing {token}"
+
+print("R10_MONITORING_POLICY_PASS: thresholds/owners plus an executable synthetic fire->SEV1 mapping->recover drill are versioned; deployed ingestion/live notification/human acknowledgement remain intentionally unclaimed")

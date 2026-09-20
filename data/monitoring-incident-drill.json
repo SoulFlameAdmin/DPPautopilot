@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "tasks": [
+    "R10",
+    "R13"
+  ],
+  "status": "partial",
+  "scope": "Synthetic CI operational drill only; does not claim deployed log ingestion, live notification delivery, human acknowledgement, or production incident recovery.",
+  "input_event": "dpp_http_request",
+  "scenario": {
+    "id": "critical_availability_fire_recover",
+    "signal_id": "availability_5xx_rate",
+    "severity": "critical",
+    "incident_severity": "SEV1",
+    "owner": "DPP operations owner",
+    "fire": {
+      "request_count": 20,
+      "server_error_count": 1,
+      "expected_ratio": 0.05,
+      "expected_active": true
+    },
+    "synthetic_timeline_minutes": {
+      "detect_and_open": 0,
+      "acknowledge": 5,
+      "triage": 6,
+      "contain": 8,
+      "communicate": 9,
+      "recover": 10,
+      "verify": 12,
+      "close_and_learn": 13
+    },
+    "ack_target_minutes": 15,
+    "recovery": {
+      "request_count": 20,
+      "server_error_count": 0,
+      "expected_ratio": 0,
+      "expected_active": false
+    }
+  },
+  "safety": {
+    "live_delivery_configured": false,
+    "production_runtime_claimed": false,
+    "production_rollback_claimed": false,
+    "secrets_or_payloads_in_report": false
+  },
+  "required_before_green": [
+    "Deployed R09 log ingestion/correlation evidence",
+    "Approved live alert destination",
+    "Real alert fire/recover notification drill",
+    "Human acknowledgement/escalation evidence",
+    "Deployed incident drill using production-like runtime evidence"
+  ]
+}
