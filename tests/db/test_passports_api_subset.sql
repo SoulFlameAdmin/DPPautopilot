@@ -208,4 +208,5 @@ begin
 end
 $m19$;
 
+select 'M23_PASSPORT_CREATE_IDEMPOTENCY_PASS' as result;
 select 'M19_PASSPORT_API_SUBSET_PASS' as result;
