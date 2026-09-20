@@ -90,7 +90,7 @@ begin
       'dpp_api_retention_status()',
       'dpp_api_purge_import_staging(timestamp with time zone)',
       'dpp_api_items_create(uuid,text,text,jsonb)',
-      'dpp_api_items_delete(uuid)',
+      'dpp_api_items_delete_checked(uuid,timestamp with time zone)',
       'dpp_api_items_list()',
       'dpp_api_items_update_checked(uuid,uuid,text,text,jsonb,timestamp with time zone)',
       'dpp_api_export_bundle()',
@@ -130,7 +130,7 @@ begin
       ('dpp_api_retention_status()'),
       ('dpp_api_purge_import_staging(timestamp with time zone)'),
       ('dpp_api_items_create(uuid,text,text,jsonb)'),
-      ('dpp_api_items_delete(uuid)'),
+      ('dpp_api_items_delete_checked(uuid,timestamp with time zone)'),
       ('dpp_api_items_list()'),
       ('dpp_api_items_update_checked(uuid,uuid,text,text,jsonb,timestamp with time zone)'),
       ('dpp_api_export_bundle()'),
@@ -157,6 +157,7 @@ begin
   if has_function_privilege('authenticated',to_regprocedure('public.dpp_api_models_update(uuid,text,text,text,jsonb)'),'EXECUTE')
      or has_function_privilege('authenticated',to_regprocedure('public.dpp_api_models_delete(uuid)'),'EXECUTE')
      or has_function_privilege('authenticated',to_regprocedure('public.dpp_api_items_update(uuid,uuid,text,text,jsonb)'),'EXECUTE')
+     or has_function_privilege('authenticated',to_regprocedure('public.dpp_api_items_delete(uuid)'),'EXECUTE')
      or has_function_privilege('authenticated',to_regprocedure('public.dpp_api_passport_update(uuid,text,jsonb,jsonb)'),'EXECUTE') then
     raise exception 'M23 unchecked update/delete RPC regained authenticated EXECUTE';
   end if;
