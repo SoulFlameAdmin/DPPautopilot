@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "R07 registry request/response credential guard merged, applied and evidenced",
+  "currentTask": "M21/R08 deterministic paged evidence export merged and evidenced",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #134 merged as b0920b735bd4730a88655d8a2406c95c306dc637 after exact-head full CI 35529752111 SUCCESS; bound runtime converged to one canonical registry payload guard after cleanup migration 20260920183843",
-  "nextTask": "Validate/merge R07 registry-guard evidence sync, then continue earliest independent non-deploy precursor while M01/F08/M13 runtime blockers remain deferred.",
-  "message": "Registry request/response JSON now fails closed on obvious credential-bearing key names without claiming provider/legal schema acceptance. R07 remains RED/PARTIAL.",
+  "lastCompletedTask": "PR #136 merged as 354a84a47bb3b675b8ed112bd8a0b8a23ae26dab after exact-head full CI 35530253593 SUCCESS; evidence export now supports integrity-checked offset/limit pages with has_more/next_offset",
+  "nextTask": "Validate/merge M21/R08 paging evidence sync, then continue earliest dependency-safe non-deploy precursor while M01/F08/M13 runtime blockers remain deferred.",
+  "message": "Paged evidence-byte export materially reduces large-tenant export risk, but M21/R08 stay RED/PARTIAL pending declared dependencies plus final archive/streaming/resumable/deployed acceptance.",
   "deferredBlockers": [
     "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T21:44:00+03:00"
+  "updatedAt": "2026-09-20T21:52:00+03:00"
 }
