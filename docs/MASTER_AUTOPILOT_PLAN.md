@@ -442,3 +442,11 @@ Append evidence here only after verification.
 - Bound runtime returned `M23_PASSPORT_CREATE_IDEMPOTENCY_PASS`.
 - Exact-head CI `35483523966` on `7a930da73cadfa9bc218abcbebd4e4fe52efca92` completed SUCCESS, including clean migration replay, M19 passport privacy/tenant DB subset, M19 HTTP contract and full repository/browser regressions.
 - PR #88 merged as `4a5325209a8834c57940babf52e8a653f1324281`. M19/M22/M23 remain RED/PARTIAL because their upstream/final deployed acceptance dependencies are not GREEN. No Vercel deployment was initiated.
+
+
+### Vercel preview/backoff evidence — 2026-09-20
+- Vercel metadata reports an existing DPP preview deployment in READY state; read-only verification of `/demo/auth-recovery.html` returned HTTP 200 with the hardened recovery implementation and production security headers.
+- This does **not** satisfy F08 because F08 requires verified production-target deployment acceptance.
+- PR #98 received Vercel provider error `api-deployments-free-per-day` at `2026-09-20T13:31:47Z` with explicit instruction `try again in 24 hours`. Production deployment must not be retried before `2026-09-21T13:31:47Z` (`2026-09-21 16:31:47 Europe/Sofia`), and any future attempt still requires the global Supabase deploy lease.
+- Preview multi-route acceptance remains fail-closed because connector access to `/data/auth-config.json` redirected through Vercel SSO; no SSO/login/MFA bypass was attempted.
+- M01 therefore advances from “no deployed recovery route” to “recovery route deployed, final valid recovery-session password update still unproven.”
