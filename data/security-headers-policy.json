@@ -67,13 +67,34 @@
   },
   "tls": {
     "runtime_verified": false,
-    "claim": "No live TLS/header claim is made while F08 is blocked.",
+    "claim": "A real HTTPS preview response and committed security headers are verified on /demo/auth-recovery.html; production hostname/certificate-chain and full multi-route acceptance remain unverified while F08 is blocked.",
     "required_before_green": [
       "Production deployment exists and is READY",
       "HTTPS endpoint is reachable on the real production hostname",
       "Live response headers match the committed policy on HTML, /data/* and /api/* routes",
       "TLS certificate chain and hostname validation pass",
       "No CSP violation breaks authentication, API calls or core UI flows"
-    ]
+    ],
+    "preview_runtime_verified": true
+  },
+  "preview_observation": {
+    "deployment_id": "dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q",
+    "project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "commit_sha": "77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7",
+    "url": "dpp-autopilot-95xeakbem-dimitar-lambovs-projects.vercel.app",
+    "path": "/demo/auth-recovery.html",
+    "observed_at": "2026-09-20T13:33:02Z",
+    "https_reachable": true,
+    "status": 200,
+    "headers": {
+      "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://frhletkiuupgksmgxoxc.supabase.co; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests",
+      "Strict-Transport-Security": "max-age=31536000",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "Referrer-Policy": "no-referrer",
+      "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    },
+    "certificate_chain_verified": false,
+    "note": "Read-only Vercel connector observed this preview response. Production hostname/certificate-chain acceptance and protected multi-route smoke remain unverified; no SSO/login/MFA bypass was attempted."
   }
 }
