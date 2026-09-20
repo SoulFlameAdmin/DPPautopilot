@@ -21,6 +21,14 @@ assert contract.get("local_codes",{}).get("EVIDENCE_EXPORT_PAGINATION_INVALID",{
     "http_status":400,
     "message":"Evidence export pagination parameters are invalid."
 }
+assert contract.get("local_codes",{}).get("EVIDENCE_EXPORT_MANIFEST_INVALID",{})=={
+    "http_status":400,
+    "message":"Evidence export manifest SHA-256 is invalid."
+}
+assert contract.get("local_codes",{}).get("EVIDENCE_EXPORT_MANIFEST_CHANGED",{})=={
+    "http_status":409,
+    "message":"Evidence export manifest changed; restart the export."
+}
 
 valid_status={400,401,403,404,405,409,413,422,428,429,500,502,503}
 code_re=re.compile(r"^[A-Z][A-Z0-9_]*$")

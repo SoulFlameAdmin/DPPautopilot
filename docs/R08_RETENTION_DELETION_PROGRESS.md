@@ -28,3 +28,11 @@ The deletion-impact preview also marks external Storage enumeration as required,
 ## Evidence target
 
 `tests/db/test_retention_deletion_subset.sql` proves eligible terminal imports are removed, their child staging rows cascade, old non-terminal/recent terminal imports are preserved, viewer access is denied, owner/admin access is allowed, too-recent cutoffs fail closed, audit delete events survive, and the non-destructive deletion-impact preview reports exact tenant-scoped counts while keeping destructive deletion unavailable. `tests/api/export.test.cjs` additionally proves evidence-byte integrity, stable unavailable/tamper/oversize errors, deterministic slice selection, `has_more` / `next_offset`, pagination validation before upstream access, and page-scoped byte-cap behavior.
+
+
+## Resumable evidence export consistency precursor — 2026-09-20
+
+- Paged evidence export now returns a deterministic `manifest_sha256` derived from canonical evidence manifest identity/path/size/hash tuples.
+- A later page may send `evidence_manifest_sha256`; if the manifest changed, export fails closed with `409 EVIDENCE_EXPORT_MANIFEST_CHANGED` before any object bytes are fetched.
+- Invalid digest shape fails closed with `400 EVIDENCE_EXPORT_MANIFEST_INVALID` before the export RPC.
+- This gives stateless resume/drift detection but is not yet a signed archive manifest or final streaming package.

@@ -72,12 +72,39 @@ function exportError(code,status,message){
   return error;
 }
 
+function evidenceManifestSha256(manifest){
+  const canonical=(Array.isArray(manifest)?manifest:[])
+    .map(item=>({
+      id:item&&item.id||null,
+      storage_path:item&&item.storage_path||null,
+      byte_size:Number(item&&item.byte_size)||0,
+      sha256_hex:typeof (item&&item.sha256_hex)==='string'?item.sha256_hex.toLowerCase():''
+    }))
+    .sort((a,b)=>{
+      const ak=String(a.storage_path||'')+'|'+String(a.id||'');
+      const bk=String(b.storage_path||'')+'|'+String(b.id||'');
+      return ak<bk?-1:ak>bk?1:0;
+    });
+  return crypto.createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
+}
+
 function evidencePageOptions(req){
   const query=req&&req.query?req.query:{};
   const rawOffset=query.evidence_offset;
   const rawLimit=query.evidence_limit;
+  const rawManifest=query.evidence_manifest_sha256;
   const paged=rawOffset!==undefined||rawLimit!==undefined;
-  if(!paged) return {paged:false,offset:0,limit:null};
+  const expectedManifestSha256=rawManifest===undefined||rawManifest===null||rawManifest===''
+    ?null
+    :String(rawManifest).toLowerCase();
+  if(expectedManifestSha256!==null&&!/^[0-9a-f]{64}$/.test(expectedManifestSha256)){
+    throw exportError(
+      'EVIDENCE_EXPORT_MANIFEST_INVALID',
+      400,
+      'Evidence export manifest SHA-256 is invalid.'
+    );
+  }
+  if(!paged) return {paged:false,offset:0,limit:null,expectedManifestSha256};
 
   const offset=rawOffset===undefined?0:Number(rawOffset);
   const limit=rawLimit===undefined?25:Number(rawLimit);
@@ -91,7 +118,7 @@ function evidencePageOptions(req){
       'Evidence export pagination parameters are invalid.'
     );
   }
-  return {paged:true,offset,limit};
+  return {paged:true,offset,limit,expectedManifestSha256};
 }
 
 async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImpl=fetch,page={paged:false,offset:0,limit:null}){
@@ -99,6 +126,15 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
   const offset=page&&Number.isInteger(page.offset)?page.offset:0;
   const limit=page&&Number.isInteger(page.limit)?page.limit:null;
   const paged=Boolean(page&&page.paged);
+  const manifestSha256=evidenceManifestSha256(manifest);
+  const expectedManifestSha256=page&&page.expectedManifestSha256?page.expectedManifestSha256:null;
+  if(expectedManifestSha256&&expectedManifestSha256!==manifestSha256){
+    throw exportError(
+      'EVIDENCE_EXPORT_MANIFEST_CHANGED',
+      409,
+      'Evidence export manifest changed; restart the export.'
+    );
+  }
   const selected=paged?manifest.slice(offset,offset+limit):manifest;
   if(manifest.length===0||selected.length===0){
     return {
@@ -112,6 +148,7 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
         encoding:'base64',
         inline_limit_bytes:MAX_INLINE_EVIDENCE_BYTES,
         manifest_object_count:manifest.length,
+        manifest_sha256:manifestSha256,
         paged,
         offset:paged?offset:0,
         limit:paged?limit:null,
@@ -215,6 +252,7 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
       encoding:'base64',
       inline_limit_bytes:MAX_INLINE_EVIDENCE_BYTES,
       manifest_object_count:manifest.length,
+      manifest_sha256:manifestSha256,
       paged,
       offset:paged?offset:0,
       limit:paged?limit:null,
@@ -258,4 +296,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidencePageOptions,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,evidencePageOptions,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT};
