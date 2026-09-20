@@ -456,3 +456,9 @@ Append evidence here only after verification.
 - R08 now has an explicit fail-closed regression proving authenticated/anon roles cannot DELETE `public.dpp_organizations` and no public organization-delete RPC exists while retention blockers remain unresolved. Bound Supabase ACL matched this state; PR #103 exact-head CI `35514662542` SUCCESS and merge `84ca5cf6241c714e68609d09e3c67472b6ad4bbd`.
 - C03/C06 release policies are being synchronized from stale “0 preview deployments” state to the observed canonical READY preview `dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q`, commit `77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7`.
 - This does not promote production or accept staging: C03 remains default-deny with `promotion_executed=false`; C06 remains `staging_acceptance_executed=false`; all existing prerequisite, commit-alignment, live smoke and deployment-lease gates remain mandatory.
+
+
+### F08 production acceptance — 2026-09-20
+- Vercel deployment `dpl_GnAFHKWJVLcWit6QuPAUb7m4FsVW` is READY with target `production`, Git source `main`, commit `7caf7ad1e37d21d0f6e81c6812c59ff1fe736b5d`.
+- Canonical alias `dpp-autopilot.vercel.app` returned HTTP 200 for both `/` and `/data/master-plan.json`.
+- F08 acceptance criteria are therefore satisfied and F08 is GREEN.
