@@ -553,3 +553,11 @@ Append evidence here only after verification.
 - The 25 MiB inline byte cap applies per selected page, while each selected object is still verified against manifest byte size + SHA-256 before base64 inclusion.
 - Response metadata provides `manifest_object_count`, `offset`, `limit`, `has_more` and `next_offset`; invalid paging fails closed before upstream export RPC.
 - M21/R08 remain RED/PARTIAL pending declared dependencies, a final archive/streaming/resumable package contract and real deployed large-tenant acceptance.
+
+
+### M21/R08 resumable evidence manifest consistency — 2026-09-20
+- PR #138 exact head `fddd701889cb2016a5536fdf1743e3c2766d14f4` completed full CI `35530924054` SUCCESS and merged as `2115d74a80cbd25d480e69d6beaa1f09c7e99d00`.
+- Paged evidence export returns deterministic `manifest_sha256` over canonical manifest identity/path/size/hash tuples.
+- Later pages may send `evidence_manifest_sha256`; changed manifests fail closed with `409 EVIDENCE_EXPORT_MANIFEST_CHANGED` before object download, malformed digests with `400 EVIDENCE_EXPORT_MANIFEST_INVALID` before export RPC.
+- Existing per-object byte-size/SHA-256 checks and 25 MiB per-page cap remain enforced.
+- M21/R08 remain RED/PARTIAL pending declared dependencies, final signed/archive/streaming package contract and real deployed large-tenant acceptance.

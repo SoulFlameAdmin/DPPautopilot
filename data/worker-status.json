@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M21/R08 deterministic paged evidence export merged and evidenced",
+  "currentTask": "M21/R08 resumable evidence manifest consistency merged and evidenced",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #136 merged as 354a84a47bb3b675b8ed112bd8a0b8a23ae26dab after exact-head full CI 35530253593 SUCCESS; evidence export now supports integrity-checked offset/limit pages with has_more/next_offset",
-  "nextTask": "Validate/merge M21/R08 paging evidence sync, then continue earliest dependency-safe non-deploy precursor while M01/F08/M13 runtime blockers remain deferred.",
-  "message": "Paged evidence-byte export materially reduces large-tenant export risk, but M21/R08 stay RED/PARTIAL pending declared dependencies plus final archive/streaming/resumable/deployed acceptance.",
+  "lastCompletedTask": "PR #138 merged as 2115d74a80cbd25d480e69d6beaa1f09c7e99d00 after exact-head full CI 35530924054 SUCCESS; paged evidence export now fail-closes on manifest drift before object fetch",
+  "nextTask": "Validate/merge M21/R08 resumability evidence sync, then continue earliest dependency-safe non-deploy precursor while M01/F08/M13 runtime blockers remain deferred.",
+  "message": "Paged evidence export now includes a deterministic manifest SHA-256 resume token and fail-closed drift detection. M21/R08 remain RED/PARTIAL pending dependencies and final package/deployed acceptance.",
   "deferredBlockers": [
     "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T21:52:00+03:00"
+  "updatedAt": "2026-09-20T22:05:00+03:00"
 }
