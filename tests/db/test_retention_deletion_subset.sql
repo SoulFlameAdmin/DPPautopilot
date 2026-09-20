@@ -39,6 +39,7 @@ declare
   old_validated uuid := 'e5555555-5555-4555-8555-555555555554';
   recent_committed uuid := 'e5555555-5555-4555-8555-555555555555';
   status_payload jsonb;
+  impact_payload jsonb;
   purge_payload jsonb;
   seen boolean;
   deleted_audit integer;
@@ -80,6 +81,25 @@ begin
   end if;
   if jsonb_array_length(status_payload->'blockers')<6 then
     raise exception 'R08 deletion blockers unexpectedly incomplete: %',status_payload;
+  end if;
+
+  impact_payload:=public.dpp_api_org_deletion_impact();
+  if coalesce((impact_payload->>'preview_only')::boolean,false) is not true
+     or coalesce((impact_payload->>'ready_for_destructive_delete')::boolean,true) is not false
+     or coalesce((impact_payload->>'destructive_surface_available')::boolean,true) is not false then
+    raise exception 'R08 deletion impact preview is not fail-closed: %',impact_payload;
+  end if;
+  if coalesce((impact_payload->'counts'->>'organization_members')::int,0)<>3
+     or coalesce((impact_payload->'counts'->>'distinct_member_users')::int,0)<>3
+     or coalesce((impact_payload->'counts'->>'active_tenant_contexts')::int,0)<>1
+     or coalesce((impact_payload->'counts'->>'import_runs')::int,0)<>5
+     or coalesce((impact_payload->'counts'->>'import_rows')::int,0)<>5 then
+    raise exception 'R08 deletion impact counts mismatch: %',impact_payload;
+  end if;
+  if coalesce((impact_payload->'external_objects'->>'storage_enumeration_required_before_delete')::boolean,false) is not true
+     or coalesce((impact_payload->'identity_boundary'->>'auth_users_deleted_by_org_delete')::boolean,true) is not false
+     or jsonb_array_length(impact_payload->'blocker_codes')<>6 then
+    raise exception 'R08 deletion impact safety boundary mismatch: %',impact_payload;
   end if;
 
   -- Too-recent cutoff must fail closed.
@@ -139,10 +159,21 @@ begin
   end;
   if not seen then raise exception 'R08 viewer purge was not denied'; end if;
 
+  seen:=false;
+  begin
+    perform public.dpp_api_org_deletion_impact();
+  exception when sqlstate 'DP104' then seen:=true;
+  end;
+  if not seen then raise exception 'R08 viewer deletion impact preview was not denied'; end if;
+
   -- Admin is accepted.
   perform set_config('request.jwt.claim.sub','e2222222-2222-4222-8222-222222222222',true);
   perform public.dpp_set_active_organization(org_a);
   status_payload:=public.dpp_api_retention_status();
+  impact_payload:=public.dpp_api_org_deletion_impact();
+  if impact_payload->>'organization_id'<>org_a::text then
+    raise exception 'R08 admin deletion impact wrong tenant';
+  end if;
   if status_payload->>'organization_id'<>org_a::text then
     raise exception 'R08 admin retention status wrong tenant';
   end if;
@@ -155,12 +186,14 @@ begin
   end if;
 
   if has_function_privilege('anon','public.dpp_api_retention_status()','EXECUTE')
-     or has_function_privilege('anon','public.dpp_api_purge_import_staging(timestamptz)','EXECUTE') then
+     or has_function_privilege('anon','public.dpp_api_purge_import_staging(timestamptz)','EXECUTE')
+     or has_function_privilege('anon','public.dpp_api_org_deletion_impact()','EXECUTE') then
     raise exception 'R08 retention RPC leaked anon EXECUTE';
   end if;
 
   if not has_function_privilege('authenticated','public.dpp_api_retention_status()','EXECUTE')
-     or not has_function_privilege('authenticated','public.dpp_api_purge_import_staging(timestamptz)','EXECUTE') then
+     or not has_function_privilege('authenticated','public.dpp_api_purge_import_staging(timestamptz)','EXECUTE')
+     or not has_function_privilege('authenticated','public.dpp_api_org_deletion_impact()','EXECUTE') then
     raise exception 'R08 retention RPC missing authenticated EXECUTE';
   end if;
 end
