@@ -45,6 +45,24 @@ function restrictedCatalogPaths() {
 
 const RESTRICTED_PATHS = restrictedCatalogPaths();
 
+function pathExists(root, segments) {
+  let node = root;
+  for (const key of segments) {
+    if (!node || typeof node !== 'object' || Array.isArray(node) || !Object.prototype.hasOwnProperty.call(node, key)) {
+      return false;
+    }
+    node = node[key];
+  }
+  return true;
+}
+
+function findRestrictedPublicPaths(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return [];
+  return RESTRICTED_PATHS
+    .filter(parts => pathExists(payload, parts))
+    .map(parts => parts.join('.'));
+}
+
 function sanitizePublicPayload(payload) {
   const out = cloneJson(payload);
   if (!out || typeof out !== 'object' || Array.isArray(out)) return out;
@@ -56,5 +74,6 @@ module.exports = {
   PUBLIC_ACCESS,
   RESTRICTED_PATHS,
   sanitizePublicPayload,
-  _test: { deletePath, restrictedCatalogPaths, cloneJson, pruneEmptyObjects }
+  findRestrictedPublicPaths,
+  _test: { deletePath, pathExists, restrictedCatalogPaths, cloneJson, pruneEmptyObjects }
 };
