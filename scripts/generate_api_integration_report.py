@@ -13,7 +13,7 @@ OUTPUT=ROOT/"artifacts/t03-api-integration-report.json"
 matrix=json.loads(MATRIX.read_text(encoding="utf-8"))
 test_text=TEST.read_text(encoding="utf-8")
 
-assert matrix.get("version")==3
+assert matrix.get("version")==4
 assert matrix.get("task")=="T03"
 assert matrix.get("status")=="partial"
 
@@ -27,11 +27,12 @@ expected_tests=[
     "stateful import create -> validate -> commit -> repeat commit -> get journey",
     "semantic not-found and conflict errors stay stable and non-leaking",
     "invalid import remains non-committable through HTTP semantic contract",
+    "resumable export detects manifest drift between pages before object fetch",
 ]
 assert test_names==expected_tests, f"T03 executable test set drifted: {test_names!r}"
 
 scenarios=matrix.get("scenarios",[])
-assert len(scenarios)==9
+assert len(scenarios)==10
 covered=set()
 for scenario in scenarios:
     covers=scenario.get("covers",[])
@@ -85,4 +86,4 @@ report={
 }
 OUTPUT.parent.mkdir(parents=True,exist_ok=True)
 OUTPUT.write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
-print(f"T03_API_INTEGRATION_REPORT_PASS: {len(scenarios)} scenarios cover {len(dependencies)} M17-M23 dependencies across {len(surfaces)} API surfaces with resumable paged evidence export; report={OUTPUT.relative_to(ROOT)}")
+print(f"T03_API_INTEGRATION_REPORT_PASS: {len(scenarios)} scenarios cover {len(dependencies)} M17-M23 dependencies across {len(surfaces)} API surfaces with resumable paged evidence export and manifest-drift rejection; report={OUTPUT.relative_to(ROOT)}")
