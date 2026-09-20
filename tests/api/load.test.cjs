@@ -212,6 +212,80 @@ test('synthetic multi-surface concurrency, import volume and overload budgets pa
       pass:true
     };
 
+    const shared=policy.profiles.shared_authenticated_concurrency;
+    const sharedCounts=new Map();
+    let sharedRpcCalls=0;
+    const sharedFetch=async(_url,options)=>{
+      sharedRpcCalls+=1;
+      const body=JSON.parse(options.body||'{}');
+      const key=body.p_bucket_key;
+      const count=(sharedCounts.get(key)||0)+1;
+      sharedCounts.set(key,count);
+      const allowed=count<=body.p_limit;
+      return {
+        ok:true,
+        async json(){
+          return [{
+            allowed,
+            request_count:count,
+            remaining:Math.max(0,body.p_limit-count),
+            reset_epoch_seconds:1900000000,
+            retry_after_seconds:allowed?0:30
+          }];
+        }
+      };
+    };
+    const sharedReq=request('POST',{
+      body:{model_identifier:'SHARED-LOAD',manufacturer_name:'Load',category:'portable',canonical_data:{}},
+      token:'shared-concurrency-token',
+      ip:'192.0.2.88'
+    });
+    const sharedDecisions=[];
+    const sharedStart=performance.now();
+    await pool(
+      Array.from({length:shared.requests},()=>async()=>{
+        const decision=await limiter.checkSharedRateLimit(
+          sharedReq,
+          shared.surface,
+          sharedReq.headers.authorization,
+          {
+            env:{
+              DPP_SHARED_RATE_LIMIT_ENABLED:'true',
+              DPP_SUPABASE_URL:'https://example.supabase.co',
+              DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+            },
+            fetchImpl:sharedFetch,
+            nowMs:1_800_000_000_000,
+            ruleName:shared.rule
+          }
+        );
+        sharedDecisions.push(decision);
+      }),
+      shared.concurrency
+    );
+    const sharedWallMs=performance.now()-sharedStart;
+    const sharedAllowed=sharedDecisions.filter(d=>d.allowed===true).length;
+    const sharedDenied=sharedDecisions.filter(d=>d.allowed===false&&!d.error).length;
+    const sharedErrors=sharedDecisions.filter(d=>d.error).length;
+    assert.equal(sharedAllowed,shared.expected_allowed);
+    assert.equal(sharedDenied,shared.expected_denied);
+    assert.equal(sharedErrors,0);
+    assert.equal(sharedRpcCalls,shared.expected_shared_rpc_calls);
+    assert.equal(sharedCounts.size,shared.expected_buckets_per_request);
+    for(const count of sharedCounts.values()) assert.equal(count,shared.requests);
+    report.profiles.shared_authenticated_concurrency={
+      requests:shared.requests,
+      concurrency:shared.concurrency,
+      configured_budget:shared.configured_budget,
+      allowed:sharedAllowed,
+      denied:sharedDenied,
+      backend_errors:sharedErrors,
+      shared_rpc_calls:sharedRpcCalls,
+      shared_bucket_count:sharedCounts.size,
+      wall_ms:Number(sharedWallMs.toFixed(3)),
+      pass:true
+    };
+
     report.claim_boundary=policy.claim_boundary;
     report.remaining=policy.remaining;
     writeReport(report);
