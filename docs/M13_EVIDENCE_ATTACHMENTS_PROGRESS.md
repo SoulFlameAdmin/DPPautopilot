@@ -32,3 +32,11 @@ M13 remains **RED** because M03 is RED and no real Supabase Storage/API upload/d
 - PR #60 merged to `main` as `fddae0e28900a7829f756f231256363cb4b2f318`.
 
 M13 remains **RED/PARTIAL**, not GREEN: a real authenticated user byte upload -> download/content verification -> delete roundtrip is still required, and declared dependency M03 remains non-GREEN. The previous “connector has no Storage object action” tooling gap is no longer a blocker because the JWT-protected Edge Function now provides the normal RLS-preserving object path.
+
+## Pre-upload byte-integrity hardening — 2026-09-20
+
+- The caller-JWT `dpp-evidence-object` upload path now performs a caller-RLS metadata lookup from `dpp_evidence_attachments` by bucket/path before Storage upload.
+- Uploaded bytes are SHA-256 hashed with Web Crypto and must exactly match registered `byte_size`, `sha256_hex` and `content_type`.
+- Missing/inaccessible metadata fails closed with `403 EVIDENCE_METADATA_NOT_AVAILABLE`; metadata/byte mismatch fails closed with `409 EVIDENCE_METADATA_MISMATCH`.
+- Verification occurs before `.storage.from(BUCKET).upload(...)`, preserving the no-overwrite Storage policy and preventing registered hash metadata from silently diverging from object bytes.
+- M13 remains RED/PARTIAL until M03 is GREEN and a real authenticated upload→download/content verification→delete roundtrip is proven against the deployed Edge Function/Storage path.

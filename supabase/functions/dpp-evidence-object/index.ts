@@ -30,6 +30,11 @@ function safePath(raw: string | null): raw is string {
   return ORG_PATH.test(raw);
 }
 
+async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (value) => value.toString(16).padStart(2, "0")).join("");
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
 
@@ -63,6 +68,30 @@ Deno.serve(async (req: Request) => {
     const bytes = new Uint8Array(await req.arrayBuffer());
     if (bytes.byteLength === 0) return json(400, "EVIDENCE_EMPTY");
     if (bytes.byteLength > MAX_BYTES) return json(413, "EVIDENCE_TOO_LARGE");
+
+    const { data: metadata, error: metadataError } = await client
+      .from("dpp_evidence_attachments")
+      .select("byte_size,sha256_hex,content_type")
+      .eq("storage_bucket", BUCKET)
+      .eq("storage_path", path)
+      .maybeSingle();
+
+    if (metadataError || !metadata) return json(403, "EVIDENCE_METADATA_NOT_AVAILABLE");
+
+    const actualSha256 = await sha256Hex(bytes);
+    const expectedSize = Number(metadata.byte_size);
+    const expectedSha256 = String(metadata.sha256_hex ?? "").toLowerCase();
+    const expectedContentType = String(metadata.content_type ?? "").toLowerCase();
+
+    if (
+      !Number.isInteger(expectedSize) ||
+      expectedSize !== bytes.byteLength ||
+      !/^[0-9a-f]{64}$/.test(expectedSha256) ||
+      expectedSha256 !== actualSha256 ||
+      expectedContentType !== contentType
+    ) {
+      return json(409, "EVIDENCE_METADATA_MISMATCH");
+    }
 
     const { error } = await client.storage.from(BUCKET).upload(path, bytes, {
       contentType,

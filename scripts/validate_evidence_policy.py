@@ -11,7 +11,7 @@ fix_sql=(ROOT/"supabase/migrations/20260919028000_dpp_evidence_storage_policy_fi
 guard_sql=(ROOT/"supabase/migrations/20260919038000_dpp_evidence_storage_registration_tenant_guard.sql").read_text(encoding="utf-8")
 edge_fn=(ROOT/"supabase/functions/dpp-evidence-object/index.ts").read_text(encoding="utf-8")
 
-assert policy.get("version")==5
+assert policy.get("version")==6
 assert policy.get("task")=="M13"
 assert policy.get("bucket")=="dpp-evidence"
 assert policy.get("max_bytes")==10_485_760
@@ -51,6 +51,15 @@ assert edge["privileged_server_key_allowed"] is False
 assert edge["operations"]==["upload","download","delete"]
 assert edge["overwrite_allowed"] is False
 assert edge["runtime_acceptance_required"] is True
+integrity=edge["upload_integrity"]
+assert integrity["metadata_lookup"]=="caller-RLS SELECT from dpp_evidence_attachments by storage_bucket + storage_path"
+assert integrity["verifies"]==["byte_size","sha256_hex","content_type"]
+assert integrity["hash"]=="SHA-256 via Web Crypto"
+assert integrity["mismatch_status"]==409
+assert integrity["mismatch_code"]=="EVIDENCE_METADATA_MISMATCH"
+assert integrity["missing_metadata_status"]==403
+assert integrity["missing_metadata_code"]=="EVIDENCE_METADATA_NOT_AVAILABLE"
+assert integrity["verify_before_storage_upload"] is True
 
 for token in [
  "npm:@supabase/supabase-js@2.95.0",
@@ -67,8 +76,21 @@ for token in [
  "EVIDENCE_TOO_LARGE",
  "EVIDENCE_UPLOAD_DENIED",
  "EVIDENCE_DELETE_DENIED",
+ "sha256Hex",
+ '.from("dpp_evidence_attachments")',
+ '.select("byte_size,sha256_hex,content_type")',
+ '.eq("storage_bucket", BUCKET)',
+ '.eq("storage_path", path)',
+ "EVIDENCE_METADATA_NOT_AVAILABLE",
+ "EVIDENCE_METADATA_MISMATCH",
+ 'crypto.subtle.digest("SHA-256", bytes)',
 ]:
     assert token in edge_fn, f"M13 Edge Function missing contract token: {token}"
+
+metadata_lookup_pos=edge_fn.index('.from("dpp_evidence_attachments")')
+hash_pos=edge_fn.index('const actualSha256 = await sha256Hex(bytes)')
+upload_pos=edge_fn.index('.storage.from(BUCKET).upload(')
+assert 0 <= metadata_lookup_pos < hash_pos < upload_pos, "M13 metadata/hash verification must happen before Storage upload"
 
 for forbidden in ["SERVICE_ROLE", "service_role", "SUPABASE_SERVICE_ROLE_KEY"]:
     assert forbidden not in edge_fn, f"M13 Edge Function must not use privileged key material: {forbidden}"
@@ -114,4 +136,4 @@ for token in [
 for content_type in expected_types:
     assert content_type in meta_sql and content_type in storage_sql
 
-print("M13_EVIDENCE_POLICY_PASS: tenant metadata plus private Storage bucket/RLS, tenant-guarded registration, caller-JWT Edge Function, MIME/size/path/hash limits and no-overwrite integrity contract are declared")
+print("M13_EVIDENCE_POLICY_PASS: tenant metadata plus private Storage bucket/RLS, tenant-guarded registration, caller-JWT Edge Function, pre-upload byte-size/SHA-256/content-type verification, MIME/size/path limits and no-overwrite integrity contract are declared")
