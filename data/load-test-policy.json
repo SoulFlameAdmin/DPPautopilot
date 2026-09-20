@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "task": "T07",
   "status": "partial",
   "mode": "synthetic_in_process_serverless_handler_load",
@@ -31,11 +31,22 @@
       "expected_successes": 120,
       "expected_rate_limited": 5,
       "expected_rate_limit_status": 429
+    },
+    "shared_authenticated_concurrency": {
+      "requests": 50,
+      "concurrency": 25,
+      "configured_budget": 40,
+      "expected_allowed": 40,
+      "expected_denied": 10,
+      "expected_shared_rpc_calls": 100,
+      "expected_buckets_per_request": 2,
+      "rule": "authenticated_write",
+      "surface": "models"
     }
   },
   "remaining": [
     "M17-M21 must be fully accepted before T07 can be GREEN.",
-    "A deployed preview/staging load test must exercise real HTTP/TLS, hosting concurrency/cold starts, Supabase latency/pooling and production-like data volume.",
+    "A deployed preview/staging load test must exercise real HTTP/TLS, hosting concurrency/cold starts, Supabase latency/pooling, the shared limiter backend and production-like data volume.",
     "Final capacity/latency budgets require accepted staging infrastructure and operational SLOs."
   ]
 }
