@@ -423,3 +423,14 @@ Append evidence here only after verification.
 - Production membership mutations are now explicitly covered for immutable audit attribution: member add INSERT, role UPDATE, and member DELETE record the owner actor, tenant, target user, timestamp, and before/after role snapshots.
 - Exact-head CI `35479402511` on `1a524ef3f58b3ffd3a855b4fb77a5ebc7eacb97f` completed SUCCESS, including `Run M12 RBAC audit trail` and the full repository regression suite.
 - PR #80 merged as `ab3296549376c4bde27dbb7b89e26c22eb3442b6`. M12 remains RED/PARTIAL because M03 is not GREEN and deployed authenticated acceptance is unavailable. No Vercel deployment was attempted.
+
+
+### M10 / M19 public access write guard — 2026-09-20
+- Public passport reads remain catalog-sanitized; POST/PATCH now also reject any canonical field whose access class is not `public` or `public_identifier` before contacting Supabase.
+- Fresh-main exact-head CI `35480591789` on `d752fe19f98b368916014c5f9662e9e5ef0e4699` completed SUCCESS, including M10 access-policy and M19 passport HTTP regressions; PR #86 merged as `97c65011e28a973fde58306e5d541ebbb4dd6bc7`.
+- M10/M19 remain RED/PARTIAL because their upstream dependencies/final deployed authenticated acceptance are not GREEN.
+
+### M13 live evidence object bridge — 2026-09-20
+- Bound Supabase Edge Function `dpp-evidence-object` is ACTIVE v1 with `verify_jwt=true`; deployed bundle SHA-256 `9ca527828da04bec19fba8e4b6afd82a710fe09b418e5f31112bacfe51f0e6ef`.
+- The bridge forwards the caller JWT through an anon/publishable client so Storage RLS remains authoritative and contains no service-role shortcut.
+- M13 remains RED/PARTIAL: current connector has no normal authenticated Edge Function/Storage invocation path for a real user byte upload/download/delete roundtrip, and no auth bypass is used.

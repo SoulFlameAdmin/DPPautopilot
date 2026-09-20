@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T04:02:00+03:00",
+  "updatedAt": "2026-09-20T04:12:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -372,7 +372,7 @@
           "acceptanceCriteria": "Every passport field has explicit access class; API enforces it",
           "evidenceRequired": "API/security tests",
           "status": "red",
-          "evidence": "PARTIAL public/private access enforcement now includes catalog-driven HTTP defense-in-depth in addition to the bound DB/RPC controls. `api/_access_policy.js` removes every nested field whose canonical field-catalog access class is not `public` or `public_identifier`, so a regressed upstream public RPC cannot leak legitimate-interest or authority-only fields through `/api/passport`. Exact-head CI `35478636516` on `e83be5d5efc094d1468a38c52a0f59bb1145c93d` completed SUCCESS, including `Validate M10 access-class policy`, `Run M19 passport HTTP contract unit tests`, and `Run M10 public private runtime subset`. PR #75 merged as `18388cad9030a281550d9c03feccb8d496b32903`. Existing bound `M10_PUBLIC_PRIVATE_RUNTIME_PASS` remains valid. M10 remains RED because M03 is not GREEN and deployed acceptance is unavailable. — PARTIAL PASS"
+          "evidence": "PARTIAL public/private enforcement now has defense-in-depth on both read and write HTTP paths. Catalog-driven response sanitization strips non-public nested fields even if an upstream public RPC regresses; POST/PATCH `/api/passport` now also rejects any canonical field whose access class is not `public` or `public_identifier` before contacting Supabase. Fresh-main exact-head CI `35480591789` on `d752fe19f98b368916014c5f9662e9e5ef0e4699` completed SUCCESS, including M10 access-class policy, M19 passport HTTP contract, bound M10 runtime subset and all security/browser regressions. PR #86 merged as `97c65011e28a973fde58306e5d541ebbb4dd6bc7`. Existing bound `M10_PUBLIC_PRIVATE_RUNTIME_PASS` remains valid. M10 remains RED because M03 is not GREEN and deployed acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M11",
@@ -399,7 +399,7 @@
           "acceptanceCriteria": "Allowed files upload/download under tenant policy; type/size limits enforced",
           "evidenceRequired": "Storage tests",
           "status": "red",
-          "evidence": "PARTIAL evidence/storage hardening includes tenant-safe registration and reduced helper privilege. `dpp_evidence_storage_org_id(text)` is now SECURITY INVOKER because it only parses paths; table-reading `dpp_evidence_storage_registered(text)` remains SECURITY DEFINER for Storage RLS. Bound `M13_EVIDENCE_STORAGE_RLS_SUBSET_PASS` and global RPC guard pass after `dpp_internal_rpc_surface_hardening`; private `dpp-evidence` remains 10 MiB with PDF/PNG/JPEG/CSV/JSON allowlist and no direct metadata table grants. Full CI `35425179398` SUCCESS. M13 remains RED until M03 is GREEN and real authenticated Storage API byte upload/download/delete is proven. — PARTIAL PASS"
+          "evidence": "PARTIAL evidence/storage hardening now includes a live caller-JWT object bridge. Bound Supabase Edge Function `dpp-evidence-object` is ACTIVE version 1 with `verify_jwt=true`, deployed bundle SHA-256 `9ca527828da04bec19fba8e4b6afd82a710fe09b418e5f31112bacfe51f0e6ef`, and source implements caller Authorization forwarding through the anon client so Storage RLS remains authoritative; no service-role key is used. Existing private bucket, 10 MiB, MIME allowlist, no-overwrite, path and tenant-registration guards remain PASS. M13 remains RED because M03 is not GREEN and the available connector has no normal authenticated Edge Function/Storage invocation path to prove a real user byte upload/download/delete roundtrip without bypassing auth. — PARTIAL PASS / EXTERNAL ACCEPTANCE BLOCKED"
         },
         {
           "id": "M14",
@@ -453,7 +453,7 @@
           "acceptanceCriteria": "Public/private read and controlled write endpoints",
           "evidenceRequired": "API/security tests",
           "status": "red",
-          "evidence": "PARTIAL passport API is revalidated under M10 privacy and M23 checked-write semantics: public/private boundary, tenant/RBAC, restricted-field rejection and non-enumerating isolation pass; authenticated PATCH requires expected_updated_at via dpp_api_passport_update_checked and stale DP411 maps to 409 STALE_WRITE. Full run 35423117317 SUCCESS. M19 remains RED because M03/M10 are not GREEN and deployed HTTP acceptance is unavailable. — PARTIAL PASS"
+          "evidence": "PARTIAL passport API now enforces privacy at DB/RPC and HTTP boundaries. Public GET is catalog-sanitized; POST/PATCH locally reject legitimate-interest or authority-only fields before any upstream request while catalog-public fields pass. PATCH retains `expected_updated_at` optimistic concurrency via `dpp_api_passport_update_checked`; stale DP411 maps to 409 STALE_WRITE, and public/private/tenant/RBAC/non-enumerating tests remain PASS. Fresh-main exact-head CI `35480591789` on `d752fe19f98b368916014c5f9662e9e5ef0e4699` completed SUCCESS; PR #86 merged as `97c65011e28a973fde58306e5d541ebbb4dd6bc7`. M19 remains RED because M03/M10 are not GREEN and deployed authenticated HTTP acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M20",
