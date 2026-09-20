@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
@@ -234,13 +234,16 @@
       "fields": "actor_id, organization_id, action, target identifiers, before/after JSON snapshots, timestamp",
       "retention": {
         "status": "pending_policy_with_audit_exception",
-        "current_behavior": "Audit rows are intentionally append-only/immutable; accepted retention period and deletion exceptions are not yet defined"
+        "current_behavior": "Audit rows remain append-only/immutable. Before/after snapshots now recursively redact values under obvious credential-bearing JSON keys before insertion; accepted retention period and broader minimization/deletion exceptions remain pending."
       },
       "controls": [
         "immutable audit contract",
-        "tenant isolation"
+        "tenant isolation",
+        "recursive audit-only credential-key redaction before immutable insert",
+        "source rows are not modified by audit redaction",
+        "redaction helper has no anon/authenticated EXECUTE"
       ],
-      "retention_risk": "before/after snapshots can duplicate personal/confidential fields and need an explicit audit-safe deletion/retention rule"
+      "retention_risk": "Credential-like JSON keys are technically redacted from audit copies, but broader personal/confidential-field minimization and accepted audit retention/deletion exceptions still require policy review."
     },
     {
       "id": "app_binding",
@@ -285,7 +288,7 @@
   "out_of_scope_shared_project_data": "All non-dpp_* application tables in the shared Supabase project are owned by other applications and are not part of DPP Autopilot privacy inventory.",
   "green_blockers": [
     "M01-M13 declared dependencies are not all GREEN.",
-    "Final regulatory/operational retention periods remain unaccepted for passports/history, registry submissions, evidence and audit snapshots.",
+    "Final regulatory/operational retention periods remain unaccepted for passports/history, registry submissions, evidence and audit snapshots; audit credential-key redaction is only a technical minimization precursor.",
     "M13 real authenticated deployed upload→download→delete lifecycle acceptance remains incomplete despite deployed private Storage/Edge integrity controls.",
     "External registry recipient terms and live payload scope are not accepted.",
     "R08 destructive organization/user deletion remains intentionally disabled pending accepted export/storage/audit/Auth lifecycle rules."
