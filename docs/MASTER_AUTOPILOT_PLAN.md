@@ -576,3 +576,11 @@ Append evidence here only after verification.
 - T03 now has 10 stateful integration scenarios. The new scenario mutates the evidence manifest between page 1 and page 2.
 - Reusing the stale `evidence_manifest_sha256` returns stable `409 EVIDENCE_EXPORT_MANIFEST_CHANGED` and proves no second evidence object is downloaded.
 - T03 remains RED/PARTIAL pending M17–M23 GREEN plus real authenticated Storage/live-data/deployed HTTP acceptance.
+
+
+### M13 deployed download integrity verification — 2026-09-21
+- PR #144 exact head `e72eac5a99c8b767a1ae738e1b5f0ed6084317b4` completed full CI `35544246411` SUCCESS and merged as `7ff3492e3fa62e480c786bc60b93fb83e914c126`.
+- Bound `dpp-evidence-object` is ACTIVE v3, `verify_jwt=true`, bundle SHA-256 `86839628d196b43512f70666213fe6f499863a4a6e7ce23b56bdee19f342ec42`.
+- Deployed-source readback proves GET checks caller-visible metadata, downloaded byte size, SHA-256 and content type before returning bytes; mismatch fails closed as `409 EVIDENCE_DOWNLOAD_INTEGRITY_FAILED`.
+- Response Content-Type is taken from verified metadata.
+- M13 remains RED/PARTIAL pending M03 GREEN and a real authenticated upload→download/content verification→delete roundtrip.
