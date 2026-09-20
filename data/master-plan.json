@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T18:59:00+03:00",
+  "updatedAt": "2026-09-20T19:09:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -747,7 +747,7 @@
           "acceptanceCriteria": "Positive/negative API flows pass",
           "evidenceRequired": "API test report",
           "status": "red",
-          "evidence": "PARTIAL API-integration acceptance now validates 5 executable stateful tests and 9 scenarios across M17-M23, including passport-create retry semantics and production-shaped M21 export. The export journey checks real `records`/history/audit/evidence manifest structure, metadata integrity and absence of object bytes/access URLs. Exact-head CI `35512145377` on `77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7` completed SUCCESS; PR #95 merged as `62bb22fceb64fe964b51404142a6efa4e1448e44`. T03 remains RED pending M17-M23 GREEN and deployed HTTP integration. — PARTIAL PASS"
+          "evidence": "PARTIAL API-integration acceptance now validates the opt-in evidence-byte export path in addition to the existing 9 scenarios across M17-M23. The stateful model→item→passport journey calls `GET /api/export?include_evidence=1`; the integration backend serves bytes through the production Edge Function route shape and assertions prove manifest byte_size/SHA-256, `evidence_export.integrity=sha256_verified`, verified `evidence_objects` base64 and no signed URL leakage. Exact-head `d49c994b14952cb451f8d80ae197bf75cc6e150f` passed full CI `35521129684`; PR #119 merged as `2bae81b3ee3e3b3dd7b4d3e5f029b835e98c7b25`. T03 remains RED pending M17-M23 GREEN plus real deployed/authenticated Storage HTTP integration. — PARTIAL PASS"
         },
         {
           "id": "T04",
