@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/retention-deletion-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==3
+assert policy.get("version")==4
 assert policy.get("task")=="R08"
 assert policy.get("status")=="partial"
 assert policy.get("scope","").startswith("DPP Autopilot")
@@ -20,7 +20,15 @@ assert precursor.get("integrity")=="byte_size + SHA-256 verified against evidenc
 assert precursor.get("encoding")=="base64"
 assert precursor.get("inline_limit_bytes")==26_214_400
 assert "fail closed" in precursor.get("failure_mode","")
-assert "bounded precursor" in export.get("current_gap","")
+pagination=precursor.get("pagination",{})
+assert pagination.get("offset_param")=="evidence_offset"
+assert pagination.get("limit_param")=="evidence_limit"
+assert pagination.get("default_limit_when_paged")==25
+assert pagination.get("max_limit")==100
+assert pagination.get("byte_cap_scope")=="selected page only"
+for field in ["manifest_object_count","offset","limit","has_more","next_offset"]:
+    assert field in pagination.get("page_metadata",[]), f"R08 evidence pagination missing {field}"
+assert "deterministic pagination" in export.get("current_gap","")
 
 rules={r["id"]:r for r in policy.get("retention_rules",[])}
 expected={
@@ -103,6 +111,7 @@ for token in [
     "EVIDENCE_EXPORT_OBJECT_UNAVAILABLE",
     "sha256",
     "content_base64",
+    "evidencePageOptions",
 ]:
     assert token in export_api, f"R08/M21 evidence byte export missing {token}"
 for token in [
@@ -110,7 +119,8 @@ for token in [
     "include_evidence fails closed on hash mismatch",
     "include_evidence rejects declared total beyond inline memory limit",
     "include_evidence maps unavailable object to stable export error",
+    "paged include_evidence fetches only selected manifest slice",
 ]:
     assert token in export_test, f"R08/M21 export regression missing {token}"
 
-print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; terminal staging purge, bounded evidence-byte export and owner/admin non-destructive deletion-impact preview are implemented while regulatory/storage/audit/auth acceptance blockers remain explicit")
+print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; terminal staging purge, deterministic paged integrity-checked evidence export and owner/admin non-destructive deletion-impact preview are implemented while final package/runtime/regulatory/storage/audit/auth blockers remain explicit")
