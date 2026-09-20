@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T16:15:00+03:00",
+  "updatedAt": "2026-09-20T16:35:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -86,7 +86,7 @@
           "acceptanceCriteria": "Production deployment READY; app and data JSON return 200",
           "evidenceRequired": "Deployment metadata + HTTP verification",
           "status": "blocked",
-          "evidence": "The original Git→Vercel integration remains inactive and both known DPP Vercel projects still had 0 deployments at the latest read. To remove that single-hook dependency, PR #57 added a guarded manual exact-SHA Vercel CLI delivery lane bound to team `team_cKaIZfnCMzoiiq80J0MhV0A2` and project `prj_K0RSGrEkEr3XDouCTA3tdasbqH55`: production is restricted to the exact current `main` SHA plus explicit `DEPLOY_PRODUCTION` confirmation, uses secret `VERCEL_TOKEN`, performs prebuilt deployment, live `/` + `/data/master-plan.json` smoke checks, and writes a deployment receipt. PR CI `35463559589` SUCCESS and post-merge main CI `35463752080` SUCCESS on merge commit `a3e4f745e7bd575279dc01afcb1dde0e7f0abe88`. No real Vercel production deployment has yet executed, so F08 remains BLOCKED until credentialed workflow execution yields a live verified deployment. — BLOCKED"
+          "evidence": "BLOCKED production-deployment acceptance still lacks a verified production-target deployment. New Vercel evidence on PR #98 at 2026-09-20T13:31:47Z returned `api-deployments-free-per-day` with the provider instruction `try again in 24 hours`; do not retry before 2026-09-21T13:31:47Z (2026-09-21 16:31:47 Europe/Sofia). Separately, an existing preview deployment is READY and read-only Vercel fetch proved `/demo/auth-recovery.html` HTTP 200 with expected CSP/HSTS/security headers, but that preview does not satisfy F08's production target. No manual deployment was attempted. — BLOCKED"
         },
         {
           "id": "F09",
@@ -291,7 +291,7 @@
           "acceptanceCriteria": "Sign-up/in/out/reset/session handling works",
           "evidenceRequired": "Auth integration tests",
           "status": "blocked",
-          "evidence": "Normal Supabase Auth acceptance advanced without admin bypass: email confirmation completed for an isolated test identity, authenticated `/auth/v1/user` returned HTTP 200, refresh-token flow returned new bearer tokens, logout returned 204 and the old session then returned 403 `session_not_found`; recovery request returned 200 and the recovery email arrived. Recovery-completion page now implements authenticated `PATCH /auth/v1/user` with fragment-only token/no persistence; contract + browser-safe default state passed full CI run `35394545987` on `d843dd7f432475ee53a85028846bb8663d9c32f1`. Final runtime password-update completion remains unproven because the DPP recovery redirect is not deployable while F08 is blocked and direct recovery-token forwarding is blocked by safety controls. — BLOCKED"
+          "evidence": "Normal Supabase Auth acceptance remains strong: confirmed user/session/refresh/logout/recovery-request flows are proven, and the recovery-completion page implements memory-only recovery-token handling plus authenticated `PATCH /auth/v1/user`. New Vercel read-only evidence proves the deployed preview recovery route `/demo/auth-recovery.html` returns HTTP 200 with the hardened recovery implementation and bound-Supabase CSP. However, final runtime password-update completion is still unproven: `/data/auth-config.json` remains behind Vercel SSO in the connector path, and no valid recovery-session password update was executed. F08 production deployment is still rate-limited with provider backoff until 2026-09-21T13:31:47Z. — BLOCKED"
         },
         {
           "id": "M02",
@@ -836,7 +836,7 @@
           "acceptanceCriteria": "Each releasable change gets preview and automated smoke test",
           "evidenceRequired": "Vercel deployment + test",
           "status": "red",
-          "evidence": "PARTIAL no-deploy preview verification precursor: read-only Vercel discovery found canonical dpp-autopilot project prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr with zero deployments. Contract + fail-closed verifier require exact project, preview env, READY state, exact commit and route/security-header/cache evidence; 5 unit tests reject wrong project/commit/state/environment/routes/headers. CI 35413805729 on cc6ecbfa54f87ce4f4c5f2201caf435900b05cfb SUCCESS including full regression/browser smoke. No deploy/redeploy attempted. C02 remains RED pending C01 GREEN and real preview deployment/live smoke. — PARTIAL PASS"
+          "evidence": "PARTIAL preview deployment evidence has materially advanced. Vercel deployment metadata reports a READY preview for the DPP project, and read-only fetch of `/demo/auth-recovery.html` returned HTTP 200 with production security headers. The connector could not complete protected multi-route verification because subsequent `/data/auth-config.json` and share-link requests redirected through Vercel SSO; no login/MFA/SSO bypass was attempted. Preview identity/core-route verification therefore remains incomplete and C02 stays RED. — PARTIAL PASS"
         },
         {
           "id": "C03",
