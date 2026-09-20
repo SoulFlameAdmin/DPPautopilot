@@ -107,10 +107,10 @@ async function handler(req,res){
 
     if(method==='POST'){
       if(!validRows(body.rows)){
-        return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'rows must contain 1..1000 normalized import objects.'}});
+        return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'The import payload is invalid.'}});
       }
       if(body.mapping_id!=null&&!validUuid(body.mapping_id)){
-        return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'mapping_id must be a valid UUID when supplied.'}});
+        return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'The import payload is invalid.'}});
       }
       const value=await rpc('dpp_api_import_create',{
         p_rows:body.rows,
