@@ -29,7 +29,7 @@ begin
   insert into public.dpp_organizations(id,name,slug)
   values(org_a,'M23 OCC Org','m23-occ-org');
   insert into public.dpp_organization_members(organization_id,user_id,role)
-  values(org_a,u_editor,'editor');
+  values(org_a,u_editor,'owner');
 
   insert into public.dpp_battery_models(
     id,organization_id,model_identifier,manufacturer_name,category,canonical_data
