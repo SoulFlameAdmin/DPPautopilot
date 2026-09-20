@@ -18,6 +18,8 @@ const IDS={
 };
 const EVIDENCE_BYTES=Buffer.from('T03 evidence object bytes','utf8');
 const EVIDENCE_SHA256=crypto.createHash('sha256').update(EVIDENCE_BYTES).digest('hex');
+const EVIDENCE_BYTES_2=Buffer.from('T03 evidence object bytes second page','utf8');
+const EVIDENCE_SHA256_2=crypto.createHash('sha256').update(EVIDENCE_BYTES_2).digest('hex');
 
 function makeRes(){
   return {
@@ -52,17 +54,19 @@ function makeBackend(){
     if(String(url).includes('/functions/v1/dpp-evidence-object')){
       const parsed=new URL(String(url));
       const path=parsed.searchParams.get('path');
-      if(path!=='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf'){
+      const objects={
+        'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf':EVIDENCE_BYTES,
+        'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report-2.pdf':EVIDENCE_BYTES_2
+      };
+      const bytes=objects[path];
+      if(!bytes){
         return {ok:false,status:404,async arrayBuffer(){return new ArrayBuffer(0);}};
       }
       return {
         ok:true,
         status:200,
         async arrayBuffer(){
-          return EVIDENCE_BYTES.buffer.slice(
-            EVIDENCE_BYTES.byteOffset,
-            EVIDENCE_BYTES.byteOffset+EVIDENCE_BYTES.byteLength
-          );
+          return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);
         }
       };
     }
@@ -219,18 +223,32 @@ function makeBackend(){
         target_id:IDS.passport,
         action:'UPDATE'
       }]:[];
-      const evidence=state.passport?[{
-        id:'ffffffff-ffff-4fff-8fff-ffffffffffff',
-        related_record_type:'passport',
-        related_record_id:IDS.passport,
-        storage_bucket:'dpp-evidence',
-        storage_path:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf',
-        original_filename:'report.pdf',
-        content_type:'application/pdf',
-        byte_size:EVIDENCE_BYTES.length,
-        sha256_hex:EVIDENCE_SHA256,
-        metadata:{source:'integration'}
-      }]:[];
+      const evidence=state.passport?[
+        {
+          id:'ffffffff-ffff-4fff-8fff-ffffffffffff',
+          related_record_type:'passport',
+          related_record_id:IDS.passport,
+          storage_bucket:'dpp-evidence',
+          storage_path:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf',
+          original_filename:'report.pdf',
+          content_type:'application/pdf',
+          byte_size:EVIDENCE_BYTES.length,
+          sha256_hex:EVIDENCE_SHA256,
+          metadata:{source:'integration'}
+        },
+        {
+          id:'99999999-9999-4999-8999-999999999999',
+          related_record_type:'passport',
+          related_record_id:IDS.passport,
+          storage_bucket:'dpp-evidence',
+          storage_path:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report-2.pdf',
+          original_filename:'report-2.pdf',
+          content_type:'application/pdf',
+          byte_size:EVIDENCE_BYTES_2.length,
+          sha256_hex:EVIDENCE_SHA256_2,
+          metadata:{source:'integration'}
+        }
+      ]:[];
       return ok({
         schema_version:1,
         organization_id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
@@ -360,7 +378,11 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     assert.equal(Object.prototype.hasOwnProperty.call(publicData,'organization_id'),false);
 
     res=makeRes();
-    await exportApi(req('GET',null,{include_evidence:'1'}),res);
+    await exportApi(req('GET',null,{
+      include_evidence:'1',
+      evidence_offset:'0',
+      evidence_limit:'1'
+    }),res);
     assert.equal(res.statusCode,200);
     const bundle=json(res).data;
     assert.equal(bundle.counts.battery_models,1);
@@ -368,7 +390,7 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     assert.equal(bundle.counts.passports,1);
     assert.equal(bundle.counts.passport_versions,1);
     assert.equal(bundle.counts.audit_log,1);
-    assert.equal(bundle.counts.evidence_manifest,1);
+    assert.equal(bundle.counts.evidence_manifest,2);
     assert.equal(bundle.records.battery_models[0].id,IDS.model);
     assert.equal(bundle.records.battery_items[0].id,IDS.item);
     assert.equal(bundle.records.passports[0].passport_id,IDS.passport);
@@ -383,12 +405,36 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     assert.equal(bundle.evidence_export.object_count,1);
     assert.equal(bundle.evidence_export.total_bytes,EVIDENCE_BYTES.length);
     assert.equal(bundle.evidence_export.integrity,'sha256_verified');
+    assert.equal(bundle.evidence_export.paged,true);
+    assert.equal(bundle.evidence_export.offset,0);
+    assert.equal(bundle.evidence_export.limit,1);
+    assert.equal(bundle.evidence_export.has_more,true);
+    assert.equal(bundle.evidence_export.next_offset,1);
+    assert.match(bundle.evidence_export.manifest_sha256,/^[0-9a-f]{64}$/);
     assert.equal(bundle.evidence_objects[0].storage_path,'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf');
     assert.equal(bundle.evidence_objects[0].byte_size,EVIDENCE_BYTES.length);
     assert.equal(bundle.evidence_objects[0].sha256_hex,EVIDENCE_SHA256);
     assert.equal(bundle.evidence_objects[0].content_base64,EVIDENCE_BYTES.toString('base64'));
     assert.equal(Buffer.from(bundle.evidence_objects[0].content_base64,'base64').toString('utf8'),'T03 evidence object bytes');
-    assert.equal(backend.state.exportCalls,1);
+
+    res=makeRes();
+    await exportApi(req('GET',null,{
+      include_evidence:'1',
+      evidence_offset:String(bundle.evidence_export.next_offset),
+      evidence_limit:'1',
+      evidence_manifest_sha256:bundle.evidence_export.manifest_sha256
+    }),res);
+    assert.equal(res.statusCode,200);
+    const secondPage=json(res).data;
+    assert.equal(secondPage.evidence_export.manifest_sha256,bundle.evidence_export.manifest_sha256);
+    assert.equal(secondPage.evidence_export.offset,1);
+    assert.equal(secondPage.evidence_export.has_more,false);
+    assert.equal(secondPage.evidence_export.next_offset,null);
+    assert.equal(secondPage.evidence_objects.length,1);
+    assert.equal(secondPage.evidence_objects[0].storage_path,'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report-2.pdf');
+    assert.equal(secondPage.evidence_objects[0].sha256_hex,EVIDENCE_SHA256_2);
+    assert.equal(Buffer.from(secondPage.evidence_objects[0].content_base64,'base64').toString('utf8'),'T03 evidence object bytes second page');
+    assert.equal(backend.state.exportCalls,2);
   }finally{global.fetch=original;restore();}
 });
 

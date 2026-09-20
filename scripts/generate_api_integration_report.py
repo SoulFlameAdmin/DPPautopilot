@@ -13,7 +13,7 @@ OUTPUT=ROOT/"artifacts/t03-api-integration-report.json"
 matrix=json.loads(MATRIX.read_text(encoding="utf-8"))
 test_text=TEST.read_text(encoding="utf-8")
 
-assert matrix.get("version")==2
+assert matrix.get("version")==3
 assert matrix.get("task")=="T03"
 assert matrix.get("status")=="partial"
 
@@ -60,6 +60,7 @@ required_tokens=[
     "evidence_objects",
     "sha256_verified",
     "content_base64",
+    "evidence_offset",
 ]
 for token in required_tokens:
     assert token in test_text, f"T03 integration suite missing token {token}"
@@ -70,7 +71,7 @@ for surface in surfaces:
 
 report={
     "task":"T03",
-    "coverage_type":"stateful_in_process_api_integration",
+    "coverage_type":"stateful_in_process_api_integration_with_resumable_evidence_export",
     "dependencies":dependencies,
     "dependency_count":len(dependencies),
     "scenario_count":len(scenarios),
@@ -84,4 +85,4 @@ report={
 }
 OUTPUT.parent.mkdir(parents=True,exist_ok=True)
 OUTPUT.write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
-print(f"T03_API_INTEGRATION_REPORT_PASS: {len(scenarios)} scenarios cover {len(dependencies)} M17-M23 dependencies across {len(surfaces)} API surfaces; report={OUTPUT.relative_to(ROOT)}")
+print(f"T03_API_INTEGRATION_REPORT_PASS: {len(scenarios)} scenarios cover {len(dependencies)} M17-M23 dependencies across {len(surfaces)} API surfaces with resumable paged evidence export; report={OUTPUT.relative_to(ROOT)}")

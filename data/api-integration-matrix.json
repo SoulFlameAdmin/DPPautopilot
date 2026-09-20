@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "task": "T03",
   "status": "partial",
   "dependencies": [
@@ -47,7 +47,7 @@
       "covers": [
         "M21"
       ],
-      "expected": "authenticated owner/admin export mirrors production bundle shape and opt-in evidence-byte augmentation verifies manifest byte_size/SHA-256 before returning base64 bytes"
+      "expected": "authenticated owner/admin export performs page-1 evidence-byte verification, returns manifest_sha256/next_offset, then resumes page 2 with the same manifest token while preserving SHA-256/base64 integrity"
     },
     {
       "id": "semantic_not_found_errors",
@@ -97,6 +97,6 @@
   "validator": "scripts/validate_api_integration_matrix.py",
   "remaining": [
     "Deployed preview/production HTTP integration awaits a functioning accepted production path and full acceptance of M17-M23 dependencies.",
-    "Real authenticated Storage byte roundtrip and large-tenant streaming/package acceptance remain outside this in-process precursor."
+    "Real authenticated Storage byte roundtrip, manifest-drift behavior over live data, and final signed/archive/streaming large-tenant package acceptance remain outside this in-process precursor."
   ]
 }
