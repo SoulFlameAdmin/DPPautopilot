@@ -11,7 +11,7 @@ fix_sql=(ROOT/"supabase/migrations/20260919028000_dpp_evidence_storage_policy_fi
 guard_sql=(ROOT/"supabase/migrations/20260919038000_dpp_evidence_storage_registration_tenant_guard.sql").read_text(encoding="utf-8")
 edge_fn=(ROOT/"supabase/functions/dpp-evidence-object/index.ts").read_text(encoding="utf-8")
 
-assert policy.get("version")==6
+assert policy.get("version")==7
 assert policy.get("task")=="M13"
 assert policy.get("bucket")=="dpp-evidence"
 assert policy.get("max_bytes")==10_485_760
@@ -60,6 +60,15 @@ assert integrity["mismatch_code"]=="EVIDENCE_METADATA_MISMATCH"
 assert integrity["missing_metadata_status"]==403
 assert integrity["missing_metadata_code"]=="EVIDENCE_METADATA_NOT_AVAILABLE"
 assert integrity["verify_before_storage_upload"] is True
+download_integrity=edge["download_integrity"]
+assert download_integrity["metadata_lookup"]=="caller-RLS SELECT from dpp_evidence_attachments by storage_bucket + storage_path"
+assert download_integrity["verifies"]==["byte_size","sha256_hex","content_type"]
+assert download_integrity["hash"]=="SHA-256 via Web Crypto"
+assert download_integrity["mismatch_status"]==409
+assert download_integrity["mismatch_code"]=="EVIDENCE_DOWNLOAD_INTEGRITY_FAILED"
+assert download_integrity["missing_metadata_status"]==404
+assert download_integrity["missing_metadata_code"]=="EVIDENCE_NOT_AVAILABLE"
+assert download_integrity["verify_before_response"] is True
 
 for token in [
  "npm:@supabase/supabase-js@2.95.0",
@@ -83,6 +92,7 @@ for token in [
  '.eq("storage_path", path)',
  "EVIDENCE_METADATA_NOT_AVAILABLE",
  "EVIDENCE_METADATA_MISMATCH",
+ "loadEvidenceMetadata",
  'crypto.subtle.digest("SHA-256", bytes)',
 ]:
     assert token in edge_fn, f"M13 Edge Function missing contract token: {token}"
@@ -91,6 +101,11 @@ metadata_lookup_pos=edge_fn.index('.from("dpp_evidence_attachments")')
 hash_pos=edge_fn.index('const actualSha256 = await sha256Hex(bytes)')
 upload_pos=edge_fn.index('.storage.from(BUCKET).upload(')
 assert 0 <= metadata_lookup_pos < hash_pos < upload_pos, "M13 metadata/hash verification must happen before Storage upload"
+
+download_pos=edge_fn.index('.storage.from(BUCKET).download(')
+download_integrity_pos=edge_fn.index('EVIDENCE_DOWNLOAD_INTEGRITY_FAILED')
+response_pos=edge_fn.index('return new Response(bytes, { status: 200, headers })')
+assert 0 <= download_pos < download_integrity_pos < response_pos, "M13 download integrity verification must happen before byte response"
 
 for forbidden in ["SERVICE_ROLE", "service_role", "SUPABASE_SERVICE_ROLE_KEY"]:
     assert forbidden not in edge_fn, f"M13 Edge Function must not use privileged key material: {forbidden}"
@@ -136,4 +151,4 @@ for token in [
 for content_type in expected_types:
     assert content_type in meta_sql and content_type in storage_sql
 
-print("M13_EVIDENCE_POLICY_PASS: tenant metadata plus private Storage bucket/RLS, tenant-guarded registration, caller-JWT Edge Function, pre-upload byte-size/SHA-256/content-type verification, MIME/size/path limits and no-overwrite integrity contract are declared")
+print("M13_EVIDENCE_POLICY_PASS: tenant metadata plus private Storage bucket/RLS, tenant-guarded registration, caller-JWT Edge Function, pre-upload and pre-response download byte-size/SHA-256/content-type verification, MIME/size/path limits and no-overwrite integrity contract are declared")
