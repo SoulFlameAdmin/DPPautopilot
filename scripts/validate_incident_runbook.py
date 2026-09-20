@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 contract=json.loads((ROOT/"data/incident-runbook-contract.json").read_text(encoding="utf-8"))
 doc=(ROOT/"docs/INCIDENT_RUNBOOK.md").read_text(encoding="utf-8")
 
-assert contract.get("version")==1
+assert contract.get("version")==2
 assert contract.get("task")=="R13"
 assert contract.get("status")=="partial"
 assert contract.get("runbook")=="docs/INCIDENT_RUNBOOK.md"
@@ -35,6 +35,20 @@ assert any("data" in x.lower() for x in severities["SEV1"]["criteria"])
 assert contract.get("required_phases")==[
     "detect_and_open","triage","contain","communicate","recover","verify","close_and_learn"
 ]
+
+synthetic=contract.get("synthetic_drill",{})
+assert synthetic.get("contract")=="data/monitoring-incident-drill.json"
+assert synthetic.get("executable_test")=="tests/api/monitoring-incident-drill.test.cjs"
+assert synthetic.get("mapped_signal")=="availability_5xx_rate"
+assert synthetic.get("mapped_severity")=="SEV1"
+assert synthetic.get("synthetic_ack_minutes")<=synthetic.get("target_ack_minutes")
+assert synthetic.get("required_phases_exercised") is True
+assert synthetic.get("live_notification_claimed") is False
+assert synthetic.get("deployed_runtime_claimed") is False
+drill=json.loads((ROOT/"data/monitoring-incident-drill.json").read_text(encoding="utf-8"))
+assert drill["scenario"]["incident_severity"]=="SEV1"
+assert drill["scenario"]["synthetic_timeline_minutes"]["acknowledge"]<=severities["SEV1"]["target_ack_minutes"]
+assert drill["safety"]["production_rollback_claimed"] is False
 
 monitoring=set(contract.get("monitoring_signals",[]))
 monitor_policy=json.loads((ROOT/"data/monitoring-alert-policy.json").read_text(encoding="utf-8"))
@@ -71,4 +85,4 @@ gaps=" ".join(contract.get("runtime_gaps",[]))
 for term in ["R09","R10","C05","Legal/privacy"]:
     assert term.lower() in gaps.lower()
 
-print("R13_INCIDENT_RUNBOOK_PASS: severity, owners, triage, containment, comms, recovery/restore, privacy-incident and closure procedures are versioned without claiming unavailable runtime capabilities")
+print("R13_INCIDENT_RUNBOOK_PASS: severity/owners/runbook plus a synthetic fire->ack-target->recover drill are versioned without claiming live notification, deployed runtime or production rollback")
