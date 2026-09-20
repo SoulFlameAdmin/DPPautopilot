@@ -34,3 +34,11 @@ The report is in-process API integration evidence only. It deliberately does not
 - Page 1 requests `evidence_offset=0&evidence_limit=1`, validates SHA-256/base64 integrity, and captures `manifest_sha256` + `next_offset`.
 - Page 2 reuses that exact `manifest_sha256` through `evidence_manifest_sha256` and proves stable resume to the second evidence object through the production-shaped Edge Function route.
 - This remains in-process integration evidence; live authenticated Storage, live manifest-drift behavior and deployed HTTP acceptance remain pending.
+
+
+## Manifest drift integration — 2026-09-20
+
+- A dedicated integration scenario mutates the evidence manifest between page 1 and page 2.
+- Page 2 reuses the stale `evidence_manifest_sha256` and must return stable `409 EVIDENCE_EXPORT_MANIFEST_CHANGED`.
+- The test proves no second evidence-object download occurs after drift is detected.
+- This remains in-process evidence; live deployed manifest drift and authenticated Storage acceptance are still pending.
