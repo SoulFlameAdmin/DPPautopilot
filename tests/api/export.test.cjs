@@ -237,3 +237,110 @@ test('include_evidence maps unavailable object to stable export error',async()=>
     assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE');
   }finally{global.fetch=original;restore();}
 });
+
+
+test('paged include_evidence fetches only selected manifest slice and exposes next_offset',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bodies=[Buffer.from('one'),Buffer.from('two'),Buffer.from('three')];
+  const manifest=bodies.map((bytes,i)=>({
+    id:`00000000-0000-4000-8000-00000000000${i+1}`,
+    storage_path:`aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/file-${i+1}.bin`,
+    original_filename:`file-${i+1}.bin`,
+    content_type:'application/octet-stream',
+    byte_size:bytes.length,
+    sha256_hex:crypto.createHash('sha256').update(bytes).digest('hex')
+  }));
+  const objectPaths=[];
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:manifest};}};
+    }
+    const decoded=decodeURIComponent(String(url).split('path=')[1]||'');
+    objectPaths.push(decoded);
+    const index=Number(decoded.match(/file-(\d+)\.bin$/)?.[1]||0)-1;
+    const bytes=bodies[index];
+    return {ok:true,async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}};
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'1',
+      evidence_limit:'1'
+    }),res);
+    assert.equal(res.statusCode,200);
+    const data=JSON.parse(res.body).data;
+    assert.equal(data.evidence_objects.length,1);
+    assert.equal(data.evidence_objects[0].original_filename,'file-2.bin');
+    assert.deepEqual(objectPaths,['aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/file-2.bin']);
+    assert.equal(data.evidence_export.manifest_object_count,3);
+    assert.equal(data.evidence_export.paged,true);
+    assert.equal(data.evidence_export.offset,1);
+    assert.equal(data.evidence_export.limit,1);
+    assert.equal(data.evidence_export.has_more,true);
+    assert.equal(data.evidence_export.next_offset,2);
+  }finally{global.fetch=original;restore();}
+});
+
+test('paged include_evidence validates pagination before export RPC',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('unexpected');};
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'-1',
+      evidence_limit:'1000'
+    }),res);
+    assert.equal(res.statusCode,400);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_PAGINATION_INVALID');
+    assert.equal(called,false);
+  }finally{global.fetch=original;restore();}
+});
+
+test('paged include_evidence ignores unselected oversized manifest objects',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('small-page');
+  const sha=crypto.createHash('sha256').update(bytes).digest('hex');
+  let objectCalls=0;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[
+        {
+          id:'11111111-1111-4111-8111-111111111111',
+          storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/huge.bin',
+          original_filename:'huge.bin',
+          content_type:'application/octet-stream',
+          byte_size:handler._test.MAX_INLINE_EVIDENCE_BYTES+1,
+          sha256_hex:'a'.repeat(64)
+        },
+        {
+          id:'22222222-2222-4222-8222-222222222222',
+          storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/small.bin',
+          original_filename:'small.bin',
+          content_type:'application/octet-stream',
+          byte_size:bytes.length,
+          sha256_hex:sha
+        }
+      ]};}};
+    }
+    objectCalls+=1;
+    assert.ok(String(url).includes('small.bin'));
+    return {ok:true,async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}};
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'1',
+      evidence_limit:'1'
+    }),res);
+    assert.equal(res.statusCode,200);
+    const data=JSON.parse(res.body).data;
+    assert.equal(data.evidence_objects[0].original_filename,'small.bin');
+    assert.equal(data.evidence_export.has_more,false);
+    assert.equal(data.evidence_export.next_offset,null);
+    assert.equal(objectCalls,1);
+  }finally{global.fetch=original;restore();}
+});
