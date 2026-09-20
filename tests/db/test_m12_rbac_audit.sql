@@ -7,6 +7,7 @@ declare
   u_admin uuid := 'f2828282-8282-4282-8282-828282828282';
   u_viewer uuid := 'f3838383-8383-4383-8383-838383838383';
   org_id uuid := 'f4848484-8484-4484-8484-848484848484';
+  insert_id bigint;
   update_id bigint;
   delete_id bigint;
   before_role text;
@@ -34,6 +35,23 @@ begin
 
   perform public.dpp_api_members_add(u_admin,'admin');
   perform public.dpp_api_members_add(u_viewer,'viewer');
+
+  select id
+  into insert_id
+  from public.dpp_audit_log
+  where organization_id=org_id
+    and actor_id=u_owner
+    and action='INSERT'
+    and target_table='dpp_organization_members'
+    and target_id=u_viewer
+    and before_data is null
+    and after_data->>'role'='viewer'
+  order by id desc
+  limit 1;
+
+  if insert_id is null then
+    raise exception 'M12 membership add audit row missing';
+  end if;
 
   perform public.dpp_api_members_update(u_viewer,'editor');
 
