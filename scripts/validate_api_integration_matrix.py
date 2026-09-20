@@ -45,6 +45,9 @@ for token in [
   "MODEL_CONFLICT",
   "PASSPORT_CONFLICT",
   "passportCreateWrites",
+  "signed_url",
+  "passport_versions",
+  "evidence_manifest",
 ]:
     assert token in test_text, f"T03 integration test missing coverage token: {token}"
 
