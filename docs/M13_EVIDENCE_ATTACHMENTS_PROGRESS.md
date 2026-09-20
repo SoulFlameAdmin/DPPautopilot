@@ -49,3 +49,12 @@ M13 remains **RED/PARTIAL**, not GREEN: a real authenticated user byte upload ->
 - Missing/inaccessible metadata remains non-enumerating as `404 EVIDENCE_NOT_AVAILABLE`; byte/type/hash mismatch fails closed with `409 EVIDENCE_DOWNLOAD_INTEGRITY_FAILED`.
 - The response `Content-Type` comes from verified metadata, not an untrusted object response alone.
 - M13 remains RED/PARTIAL until M03 is GREEN and a real authenticated upload→download/content verification→delete roundtrip is proven against the deployed function.
+
+
+## Deployed download-integrity evidence — 2026-09-21
+
+- PR #144 exact head `e72eac5a99c8b767a1ae738e1b5f0ed6084317b4` completed GitHub Actions CI `35544246411` SUCCESS and merged as `7ff3492e3fa62e480c786bc60b93fb83e914c126`.
+- Supabase project `frhletkiuupgksmgxoxc` deployed `dpp-evidence-object` as **ACTIVE v4**, `verify_jwt=true`, bundle SHA-256 `86839628d196b43512f70666213fe6f499863a4a6e7ce23b56bdee19f342ec42`.
+- Connector readback matches merged `index.ts`: GET first loads caller-RLS evidence metadata, then downloads bytes, recomputes SHA-256 and requires exact `byte_size`, `sha256_hex` and `content_type` before response.
+- Missing/inaccessible metadata/object remains non-enumerating as `404 EVIDENCE_NOT_AVAILABLE`; mismatch fails closed as `409 EVIDENCE_DOWNLOAD_INTEGRITY_FAILED`.
+- M13 remains **RED/PARTIAL**, not GREEN: M03 is non-GREEN and a real authenticated upload→download/content verification→delete roundtrip is still required.
