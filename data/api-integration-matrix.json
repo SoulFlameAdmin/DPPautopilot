@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "task": "T03",
   "status": "partial",
   "dependencies": [
@@ -47,7 +47,7 @@
       "covers": [
         "M21"
       ],
-      "expected": "authenticated export mirrors production bundle shape with records/history/audit/evidence metadata and excludes object bytes/access URLs"
+      "expected": "authenticated owner/admin export mirrors production bundle shape and opt-in evidence-byte augmentation verifies manifest byte_size/SHA-256 before returning base64 bytes"
     },
     {
       "id": "semantic_not_found_errors",
@@ -96,6 +96,7 @@
   "executable_test": "tests/api/integration.test.cjs",
   "validator": "scripts/validate_api_integration_matrix.py",
   "remaining": [
-    "Deployed preview/production HTTP integration awaits a functioning Git→Vercel deployment path and full acceptance of M17-M23 dependencies."
+    "Deployed preview/production HTTP integration awaits a functioning accepted production path and full acceptance of M17-M23 dependencies.",
+    "Real authenticated Storage byte roundtrip and large-tenant streaming/package acceptance remain outside this in-process precursor."
   ]
 }
