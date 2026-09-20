@@ -19,6 +19,7 @@ expected=[
     "import_duplicate_commit",
     "registry_duplicate_submission",
     "api_write_conflicts",
+    "passport_create_retry_idempotency",
 ]
 assert [s["id"] for s in scenarios]==expected, f"T08 scenario drift: {[s['id'] for s in scenarios]!r}"
 
@@ -58,6 +59,9 @@ required={
     "item_unique_conflict_409",
     "passport_unique_conflict_409",
     "unexpected_db_error_fail_closed",
+    "same_item_same_payload_same_passport",
+    "no_duplicate_passport_row",
+    "same_item_different_payload_conflict",
 }
 assert required<=all_covers, f"T08 reliability coverage missing: {sorted(required-all_covers)}"
 
