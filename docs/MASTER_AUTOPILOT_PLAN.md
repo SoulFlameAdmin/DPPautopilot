@@ -516,3 +516,10 @@ Append evidence here only after verification.
 - Bound BEGIN/ROLLBACK execution returned `R08_RETENTION_DELETION_SUBSET_PASS`.
 - Owner/admin `dpp_api_org_deletion_impact()` reports tenant-scoped row counts, declared evidence bytes, Storage enumeration requirement, Auth-user boundary and explicit blocker codes while keeping `ready_for_destructive_delete=false`; no organization delete surface is exposed.
 - R08 remains RED/PARTIAL pending R07, accepted regulatory retention, exhaustive evidence packaging/storage deletion lifecycle, audit minimization and Auth-account deletion acceptance.
+
+
+### R07 deployed privacy inventory synchronization — 2026-09-20
+- PR #127 exact head `8a7af65ee0b2a4a9535bb629067dd64f8d8fdb23` completed full CI `35523068588` SUCCESS and merged as `2dc37959394ed4c55e93e647546f4492307cd9e3`.
+- The inventory now reflects active Supabase Auth/Postgres/private Storage/Edge Functions rather than planned Storage: private `dpp-evidence`, caller-JWT `dpp-evidence-object`, and pre-upload size/SHA-256/content-type verification are recorded.
+- Implemented lifecycle precursors are also recorded: 30-day owner/admin terminal import purge, bounded evidence-byte export and non-destructive organization deletion-impact preview.
+- Destructive organization/user deletion remains disabled. R07 stays RED/PARTIAL pending M01–M13 GREEN, accepted retention/minimization, real authenticated evidence lifecycle and external-registry recipient/live-payload acceptance.
