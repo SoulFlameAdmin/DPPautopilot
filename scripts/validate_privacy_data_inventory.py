@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 inventory=json.loads((ROOT/"data/privacy-data-inventory.json").read_text(encoding="utf-8"))
 doc=(ROOT/"docs/PRIVACY_DATA_INVENTORY.md").read_text(encoding="utf-8")
 
-assert inventory.get("version")==1
+assert inventory.get("version")==2
 assert inventory.get("task")=="R07"
 assert inventory.get("status")=="partial"
 assert "DPP Autopilot only" in inventory.get("scope","")
@@ -51,10 +51,25 @@ assert rate_store["tables"]==["dpp_rate_limit_buckets"]
 assert "raw IP" in rate_store["fields"] or "raw ip" in rate_store["fields"].lower()
 assert "digest" in rate_store["fields"].lower()
 assert "10 minutes" in rate_store["retention"]["current_behavior"]
+evidence_store=next(s for s in stores if s["id"]=="evidence_metadata_objects")
+assert "private object bytes" in evidence_store["location"]
+assert "dpp-evidence-object" in evidence_store["location"]
+assert "SHA-256" in evidence_store["retention"]["current_behavior"]
+assert "verify_jwt=true" in " ".join(evidence_store["controls"])
+import_store=next(s for s in stores if s["id"]=="import_staging")
+assert import_store["retention"]["status"]=="implemented_precursor"
+assert "30 days" in import_store["retention"]["current_behavior"]
 
 processors=inventory.get("processors_and_recipients",[])
 names={p["name"] for p in processors}
 assert {"Supabase","Vercel","GitHub","EU DPP registry provider"} <= names
+
+lifecycle=inventory.get("deletion_export_precursor",{})
+assert lifecycle.get("retention_status_rpc")=="dpp_api_retention_status()"
+assert lifecycle.get("terminal_import_purge_rpc")=="dpp_api_purge_import_staging(timestamptz)"
+assert lifecycle.get("org_deletion_impact_preview_rpc")=="dpp_api_org_deletion_impact()"
+assert lifecycle.get("destructive_org_delete_enabled") is False
+assert lifecycle.get("auth_users_deleted_by_org_delete") is False
 
 blockers=inventory.get("green_blockers",[])
 assert len(blockers)>=5
@@ -70,4 +85,4 @@ for token in [
 ]:
     assert token in doc, f"R07 document missing {token}"
 
-print(f"R07_PRIVACY_DATA_INVENTORY_PASS: {len(migration_tables)} DPP migration tables have complete inventory coverage with purpose/location/processor/retention state")
+print(f"R07_PRIVACY_DATA_INVENTORY_PASS: {len(migration_tables)} DPP migration tables have complete inventory coverage with current deployed Storage/Edge controls and fail-closed deletion/export lifecycle state")
