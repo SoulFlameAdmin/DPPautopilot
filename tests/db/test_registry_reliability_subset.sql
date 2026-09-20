@@ -14,6 +14,7 @@ declare
   v_submitted timestamptz;
   v_accepted timestamptz;
   invalid_terminal_rejected boolean := false;
+  credential_payload_rejected boolean := false;
 begin
   insert into public.dpp_organizations(id,name,slug)
   values(v_org,'T08 Reliability Org','t08-reliability');
@@ -36,12 +37,42 @@ begin
     v_passport,v_org,v_item,'draft','{}'::jsonb,'{}'::jsonb
   );
 
+  begin
+    insert into public.dpp_registry_submissions(
+      id,organization_id,battery_item_id,passport_id,environment,provider,status,request_payload
+    ) values(
+      v_submission,v_org,v_item,v_passport,'test','eu_dpp_registry','draft',
+      '{"suite":"T08","nested":[{"client_secret":"must-not-persist"}]}'::jsonb
+    );
+  exception when check_violation then
+    credential_payload_rejected := true;
+  end;
+
+  if not credential_payload_rejected then
+    raise exception 'T08 credential-bearing registry payload was not rejected';
+  end if;
+
   insert into public.dpp_registry_submissions(
     id,organization_id,battery_item_id,passport_id,environment,provider,status,request_payload
   ) values(
     v_submission,v_org,v_item,v_passport,'test','eu_dpp_registry','draft',
     '{"suite":"T08","synthetic":true}'::jsonb
   );
+
+  if exists(
+    select 1 from public.dpp_registry_submissions
+    where id=v_submission
+      and request_payload::text like '%must-not-persist%'
+  ) then
+    raise exception 'T08 credential-bearing payload persisted despite guard';
+  end if;
+
+  if has_function_privilege('anon','public.dpp_json_has_credential_key(jsonb)','EXECUTE')
+     or has_function_privilege('authenticated','public.dpp_json_has_credential_key(jsonb)','EXECUTE')
+     or has_function_privilege('anon','public.dpp_reject_registry_payload_credentials()','EXECUTE')
+     or has_function_privilege('authenticated','public.dpp_reject_registry_payload_credentials()','EXECUTE') then
+    raise exception 'T08 registry privacy helper leaked direct client EXECUTE';
+  end if;
 
   update public.dpp_registry_submissions set status='queued' where id=v_submission;
   update public.dpp_registry_submissions set status='submitted' where id=v_submission;
