@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "task": "M13",
   "bucket": "dpp-evidence",
   "max_bytes": 10485760,
@@ -19,7 +19,7 @@
   ],
   "storage_path_rule": "<organization_uuid>/<object path>; '..' segments are forbidden",
   "sha256_format": "64 lowercase hexadecimal characters",
-  "note": "Project file policy, not a legal requirement. Private Storage bucket/RLS, deny-by-default metadata registration, tenant-aware registration helper, caller-JWT Edge Function, and upload byte-integrity verification are versioned; M13 remains RED until a real authenticated byte upload/download/delete roundtrip passes and M03 is GREEN.",
+  "note": "Project file policy, not a legal requirement. Private Storage bucket/RLS, deny-by-default metadata registration, tenant-aware registration helper, caller-JWT Edge Function, upload verification, and download byte-integrity verification are versioned; M13 remains RED until a real authenticated byte upload/download/delete roundtrip passes and M03 is GREEN.",
   "storage": {
     "private_bucket": true,
     "metadata_registration_required_before_upload": true,
@@ -73,6 +73,20 @@
         "missing_metadata_status": 403,
         "missing_metadata_code": "EVIDENCE_METADATA_NOT_AVAILABLE",
         "verify_before_storage_upload": true
+      },
+      "download_integrity": {
+        "metadata_lookup": "caller-RLS SELECT from dpp_evidence_attachments by storage_bucket + storage_path",
+        "verifies": [
+          "byte_size",
+          "sha256_hex",
+          "content_type"
+        ],
+        "hash": "SHA-256 via Web Crypto",
+        "mismatch_status": 409,
+        "mismatch_code": "EVIDENCE_DOWNLOAD_INTEGRITY_FAILED",
+        "missing_metadata_status": 404,
+        "missing_metadata_code": "EVIDENCE_NOT_AVAILABLE",
+        "verify_before_response": true
       }
     }
   }
