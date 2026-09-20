@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-21T02:18:00+03:00",
+  "updatedAt": "2026-09-21T02:23:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -86,7 +86,7 @@
           "acceptanceCriteria": "Production deployment READY; app and data JSON return 200",
           "evidenceRequired": "Deployment metadata + HTTP verification",
           "status": "blocked",
-          "evidence": "BLOCKED/PARTIAL: canonical Vercel project `prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr` now has READY production deployment `dpl_75FRys3F48iXFpMoHRjte5YLT3sz`, source `git`, exact `main@510527d6e1d63fbc63b1c919c3d8e67240456f8f`. Read-only HTTP verification of the exact deployment root returned 302 to Vercel SSO, so the required app and data JSON HTTP 200 acceptance is not proven. No SSO/login/MFA bypass and no explicit deploy/redeploy were attempted. PR #111 fail-closed evidence contract passed CI `35518399765` and merged as `4440605f4eda88b1ebf086f06eccb97ae89673be`. — BLOCKED"
+          "evidence": "BLOCKED/PARTIAL: canonical Vercel project `prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr` has prior READY production evidence, but the lease-governed production attempt for exact main commit `7ff3492e3fa62e480c786bc60b93fb83e914c126` returned Vercel `build-rate-limit`. The lease was released with success=false. Vercel provided no retry timestamp, so no synthetic backoff is recorded. Existing HTTP acceptance also remains incomplete because protected data JSON can redirect to Vercel SSO. F08 remains BLOCKED; no auth/SSO bypass and no immediate retry. — BLOCKED"
         },
         {
           "id": "F09",
@@ -399,7 +399,7 @@
           "acceptanceCriteria": "Allowed files upload/download under tenant policy; type/size limits enforced",
           "evidenceRequired": "Storage tests",
           "status": "red",
-          "evidence": "PARTIAL evidence object lifecycle now has private Storage/RLS, caller-JWT Edge bridge, bounded export bytes, and deployed pre-upload integrity verification. PR #123 exact-head `60c7c5e0d6d9a1fb811031d2e2cab5b219bb9c19` completed full CI `35521896483` SUCCESS and merged as `194d4a68bb3dbf89046c67fb6adbed6a28dbdde6`. Bound Supabase Edge Function `dpp-evidence-object` was deployed as ACTIVE version 2 with `verify_jwt=true`; source readback confirms caller-RLS lookup from `dpp_evidence_attachments`, SHA-256 computation, exact byte_size/hash/content_type comparison, `403 EVIDENCE_METADATA_NOT_AVAILABLE` / `409 EVIDENCE_METADATA_MISMATCH`, and verification before Storage upload. M13 remains RED pending M03 GREEN plus a real authenticated upload→download/content verification→delete roundtrip against the deployed function. — PARTIAL PASS"
+          "evidence": "PARTIAL evidence object lifecycle now has private Storage/RLS, caller-JWT Edge bridge, upload integrity verification and deployed download integrity verification. PR #144 exact-head `e72eac5a99c8b767a1ae738e1b5f0ed6084317b4` completed CI `35544246411` SUCCESS and merged as `7ff3492e3fa62e480c786bc60b93fb83e914c126`. Bound Supabase Edge Function `dpp-evidence-object` is ACTIVE v4 with `verify_jwt=true`; source readback proves caller-RLS metadata lookup plus exact SHA-256/byte_size/content_type verification before GET returns bytes, with `404 EVIDENCE_NOT_AVAILABLE` for unavailable metadata/object and `409 EVIDENCE_DOWNLOAD_INTEGRITY_FAILED` for integrity mismatch. M13 remains RED pending M03 GREEN plus a real authenticated upload→download/content verification→delete roundtrip. — PARTIAL PASS"
         },
         {
           "id": "M14",
