@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "R08",
   "status": "partial",
   "scope": "DPP Autopilot only; shared Supabase non-dpp_* data is excluded.",
@@ -25,10 +25,20 @@
           "has_more",
           "next_offset"
         ],
-        "byte_cap_scope": "selected page only"
+        "byte_cap_scope": "selected page only",
+        "resume_manifest_sha256": {
+          "query_param": "evidence_manifest_sha256",
+          "response_field": "manifest_sha256",
+          "algorithm": "SHA-256 over canonicalized evidence manifest identity/size/hash tuples",
+          "mismatch_status": 409,
+          "mismatch_code": "EVIDENCE_EXPORT_MANIFEST_CHANGED",
+          "invalid_status": 400,
+          "invalid_code": "EVIDENCE_EXPORT_MANIFEST_INVALID",
+          "failure_stage": "before evidence object download"
+        }
       }
     },
-    "current_gap": "Integrity-checked evidence bytes now support deterministic pagination under a 25 MiB per-page cap, but a final archive/streaming package format, resumable export manifest contract and real authenticated deployed large-tenant acceptance remain unproven."
+    "current_gap": "Integrity-checked evidence bytes now support deterministic pagination plus a manifest SHA-256 consistency token for stateless resume/drift detection, but a final archive/streaming package format, signed resumable export manifest, and real authenticated deployed large-tenant acceptance remain unproven."
   },
   "retention_rules": [
     {
