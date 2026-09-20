@@ -96,7 +96,7 @@ async function handler(req,res){
   }
 
   const problem=validateCreate(body);
-  if(problem) return send(res,422,{error:{code:'VALIDATION_ERROR',message:problem}});
+  if(problem) return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
 
   try{
     const organization=await rpc('dpp_api_organization_create',{
