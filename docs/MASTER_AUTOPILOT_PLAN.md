@@ -402,3 +402,15 @@ Append evidence here only after verification.
 - `M05_MEMBERSHIP_REVOCATION_ISOLATION_PASS` proves the removed member can no longer access model data or authorization context and no longer discovers the organization.
 - Exact-head GitHub Actions CI `35476988177` on `63561536b1d3d162f43ff7a57b732e97937a3520` completed SUCCESS; PR #70 merged as `a9fb4c1006aafe9a2a3bcc210c9fe0085e002eb3`.
 - M05 remains RED/PARTIAL because M02/M03 are not GREEN. No Vercel deployment was attempted.
+
+
+### M12 RBAC audit trail — 2026-09-20
+- Added transaction-only regression coverage over production membership role update/delete RPCs.
+- `M12_RBAC_AUDIT_PASS` proves actor attribution, before/after role history and immutable audit rows for RBAC mutations.
+- Exact-head CI `35478013319` on `bce99a08c02e56134ede996299ad5e0addcfd73e` completed SUCCESS; PR #72 merged as `22a250851cf5039ceb75a629e3f36e25eaa389da`.
+- M12 remains RED/PARTIAL because M03 is not GREEN and deployed authenticated acceptance is unavailable.
+
+### M13 live evidence bridge deployment — 2026-09-20
+- Supabase Edge Function `dpp-evidence-object` is ACTIVE version 1 with `verify_jwt=true` in project `frhletkiuupgksmgxoxc`.
+- Deployed `index.ts` and `deno.json` are byte-for-byte exact with canonical `main`; deployed bundle SHA-256 is `9ca527828da04bec19fba8e4b6afd82a710fe09b418e5f31112bacfe51f0e6ef`.
+- M13 remains RED/PARTIAL because a normal authenticated user byte upload/download/delete roundtrip is still not proven. No auth bypass or service-role shortcut is used.
