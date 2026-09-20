@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T03:05:00+03:00",
+  "updatedAt": "2026-09-20T03:45:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -435,7 +435,7 @@
           "acceptanceCriteria": "Authenticated CRUD with validation/tenant enforcement",
           "evidenceRequired": "API tests",
           "status": "red",
-          "evidence": "PARTIAL authenticated models API is revalidated under M23 checked-write semantics: active-tenant CRUD/RBAC/validation RPC matrix passes; PATCH requires expected_updated_at and calls dpp_api_models_update_checked; stale DP206 maps to 409 STALE_WRITE while unchecked authenticated update EXECUTE is denied. Full run 35423117317 SUCCESS includes M17 HTTP/RPC, M23 and isolation/security suites. M17 remains RED because M03 is not GREEN and deployed authenticated HTTP acceptance is unavailable. — PARTIAL PASS"
+          "evidence": "PARTIAL authenticated models API now protects both PATCH and DELETE with optimistic concurrency. Bound Supabase migration `dpp_models_delete_checked` version `20260920003348` adds `dpp_api_models_delete_checked(uuid,timestamptz)`, revokes authenticated EXECUTE on unchecked delete, and preserves owner/admin delete authorization. `/api/models` DELETE requires `expected_updated_at`; stale DP206 maps to 409 STALE_WRITE without leaking DB details. Live ACL proves checked-only authenticated access, anon denial and fixed `search_path=public, pg_temp`. Exact-head CI `35479236122` on `8c3c953397746ed9e6f8b6798ff149ddab081003` completed SUCCESS including M17 HTTP tests, clean migration replay, M23 optimistic-concurrency subset and global RPC guard. PR #79 merged as `94c38301402512734b5e782d20d8465b0ed0d10e`. M17 remains RED because M03 is not GREEN and deployed authenticated HTTP acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M18",
@@ -489,7 +489,7 @@
           "acceptanceCriteria": "Duplicate import/submission and conflicting writes are safely handled",
           "evidenceRequired": "Concurrency tests",
           "status": "red",
-          "evidence": "PARTIAL idempotency/concurrency hardening now proves optimistic lost-update protection in addition to import/registry idempotency and duplicate-write conflict mapping. Checked model/item/passport update RPCs lock/read updated_at, require expected_updated_at, reject stale writers with DP206/DP309/DP411, use wall-clock mutation tokens and revoke authenticated EXECUTE on unchecked update RPCs. Bound Supabase rollback returned M23_OPTIMISTIC_CONCURRENCY_PASS; full run 35423117317 SUCCESS includes API precondition/stale tests, import/registry idempotency, M23 DB regression and explicit RPC bypass guard. M23 remains RED until M17-M20 are fully accepted. — PARTIAL PASS"
+          "evidence": "PARTIAL idempotency/concurrency hardening now covers lost-update protection for model PATCH and model DELETE in addition to item/passport PATCH plus import/registry idempotency. Checked model DELETE locks the active-tenant row, requires the last observed updated_at, rejects stale deletes with DP206, and authenticated callers cannot bypass through the unchecked delete RPC. Bound migration `dpp_models_delete_checked` version `20260920003348`; exact-head CI `35479236122` SUCCESS includes `M23_OPTIMISTIC_CONCURRENCY_PASS`, clean replay, HTTP stale-delete contract and global RPC bypass guard. PR #79 merged as `94c38301402512734b5e782d20d8465b0ed0d10e`. M23 remains RED until M17-M20 are fully accepted. — PARTIAL PASS"
         },
         {
           "id": "M24",

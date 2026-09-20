@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M10 catalog-driven public sanitizer merged and evidenced; continue earliest dependency-safe non-deploy MVP/security precursor",
+  "currentTask": "M17/M23 checked model delete merged and evidenced; continue earliest dependency-safe non-deploy MVP/API hardening",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #75 merged as 18388cad9030a281550d9c03feccb8d496b32903; exact-head CI 35478636516 SUCCESS",
-  "nextTask": "Continue with M12 audit-log hardening or another earliest RED precursor whose implementation/tests can advance without M01/M03 deployed acceptance; do not retry F08 without new evidence.",
-  "message": "M10 now has DB/RPC enforcement plus catalog-driven HTTP defense-in-depth against nested restricted-field leakage. M10 remains RED by dependency; continue independent implementation/tests without status inflation.",
+  "lastCompletedTask": "PR #79 merged as 94c38301402512734b5e782d20d8465b0ed0d10e; bound migration dpp_models_delete_checked version 20260920003348; exact-head CI 35479236122 SUCCESS",
+  "nextTask": "Continue with M18 item delete concurrency hardening or another earliest RED precursor that can advance without M01/M03 deployed acceptance; do not retry F08 without new evidence.",
+  "message": "Model DELETE is now fail-closed against stale clients and unchecked RPC bypass. M17/M23 remain RED by dependency/final acceptance, so continue independent implementation/tests without status inflation.",
   "deferredBlockers": [
     "F08 — Vercel production acceptance remains externally blocked; do not retry without new quota/access evidence and always obey the global Supabase deployment lease law.",
     "M01 — final runtime recovery password-update acceptance remains blocked on a usable deployed recovery redirect.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T03:05:00+03:00"
+  "updatedAt": "2026-09-20T03:45:00+03:00"
 }

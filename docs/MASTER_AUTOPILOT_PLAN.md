@@ -409,3 +409,11 @@ Append evidence here only after verification.
 - Regression coverage injects legitimate-interest, authority-only, tenant and top-level private data from a deliberately regressed upstream response and proves none reaches the HTTP response.
 - Exact-head CI `35478636516` on `e83be5d5efc094d1468a38c52a0f59bb1145c93d` completed SUCCESS, including M10 access-policy validation, passport HTTP contract tests and the M10 public/private DB runtime subset.
 - PR #75 merged as `18388cad9030a281550d9c03feccb8d496b32903`. M10 remains RED/PARTIAL because M03 is not GREEN and deployed acceptance is unavailable.
+
+
+### M17/M23 checked model delete — 2026-09-20
+- Added bound `dpp_api_models_delete_checked(uuid,timestamptz)` and revoked authenticated EXECUTE on unchecked model delete.
+- `/api/models` DELETE now requires `expected_updated_at`; stale deletes return stable `409 STALE_WRITE` without DB-detail leakage.
+- Bound Supabase migration `dpp_models_delete_checked` is applied as version `20260920003348`; live ACL confirms checked-only authenticated execution, anon denial and fixed `search_path=public, pg_temp`.
+- Exact-head CI `35479236122` on `8c3c953397746ed9e6f8b6798ff149ddab081003` completed SUCCESS, including M17 HTTP tests, clean replay, M23 optimistic-concurrency regression and global RPC guard.
+- PR #79 merged as `94c38301402512734b5e782d20d8465b0ed0d10e`. M17/M23 remain RED/PARTIAL because their upstream/final deployed acceptance dependencies are not GREEN.
