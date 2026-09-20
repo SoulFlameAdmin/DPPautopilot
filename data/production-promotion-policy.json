@@ -62,7 +62,7 @@
     "note": "This repository precursor validates evidence only. It does not create, promote or redeploy a Vercel deployment."
   },
   "live_state": {
-    "observed_deployments_for_canonical_project": 1,
+    "observed_deployments_for_canonical_project": 2,
     "observed_ready_preview": {
       "deployment_id": "dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q",
       "state": "READY",
@@ -74,12 +74,30 @@
       "url": "dpp-autopilot-95xeakbem-dimitar-lambovs-projects.vercel.app"
     },
     "promotion_executed": false,
-    "deployment_lease_required": false
+    "deployment_lease_required": false,
+    "observed_ready_production": {
+      "deployment_id": "dpl_75FRys3F48iXFpMoHRjte5YLT3sz",
+      "project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+      "state": "READY",
+      "environment": "production",
+      "target": "production",
+      "source": "git",
+      "commit_sha": "510527d6e1d63fbc63b1c919c3d8e67240456f8f",
+      "commit_ref": "main",
+      "url": "dpp-autopilot-kd65y2n33-dimitar-lambovs-projects.vercel.app",
+      "http_acceptance": {
+        "verified": false,
+        "observed_status": 302,
+        "reason": "Vercel SSO redirect; required app/data JSON HTTP 200 not proven and no auth bypass attempted"
+      }
+    }
   },
   "remaining": [
     "C02 must be GREEN with complete live preview route/TLS/header evidence.",
     "C01/T01-T04 release prerequisites must be GREEN as required by source of truth.",
-    "A real production promotion must be executed only after all gates pass and under the DAVID Vercel deployment lease.",
+    "The observed READY production deployment was created by Git integration and does not by itself prove an authorized C03 promotion; promotion_executed remains false.",
+    "F08 app and data JSON HTTP 200 acceptance must be proven without bypassing Vercel SSO.",
+    "Any future explicit create/update/redeploy must obey the DAVID Vercel deployment lease.",
     "Post-promotion production smoke and immutable deployment evidence must be captured."
   ]
 }
