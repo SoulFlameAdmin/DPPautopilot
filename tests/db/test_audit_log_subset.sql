@@ -12,6 +12,10 @@ declare
   v_after text;
   v_seen boolean;
   v_count integer;
+  v_source_secret text;
+  v_audit_secret text;
+  v_nested_secret text;
+  v_plain_value text;
 begin
   perform set_config('request.jwt.claim.sub',v_actor::text,true);
 
@@ -46,6 +50,63 @@ begin
   end if;
   if v_before<>'M12 Manufacturer A' or v_after<>'M12 Manufacturer B' then
     raise exception 'M12 before/after snapshot mismatch: before %, after %',v_before,v_after;
+  end if;
+
+  -- Secret-like values may exist in flexible source JSON, but the immutable audit copy must redact them.
+  update public.dpp_battery_models
+  set canonical_data=jsonb_build_object(
+    'technical_value','keep-me',
+    'api_key','source-api-secret',
+    'nested',jsonb_build_object(
+      'refresh_token','source-refresh-secret',
+      'array',jsonb_build_array(
+        jsonb_build_object('client_secret','source-client-secret'),
+        jsonb_build_object('safe','visible')
+      )
+    )
+  )
+  where id=v_model;
+
+  select canonical_data->>'api_key'
+    into v_source_secret
+  from public.dpp_battery_models
+  where id=v_model;
+
+  select after_data->'canonical_data'->>'api_key',
+         after_data->'canonical_data'->'nested'->>'refresh_token',
+         after_data->'canonical_data'->>'technical_value'
+    into v_audit_secret,v_nested_secret,v_plain_value
+  from public.dpp_audit_log
+  where organization_id=v_org
+    and actor_id=v_actor
+    and action='UPDATE'
+    and target_table='dpp_battery_models'
+    and target_id=v_model
+  order by id desc
+  limit 1;
+
+  if v_source_secret<>'source-api-secret' then
+    raise exception 'M12 audit redaction mutated source row: %',v_source_secret;
+  end if;
+  if v_audit_secret<>'[REDACTED]' or v_nested_secret<>'[REDACTED]' or v_plain_value<>'keep-me' then
+    raise exception 'M12 audit secret redaction mismatch: api %, refresh %, safe %',v_audit_secret,v_nested_secret,v_plain_value;
+  end if;
+  if exists(
+    select 1
+    from public.dpp_audit_log
+    where organization_id=v_org
+      and target_table='dpp_battery_models'
+      and target_id=v_model
+      and (
+        coalesce(before_data::text,'') like '%source-api-secret%'
+        or coalesce(after_data::text,'') like '%source-api-secret%'
+        or coalesce(before_data::text,'') like '%source-refresh-secret%'
+        or coalesce(after_data::text,'') like '%source-refresh-secret%'
+        or coalesce(before_data::text,'') like '%source-client-secret%'
+        or coalesce(after_data::text,'') like '%source-client-secret%'
+      )
+  ) then
+    raise exception 'M12 secret-like source value leaked into immutable audit snapshot';
   end if;
 
   insert into public.dpp_import_runs(id,organization_id,status)
@@ -87,6 +148,11 @@ begin
   end;
   if not v_seen then
     raise exception 'M12 audit DELETE mutation was not rejected';
+  end if;
+
+  if has_function_privilege('anon','public.dpp_redact_audit_json(jsonb)','EXECUTE')
+     or has_function_privilege('authenticated','public.dpp_redact_audit_json(jsonb)','EXECUTE') then
+    raise exception 'M12 audit redaction helper leaked direct client EXECUTE';
   end if;
 
   if has_table_privilege('anon','public.dpp_audit_log','SELECT')
