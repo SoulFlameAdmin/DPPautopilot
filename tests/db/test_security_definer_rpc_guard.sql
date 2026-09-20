@@ -103,7 +103,8 @@ begin
       'dpp_evidence_storage_org_id(text)',
       'dpp_evidence_storage_registered(text)',
       'dpp_has_org_role(uuid,text[])',
-      'dpp_request_user_id()'
+      'dpp_request_user_id()',
+      'dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)'
     );
 
   if v_auth_extra is not null then
@@ -143,7 +144,8 @@ begin
       ('dpp_evidence_storage_org_id(text)'),
       ('dpp_evidence_storage_registered(text)'),
       ('dpp_has_org_role(uuid,text[])'),
-      ('dpp_request_user_id()')
+      ('dpp_request_user_id()'),
+      ('dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)')
   )
   select string_agg(r.signature,', ' order by r.signature)
     into v_auth_missing
