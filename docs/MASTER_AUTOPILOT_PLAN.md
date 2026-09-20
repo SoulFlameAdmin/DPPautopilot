@@ -19,7 +19,7 @@
 | System | Verified object | State | Evidence / decision |
 |---|---|---|---|
 | GitHub | `SoulFlameAdmin/DPPautopilot`, branch `main` | VERIFIED | Repository exists and connected GitHub account has write/admin access. |
-| Vercel | Project `dpp` linked to controlled mirror `SoulFlameAdmin/dpp` | VERIFIED BINDING / BUILD BLOCKED | `SoulFlameAdmin/dpp` is documented as a deployment-only mirror of canonical `SoulFlameAdmin/DPPautopilot`. Mirror commit `748806ae42aa5e958a993137695818036b1022b6` received a Vercel commit status, proving the Git integration path. The status failed with `build-rate-limit`, so F07 is resolved but F08 remains blocked. Dedicated unlinked Vercel project `dpp-autopilot` also exists with no deployments. |
+| Vercel | Canonical project `dpp-autopilot` | PRODUCTION READY / VERIFIED | Production deployment `dpl_GnAFHKWJVLcWit6QuPAUb7m4FsVW` is READY on `main` commit `7caf7ad1e37d21d0f6e81c6812c59ff1fe736b5d`; canonical alias `dpp-autopilot.vercel.app` returns HTTP 200 for `/` and `/data/master-plan.json`. |
 | Supabase | Project `soulflame-twins` used as shared infrastructure with isolated `dpp_` namespace | VERIFIED | Migration `bind_dpp_autopilot_namespace` created `public.dpp_app_binding`; RLS enabled, anon/authenticated privileges revoked, binding row verified for `SoulFlameAdmin/DPPautopilot`. Existing non-DPP tables remain out of scope. |
 
 ## Current implementation audit
@@ -47,7 +47,7 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | F05 | Keep DAVID worker status contract | F03 | Worker JSON parseable with required fields/status | Passing CI validator | GREEN |
 | F06 | Define product scope and target architecture | F03 | Scope + architecture recorded and reviewed against implementation | This file | GREEN |
 | F07 | Bind Vercel delivery path | F01 | A Vercel project is connected either directly to canonical repo or to a documented deployment-only mirror synchronized from canonical; a Vercel commit/deployment status proves the integration receives the expected commit | Vercel project metadata + GitHub/Vercel status evidence + mirror policy when applicable | GREEN |
-| F08 | Verify first production deployment | F07 | Production deployment READY; app and data JSON return 200 | Deployment metadata + HTTP verification | BLOCKED |
+| F08 | Verify first production deployment | F07 | Production deployment READY; app and data JSON return 200 | Deployment metadata + HTTP verification | GREEN |
 | F09 | Add CI baseline | F03 | CI validates JSON, stable IDs, required repo files and HTML data references | GitHub Actions check `validate` PASS on commit `9f3892b26176da8a9aac8063f3f528906840d18c` | GREEN |
 | F10 | Define dev/preview/production environment policy | F03 | Environment ownership, secrets, promotion and rollback rules documented | `docs/ENVIRONMENT_POLICY.md` + PASS on commit `eb40704890ececa3df3e2f519962e82d0570c39e` | GREEN |
 | F11 | Requirements traceability matrix | F03 | Product/compliance fields map to authoritative requirement/source and implementation | `docs/REQUIREMENTS_TRACEABILITY.md` + `data/dpp-field-catalog.json` + CI coverage validator | GREEN |
