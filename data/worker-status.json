@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "R07 privacy inventory synchronized to deployed Storage/Edge and R08 lifecycle precursors",
+  "currentTask": "R10/R13 synthetic fire-recover incident drill merged and evidenced",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #127 merged as 2dc37959394ed4c55e93e647546f4492307cd9e3 after exact-head full CI 35523068588 SUCCESS; privacy inventory now reflects deployed private evidence Storage/Edge controls and implemented fail-closed lifecycle precursors",
-  "nextTask": "Merge R07 evidence sync, then continue the earliest safe non-deploy operations precursor while F08/M01 runtime blockers remain deferred.",
-  "message": "R07 inventory drift is corrected, but R07 remains RED pending declared dependencies, accepted retention/minimization and real authenticated lifecycle/external-recipient acceptance.",
+  "lastCompletedTask": "PR #129 merged as 5d224975672a56fa028f9942d8cacd41e6decca1 after exact-head full CI 35523442803 SUCCESS; critical availability fire -> SEV1/ack target -> recover is executable in CI",
+  "nextTask": "Validate/merge R10/R13 evidence sync, then continue earliest independent non-deploy operations/privacy precursor while R09/F08 runtime acceptance remains deferred.",
+  "message": "Synthetic operational drill is now real CI evidence, but live notification/human acknowledgement/deployed runtime remain unproven; R10/R13 stay RED/PARTIAL.",
   "deferredBlockers": [
     "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T19:36:00+03:00"
+  "updatedAt": "2026-09-20T21:09:00+03:00"
 }
