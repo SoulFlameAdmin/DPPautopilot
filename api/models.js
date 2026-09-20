@@ -163,7 +163,13 @@ async function handler(req, res) {
       return send(res, 200, { data: model });
     }
 
-    const deleted = await rpc('dpp_api_models_delete', { p_id: id }, authorization);
+    if (!validTimestamp(body.expected_updated_at)) {
+      return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
+    }
+    const deleted = await rpc('dpp_api_models_delete_checked', {
+      p_id: id,
+      p_expected_updated_at: body.expected_updated_at
+    }, authorization);
     return send(res, 200, { data: { id: deleted, deleted: true } });
   } catch (error) {
     const status = Number.isInteger(error.status) ? error.status : 502;
