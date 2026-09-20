@@ -7,6 +7,7 @@ const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody
 const { startRequestObservability } = require('./_observability.js');
 
 const MAX_INLINE_EVIDENCE_BYTES=25*1024*1024;
+const MAX_EVIDENCE_PAGE_LIMIT=100;
 
 function send(res,status,body){
   res.statusCode=status;
@@ -71,11 +72,56 @@ function exportError(code,status,message){
   return error;
 }
 
-async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImpl=fetch){
-  const manifest=Array.isArray(bundle&&bundle.evidence_manifest)?bundle.evidence_manifest:[];
-  if(manifest.length===0) return {...bundle,evidence_objects:[]};
+function evidencePageOptions(req){
+  const query=req&&req.query?req.query:{};
+  const rawOffset=query.evidence_offset;
+  const rawLimit=query.evidence_limit;
+  const paged=rawOffset!==undefined||rawLimit!==undefined;
+  if(!paged) return {paged:false,offset:0,limit:null};
 
-  const declaredTotal=manifest.reduce((sum,item)=>{
+  const offset=rawOffset===undefined?0:Number(rawOffset);
+  const limit=rawLimit===undefined?25:Number(rawLimit);
+  if(
+    !Number.isInteger(offset)||offset<0||
+    !Number.isInteger(limit)||limit<1||limit>MAX_EVIDENCE_PAGE_LIMIT
+  ){
+    throw exportError(
+      'EVIDENCE_EXPORT_PAGINATION_INVALID',
+      400,
+      'Evidence export pagination parameters are invalid.'
+    );
+  }
+  return {paged:true,offset,limit};
+}
+
+async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImpl=fetch,page={paged:false,offset:0,limit:null}){
+  const manifest=Array.isArray(bundle&&bundle.evidence_manifest)?bundle.evidence_manifest:[];
+  const offset=page&&Number.isInteger(page.offset)?page.offset:0;
+  const limit=page&&Number.isInteger(page.limit)?page.limit:null;
+  const paged=Boolean(page&&page.paged);
+  const selected=paged?manifest.slice(offset,offset+limit):manifest;
+  if(manifest.length===0||selected.length===0){
+    return {
+      ...bundle,
+      evidence_objects:[],
+      evidence_export:{
+        included:true,
+        object_count:0,
+        total_bytes:0,
+        integrity:'sha256_verified',
+        encoding:'base64',
+        inline_limit_bytes:MAX_INLINE_EVIDENCE_BYTES,
+        manifest_object_count:manifest.length,
+        paged,
+        offset:paged?offset:0,
+        limit:paged?limit:null,
+        has_more:false,
+        next_offset:null
+      }
+    };
+  }
+
+  const declaredTotal=selected.reduce((sum,item)=>{
     const size=Number(item&&item.byte_size);
     return sum+(Number.isFinite(size)&&size>0?size:0);
   },0);
@@ -95,7 +141,7 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
 
   let actualTotal=0;
   const objects=[];
-  for(const item of manifest){
+  for(const item of selected){
     const path=typeof item.storage_path==='string'?item.storage_path:'';
     if(!path){
       throw exportError(
@@ -167,7 +213,13 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
       total_bytes:actualTotal,
       integrity:'sha256_verified',
       encoding:'base64',
-      inline_limit_bytes:MAX_INLINE_EVIDENCE_BYTES
+      inline_limit_bytes:MAX_INLINE_EVIDENCE_BYTES,
+      manifest_object_count:manifest.length,
+      paged,
+      offset:paged?offset:0,
+      limit:paged?limit:null,
+      has_more:paged?(offset+selected.length<manifest.length):false,
+      next_offset:paged&&offset+selected.length<manifest.length?offset+selected.length:null
     }
   };
 }
@@ -189,9 +241,11 @@ async function handler(req,res){
   if(sharedRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
   if(!sharedRateLimit.allowed) return send(res,429,rateLimitBody());
   try{
+    const includeEvidence=includeEvidenceRequested(req);
+    const page=includeEvidence?evidencePageOptions(req):null;
     const bundle=await rpc(authorization);
-    const output=includeEvidenceRequested(req)
-      ?await inlineEvidenceBytes(bundle,authorization)
+    const output=includeEvidence
+      ?await inlineEvidenceBytes(bundle,authorization,process.env,fetch,page)
       :bundle;
     return send(res,200,{data:output});
   }catch(error){
@@ -204,4 +258,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidencePageOptions,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT};
