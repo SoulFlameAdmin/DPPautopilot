@@ -385,6 +385,14 @@
     "EVIDENCE_EXPORT_PAGINATION_INVALID": {
       "http_status": 400,
       "message": "Evidence export pagination parameters are invalid."
+    },
+    "EVIDENCE_EXPORT_MANIFEST_INVALID": {
+      "http_status": 400,
+      "message": "Evidence export manifest SHA-256 is invalid."
+    },
+    "EVIDENCE_EXPORT_MANIFEST_CHANGED": {
+      "http_status": 409,
+      "message": "Evidence export manifest changed; restart the export."
     }
   }
 }
