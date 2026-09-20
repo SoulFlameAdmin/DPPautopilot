@@ -486,3 +486,10 @@ Append evidence here only after verification.
 - Owner/admin `GET /api/export?include_evidence=1` now augments the existing tenant export with real private evidence bytes obtained through the caller-JWT `dpp-evidence-object` bridge.
 - Each object is checked against manifest `byte_size` and SHA-256 before inclusion; verified bytes are base64 encoded. Missing objects, integrity mismatch and aggregate inline size >25 MiB fail closed with stable public errors.
 - M21 and R08 remain RED/PARTIAL pending declared dependencies, exhaustive large-tenant packaging/streaming strategy, final authenticated Storage runtime acceptance, regulatory retention decisions and deployed production acceptance.
+
+
+### T03 evidence-byte export integration — 2026-09-20
+- PR #119 exact head `d49c994b14952cb451f8d80ae197bf75cc6e150f` completed full CI `35521129684` SUCCESS and merged as `2bae81b3ee3e3b3dd7b4d3e5f029b835e98c7b25`.
+- The stateful model→item→passport→export flow now requests `GET /api/export?include_evidence=1`.
+- The integration backend serves the evidence object through the production Edge Function route shape and proves byte-size/SHA-256 verification, `sha256_verified`, correct base64 content and no signed URL leakage.
+- T03 remains RED/PARTIAL pending M17–M23 GREEN plus real authenticated Storage and deployed HTTP integration acceptance.
