@@ -508,3 +508,11 @@ Append evidence here only after verification.
 - Deployed-source readback proves caller-RLS metadata lookup from `dpp_evidence_attachments`, SHA-256 hashing and exact `byte_size`/`sha256_hex`/`content_type` verification before Storage upload.
 - Missing/inaccessible metadata fails closed as `403 EVIDENCE_METADATA_NOT_AVAILABLE`; mismatch fails closed as `409 EVIDENCE_METADATA_MISMATCH`.
 - M13 remains RED/PARTIAL pending M03 GREEN and a real authenticated upload→download/content verification→delete roundtrip against the deployed function.
+
+
+### R08 deletion-impact preview runtime evidence — 2026-09-20
+- PR #125 exact head `f0d099853af80245f60f4c6eb56ea7116f4f37ef` completed full CI `35522533071` SUCCESS and merged as `550f3535ef94b771b39c28067229bf3cbea54b3d`.
+- Bound migration `dpp_org_deletion_impact_preview` is applied as Supabase version `20260920162228`.
+- Bound BEGIN/ROLLBACK execution returned `R08_RETENTION_DELETION_SUBSET_PASS`.
+- Owner/admin `dpp_api_org_deletion_impact()` reports tenant-scoped row counts, declared evidence bytes, Storage enumeration requirement, Auth-user boundary and explicit blocker codes while keeping `ready_for_destructive_delete=false`; no organization delete surface is exposed.
+- R08 remains RED/PARTIAL pending R07, accepted regulatory retention, exhaustive evidence packaging/storage deletion lifecycle, audit minimization and Auth-account deletion acceptance.
