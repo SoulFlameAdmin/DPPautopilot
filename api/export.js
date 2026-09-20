@@ -1,8 +1,12 @@
 'use strict';
 
+const crypto=require('node:crypto');
+
 const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
+
+const MAX_INLINE_EVIDENCE_BYTES=25*1024*1024;
 
 function send(res,status,body){
   res.statusCode=status;
@@ -53,6 +57,121 @@ async function rpc(authorization,env=process.env,fetchImpl=fetch){
   return data;
 }
 
+
+function includeEvidenceRequested(req){
+  const value=req&&req.query&&req.query.include_evidence;
+  return value==='1'||value==='true'||value===true;
+}
+
+function exportError(code,status,message){
+  const error=new Error(code);
+  error.status=status;
+  error.publicCode=code;
+  error.publicMessage=message;
+  return error;
+}
+
+async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImpl=fetch){
+  const manifest=Array.isArray(bundle&&bundle.evidence_manifest)?bundle.evidence_manifest:[];
+  if(manifest.length===0) return {...bundle,evidence_objects:[]};
+
+  const declaredTotal=manifest.reduce((sum,item)=>{
+    const size=Number(item&&item.byte_size);
+    return sum+(Number.isFinite(size)&&size>0?size:0);
+  },0);
+  if(declaredTotal>MAX_INLINE_EVIDENCE_BYTES){
+    throw exportError(
+      'EVIDENCE_EXPORT_TOO_LARGE',
+      413,
+      'Evidence bytes exceed the inline export limit.'
+    );
+  }
+
+  const base=env.DPP_SUPABASE_URL||env.SUPABASE_URL;
+  const key=env.DPP_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
+  if(!base||!key){
+    throw exportError('SERVER_CONFIGURATION_MISSING',500,'Server configuration is incomplete.');
+  }
+
+  let actualTotal=0;
+  const objects=[];
+  for(const item of manifest){
+    const path=typeof item.storage_path==='string'?item.storage_path:'';
+    if(!path){
+      throw exportError(
+        'EVIDENCE_EXPORT_INTEGRITY_FAILED',
+        502,
+        'Evidence export integrity verification failed.'
+      );
+    }
+    const response=await fetchImpl(
+      `${base.replace(/\/$/,'')}/functions/v1/dpp-evidence-object?path=${encodeURIComponent(path)}`,
+      {
+        method:'GET',
+        headers:{
+          apikey:key,
+          Authorization:authorization,
+          Accept:'application/octet-stream'
+        }
+      }
+    );
+    if(!response.ok){
+      throw exportError(
+        'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE',
+        502,
+        'An evidence object could not be exported.'
+      );
+    }
+    const bytes=Buffer.from(await response.arrayBuffer());
+    actualTotal+=bytes.byteLength;
+    if(actualTotal>MAX_INLINE_EVIDENCE_BYTES){
+      throw exportError(
+        'EVIDENCE_EXPORT_TOO_LARGE',
+        413,
+        'Evidence bytes exceed the inline export limit.'
+      );
+    }
+    const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+    const declaredSize=Number(item.byte_size);
+    const declaredHash=typeof item.sha256_hex==='string'?item.sha256_hex.toLowerCase():'';
+    if(
+      !Number.isInteger(declaredSize)||
+      declaredSize!==bytes.byteLength||
+      !/^[0-9a-f]{64}$/.test(declaredHash)||
+      declaredHash!==sha256
+    ){
+      throw exportError(
+        'EVIDENCE_EXPORT_INTEGRITY_FAILED',
+        502,
+        'Evidence export integrity verification failed.'
+      );
+    }
+    objects.push({
+      id:item.id,
+      storage_path:path,
+      original_filename:item.original_filename,
+      content_type:item.content_type,
+      byte_size:bytes.byteLength,
+      sha256_hex:sha256,
+      encoding:'base64',
+      content_base64:bytes.toString('base64')
+    });
+  }
+
+  return {
+    ...bundle,
+    evidence_objects:objects,
+    evidence_export:{
+      included:true,
+      object_count:objects.length,
+      total_bytes:actualTotal,
+      integrity:'sha256_verified',
+      encoding:'base64',
+      inline_limit_bytes:MAX_INLINE_EVIDENCE_BYTES
+    }
+  };
+}
+
 async function handler(req,res){
   startRequestObservability(req,res,'export');
   const rateLimit=enforceRateLimit(req,res,'export');
@@ -71,7 +190,10 @@ async function handler(req,res){
   if(!sharedRateLimit.allowed) return send(res,429,rateLimitBody());
   try{
     const bundle=await rpc(authorization);
-    return send(res,200,{data:bundle});
+    const output=includeEvidenceRequested(req)
+      ?await inlineEvidenceBytes(bundle,authorization)
+      :bundle;
+    return send(res,200,{data:output});
   }catch(error){
     const status=Number.isInteger(error.status)?error.status:502;
     const code=error.publicCode||error.message||'UPSTREAM_ERROR';
@@ -82,4 +204,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES};
