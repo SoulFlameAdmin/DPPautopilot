@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 inventory=json.loads((ROOT/"data/privacy-data-inventory.json").read_text(encoding="utf-8"))
 doc=(ROOT/"docs/PRIVACY_DATA_INVENTORY.md").read_text(encoding="utf-8")
 
-assert inventory.get("version")==3
+assert inventory.get("version")==4
 assert inventory.get("task")=="R07"
 assert inventory.get("status")=="partial"
 assert "DPP Autopilot only" in inventory.get("scope","")
@@ -64,6 +64,11 @@ audit_store=next(s for s in stores if s["id"]=="audit_history")
 assert "credential-bearing" in audit_store["retention"]["current_behavior"]
 assert any("recursive audit-only credential-key redaction" in x for x in audit_store["controls"])
 assert any("source rows are not modified" in x for x in audit_store["controls"])
+
+registry_store=next(s for s in stores if s["id"]=="registry_submission")
+assert any("credential-key guard" in x for x in registry_store["controls"])
+assert any("not client-executable" in x for x in registry_store["controls"])
+assert "must not persist obvious credential-bearing keys" in registry_store.get("minimization_note","")
 
 processors=inventory.get("processors_and_recipients",[])
 names={p["name"] for p in processors}
