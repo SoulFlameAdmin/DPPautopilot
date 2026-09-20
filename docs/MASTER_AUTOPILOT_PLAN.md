@@ -417,3 +417,9 @@ Append evidence here only after verification.
 - Bound Supabase migration `dpp_models_delete_checked` is applied as version `20260920003348`; live ACL confirms checked-only authenticated execution, anon denial and fixed `search_path=public, pg_temp`.
 - Exact-head CI `35479236122` on `8c3c953397746ed9e6f8b6798ff149ddab081003` completed SUCCESS, including M17 HTTP tests, clean replay, M23 optimistic-concurrency regression and global RPC guard.
 - PR #79 merged as `94c38301402512734b5e782d20d8465b0ed0d10e`. M17/M23 remain RED/PARTIAL because their upstream/final deployed acceptance dependencies are not GREEN.
+
+
+### M12 RBAC membership audit precursor — 2026-09-20
+- Production membership mutations are now explicitly covered for immutable audit attribution: member add INSERT, role UPDATE, and member DELETE record the owner actor, tenant, target user, timestamp, and before/after role snapshots.
+- Exact-head CI `35479402511` on `1a524ef3f58b3ffd3a855b4fb77a5ebc7eacb97f` completed SUCCESS, including `Run M12 RBAC audit trail` and the full repository regression suite.
+- PR #80 merged as `ab3296549376c4bde27dbb7b89e26c22eb3442b6`. M12 remains RED/PARTIAL because M03 is not GREEN and deployed authenticated acceptance is unavailable. No Vercel deployment was attempted.

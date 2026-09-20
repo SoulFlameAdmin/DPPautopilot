@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T03:45:00+03:00",
+  "updatedAt": "2026-09-20T03:46:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -390,7 +390,7 @@
           "acceptanceCriteria": "Actor/action/time/target/before-after metadata captured; app cannot alter past entries",
           "evidenceRequired": "DB policy tests",
           "status": "red",
-          "evidence": "PARTIAL immutable audit coverage is full-CI evidenced, including authorization-scope tenant switches: bound M12_TENANT_CONTEXT_AUDIT_PASS proves actor/action/time/target/before-after for active-tenant changes; critical audit and append-only DB suites pass. Full run 35423117317 SUCCESS includes both M12 subsets, clean replay and security guards. M12 remains RED because M03 is not GREEN. — PARTIAL PASS"
+          "evidence": "PARTIAL immutable audit coverage now includes production-RPC RBAC membership INSERT/UPDATE/DELETE attribution. Existing `M12_TENANT_CONTEXT_AUDIT_PASS`, critical audit and append-only suites remain valid. Exact-head CI `35479402511` on `1a524ef3f58b3ffd3a855b4fb77a5ebc7eacb97f` completed SUCCESS; `Run M12 RBAC audit trail` proves owner-attributed member add INSERT audit with tenant/target/role snapshot, role-change before/after, deletion snapshot, and immutable history. PR #80 merged as `ab3296549376c4bde27dbb7b89e26c22eb3442b6`. M12 remains RED because M03 is not GREEN and deployed authenticated acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M13",
