@@ -3,6 +3,7 @@
 
 const test=require('node:test');
 const assert=require('node:assert/strict');
+const crypto=require('node:crypto');
 const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
@@ -15,6 +16,8 @@ const IDS={
   passport:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
   import:'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
 };
+const EVIDENCE_BYTES=Buffer.from('T03 evidence object bytes','utf8');
+const EVIDENCE_SHA256=crypto.createHash('sha256').update(EVIDENCE_BYTES).digest('hex');
 
 function makeRes(){
   return {
@@ -46,6 +49,23 @@ function makeBackend(){
     passportCreateWrites:0
   };
   const fetchImpl=async(url,options)=>{
+    if(String(url).includes('/functions/v1/dpp-evidence-object')){
+      const parsed=new URL(String(url));
+      const path=parsed.searchParams.get('path');
+      if(path!=='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf'){
+        return {ok:false,status:404,async arrayBuffer(){return new ArrayBuffer(0);}};
+      }
+      return {
+        ok:true,
+        status:200,
+        async arrayBuffer(){
+          return EVIDENCE_BYTES.buffer.slice(
+            EVIDENCE_BYTES.byteOffset,
+            EVIDENCE_BYTES.byteOffset+EVIDENCE_BYTES.byteLength
+          );
+        }
+      };
+    }
     const rpc=rpcName(url);
     const body=JSON.parse(options.body||'{}');
     const ok=data=>({ok:true,async json(){return data;}});
@@ -207,8 +227,8 @@ function makeBackend(){
         storage_path:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf',
         original_filename:'report.pdf',
         content_type:'application/pdf',
-        byte_size:2048,
-        sha256_hex:'a'.repeat(64),
+        byte_size:EVIDENCE_BYTES.length,
+        sha256_hex:EVIDENCE_SHA256,
         metadata:{source:'integration'}
       }]:[];
       return ok({
@@ -340,7 +360,7 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     assert.equal(Object.prototype.hasOwnProperty.call(publicData,'organization_id'),false);
 
     res=makeRes();
-    await exportApi(req('GET'),res);
+    await exportApi(req('GET',null,{include_evidence:'1'}),res);
     assert.equal(res.statusCode,200);
     const bundle=json(res).data;
     assert.equal(bundle.counts.battery_models,1);
@@ -355,10 +375,19 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     assert.equal(bundle.records.passport_versions[0].passport_id,IDS.passport);
     assert.equal(bundle.records.audit_log[0].target_id,IDS.passport);
     assert.equal(bundle.evidence_manifest[0].storage_bucket,'dpp-evidence');
-    assert.equal(bundle.evidence_manifest[0].sha256_hex,'a'.repeat(64));
+    assert.equal(bundle.evidence_manifest[0].sha256_hex,EVIDENCE_SHA256);
     assert.equal(Object.prototype.hasOwnProperty.call(bundle.evidence_manifest[0],'object_bytes'),false);
     assert.equal(Object.prototype.hasOwnProperty.call(bundle.evidence_manifest[0],'content_bytes'),false);
     assert.equal(Object.prototype.hasOwnProperty.call(bundle.evidence_manifest[0],'signed_url'),false);
+    assert.equal(bundle.evidence_export.included,true);
+    assert.equal(bundle.evidence_export.object_count,1);
+    assert.equal(bundle.evidence_export.total_bytes,EVIDENCE_BYTES.length);
+    assert.equal(bundle.evidence_export.integrity,'sha256_verified');
+    assert.equal(bundle.evidence_objects[0].storage_path,'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf');
+    assert.equal(bundle.evidence_objects[0].byte_size,EVIDENCE_BYTES.length);
+    assert.equal(bundle.evidence_objects[0].sha256_hex,EVIDENCE_SHA256);
+    assert.equal(bundle.evidence_objects[0].content_base64,EVIDENCE_BYTES.toString('base64'));
+    assert.equal(Buffer.from(bundle.evidence_objects[0].content_base64,'base64').toString('utf8'),'T03 evidence object bytes');
     assert.equal(backend.state.exportCalls,1);
   }finally{global.fetch=original;restore();}
 });
