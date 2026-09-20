@@ -402,3 +402,10 @@ Append evidence here only after verification.
 - `M05_MEMBERSHIP_REVOCATION_ISOLATION_PASS` proves the removed member can no longer access model data or authorization context and no longer discovers the organization.
 - Exact-head GitHub Actions CI `35476988177` on `63561536b1d3d162f43ff7a57b732e97937a3520` completed SUCCESS; PR #70 merged as `a9fb4c1006aafe9a2a3bcc210c9fe0085e002eb3`.
 - M05 remains RED/PARTIAL because M02/M03 are not GREEN. No Vercel deployment was attempted.
+
+
+### M10 catalog-driven public sanitization — 2026-09-20
+- Public passport HTTP responses now apply a second enforcement layer derived from `data/dpp-field-catalog.json`: only fields classified `public` or `public_identifier` survive in nested `public_payload`.
+- Regression coverage injects legitimate-interest, authority-only, tenant and top-level private data from a deliberately regressed upstream response and proves none reaches the HTTP response.
+- Exact-head CI `35478636516` on `e83be5d5efc094d1468a38c52a0f59bb1145c93d` completed SUCCESS, including M10 access-policy validation, passport HTTP contract tests and the M10 public/private DB runtime subset.
+- PR #75 merged as `18388cad9030a281550d9c03feccb8d496b32903`. M10 remains RED/PARTIAL because M03 is not GREEN and deployed acceptance is unavailable.
