@@ -96,14 +96,40 @@ begin
   end;
   if not seen then raise exception 'M23 stale passport write was not rejected'; end if;
 
-  -- Authenticated clients must not retain execute on unchecked updates.
+  -- Model delete must also be protected by the same observed updated_at token.
+  select updated_at into model_ts
+  from public.dpp_battery_models
+  where id=model_a;
+
+  perform public.dpp_api_models_update_checked(
+    model_a,'M23-OCC-3',null,null,null,model_ts
+  );
+
+  seen:=false;
+  begin
+    perform public.dpp_api_models_delete_checked(model_a,model_ts);
+  exception when sqlstate 'DP206' then seen:=true;
+  end;
+  if not seen then raise exception 'M23 stale model delete was not rejected'; end if;
+
+  select updated_at into model_ts
+  from public.dpp_battery_models
+  where id=model_a;
+
+  if public.dpp_api_models_delete_checked(model_a,model_ts)<>model_a then
+    raise exception 'M23 checked model delete failed';
+  end if;
+
+  -- Authenticated clients must not retain execute on unchecked updates/deletes.
   if has_function_privilege('authenticated','public.dpp_api_models_update(uuid,text,text,text,jsonb)','EXECUTE')
+     or has_function_privilege('authenticated','public.dpp_api_models_delete(uuid)','EXECUTE')
      or has_function_privilege('authenticated','public.dpp_api_items_update(uuid,uuid,text,text,jsonb)','EXECUTE')
      or has_function_privilege('authenticated','public.dpp_api_passport_update(uuid,text,jsonb,jsonb)','EXECUTE') then
-    raise exception 'M23 unchecked update RPC remains executable by authenticated';
+    raise exception 'M23 unchecked update/delete RPC remains executable by authenticated';
   end if;
 
   if not has_function_privilege('authenticated','public.dpp_api_models_update_checked(uuid,text,text,text,jsonb,timestamptz)','EXECUTE')
+     or not has_function_privilege('authenticated','public.dpp_api_models_delete_checked(uuid,timestamptz)','EXECUTE')
      or not has_function_privilege('authenticated','public.dpp_api_items_update_checked(uuid,uuid,text,text,jsonb,timestamptz)','EXECUTE')
      or not has_function_privilege('authenticated','public.dpp_api_passport_update_checked(uuid,text,jsonb,jsonb,timestamptz)','EXECUTE') then
     raise exception 'M23 checked update RPC execute grant missing';
