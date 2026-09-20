@@ -381,6 +381,10 @@
     "EVIDENCE_EXPORT_OBJECT_UNAVAILABLE": {
       "http_status": 502,
       "message": "An evidence object could not be exported."
+    },
+    "EVIDENCE_EXPORT_PAGINATION_INVALID": {
+      "http_status": 400,
+      "message": "Evidence export pagination parameters are invalid."
     }
   }
 }
