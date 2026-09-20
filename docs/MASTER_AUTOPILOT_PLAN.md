@@ -537,3 +537,11 @@ Append evidence here only after verification.
 - Bound migration `dpp_audit_snapshot_secret_redaction` is applied as `20260920181053`; BEGIN/ROLLBACK regression returned `M12_AUDIT_LOG_SUBSET_PASS`.
 - Immutable audit copies recursively redact obvious credential-bearing JSON keys while source rows are unchanged; direct client EXECUTE on the helper is revoked.
 - M12/R07/R08 remain RED/PARTIAL pending declared dependencies and broader accepted audit retention/minimization/deployed acceptance.
+
+
+### R07 registry payload credential guard — 2026-09-20
+- PR #134 exact head `7368a2fb0db1a75cd2f94a12443cabfbc5d97ad2` completed full CI `35529752111` SUCCESS and merged as `b0920b735bd4730a88655d8a2406c95c306dc637`.
+- Bound registry request/response JSON now fails closed on obvious credential-bearing keys recursively; safe provider-neutral business payloads continue to pass.
+- Applied versions are request-only precursor `20260920182128`, canonical request+response guard `20260920182832`, and cleanup `20260920183843`.
+- Live readback confirms the superseded request-only trigger/helpers are gone and only `dpp_registry_payload_credential_guard` plus canonical helpers remain.
+- R07 remains RED/PARTIAL pending declared dependencies and accepted external-recipient/provider scope, retention and deletion policy.

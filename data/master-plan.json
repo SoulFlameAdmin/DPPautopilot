@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T21:16:00+03:00",
+  "updatedAt": "2026-09-20T21:44:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -649,7 +649,7 @@
           "acceptanceCriteria": "Personal/business data, purpose, location, processor and retention recorded",
           "evidenceRequired": "`docs/PRIVACY_DATA_INVENTORY.md`",
           "status": "red",
-          "evidence": "PARTIAL privacy inventory now includes deployed Storage/Edge/lifecycle controls plus a technical audit minimization precursor. Bound migration `dpp_audit_snapshot_secret_redaction` version `20260920181053` recursively removes obvious credential-bearing values from immutable audit copies without modifying source rows; inventory v3 records this control while preserving broader personal/confidential-field minimization and retention gaps. Transactional bound regression returned `M12_AUDIT_LOG_SUBSET_PASS`; exact-head full CI `35528258200` on `d4b19cd997bb054f95e4df2e57207d258600133f` SUCCESS; PR #132 merged as `db3cd9adf6bf9d6d66ff2f3e2cb70ac0bccb56df`. R07 remains RED pending M01-M13 GREEN plus accepted passport/registry/evidence/audit retention, external-recipient terms and destructive deletion policy. — PARTIAL PASS"
+          "evidence": "PARTIAL privacy minimization now also protects registry request/response JSON at the database boundary. Bound migrations `dpp_registry_request_secret_guard` (`20260920182128`) and canonical `dpp_registry_payload_credential_guard` (`20260920182832`) reject obvious credential-bearing keys recursively; cleanup migration `dpp_registry_payload_guard_cleanup` (`20260920183843`) removes the superseded request-only trigger/helpers so live readback exposes one canonical request+response guard. Safe payloads remain accepted; nested `access_token`/`api_key` fixtures fail closed with check violations. Bound transactional regression returned `T08_REGISTRY_RELIABILITY_SUBSET_PASS`. Exact-head `7368a2fb0db1a75cd2f94a12443cabfbc5d97ad2` completed full CI `35529752111` SUCCESS and PR #134 merged as `b0920b735bd4730a88655d8a2406c95c306dc637`. R07 remains RED pending M01-M13 GREEN plus accepted provider/external-recipient scope, retention and destructive deletion rules. — PARTIAL PASS"
         },
         {
           "id": "R08",
