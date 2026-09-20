@@ -25,7 +25,7 @@ R07 remains **RED/PARTIAL** until M01–M13 are fully accepted and retention/del
 | Import staging | Mapping/validation/transactional import | `dpp_import_mappings`, `dpp_import_runs`, `dpp_import_rows` | Product/business staging + creator UUID | Owner/admin terminal `invalid`/`committed` purge after minimum 30 days is implemented; final policy acceptance pending |
 | Registry submissions | External registry workflow/retry evidence | `dpp_registry_submissions` | Request/response payload, refs/errors, actor UUID | Operational/legal period pending |
 | Evidence | Evidence integrity and attachment metadata | `dpp_evidence_attachments` + private `dpp-evidence` Storage via caller-JWT `dpp-evidence-object` Edge Function | Filenames/metadata/files may contain personal or confidential data | Pre-upload size/SHA-256/type integrity is deployed; final authenticated upload→download→delete acceptance and retention period remain pending |
-| Audit | Accountability and security trail | `dpp_audit_log` | Actor UUID + before/after snapshots | Append-only; audit-safe retention/deletion exception pending |
+| Audit | Accountability and security trail | `dpp_audit_log` | Actor UUID + before/after snapshots | Append-only; audit copies now redact obvious credential-bearing JSON keys; broader minimization + retention/deletion exception pending |
 | App binding | DPP namespace binding | `dpp_app_binding` | Non-personal configuration | Application binding lifetime |
 | Rate-limit metadata | Abuse prevention | Process-local API memory + `dpp_rate_limit_buckets` for shared authenticated counters | Truncated SHA-256 network/credential bucket digests + counters/window timestamps; raw IP/bearer values are not stored | Local buckets are pruned/capped; shared rows older than reset+10 min are opportunistically deleted; deployed/public distributed acceptance pending |
 
@@ -58,3 +58,12 @@ The live Supabase project contains unrelated non-DPP application tables. DPP mig
 - `dpp_api_purge_import_staging(timestamptz)` implements owner/admin-only terminal staging purge with a 30-day minimum.
 - `dpp_api_org_deletion_impact()` is owner/admin-only and non-destructive: it reports tenant row counts, evidence declared bytes, active tenant contexts, Auth-user boundary and blocker codes while keeping destructive deletion unavailable.
 - `GET /api/export?include_evidence=1` provides a bounded integrity-checked evidence-byte export precursor; exhaustive large-tenant packaging/streaming acceptance remains pending.
+
+
+## Audit snapshot credential-key minimization precursor
+
+- Audit capture now recursively redacts values under obvious credential-bearing JSON keys before immutable `before_data` / `after_data` insertion.
+- Redacted key names include password/passwd, secret/token variants, authorization, API-key variants, client secret and credential(s).
+- This affects only the audit copy; source business/regulatory rows are not modified.
+- The helper is not executable by `anon` or `authenticated`.
+- This does **not** define the final audit retention period or broader personal/confidential-field minimization policy.
