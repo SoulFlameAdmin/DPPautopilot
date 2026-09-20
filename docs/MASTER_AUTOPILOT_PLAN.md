@@ -545,3 +545,11 @@ Append evidence here only after verification.
 - Applied versions are request-only precursor `20260920182128`, canonical request+response guard `20260920182832`, and cleanup `20260920183843`.
 - Live readback confirms the superseded request-only trigger/helpers are gone and only `dpp_registry_payload_credential_guard` plus canonical helpers remain.
 - R07 remains RED/PARTIAL pending declared dependencies and accepted external-recipient/provider scope, retention and deletion policy.
+
+
+### M21/R08 deterministic paged evidence export — 2026-09-20
+- PR #136 exact head `1eef1c2e7a59acbedab793fdb3b6386686a9c1cc` completed full CI `35530253593` SUCCESS and merged as `354a84a47bb3b675b8ed112bd8a0b8a23ae26dab`.
+- Optional `evidence_offset` / `evidence_limit` parameters select a deterministic manifest slice; paging defaults to 25 and caps at 100 objects.
+- The 25 MiB inline byte cap applies per selected page, while each selected object is still verified against manifest byte size + SHA-256 before base64 inclusion.
+- Response metadata provides `manifest_object_count`, `offset`, `limit`, `has_more` and `next_offset`; invalid paging fails closed before upstream export RPC.
+- M21/R08 remain RED/PARTIAL pending declared dependencies, a final archive/streaming/resumable package contract and real deployed large-tenant acceptance.
