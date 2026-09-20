@@ -365,6 +365,10 @@
     "WRITE_PRECONDITION_REQUIRED": {
       "http_status": 428,
       "message": "expected_updated_at must be a valid timestamp from the last read."
+    },
+    "RATE_LIMIT_BACKEND_UNAVAILABLE": {
+      "http_status": 503,
+      "message": "Request protection is temporarily unavailable."
     }
   }
 }
