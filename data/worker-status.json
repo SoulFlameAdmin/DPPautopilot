@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M18/M23 checked item delete merged and evidenced; continue earliest dependency-safe non-deploy MVP/API hardening",
+  "currentTask": "M10/M19 local public-write guard merged; M13 live caller-JWT evidence bridge verified; continue earliest dependency-safe non-deploy MVP/API hardening",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #82 merged as 8f8e24497edc02f3050fa236b0a453e6fefe8534; bound dpp_items_delete_checked first applied as 20260920004250; exact-head CI 35479650181 SUCCESS",
-  "nextTask": "Continue with M19/M23 passport mutation hardening or another earliest RED precursor that can advance without M01/M03/M10 deployed acceptance; do not retry F08 without new evidence.",
-  "message": "Item DELETE is now fail-closed against stale clients and unchecked RPC bypass while preserving passport-protection semantics. M18/M23 remain RED by dependency/final deployed acceptance; continue independent implementation/tests without status inflation.",
+  "lastCompletedTask": "PR #86 merged as 97c65011e28a973fde58306e5d541ebbb4dd6bc7 with exact-head CI 35480591789 SUCCESS; M13 dpp-evidence-object ACTIVE v1 verify_jwt=true reverified",
+  "nextTask": "Inspect M23/passport create idempotency and other remaining independent API/security gaps; do not retry F08 without new evidence and do not bypass M13 normal-user auth for byte-roundtrip acceptance.",
+  "message": "M10/M19 now reject restricted public fields locally before Supabase and sanitize public reads. M13 live bridge is deployed and JWT-protected but final user byte roundtrip remains externally unavailable through current connector. Continue independent implementation/tests without status inflation.",
   "deferredBlockers": [
     "F08 — Vercel production acceptance remains externally blocked; do not retry without new quota/access evidence and always obey the global Supabase deployment lease law.",
     "M01 — final runtime recovery password-update acceptance remains blocked on a usable deployed recovery redirect.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T04:02:00+03:00"
+  "updatedAt": "2026-09-20T04:12:00+03:00"
 }
