@@ -64,7 +64,7 @@
       "headers"
     ]
   },
-  "live_gap": "A real READY preview is now observed for the canonical project and exact Git commit. Read-only recovery-route verification returned HTTP 200, but complete C02 route/TLS/header evidence remains unavailable because protected preview requests redirect through Vercel SSO in the connector path. No login/MFA/SSO bypass and no create/redeploy action was attempted.",
+  "live_gap": "A real READY preview is now observed for the canonical project and exact Git commit. Read-only recovery-route verification returned HTTP 200, but complete C02 route/TLS/header evidence remains unavailable because protected preview requests redirect through Vercel SSO in the connector path. No login/MFA/SSO bypass was attempted. No create/redeploy action was attempted.",
   "remaining": [
     "C01 must be GREEN.",
     "Automated live HTTP/TLS/header smoke evidence must pass against the observed exact-commit preview.",
