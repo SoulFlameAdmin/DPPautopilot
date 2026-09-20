@@ -7,7 +7,9 @@ declare
   org_a uuid := 'e2828282-8282-4282-8282-828282828282';
   model_a uuid := 'e3838383-8383-4383-8383-838383838383';
   model_delete uuid := 'e5858585-8585-4585-8585-858585858585';
+  model_item_delete uuid := 'e6868686-8686-4686-8686-868686868686';
   item_a uuid := 'e4848484-8484-4484-8484-848484848484';
+  item_delete uuid := 'e7878787-8787-4787-8787-878787878787';
   passport_a uuid;
   model_ts timestamptz;
   item_ts timestamptz;
@@ -41,10 +43,18 @@ begin
     id,organization_id,model_identifier,manufacturer_name,category,canonical_data
   ) values(model_delete,org_a,'M23-DELETE','Maker Delete','portable','{}'::jsonb);
 
+  insert into public.dpp_battery_models(
+    id,organization_id,model_identifier,manufacturer_name,category,canonical_data
+  ) values(model_item_delete,org_a,'M23-ITEM-DELETE','Maker Item Delete','portable','{}'::jsonb);
+
   insert into public.dpp_battery_items(
     id,organization_id,model_id,unique_identifier,lifecycle_status,canonical_data
   ) values(item_a,org_a,model_a,'urn:dpp:m23:occ','original','{}'::jsonb)
   returning updated_at into item_ts;
+
+  insert into public.dpp_battery_items(
+    id,organization_id,model_id,unique_identifier,lifecycle_status,canonical_data
+  ) values(item_delete,org_a,model_item_delete,'urn:dpp:m23:item-delete','original','{}'::jsonb);
 
   perform set_config('request.jwt.claim.sub',u_editor::text,true);
   perform public.dpp_api_tenant_context_set(org_a);
@@ -125,10 +135,35 @@ begin
     raise exception 'M23 checked model delete failed';
   end if;
 
+  -- Item delete must be protected too, without weakening passport-protected delete semantics.
+  select updated_at into item_ts
+  from public.dpp_battery_items
+  where id=item_delete;
+
+  perform public.dpp_api_items_update_checked(
+    item_delete,null,null,'repurposed',null,item_ts
+  );
+
+  seen:=false;
+  begin
+    perform public.dpp_api_items_delete_checked(item_delete,item_ts);
+  exception when sqlstate 'DP309' then seen:=true;
+  end;
+  if not seen then raise exception 'M23 stale item delete was not rejected'; end if;
+
+  select updated_at into item_ts
+  from public.dpp_battery_items
+  where id=item_delete;
+
+  if public.dpp_api_items_delete_checked(item_delete,item_ts)<>item_delete then
+    raise exception 'M23 checked item delete failed';
+  end if;
+
   -- Authenticated clients must not retain execute on unchecked updates/deletes.
   if has_function_privilege('authenticated','public.dpp_api_models_update(uuid,text,text,text,jsonb)','EXECUTE')
      or has_function_privilege('authenticated','public.dpp_api_models_delete(uuid)','EXECUTE')
      or has_function_privilege('authenticated','public.dpp_api_items_update(uuid,uuid,text,text,jsonb)','EXECUTE')
+     or has_function_privilege('authenticated','public.dpp_api_items_delete(uuid)','EXECUTE')
      or has_function_privilege('authenticated','public.dpp_api_passport_update(uuid,text,jsonb,jsonb)','EXECUTE') then
     raise exception 'M23 unchecked update/delete RPC remains executable by authenticated';
   end if;
@@ -136,6 +171,7 @@ begin
   if not has_function_privilege('authenticated','public.dpp_api_models_update_checked(uuid,text,text,text,jsonb,timestamptz)','EXECUTE')
      or not has_function_privilege('authenticated','public.dpp_api_models_delete_checked(uuid,timestamptz)','EXECUTE')
      or not has_function_privilege('authenticated','public.dpp_api_items_update_checked(uuid,uuid,text,text,jsonb,timestamptz)','EXECUTE')
+     or not has_function_privilege('authenticated','public.dpp_api_items_delete_checked(uuid,timestamptz)','EXECUTE')
      or not has_function_privilege('authenticated','public.dpp_api_passport_update_checked(uuid,text,jsonb,jsonb,timestamptz)','EXECUTE') then
     raise exception 'M23 checked update RPC execute grant missing';
   end if;
