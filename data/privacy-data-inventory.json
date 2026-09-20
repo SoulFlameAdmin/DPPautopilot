@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
@@ -14,18 +14,20 @@
       "services": [
         "Auth",
         "Postgres",
-        "planned Storage"
+        "Storage",
+        "Edge Functions"
       ],
-      "data": "identity/auth, DPP database records, planned evidence objects"
+      "data": "identity/auth, DPP database records, evidence metadata and private dpp-evidence object bytes",
+      "status": "Auth/Postgres active; private dpp-evidence Storage + caller-JWT dpp-evidence-object Edge Function deployed; final authenticated lifecycle acceptance remains incomplete"
     },
     {
       "name": "Vercel",
-      "role": "planned application runtime/processor",
+      "role": "application runtime/processor",
       "services": [
         "Serverless API hosting"
       ],
       "data": "HTTP request metadata and DPP API payloads when deployed",
-      "status": "runtime deployment not currently proven"
+      "status": "preview/production deployment evidence exists, but final production acceptance is blocked by Vercel SSO/build constraints and incomplete dependent gates"
     },
     {
       "name": "GitHub",
@@ -165,15 +167,15 @@
       ],
       "fields": "source headers/mapping, normalized model/item JSON, validation errors, creator ID, processing timestamps",
       "retention": {
-        "status": "pending_policy",
-        "current_behavior": "No automatic staging expiry currently exists; rows persist until explicit deletion/cascade"
+        "status": "implemented_precursor",
+        "current_behavior": "Terminal invalid/committed import runs may be purged only after 30 days through owner/admin dpp_api_purge_import_staging(); staged/validated runs are preserved; final accepted policy remains pending."
       },
       "controls": [
         "tenant/RBAC API",
         "transactional validation/commit",
-        "request size/input validation"
-      ],
-      "retention_risk": "Staging data should receive a bounded cleanup period before R07/R08 acceptance"
+        "request size/input validation",
+        "R08 owner/admin terminal staging purge with immutable audit DELETE evidence"
+      ]
     },
     {
       "id": "registry_submission",
@@ -200,20 +202,23 @@
       "id": "evidence_metadata_objects",
       "classification": "potentially_personal_or_confidential_evidence",
       "purpose": "Attach evidence to DPP records with integrity metadata",
-      "location": "Metadata in Supabase Postgres; object bytes planned for Supabase Storage bucket dpp-evidence",
+      "location": "Metadata in Supabase Postgres; private object bytes in Supabase Storage bucket dpp-evidence via caller-JWT Edge Function dpp-evidence-object",
       "processor": "Supabase",
       "tables": [
         "dpp_evidence_attachments"
       ],
-      "fields": "storage path, original filename, content type, size, SHA-256, metadata JSON, creator ID, timestamps; future object bytes may contain documents/images",
+      "fields": "storage path, original filename, content type, size, SHA-256, metadata JSON, creator ID, timestamps; object bytes may contain documents/images",
       "retention": {
         "status": "pending_policy",
-        "current_behavior": "Metadata persists; M13 real object storage upload/download and deletion lifecycle are not yet accepted"
+        "current_behavior": "Metadata and private object bytes persist; deployed upload path verifies byte_size/SHA-256/content_type before Storage write. Final authenticated upload→download→delete lifecycle and accepted retention period remain pending."
       },
       "controls": [
         "10 MiB/type policy",
-        "hash metadata",
-        "tenant scoping"
+        "private dpp-evidence Storage bucket with tenant RLS",
+        "caller-JWT dpp-evidence-object Edge Function verify_jwt=true",
+        "pre-upload byte_size/SHA-256/content_type verification",
+        "no-overwrite Storage upload",
+        "tenant-scoped evidence registration"
       ],
       "minimization_note": "filenames, metadata and evidence files may contain personal data and require explicit minimization/redaction rules before production"
     },
@@ -280,9 +285,18 @@
   "out_of_scope_shared_project_data": "All non-dpp_* application tables in the shared Supabase project are owned by other applications and are not part of DPP Autopilot privacy inventory.",
   "green_blockers": [
     "M01-M13 declared dependencies are not all GREEN.",
-    "Retention periods/deletion rules are not yet accepted for imports, passports/history, registry submissions, evidence and audit snapshots.",
-    "M13 real evidence object storage lifecycle is incomplete.",
+    "Final regulatory/operational retention periods remain unaccepted for passports/history, registry submissions, evidence and audit snapshots.",
+    "M13 real authenticated deployed upload→download→delete lifecycle acceptance remains incomplete despite deployed private Storage/Edge integrity controls.",
     "External registry recipient terms and live payload scope are not accepted.",
-    "R08 deletion/export integration must implement the accepted retention policy."
-  ]
+    "R08 destructive organization/user deletion remains intentionally disabled pending accepted export/storage/audit/Auth lifecycle rules."
+  ],
+  "deletion_export_precursor": {
+    "retention_status_rpc": "dpp_api_retention_status()",
+    "terminal_import_purge_rpc": "dpp_api_purge_import_staging(timestamptz)",
+    "org_deletion_impact_preview_rpc": "dpp_api_org_deletion_impact()",
+    "impact_preview": "owner/admin only; non-destructive; reports tenant row/object/auth-context impact and blocker codes",
+    "destructive_org_delete_enabled": false,
+    "auth_users_deleted_by_org_delete": false,
+    "export_evidence_bytes": "bounded opt-in integrity-checked base64 precursor; exhaustive package/streaming acceptance pending"
+  }
 }
