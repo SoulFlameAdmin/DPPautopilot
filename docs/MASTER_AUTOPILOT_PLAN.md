@@ -576,3 +576,11 @@ Append evidence here only after verification.
 - T03 now has 10 stateful integration scenarios. The new scenario mutates the evidence manifest between page 1 and page 2.
 - Reusing the stale `evidence_manifest_sha256` returns stable `409 EVIDENCE_EXPORT_MANIFEST_CHANGED` and proves no second evidence object is downloaded.
 - T03 remains RED/PARTIAL pending M17–M23 GREEN plus real authenticated Storage/live-data/deployed HTTP acceptance.
+
+
+### M13 deployed download-integrity hardening + F08 deploy evidence — 2026-09-21
+- PR #144 exact head `e72eac5a99c8b767a1ae738e1b5f0ed6084317b4` completed GitHub Actions CI `35544246411` SUCCESS and merged as `7ff3492e3fa62e480c786bc60b93fb83e914c126`.
+- Bound Supabase Edge Function `dpp-evidence-object` is ACTIVE version 4 with `verify_jwt=true`; connector readback matches merged source and proves GET performs caller-RLS metadata lookup, SHA-256/byte-size/content-type verification, and fail-closed `409 EVIDENCE_DOWNLOAD_INTEGRITY_FAILED` before returning bytes.
+- M13 remains RED/PARTIAL because M03 is RED and a real authenticated upload→download/content verification→delete roundtrip is still required.
+- The lease-governed production deploy triggered by the #144 merge returned Vercel `build-rate-limit` for exact main commit `7ff3492e3fa62e480c786bc60b93fb83e914c126`; the global lease was released with success=false. Vercel supplied no retry timestamp, so none is recorded.
+- F08 remains BLOCKED; no deploy retry is attempted in this evidence sync.
