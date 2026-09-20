@@ -215,3 +215,53 @@ test('stale passport write maps DP411 to stable 409', async () => {
     assert.equal(res.body.includes('internal stale timestamp'),false);
   } finally { global.fetch=original; restore(); }
 });
+
+
+test('public GET strips catalog-restricted nested fields even if upstream regresses', async () => {
+  const restore=withEnv(), original=global.fetch;
+  global.fetch=async()=>({
+    ok:true,
+    async json(){
+      return {
+        passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        unique_identifier:'urn:dpp:public-safe',
+        status:'active',
+        public_payload:{
+          model:{
+            identification:{manufacturer:{name:'Safe Maker'}},
+            restricted_composition:{secret:'MODEL-SECRET'},
+            compliance_test_reports:['AUTHORITY-SECRET']
+          },
+          item:{
+            unique_identifier:'urn:dpp:public-safe',
+            state_of_health:{percent:95},
+            performance_history:[{secret:true}],
+            usage:{cycles:42},
+            telemetry:{environment:[{temperature:31}]}
+          }
+        },
+        private_payload:{secret_marker:'TOP-LEVEL-SECRET'},
+        organization_id:'tenant-secret'
+      };
+    }
+  });
+  try {
+    const res=makeRes();
+    await handler(makeReq('GET',null,{identifier:'urn:dpp:public-safe'},null),res);
+    assert.equal(res.statusCode,200);
+    const data=JSON.parse(res.body).data;
+    assert.equal(data.private_payload,undefined);
+    assert.equal(data.organization_id,undefined);
+    assert.equal(data.public_payload.model.identification.manufacturer.name,'Safe Maker');
+    assert.equal(data.public_payload.item.unique_identifier,'urn:dpp:public-safe');
+    assert.equal(data.public_payload.model.restricted_composition,undefined);
+    assert.equal(data.public_payload.model.compliance_test_reports,undefined);
+    assert.equal(data.public_payload.item.state_of_health,undefined);
+    assert.equal(data.public_payload.item.performance_history,undefined);
+    assert.equal(data.public_payload.item.usage,undefined);
+    assert.equal(data.public_payload.item.telemetry,undefined);
+    assert.equal(res.body.includes('MODEL-SECRET'),false);
+    assert.equal(res.body.includes('AUTHORITY-SECRET'),false);
+    assert.equal(res.body.includes('TOP-LEVEL-SECRET'),false);
+  } finally { global.fetch=original; restore(); }
+});
