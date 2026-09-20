@@ -15,7 +15,7 @@ export=policy.get("export",{})
 assert export.get("required_before_org_deletion") is True
 assert "dpp_api_export_bundle" in export.get("implementation","")
 precursor=export.get("evidence_bytes_precursor",{})
-assert precursor.get("endpoint")=="GET /api/export?include_evidence=1"
+assert precursor.get("endpoint")=="GET /api/export?include_evidence=1[&evidence_offset=N&evidence_limit=N]"
 assert precursor.get("integrity")=="byte_size + SHA-256 verified against evidence_manifest before inclusion"
 assert precursor.get("encoding")=="base64"
 assert precursor.get("inline_limit_bytes")==26_214_400
@@ -106,12 +106,16 @@ for token in [
     "include_evidence",
     "inlineEvidenceBytes",
     "MAX_INLINE_EVIDENCE_BYTES",
+    "MAX_EVIDENCE_PAGE_LIMIT",
     "EVIDENCE_EXPORT_TOO_LARGE",
     "EVIDENCE_EXPORT_INTEGRITY_FAILED",
     "EVIDENCE_EXPORT_OBJECT_UNAVAILABLE",
+    "EVIDENCE_EXPORT_PAGINATION_INVALID",
     "sha256",
     "content_base64",
     "evidencePageOptions",
+    "next_offset",
+    "has_more",
 ]:
     assert token in export_api, f"R08/M21 evidence byte export missing {token}"
 for token in [
@@ -120,6 +124,8 @@ for token in [
     "include_evidence rejects declared total beyond inline memory limit",
     "include_evidence maps unavailable object to stable export error",
     "paged include_evidence fetches only selected manifest slice",
+    "paged include_evidence validates pagination before export RPC",
+    "paged include_evidence ignores unselected oversized manifest objects",
 ]:
     assert token in export_test, f"R08/M21 export regression missing {token}"
 
