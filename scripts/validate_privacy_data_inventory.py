@@ -47,9 +47,10 @@ assert not extra, f"R07 inventory references unknown DPP migration tables: {sort
 auth_store=next(s for s in stores if s["id"]=="auth_identity")
 assert "auth.users" in auth_store["tables"]
 rate_store=next(s for s in stores if s["id"]=="rate_limit_transient")
-assert rate_store["tables"]==[]
-assert "IP" in rate_store["fields"] or "ip" in rate_store["fields"].lower()
+assert rate_store["tables"]==["dpp_rate_limit_buckets"]
+assert "raw IP" in rate_store["fields"] or "raw ip" in rate_store["fields"].lower()
 assert "digest" in rate_store["fields"].lower()
+assert "10 minutes" in rate_store["retention"]["current_behavior"]
 
 processors=inventory.get("processors_and_recipients",[])
 names={p["name"] for p in processors}

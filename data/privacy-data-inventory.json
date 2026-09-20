@@ -257,19 +257,23 @@
     },
     {
       "id": "rate_limit_transient",
-      "classification": "transient_security_metadata",
-      "purpose": "Abuse prevention before upstream API work",
-      "location": "Process-local serverless memory only; not stored in Supabase",
-      "processor": "Application runtime; Vercel when deployed",
-      "tables": [],
-      "fields": "normalized client IP plus truncated SHA-256 digest of Authorization header, request counters and window timestamps",
+      "classification": "pseudonymous_security_metadata",
+      "purpose": "Abuse prevention before upstream API work, with shared authenticated budgets prepared for distributed enforcement",
+      "location": "Process-local serverless memory plus Supabase Postgres DPP namespace for authenticated shared buckets",
+      "processor": "Application runtime/Vercel when deployed; Supabase for shared authenticated counters",
+      "tables": [
+        "dpp_rate_limit_buckets"
+      ],
+      "fields": "truncated SHA-256 network/Authorization-derived bucket digests, surface/rule namespace, request counters and fixed-window timestamps; raw IP addresses and bearer credentials are not stored",
       "retention": {
-        "status": "implementation_followup",
-        "current_behavior": "Process-local Map entries currently survive until process termination; no durable storage, but stale-window pruning should be added before production"
+        "status": "implemented_precursor",
+        "current_behavior": "Process-local entries are pruned/capped; shared authenticated rows are opportunistically deleted after their reset time is older than 10 minutes. Final deployed distributed/public-endpoint policy remains unaccepted."
       },
       "controls": [
-        "raw bearer token is never stored in bucket keys",
-        "canonical 429 behavior"
+        "raw IP and bearer token are never stored in bucket keys",
+        "direct anon/authenticated table privileges revoked with RLS enabled",
+        "shared consume RPC requires authenticated request-user context and validated pseudonymous key format",
+        "canonical 429 behavior remains process-local until shared runtime wiring is accepted"
       ]
     }
   ],

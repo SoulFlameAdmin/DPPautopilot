@@ -45,6 +45,10 @@ function bucketIdentities(req){
   return identities;
 }
 
+function sharedBucketKeys(req,surface,ruleName){
+  return bucketIdentities(req).map(identity=>`${surface}|${ruleName}|${identity}`);
+}
+
 function classify(surface,req){
   const method=String(req&&req.method||'GET').toUpperCase();
   if(surface==='passport'&&method==='GET'&&req&&req.query&&req.query.identifier){
@@ -157,6 +161,7 @@ module.exports={
     authDigest,
     networkDigest,
     bucketIdentities,
+    sharedBucketKeys,
     pruneBuckets,
     resetForTests,
     buckets,

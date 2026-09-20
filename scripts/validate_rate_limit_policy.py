@@ -7,10 +7,10 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==6
+assert policy.get("version")==7
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
-assert policy.get("strategy")=="process_local_dual_bucket_fixed_window_precursor"
+assert policy.get("strategy")=="dual_layer_process_local_plus_shared_authenticated_precursor"
 identity=policy.get("identity_safety",{})
 assert identity=={
     "network_bucket_always_enforced":True,
@@ -104,8 +104,49 @@ for token in [
 ]:
     assert token in test_text, f"R05 abuse suite missing {token}"
 
-limitations=policy.get("limitations",[])
-assert any("parallel serverless isolates" in x for x in limitations)
-assert any("shared durable limiter" in x for x in limitations)
+shared=policy.get("shared_backend",{})
+assert shared.get("status")=="implemented_not_runtime_wired"
+assert shared.get("table")=="dpp_rate_limit_buckets"
+assert shared.get("rpc")=="dpp_rate_limit_consume(text,integer,integer,timestamptz)"
+assert shared.get("scope")=="authenticated network/credential budgets only"
+assert shared.get("atomic_increment") is True
+assert shared.get("fixed_window_reset") is True
+assert shared.get("direct_table_grants") is False
+assert shared.get("anon_rpc_execute") is False
+assert shared.get("authenticated_rpc_execute") is True
+assert "10 minutes" in shared.get("stale_row_retention","")
 
-print("R05_RATE_LIMIT_POLICY_PASS: eight inventoried API surfaces have versioned process-local abuse budgets, dual privacy-hashed network/credential buckets, bounded memory, canonical 429 behavior and explicit distributed-runtime limitation")
+migration=(ROOT/"supabase/migrations/20260920152000_dpp_shared_rate_limit_backend.sql").read_text(encoding="utf-8")
+for token in [
+    "create table if not exists public.dpp_rate_limit_buckets",
+    "create or replace function public.dpp_rate_limit_consume",
+    "security definer",
+    "set search_path = public, pg_temp",
+    "revoke all on table public.dpp_rate_limit_buckets from public, anon, authenticated",
+    "grant execute on function public.dpp_rate_limit_consume",
+    "p_bucket_key !~",
+    "request_count + 1",
+    "reset_at < p_now - interval '10 minutes'",
+]:
+    assert token.lower() in migration.lower(), f"R05 shared backend migration missing {token}"
+
+db_test=(ROOT/"tests/db/test_shared_rate_limit_backend.sql").read_text(encoding="utf-8")
+for token in [
+    "R05_SHARED_RATE_LIMIT_BACKEND_PASS",
+    "shared over-budget mismatch",
+    "shared window reset mismatch",
+    "invalid shared bucket key was accepted",
+    "unauthenticated shared consume was accepted",
+    "shared bucket table regained direct client privileges",
+]:
+    assert token in db_test, f"R05 shared backend regression missing {token}"
+
+assert "sharedBucketKeys" in helper
+assert "shared backend keys match the DB-safe pseudonymous contract" in test_text
+
+limitations=policy.get("limitations",[])
+assert any("not yet wired" in x for x in limitations)
+assert any("Anonymous public passport" in x for x in limitations)
+assert any("multi-isolate" in x for x in limitations)
+
+print("R05_RATE_LIMIT_POLICY_PASS: eight API surfaces keep local abuse budgets while an atomic RLS-protected shared authenticated Supabase counter backend is versioned/tested; deployed/public distributed enforcement remains explicit")

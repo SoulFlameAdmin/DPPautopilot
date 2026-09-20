@@ -52,6 +52,16 @@ test('client identity hashes network and bearer material instead of storing raw 
   ]);
 });
 
+test('shared backend keys match the DB-safe pseudonymous contract',()=>{
+  const request=req('POST',{},{} ,'Bearer shared-secret','203.0.113.90');
+  const keys=limiter._test.sharedBucketKeys(request,'models','authenticated_write');
+  assert.equal(keys.length,2);
+  assert.match(keys[0],/^models\|authenticated_write\|network:[0-9a-f]{32}$/);
+  assert.match(keys[1],/^models\|authenticated_write\|credential:[0-9a-f]{24}$/);
+  assert.equal(keys.join('|').includes('203.0.113.90'),false);
+  assert.equal(keys.join('|').includes('shared-secret'),false);
+});
+
 test('fixed window denies the request after the configured budget and exposes retry metadata',()=>{
   const rules={authenticated_write:{limit:2,window_seconds:60}};
   let decision=limiter.checkRateLimit(req('POST',{}),'models',{rules,nowMs:1000});

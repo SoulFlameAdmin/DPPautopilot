@@ -160,6 +160,10 @@
     {
       "version": "20260920021507",
       "name": "dpp_passport_create_idempotency"
+    },
+    {
+      "version": "20260920151744",
+      "name": "dpp_shared_rate_limit_backend"
     }
   ],
   "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."

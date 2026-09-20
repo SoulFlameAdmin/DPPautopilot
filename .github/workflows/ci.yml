@@ -485,6 +485,16 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_security_definer_rpc_guard.sql
+      - name: Run R05 shared rate limit backend subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_shared_rate_limit_backend.sql
+          rollback;
+          SQL
       - name: Run M13 evidence metadata subset
         env:
           PGPASSWORD: postgres
