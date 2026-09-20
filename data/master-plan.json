@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T19:09:00+03:00",
+  "updatedAt": "2026-09-20T19:10:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -631,7 +631,7 @@
           "acceptanceCriteria": "Sensitive/public endpoints have documented limits and 429 behavior",
           "evidenceRequired": "Load/abuse tests",
           "status": "red",
-          "evidence": "PARTIAL shared authenticated rate limiting now has both an applied atomic Supabase backend and feature-gated runtime wiring across all eight serverless API surfaces. Bound migration `dpp_shared_rate_limit_backend` is applied as `20260920151744`; table/RPC ACL and RLS probes passed. PR #115 exact-head `cfe8302c3000a1757d3c7e6939627995a6315515` passed full CI `35520015959` including API contracts, R05 abuse suite, clean PostgreSQL replay, shared DB limiter subset, global RLS/SECURITY DEFINER guards, restore and browser regression, then merged as `00ea0345448758a70087f9deaf9c61ae235ec0c6`. Runtime gate is explicit `DPP_SHARED_RATE_LIMIT_ENABLED=true`; authenticated requests consume network+credential shared budgets and fail closed with canonical HTTP 503 if the backend is unavailable; anonymous public passport identifier GET remains local-only. R05 remains RED because M17-M20 are not all GREEN and production enablement, anonymous distributed protection, multi-isolate and real-network load acceptance remain unproven. — PARTIAL PASS"
+          "evidence": "PARTIAL shared authenticated rate limiting now has applied atomic Supabase backend, feature-gated runtime wiring across all eight API surfaces, and synthetic concurrent shared-budget evidence. PR #121 versioned a T07 profile with 50 concurrent authenticated-write checks against the same pseudonymous network+credential shared buckets; exact result is 40 allowed, 10 denied, 100 shared RPC calls, two shared buckets and zero backend errors. Exact-head `b48a45a562005f539fc5248f61d23650fc0f5414` passed full CI `35521547459` and merged as `79abc50529909d7213806947b91d0d95613ac1fd`. R05 remains RED because M17-M20 are not all GREEN and production enablement, anonymous distributed protection plus real multi-isolate/network acceptance remain unproven. — PARTIAL PASS"
         },
         {
           "id": "R06",
@@ -783,7 +783,7 @@
           "acceptanceCriteria": "Agreed concurrency/data-volume targets pass within latency/error budgets",
           "evidenceRequired": "Load report",
           "status": "red",
-          "evidence": "PARTIAL synthetic handler-load precursor: 200 requests at concurrency 25 across models/items/passport/imports/export with zero errors and versioned p95/wall budgets; 1000-row import volume; same-client 125-request overload proves 120 successes + 5 canonical 429 responses before upstream. CI 35413316603 on 5d3df2e3b9c78ecf6f4fe1f638150d46492db45d SUCCESS including full regression; artifact 10575440649 contains t07-load-report.json. T07 remains RED pending full M17-M21 acceptance and deployed preview/staging HTTP/TLS/Vercel/Supabase/cold-start load evidence. — PARTIAL PASS"
+          "evidence": "PARTIAL synthetic load precursor now covers four profiles: 200 requests at concurrency 25 across models/items/passport/imports/export; 1000-row import volume; deterministic same-client local overload shedding; and atomic shared-authenticated limiter concurrency. The new shared profile issues 50 concurrent authenticated-write budget checks with configured budget 40 and proves exactly 40 allowed, 10 denied, 100 shared RPC calls, two pseudonymous buckets and zero backend errors. Exact-head `b48a45a562005f539fc5248f61d23650fc0f5414` completed full CI `35521547459` SUCCESS; PR #121 merged as `79abc50529909d7213806947b91d0d95613ac1fd`. T07 remains RED pending M17-M21 GREEN and real deployed HTTP/TLS/cold-start/Supabase/shared-backend load evidence. — PARTIAL PASS"
         },
         {
           "id": "T08",
