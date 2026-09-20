@@ -463,3 +463,11 @@ Append evidence here only after verification.
 - Read-only verification of the exact deployment root returned HTTP 302 to Vercel SSO. F08 requires the app and data JSON to return HTTP 200, so F08 remains BLOCKED/PARTIAL; no SSO/login/MFA bypass was attempted.
 - This worker did not create/update/redeploy Vercel. Any future explicit deployment remains subject to the global DAVID Vercel deploy lease.
 - Fail-closed C03 evidence contract for this observation passed exact-head CI `35518399765`; PR #111 merged as `4440605f4eda88b1ebf086f06eccb97ae89673be`. `promotion_executed=false` remains until its declared prerequisites and production acceptance are satisfied.
+
+
+### R05 shared authenticated limiter backend precursor — 2026-09-20
+- Bound Supabase migration `dpp_shared_rate_limit_backend` applied successfully as version `20260920151744`.
+- `public.dpp_rate_limit_buckets` is RLS-enabled with direct anon/authenticated table access revoked; `dpp_rate_limit_consume(text,integer,integer,timestamptz)` is authenticated-only SECURITY DEFINER with fixed `search_path=public, pg_temp`, atomic fixed-window increments and validated pseudonymous network/credential bucket keys.
+- Bound runtime ACL evidence: `rls_enabled=true`, `anon_select=false`, `auth_select=false`, `anon_exec=false`, `auth_exec=true`, `security_definer=true`. Raw IP addresses and bearer credentials are not stored in shared bucket keys.
+- Exact-head CI `35519149174` on `7dd12e8dba2905c5a4bd946ae804341a7a544071` completed SUCCESS, including C04 applied-migration gate, clean PostgreSQL replay, R05 policy/API suite, `R05_SHARED_RATE_LIMIT_BACKEND_PASS`, global RLS/RPC security guards, restore drill and browser regression. PR #113 merged as `95bed9142570591f16f8fbb4eecf213fd633fb24`.
+- R05 remains RED/PARTIAL: M17–M20 are not all GREEN; deployed API enforcement is still process-local; anonymous public passport distributed protection and deployed multi-isolate/real-network load acceptance remain unproven. No Vercel deployment was attempted.

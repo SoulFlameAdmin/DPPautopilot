@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "F08 canonical READY production deployment is evidenced; HTTP 200 acceptance remains blocked by Vercel SSO",
+  "currentTask": "R05 shared authenticated rate-limit backend merged and evidenced; continue next independent non-deploy precursor",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #111 merged as 4440605f4eda88b1ebf086f06eccb97ae89673be after exact-head CI 35518399765 SUCCESS; C03 records READY production deployment without falsely accepting F08",
-  "nextTask": "Synchronize F08 canonical source-of-truth evidence, validate in CI, then continue earliest independent non-deploy precursor.",
-  "message": "Canonical Vercel production deployment dpl_75FRys3F48iXFpMoHRjte5YLT3sz is READY for main@510527d6e1d63fbc63b1c919c3d8e67240456f8f. Exact deployment root returned Vercel SSO 302, so required app/data JSON HTTP 200 acceptance remains unproven.",
+  "lastCompletedTask": "PR #113 merged as 95bed9142570591f16f8fbb4eecf213fd633fb24 after exact-head CI 35519149174 SUCCESS; bound Supabase migration dpp_shared_rate_limit_backend applied as 20260920151744",
+  "nextTask": "Validate and merge R05 evidence sync; then select the earliest remaining dependency-safe precursor without changing blocked/dependent tasks to GREEN.",
+  "message": "R05 now has an atomic RLS-protected shared authenticated Supabase counter backend and clean/bound evidence. Runtime enforcement remains process-local; anonymous public distributed protection and deployed multi-isolate/load acceptance remain unresolved, so R05 stays RED.",
   "deferredBlockers": [
     "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T18:10:00+03:00"
+  "updatedAt": "2026-09-20T18:22:00+03:00"
 }
