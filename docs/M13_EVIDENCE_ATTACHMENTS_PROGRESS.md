@@ -40,3 +40,12 @@ M13 remains **RED/PARTIAL**, not GREEN: a real authenticated user byte upload ->
 - Missing/inaccessible metadata fails closed with `403 EVIDENCE_METADATA_NOT_AVAILABLE`; metadata/byte mismatch fails closed with `409 EVIDENCE_METADATA_MISMATCH`.
 - Verification occurs before `.storage.from(BUCKET).upload(...)`, preserving the no-overwrite Storage policy and preventing registered hash metadata from silently diverging from object bytes.
 - M13 remains RED/PARTIAL until M03 is GREEN and a real authenticated upload→download/content verification→delete roundtrip is proven against the deployed Edge Function/Storage path.
+
+
+## Pre-response download integrity hardening — 2026-09-21
+
+- `dpp-evidence-object` GET now performs a caller-RLS metadata lookup before Storage download.
+- Downloaded bytes are SHA-256 hashed and must exactly match registered `byte_size`, `sha256_hex` and `content_type` before any byte response is returned.
+- Missing/inaccessible metadata remains non-enumerating as `404 EVIDENCE_NOT_AVAILABLE`; byte/type/hash mismatch fails closed with `409 EVIDENCE_DOWNLOAD_INTEGRITY_FAILED`.
+- The response `Content-Type` comes from verified metadata, not an untrusted object response alone.
+- M13 remains RED/PARTIAL until M03 is GREEN and a real authenticated upload→download/content verification→delete roundtrip is proven against the deployed function.
