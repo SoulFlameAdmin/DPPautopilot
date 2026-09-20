@@ -6,6 +6,7 @@ declare
   u_editor uuid := 'e1818181-8181-4181-8181-818181818181';
   org_a uuid := 'e2828282-8282-4282-8282-828282828282';
   model_a uuid := 'e3838383-8383-4383-8383-838383838383';
+  model_delete uuid := 'e5858585-8585-4585-8585-858585858585';
   item_a uuid := 'e4848484-8484-4484-8484-848484848484';
   passport_a uuid;
   model_ts timestamptz;
@@ -29,12 +30,16 @@ begin
   insert into public.dpp_organizations(id,name,slug)
   values(org_a,'M23 OCC Org','m23-occ-org');
   insert into public.dpp_organization_members(organization_id,user_id,role)
-  values(org_a,u_editor,'editor');
+  values(org_a,u_editor,'owner');
 
   insert into public.dpp_battery_models(
     id,organization_id,model_identifier,manufacturer_name,category,canonical_data
   ) values(model_a,org_a,'M23-OCC','Maker A','portable','{}'::jsonb)
   returning updated_at into model_ts;
+
+  insert into public.dpp_battery_models(
+    id,organization_id,model_identifier,manufacturer_name,category,canonical_data
+  ) values(model_delete,org_a,'M23-DELETE','Maker Delete','portable','{}'::jsonb);
 
   insert into public.dpp_battery_items(
     id,organization_id,model_id,unique_identifier,lifecycle_status,canonical_data
@@ -96,14 +101,40 @@ begin
   end;
   if not seen then raise exception 'M23 stale passport write was not rejected'; end if;
 
-  -- Authenticated clients must not retain execute on unchecked updates.
+  -- Model delete must also be protected by the same observed updated_at token.
+  select updated_at into model_ts
+  from public.dpp_battery_models
+  where id=model_delete;
+
+  perform public.dpp_api_models_update_checked(
+    model_delete,'M23-DELETE-2',null,null,null,model_ts
+  );
+
+  seen:=false;
+  begin
+    perform public.dpp_api_models_delete_checked(model_delete,model_ts);
+  exception when sqlstate 'DP206' then seen:=true;
+  end;
+  if not seen then raise exception 'M23 stale model delete was not rejected'; end if;
+
+  select updated_at into model_ts
+  from public.dpp_battery_models
+  where id=model_delete;
+
+  if public.dpp_api_models_delete_checked(model_delete,model_ts)<>model_delete then
+    raise exception 'M23 checked model delete failed';
+  end if;
+
+  -- Authenticated clients must not retain execute on unchecked updates/deletes.
   if has_function_privilege('authenticated','public.dpp_api_models_update(uuid,text,text,text,jsonb)','EXECUTE')
+     or has_function_privilege('authenticated','public.dpp_api_models_delete(uuid)','EXECUTE')
      or has_function_privilege('authenticated','public.dpp_api_items_update(uuid,uuid,text,text,jsonb)','EXECUTE')
      or has_function_privilege('authenticated','public.dpp_api_passport_update(uuid,text,jsonb,jsonb)','EXECUTE') then
-    raise exception 'M23 unchecked update RPC remains executable by authenticated';
+    raise exception 'M23 unchecked update/delete RPC remains executable by authenticated';
   end if;
 
   if not has_function_privilege('authenticated','public.dpp_api_models_update_checked(uuid,text,text,text,jsonb,timestamptz)','EXECUTE')
+     or not has_function_privilege('authenticated','public.dpp_api_models_delete_checked(uuid,timestamptz)','EXECUTE')
      or not has_function_privilege('authenticated','public.dpp_api_items_update_checked(uuid,uuid,text,text,jsonb,timestamptz)','EXECUTE')
      or not has_function_privilege('authenticated','public.dpp_api_passport_update_checked(uuid,text,jsonb,jsonb,timestamptz)','EXECUTE') then
     raise exception 'M23 checked update RPC execute grant missing';

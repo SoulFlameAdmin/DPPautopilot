@@ -80,7 +80,7 @@ begin
       'dpp_api_organization_create(text,text)',
       'dpp_api_organizations_list()',
       'dpp_api_models_create(text,text,text,jsonb)',
-      'dpp_api_models_delete(uuid)',
+      'dpp_api_models_delete_checked(uuid,timestamp with time zone)',
       'dpp_api_models_list()',
       'dpp_api_models_update_checked(uuid,text,text,text,jsonb,timestamp with time zone)',
       'dpp_api_passport_create(uuid,jsonb,jsonb)',
@@ -120,7 +120,7 @@ begin
       ('dpp_api_organization_create(text,text)'),
       ('dpp_api_organizations_list()'),
       ('dpp_api_models_create(text,text,text,jsonb)'),
-      ('dpp_api_models_delete(uuid)'),
+      ('dpp_api_models_delete_checked(uuid,timestamp with time zone)'),
       ('dpp_api_models_list()'),
       ('dpp_api_models_update_checked(uuid,text,text,text,jsonb,timestamp with time zone)'),
       ('dpp_api_passport_create(uuid,jsonb,jsonb)'),
@@ -155,9 +155,10 @@ begin
   end if;
 
   if has_function_privilege('authenticated',to_regprocedure('public.dpp_api_models_update(uuid,text,text,text,jsonb)'),'EXECUTE')
+     or has_function_privilege('authenticated',to_regprocedure('public.dpp_api_models_delete(uuid)'),'EXECUTE')
      or has_function_privilege('authenticated',to_regprocedure('public.dpp_api_items_update(uuid,uuid,text,text,jsonb)'),'EXECUTE')
      or has_function_privilege('authenticated',to_regprocedure('public.dpp_api_passport_update(uuid,text,jsonb,jsonb)'),'EXECUTE') then
-    raise exception 'M23 unchecked update RPC regained authenticated EXECUTE';
+    raise exception 'M23 unchecked update/delete RPC regained authenticated EXECUTE';
   end if;
 end
 $guard$;

@@ -150,7 +150,10 @@ test('cross-tenant/not-found database response maps to 404 without detail leak',
   });
   try {
     const res = makeRes();
-    await handler(makeReq('DELETE', { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }), res);
+    await handler(makeReq('DELETE', {
+      id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      expected_updated_at: '2026-09-20T00:00:00.000Z'
+    }), res);
     const payload = JSON.parse(res.body);
     assert.equal(res.statusCode, 404);
     assert.equal(payload.error.code, 'MODEL_NOT_FOUND');
@@ -229,6 +232,73 @@ test('stale model write maps DP206 to stable 409', async () => {
     assert.equal(res.statusCode,409);
     assert.equal(JSON.parse(res.body).error.code,'STALE_WRITE');
     assert.equal(res.body.includes('internal stale timestamp'),false);
+  } finally {
+    global.fetch=original;
+    if(oldUrl===undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL=oldUrl;
+    if(oldKey===undefined) delete process.env.SUPABASE_ANON_KEY; else process.env.SUPABASE_ANON_KEY=oldKey;
+  }
+});
+
+
+test('DELETE requires expected_updated_at before upstream access', async () => {
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true; throw new Error('unexpected');};
+  try {
+    const res=makeRes();
+    await handler(makeReq('DELETE',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+    }),res);
+    assert.equal(res.statusCode,428);
+    assert.equal(JSON.parse(res.body).error.code,'WRITE_PRECONDITION_REQUIRED');
+    assert.equal(called,false);
+  } finally { global.fetch=original; }
+});
+
+test('DELETE forwards optimistic concurrency token to checked model delete RPC', async () => {
+  const original=global.fetch;
+  const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY='anon-key';
+  let seen;
+  global.fetch=async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';}};
+  };
+  try {
+    const res=makeRes();
+    await handler(makeReq('DELETE',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      expected_updated_at:'2026-09-20T00:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,200);
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_models_delete_checked');
+    assert.deepEqual(JSON.parse(seen.options.body),{
+      p_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      p_expected_updated_at:'2026-09-20T00:00:00.000Z'
+    });
+  } finally {
+    global.fetch=original;
+    if(oldUrl===undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL=oldUrl;
+    if(oldKey===undefined) delete process.env.SUPABASE_ANON_KEY; else process.env.SUPABASE_ANON_KEY=oldKey;
+  }
+});
+
+test('stale model delete maps DP206 to stable 409', async () => {
+  const original=global.fetch;
+  const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY='anon-key';
+  global.fetch=async()=>({ok:false,async json(){return {code:'DP206',message:'internal stale delete timestamp'};}});
+  try {
+    const res=makeRes();
+    await handler(makeReq('DELETE',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      expected_updated_at:'2026-09-20T00:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,409);
+    assert.equal(JSON.parse(res.body).error.code,'STALE_WRITE');
+    assert.equal(res.body.includes('internal stale delete timestamp'),false);
   } finally {
     global.fetch=original;
     if(oldUrl===undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL=oldUrl;
