@@ -124,7 +124,7 @@ test('guessed cross-tenant item id is non-enumerating 404',async()=>{
   global.fetch=errorFetch('DP306');
   try{
     const res=makeRes();
-    await items(req('DELETE',{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'}),res);
+    await items(req('DELETE',{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',expected_updated_at:'2026-09-20T00:00:00.000Z'}),res);
     const payload=JSON.parse(res.body);
     assert.equal(res.statusCode,404);
     assert.equal(payload.error.code,'ITEM_NOT_FOUND');
