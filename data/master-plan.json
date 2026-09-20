@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T05:22:00+03:00",
+  "updatedAt": "2026-09-20T15:52:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -747,7 +747,7 @@
           "acceptanceCriteria": "Positive/negative API flows pass",
           "evidenceRequired": "API test report",
           "status": "red",
-          "evidence": "PARTIAL API-integration acceptance coverage: report generator validates 5 executable stateful integration tests, 8 scenarios and collective M17-M23 coverage across models/items/passport/imports/export. CI 35412297769 on 461e22c77629369e28e1e2da19c76884cae81ec0 SUCCESS including T03 test/report, full API/DB/security regression, clean replay, restore and browser smoke; artifact 10574279507. T03 remains RED pending full M17-M23 acceptance and deployed HTTP integration. — PARTIAL PASS"
+          "evidence": "PARTIAL API-integration acceptance coverage now validates 5 executable stateful integration tests and 9 scenarios across M17-M23. Fresh-main PR #93 adds passport create retry behavior to the end-to-end handler journey: identical retry returns the same passport without another physical create; divergent retry maps DP412 to stable HTTP 409 PASSPORT_CONFLICT without backend detail leakage. Exact-head CI `35484156404` on `3a44edbff0d33f79e8feeac22915496e2f8afa9d` completed SUCCESS; PR #93 merged as `25608199d232beeeae2b963159135ec4c48ccc44`. T03 remains RED pending M17-M23 GREEN and deployed HTTP integration. — PARTIAL PASS"
         },
         {
           "id": "T04",
@@ -792,7 +792,7 @@
           "acceptanceCriteria": "Retries/timeouts/idempotency survive injected failures",
           "evidenceRequired": "Reliability report",
           "status": "red",
-          "evidence": "PARTIAL reliability/retry acceptance coverage: report generator validates 4 executable scenarios covering registry timeout/retry, import idempotency, registry idempotency and API conflicts/fail-closed behavior (15 behaviors). CI 35412453600 on 7c0aaec92f1fe958c6734eb2ff5474ca1015966e SUCCESS; artifact 10574529645. Bound Supabase frhletkiuupgksmgxoxc ran all three PostgreSQL reliability/idempotency suites in BEGIN/ROLLBACK and returned T08_BOUND_SUPABASE_RELIABILITY_ROLLBACK_PASS. T08 remains RED while M23 is RED. — PARTIAL PASS"
+          "evidence": "PARTIAL reliability/retry acceptance coverage now validates 5 executable scenarios: registry timeout/retry, import idempotency, registry idempotency, API conflicts/fail-closed behavior, and passport create retry idempotency. The passport scenario proves same-item/same-payload returns the same passport, creates no duplicate row, and divergent retry content conflicts. Exact-head CI `35483949394` on `d801cb0e6c4aa037487e0f6a94aed15e5566938c` completed SUCCESS; PR #91 merged as `babdbb03dfff9e1cd8da2095625c5c965d07e158`. Existing bound Supabase reliability/idempotency evidence remains valid. T08 remains RED while M23 is RED. — PARTIAL PASS"
         },
         {
           "id": "T09",
