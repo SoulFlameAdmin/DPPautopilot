@@ -434,3 +434,11 @@ Append evidence here only after verification.
 - Bound Supabase Edge Function `dpp-evidence-object` is ACTIVE v1 with `verify_jwt=true`; deployed bundle SHA-256 `9ca527828da04bec19fba8e4b6afd82a710fe09b418e5f31112bacfe51f0e6ef`.
 - The bridge forwards the caller JWT through an anon/publishable client so Storage RLS remains authoritative and contains no service-role shortcut.
 - M13 remains RED/PARTIAL: current connector has no normal authenticated Edge Function/Storage invocation path for a real user byte upload/download/delete roundtrip, and no auth bypass is used.
+
+
+### M19 / M22 / M23 passport create idempotency — 2026-09-20
+- Bound Supabase migration `dpp_passport_create_idempotency` version `20260920021507` makes tenant battery-item passport creation deterministic on retry while preserving M10 public-payload policy enforcement and RBAC.
+- Identical draft retries return the same passport and create no second row; divergent retry state/payload raises `DP412`, mapped publicly to HTTP 409 `PASSPORT_CONFLICT` without database detail leakage.
+- Bound runtime returned `M23_PASSPORT_CREATE_IDEMPOTENCY_PASS`.
+- Exact-head CI `35483523966` on `7a930da73cadfa9bc218abcbebd4e4fe52efca92` completed SUCCESS, including clean migration replay, M19 passport privacy/tenant DB subset, M19 HTTP contract and full repository/browser regressions.
+- PR #88 merged as `4a5325209a8834c57940babf52e8a653f1324281`. M19/M22/M23 remain RED/PARTIAL because their upstream/final deployed acceptance dependencies are not GREEN. No Vercel deployment was initiated.
