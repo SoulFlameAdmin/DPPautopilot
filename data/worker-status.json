@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M17/M23 checked model delete merged and evidenced; continue earliest dependency-safe non-deploy MVP/API hardening",
+  "currentTask": "M18/M23 checked item delete merged and evidenced; continue earliest dependency-safe non-deploy MVP/API hardening",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #79 merged as 94c38301402512734b5e782d20d8465b0ed0d10e; bound migration dpp_models_delete_checked version 20260920003348; exact-head CI 35479236122 SUCCESS",
-  "nextTask": "Continue with M18 item delete concurrency hardening or another earliest RED precursor that can advance without M01/M03 deployed acceptance; do not retry F08 without new evidence.",
-  "message": "Model DELETE is now fail-closed against stale clients and unchecked RPC bypass. M17/M23 remain RED by dependency/final acceptance, so continue independent implementation/tests without status inflation.",
+  "lastCompletedTask": "PR #82 merged as 8f8e24497edc02f3050fa236b0a453e6fefe8534; bound dpp_items_delete_checked first applied as 20260920004250; exact-head CI 35479650181 SUCCESS",
+  "nextTask": "Continue with M19/M23 passport mutation hardening or another earliest RED precursor that can advance without M01/M03/M10 deployed acceptance; do not retry F08 without new evidence.",
+  "message": "Item DELETE is now fail-closed against stale clients and unchecked RPC bypass while preserving passport-protection semantics. M18/M23 remain RED by dependency/final deployed acceptance; continue independent implementation/tests without status inflation.",
   "deferredBlockers": [
     "F08 — Vercel production acceptance remains externally blocked; do not retry without new quota/access evidence and always obey the global Supabase deployment lease law.",
     "M01 — final runtime recovery password-update acceptance remains blocked on a usable deployed recovery redirect.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T03:45:00+03:00"
+  "updatedAt": "2026-09-20T04:02:00+03:00"
 }
