@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 matrix=json.loads((ROOT/"data/api-integration-matrix.json").read_text(encoding="utf-8"))
 
-assert matrix.get("version")==1
+assert matrix.get("version")==2
 assert matrix.get("task")=="T03"
 assert matrix.get("status")=="partial"
 assert matrix.get("dependencies")==["M17","M18","M19","M20","M21","M22","M23"]
@@ -48,6 +48,10 @@ for token in [
   "signed_url",
   "passport_versions",
   "evidence_manifest",
+  "include_evidence",
+  "evidence_objects",
+  "sha256_verified",
+  "content_base64",
 ]:
     assert token in test_text, f"T03 integration test missing coverage token: {token}"
 
@@ -57,4 +61,4 @@ for rel in ["api/models.js","api/items.js","api/passport.js","api/imports.js","a
 remaining=matrix.get("remaining",[])
 assert remaining, "T03 must document deployed integration evidence still pending while partial"
 
-print("T03_API_INTEGRATION_MATRIX_PASS: 9 positive/negative multi-surface API integration scenarios are versioned")
+print("T03_API_INTEGRATION_MATRIX_PASS: 9 positive/negative multi-surface API integration scenarios are versioned, including opt-in integrity-checked evidence-byte export")
