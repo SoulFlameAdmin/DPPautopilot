@@ -265,3 +265,69 @@ test('public GET strips catalog-restricted nested fields even if upstream regres
     assert.equal(res.body.includes('TOP-LEVEL-SECRET'),false);
   } finally { global.fetch=original; restore(); }
 });
+
+
+test('POST rejects restricted public fields before upstream access', async () => {
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true; throw new Error('unexpected');};
+  try {
+    const res=makeRes();
+    await handler(makeReq('POST',{
+      battery_item_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      public_payload:{
+        model:{
+          identification:{manufacturer:{name:'Safe Maker'}},
+          restricted_composition:{secret:true}
+        }
+      },
+      private_payload:{}
+    }),res);
+    assert.equal(res.statusCode,422);
+    assert.equal(JSON.parse(res.body).error.code,'VALIDATION_ERROR');
+    assert.equal(called,false);
+  } finally { global.fetch=original; }
+});
+
+test('PATCH rejects authority-only public fields before upstream access', async () => {
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true; throw new Error('unexpected');};
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      expected_updated_at:'2026-09-20T00:00:00.000Z',
+      public_payload:{
+        model:{
+          compliance_test_reports:['secret-report']
+        }
+      }
+    }),res);
+    assert.equal(res.statusCode,422);
+    assert.equal(JSON.parse(res.body).error.code,'VALIDATION_ERROR');
+    assert.equal(called,false);
+  } finally { global.fetch=original; }
+});
+
+test('POST allows catalog-public fields through to upstream', async () => {
+  const restore=withEnv(), original=global.fetch;
+  let seen;
+  global.fetch=async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return {passport_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',status:'draft'};}};
+  };
+  try {
+    const res=makeRes();
+    await handler(makeReq('POST',{
+      battery_item_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      public_payload:{
+        model:{identification:{manufacturer:{name:'Safe Maker'},category:'electric_vehicle',model_id:'SAFE-1'}},
+        item:{unique_identifier:'urn:dpp:safe:1'}
+      },
+      private_payload:{}
+    }),res);
+    assert.equal(res.statusCode,201);
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_passport_create');
+  } finally { global.fetch=original; restore(); }
+});
