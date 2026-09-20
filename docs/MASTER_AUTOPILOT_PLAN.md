@@ -500,3 +500,11 @@ Append evidence here only after verification.
 - A synthetic atomic shared-backend load profile runs 50 concurrent authenticated-write checks against the same network+credential pseudonymous buckets.
 - Acceptance is exact: configured budget 40 → 40 allowed, 10 denied, 100 shared RPC calls, 2 shared buckets, 0 backend errors.
 - This is in-process/CI evidence only. R05/T07 remain RED/PARTIAL pending declared dependencies and real deployed HTTP/TLS, hosting isolation/cold starts, Supabase latency/pooling and production-like load acceptance.
+
+
+### M13 deployed pre-upload integrity hardening — 2026-09-20
+- PR #123 exact head `60c7c5e0d6d9a1fb811031d2e2cab5b219bb9c19` completed full CI `35521896483` SUCCESS and merged as `194d4a68bb3dbf89046c67fb6adbed6a28dbdde6`.
+- Bound Supabase Edge Function `dpp-evidence-object` is ACTIVE version 2 with `verify_jwt=true`.
+- Deployed-source readback proves caller-RLS metadata lookup from `dpp_evidence_attachments`, SHA-256 hashing and exact `byte_size`/`sha256_hex`/`content_type` verification before Storage upload.
+- Missing/inaccessible metadata fails closed as `403 EVIDENCE_METADATA_NOT_AVAILABLE`; mismatch fails closed as `409 EVIDENCE_METADATA_MISMATCH`.
+- M13 remains RED/PARTIAL pending M03 GREEN and a real authenticated upload→download/content verification→delete roundtrip against the deployed function.
