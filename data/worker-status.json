@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "R05 shared authenticated runtime wiring merged and evidenced; continuing next independent non-deploy precursor",
+  "currentTask": "M21/R08 bounded evidence-byte export precursor merged and evidenced; continuing next independent non-deploy precursor",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #115 merged as 00ea0345448758a70087f9deaf9c61ae235ec0c6 after exact-head CI 35520015959 SUCCESS; all eight authenticated API surfaces now support the fail-closed shared limiter runtime gate",
-  "nextTask": "Validate/merge R05 runtime evidence sync, then continue the earliest safe precursor that reduces unresolved internal acceptance gaps without changing blocked/dependent tasks to GREEN.",
-  "message": "R05 shared backend is applied and runtime-wired behind DPP_SHARED_RATE_LIMIT_ENABLED=true. R05 stays RED until declared dependencies and real deployed distributed/load acceptance are proven.",
+  "lastCompletedTask": "PR #117 merged as be1a9f28ecce3dbc9be67a24e200fc93f3be6ddf after exact-head full CI 35520561209 SUCCESS; owner/admin export can optionally include SHA-256 verified evidence bytes under a bounded inline cap",
+  "nextTask": "Validate/merge M21/R08 evidence sync, then continue the earliest safe precursor reducing remaining internal gaps without promoting dependent RED/BLOCKED tasks.",
+  "message": "M21/R08 now include bounded integrity-checked evidence bytes through the caller-JWT Storage bridge. Final large-tenant/deployed acceptance and declared dependencies remain unresolved, so both stay RED/PARTIAL.",
   "deferredBlockers": [
     "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T18:37:00+03:00"
+  "updatedAt": "2026-09-20T18:59:00+03:00"
 }
