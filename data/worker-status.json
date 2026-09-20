@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "Vercel preview/backoff evidence synchronized; continue dependency-safe non-deploy hardening while production retry window is active",
+  "currentTask": "C02 exact READY preview and R02 live preview headers merged/evidenced; continue independent non-deploy release/security hardening",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #98 merged as f3478eb8e999cc0b253c7c74afd6dcb00d7e972a with CI 35513769984 SUCCESS; F08/M01/C02 updated with READY preview + provider backoff evidence",
-  "nextTask": "Continue earliest independent precursor not requiring production deployment; do not retry Vercel production deployment before 2026-09-21T13:31:47Z / 16:31:47 Europe/Sofia.",
-  "message": "READY preview exists and recovery route is live, but production deployment acceptance remains blocked by Vercel daily free-plan quota. Provider supplied a real 24-hour retry window, now recorded. Continue non-deploy work.",
+  "lastCompletedTask": "PR #100 merged as 2e44604d9a6f3b409697901695018853b4fb52fa with CI 35514227913 SUCCESS; PR #101 merged as aabbc021d93f8db8394364eff9b1b55beae1fd82 with CI 35514306896 SUCCESS",
+  "nextTask": "Continue earliest dependency-safe release/security precursor that does not require production deployment or blocked admin access. Do not retry Vercel before 2026-09-21T13:42:48Z / 16:42:48 Europe/Sofia.",
+  "message": "C02 now knows the exact READY preview; R02 has real preview HTTPS/header evidence. Production deployment/TLS acceptance remains blocked by provider quota and protected-route access constraints.",
   "deferredBlockers": [
-    "F08 — Vercel production deployment acceptance blocked by `api-deployments-free-per-day`; provider says retry after 2026-09-21T13:31:47Z (16:31:47 Europe/Sofia). Do not retry earlier; when retrying, obey the global Supabase deployment lease law.",
+    "F08 — Vercel production deployment acceptance blocked by `api-deployments-free-per-day`; latest provider instruction on 2026-09-20T13:42:48Z says retry in 1 day. Do not retry before 2026-09-21T13:42:48Z (16:42:48 Europe/Sofia); obey the global Supabase deployment lease law on any future attempt.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T16:35:00+03:00"
+  "updatedAt": "2026-09-20T16:45:00+03:00"
 }

@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T16:35:00+03:00",
+  "updatedAt": "2026-09-20T16:45:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -86,7 +86,7 @@
           "acceptanceCriteria": "Production deployment READY; app and data JSON return 200",
           "evidenceRequired": "Deployment metadata + HTTP verification",
           "status": "blocked",
-          "evidence": "BLOCKED production-deployment acceptance still lacks a verified production-target deployment. New Vercel evidence on PR #98 at 2026-09-20T13:31:47Z returned `api-deployments-free-per-day` with the provider instruction `try again in 24 hours`; do not retry before 2026-09-21T13:31:47Z (2026-09-21 16:31:47 Europe/Sofia). Separately, an existing preview deployment is READY and read-only Vercel fetch proved `/demo/auth-recovery.html` HTTP 200 with expected CSP/HSTS/security headers, but that preview does not satisfy F08's production target. No manual deployment was attempted. — BLOCKED"
+          "evidence": "BLOCKED production-deployment acceptance still lacks a verified production-target deployment. Latest Vercel provider evidence from PR #101 at 2026-09-20T13:42:48Z returned `api-deployments-free-per-day` with `try again in 1 day`; do not retry before 2026-09-21T13:42:48Z (2026-09-21 16:42:48 Europe/Sofia). Existing preview deployment remains READY but does not satisfy F08. No manual deployment was attempted. — BLOCKED"
         },
         {
           "id": "F09",
@@ -604,7 +604,7 @@
           "acceptanceCriteria": "Production serves TLS and required headers; unsafe defaults removed",
           "evidenceRequired": "HTTP header test",
           "status": "red",
-          "evidence": "PARTIAL deploy-time security-header/TLS precursor: global vercel.json CSP/HSTS/X-Content-Type-Options/X-Frame-Options/Referrer-Policy/Permissions-Policy, exact same-origin + bound Supabase connect-src, /data no-store preserved, temporary unsafe-inline gap explicitly versioned. CI 35411624210 on 56a13af94d18af02d93db56431bec2054c7c7cce SUCCESS including R02 validator, API/security regressions, clean DB replay, restore and browser smoke. R02 remains RED pending F08 and live TLS/certificate/header/CSP runtime evidence. — PARTIAL PASS"
+          "evidence": "PARTIAL deploy-time security policy now includes real preview-runtime evidence. Read-only Vercel observation on deployment `dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q` / commit `77fe2a39...` proved HTTPS `/demo/auth-recovery.html` HTTP 200 with committed CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy and Permissions-Policy. `data/security-headers-policy.json` now records this exact preview observation, and the validator checks the live header values while still requiring production hostname/certificate-chain/full multi-route acceptance before GREEN. PR #101 exact-head CI `35514306896` SUCCESS; PR #101 merged as `aabbc021d93f8db8394364eff9b1b55beae1fd82`. R02 remains RED because production TLS/certificate-chain and full live production header smoke are unverified. — PARTIAL PASS"
         },
         {
           "id": "R03",
@@ -836,7 +836,7 @@
           "acceptanceCriteria": "Each releasable change gets preview and automated smoke test",
           "evidenceRequired": "Vercel deployment + test",
           "status": "red",
-          "evidence": "PARTIAL preview deployment evidence has materially advanced. Vercel deployment metadata reports a READY preview for the DPP project, and read-only fetch of `/demo/auth-recovery.html` returned HTTP 200 with production security headers. The connector could not complete protected multi-route verification because subsequent `/data/auth-config.json` and share-link requests redirected through Vercel SSO; no login/MFA/SSO bypass was attempted. Preview identity/core-route verification therefore remains incomplete and C02 stays RED. — PARTIAL PASS"
+          "evidence": "PARTIAL preview verification contract now records the exact observed READY Git preview instead of stale zero-deployment evidence. Canonical preview: deployment `dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q`, project `prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr`, commit `77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7`, branch `m21-export-shape-fresh-main-20260920`, target preview (`target=null`), source `git`. PR #100 exact-head CI `35514227913` completed SUCCESS after an initial rejected probe caught evidence-string drift; C02 validator now accepts the READY preview identity while still requiring live route/TLS/header evidence and prohibiting Vercel SSO bypass. PR #100 merged as `2e44604d9a6f3b409697901695018853b4fb52fa`. C02 remains RED because complete protected-route smoke and C01 GREEN are not proven. — PARTIAL PASS"
         },
         {
           "id": "C03",
