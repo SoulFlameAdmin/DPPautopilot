@@ -523,3 +523,10 @@ Append evidence here only after verification.
 - The inventory now reflects active Supabase Auth/Postgres/private Storage/Edge Functions rather than planned Storage: private `dpp-evidence`, caller-JWT `dpp-evidence-object`, and pre-upload size/SHA-256/content-type verification are recorded.
 - Implemented lifecycle precursors are also recorded: 30-day owner/admin terminal import purge, bounded evidence-byte export and non-destructive organization deletion-impact preview.
 - Destructive organization/user deletion remains disabled. R07 stays RED/PARTIAL pending M01–M13 GREEN, accepted retention/minimization, real authenticated evidence lifecycle and external-registry recipient/live-payload acceptance.
+
+
+### R10/R13 synthetic fire-recover incident drill — 2026-09-20
+- PR #129 exact head `b5fa74129184b5c328915074d4a675be8c346c36` completed full CI `35523442803` SUCCESS and merged as `5d224975672a56fa028f9942d8cacd41e6decca1`.
+- Twenty valid R09 events with one HTTP 503 fire `availability_5xx_rate` at exactly 5%, map to R13 `SEV1` / DPP operations owner, and prove a synthetic minute-5 acknowledgement inside the 15-minute target.
+- Every required incident phase is exercised and a later healthy monitoring window clears the alert; CI emits `r10-r13-monitoring-incident-drill.json`.
+- This is synthetic CI evidence only. R10/R13 remain RED/PARTIAL pending deployed R09 ingestion, approved live delivery, human acknowledgement/escalation and deployed production-like incident recovery evidence.
