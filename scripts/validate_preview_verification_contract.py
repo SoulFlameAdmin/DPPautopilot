@@ -13,7 +13,20 @@ assert contract.get("status")=="partial"
 canonical=contract["canonical_vercel"]
 assert canonical["project_id"]=="prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr"
 assert canonical["project_name"]=="dpp-autopilot"
-assert canonical["observed_deployments"]==0
+assert canonical["observed_deployments"]>=1
+
+observed=contract["observed_preview"]
+assert observed["deployment_id"]=="dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q"
+assert observed["project_id"]==canonical["project_id"]
+assert observed["project_name"]==canonical["project_name"]
+assert observed["environment"]=="preview"
+assert observed["state"]=="READY"
+assert observed["target"] is None
+assert observed["source"]=="git"
+assert observed["commit_sha"]=="77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7"
+assert observed["commit_ref"]=="m21-export-shape-fresh-main-20260920"
+assert observed["url"]=="dpp-autopilot-95xeakbem-dimitar-lambovs-projects.vercel.app"
+assert int(observed["ready_at_ms"])>=int(observed["created_at_ms"])
 
 req=contract["deployment_requirements"]
 assert req=={
@@ -52,9 +65,9 @@ for token in [
 
 remaining=" ".join(contract["remaining"])
 assert "C01 must be GREEN" in remaining
-assert "real preview deployment" in remaining
 assert "Automated live HTTP/TLS/header smoke evidence" in remaining
-assert "zero deployments" in contract["live_gap"]
+assert "Vercel SSO" in remaining
+assert "real READY preview" in contract["live_gap"]
 assert "No create/redeploy action was attempted" in contract["live_gap"]
 
-print("C02_PREVIEW_CONTRACT_PASS: exact preview deployment/commit/route/header evidence is versioned and fail-closed; zero live deployments remain explicitly recorded")
+print("C02_PREVIEW_CONTRACT_PASS: exact READY preview identity is versioned; protected live route/TLS/header acceptance remains fail-closed")
