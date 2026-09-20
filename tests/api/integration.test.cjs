@@ -188,17 +188,50 @@ function makeBackend(){
 
     if(rpc==='dpp_api_export_bundle'){
       state.exportCalls+=1;
+      const versions=state.passport?[{
+        passport_id:IDS.passport,
+        version_no:1,
+        snapshot:{status:state.passport.status}
+      }]:[];
+      const audit=state.passport?[{
+        id:1,
+        target_table:'dpp_passports',
+        target_id:IDS.passport,
+        action:'UPDATE'
+      }]:[];
+      const evidence=state.passport?[{
+        id:'ffffffff-ffff-4fff-8fff-ffffffffffff',
+        related_record_type:'passport',
+        related_record_id:IDS.passport,
+        storage_bucket:'dpp-evidence',
+        storage_path:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf',
+        original_filename:'report.pdf',
+        content_type:'application/pdf',
+        byte_size:2048,
+        sha256_hex:'a'.repeat(64),
+        metadata:{source:'integration'}
+      }]:[];
       return ok({
         schema_version:1,
         organization_id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+        organization:{id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',name:'Integration Org'},
+        generated_at:'2026-09-20T00:02:00Z',
+        records:{
+          battery_models:state.model?[state.model]:[],
+          battery_items:state.item?[state.item]:[],
+          passports:state.passport?[state.passport]:[],
+          passport_versions:versions,
+          audit_log:audit
+        },
+        evidence_manifest:evidence,
         counts:{
           battery_models:state.model?1:0,
           battery_items:state.item?1:0,
-          passports:state.passport?1:0
-        },
-        battery_models:state.model?[state.model]:[],
-        battery_items:state.item?[state.item]:[],
-        passports:state.passport?[state.passport]:[]
+          passports:state.passport?1:0,
+          passport_versions:versions.length,
+          audit_log:audit.length,
+          evidence_manifest:evidence.length
+        }
       });
     }
     return fail('XX999',`unexpected RPC ${rpc}`);
@@ -313,6 +346,19 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     assert.equal(bundle.counts.battery_models,1);
     assert.equal(bundle.counts.battery_items,1);
     assert.equal(bundle.counts.passports,1);
+    assert.equal(bundle.counts.passport_versions,1);
+    assert.equal(bundle.counts.audit_log,1);
+    assert.equal(bundle.counts.evidence_manifest,1);
+    assert.equal(bundle.records.battery_models[0].id,IDS.model);
+    assert.equal(bundle.records.battery_items[0].id,IDS.item);
+    assert.equal(bundle.records.passports[0].passport_id,IDS.passport);
+    assert.equal(bundle.records.passport_versions[0].passport_id,IDS.passport);
+    assert.equal(bundle.records.audit_log[0].target_id,IDS.passport);
+    assert.equal(bundle.evidence_manifest[0].storage_bucket,'dpp-evidence');
+    assert.equal(bundle.evidence_manifest[0].sha256_hex,'a'.repeat(64));
+    assert.equal(Object.prototype.hasOwnProperty.call(bundle.evidence_manifest[0],'object_bytes'),false);
+    assert.equal(Object.prototype.hasOwnProperty.call(bundle.evidence_manifest[0],'content_bytes'),false);
+    assert.equal(Object.prototype.hasOwnProperty.call(bundle.evidence_manifest[0],'signed_url'),false);
     assert.equal(backend.state.exportCalls,1);
   }finally{global.fetch=original;restore();}
 });
