@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T15:52:00+03:00",
+  "updatedAt": "2026-09-20T16:03:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -471,7 +471,7 @@
           "acceptanceCriteria": "Tenant-scoped export includes required records/history/evidence manifest",
           "evidenceRequired": "Integration/E2E test",
           "status": "red",
-          "evidence": "PARTIAL export/evidence precursor: /api/export + owner/admin-only dpp_api_export_bundle() exports active-tenant organisation/models/items/passports/version history/audit/evidence metadata manifest, excluding object bytes/access URLs. CI 35405402646 on 9e2b1eb5c60e3b3de3da4562edb03071a4edd06c SUCCESS; migration dpp_export_bundle applied to bound Supabase; runtime M21_EXPORT_BUNDLE_SUBSET_PASS; live ACL anon=false/authenticated=true with fixed search_path. M21 remains RED pending M10-M13 completion and deployed E2E export acceptance. — PARTIAL PASS"
+          "evidence": "PARTIAL export/evidence implementation now has production-shaped stateful API integration in addition to bound DB/RPC tenant/RBAC coverage. The T03 export fixture mirrors `dpp_api_export_bundle()` with `records` (models/items/passports/passport_versions/audit_log), `evidence_manifest`, organization metadata and count fields; assertions prove history/evidence metadata survive the HTTP layer while `object_bytes`, `content_bytes` and `signed_url` remain absent. Exact-head CI `35512145377` on `77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7` completed SUCCESS, including T03 matrix/report, stateful API integration, M21 DB tenant/RBAC subset and full security/browser regression. PR #95 merged as `62bb22fceb64fe964b51404142a6efa4e1448e44`. M21 remains RED pending M10-M13 completion and deployed E2E export acceptance. — PARTIAL PASS"
         },
         {
           "id": "M22",
@@ -747,7 +747,7 @@
           "acceptanceCriteria": "Positive/negative API flows pass",
           "evidenceRequired": "API test report",
           "status": "red",
-          "evidence": "PARTIAL API-integration acceptance coverage now validates 5 executable stateful integration tests and 9 scenarios across M17-M23. Fresh-main PR #93 adds passport create retry behavior to the end-to-end handler journey: identical retry returns the same passport without another physical create; divergent retry maps DP412 to stable HTTP 409 PASSPORT_CONFLICT without backend detail leakage. Exact-head CI `35484156404` on `3a44edbff0d33f79e8feeac22915496e2f8afa9d` completed SUCCESS; PR #93 merged as `25608199d232beeeae2b963159135ec4c48ccc44`. T03 remains RED pending M17-M23 GREEN and deployed HTTP integration. — PARTIAL PASS"
+          "evidence": "PARTIAL API-integration acceptance now validates 5 executable stateful tests and 9 scenarios across M17-M23, including passport-create retry semantics and production-shaped M21 export. The export journey checks real `records`/history/audit/evidence manifest structure, metadata integrity and absence of object bytes/access URLs. Exact-head CI `35512145377` on `77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7` completed SUCCESS; PR #95 merged as `62bb22fceb64fe964b51404142a6efa4e1448e44`. T03 remains RED pending M17-M23 GREEN and deployed HTTP integration. — PARTIAL PASS"
         },
         {
           "id": "T04",
