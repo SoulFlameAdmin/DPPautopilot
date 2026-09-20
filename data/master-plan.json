@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T02:58:00+03:00",
+  "updatedAt": "2026-09-20T03:15:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -390,7 +390,7 @@
           "acceptanceCriteria": "Actor/action/time/target/before-after metadata captured; app cannot alter past entries",
           "evidenceRequired": "DB policy tests",
           "status": "red",
-          "evidence": "PARTIAL immutable audit coverage is full-CI evidenced, including authorization-scope tenant switches: bound M12_TENANT_CONTEXT_AUDIT_PASS proves actor/action/time/target/before-after for active-tenant changes; critical audit and append-only DB suites pass. Full run 35423117317 SUCCESS includes both M12 subsets, clean replay and security guards. M12 remains RED because M03 is not GREEN. — PARTIAL PASS"
+          "evidence": "PARTIAL immutable critical audit coverage now includes production RBAC membership mutations. `M12_RBAC_AUDIT_PASS` proves owner-attributed membership role UPDATE records preserve viewer→editor before/after state, membership DELETE preserves the prior editor role, and both actor/history rows reject mutation. Exact-head CI `35478013319` on `bce99a08c02e56134ede996299ad5e0addcfd73e` completed SUCCESS; PR #72 merged as `22a250851cf5039ceb75a629e3f36e25eaa389da`. Existing tenant-context and critical audit subsets remain PASS. M12 remains RED because M03 is not GREEN and deployed authenticated acceptance is unavailable. — PARTIAL PASS"
         },
         {
           "id": "M13",
@@ -399,7 +399,7 @@
           "acceptanceCriteria": "Allowed files upload/download under tenant policy; type/size limits enforced",
           "evidenceRequired": "Storage tests",
           "status": "red",
-          "evidence": "PARTIAL evidence/storage hardening includes tenant-safe registration and reduced helper privilege. `dpp_evidence_storage_org_id(text)` is now SECURITY INVOKER because it only parses paths; table-reading `dpp_evidence_storage_registered(text)` remains SECURITY DEFINER for Storage RLS. Bound `M13_EVIDENCE_STORAGE_RLS_SUBSET_PASS` and global RPC guard pass after `dpp_internal_rpc_surface_hardening`; private `dpp-evidence` remains 10 MiB with PDF/PNG/JPEG/CSV/JSON allowlist and no direct metadata table grants. Full CI `35425179398` SUCCESS. M13 remains RED until M03 is GREEN and real authenticated Storage API byte upload/download/delete is proven. — PARTIAL PASS"
+          "evidence": "PARTIAL evidence/storage hardening now includes verified deployed bridge identity. Bound Supabase Edge Function `dpp-evidence-object` is ACTIVE version 1 with `verify_jwt=true`; deployed `index.ts` and `deno.json` are byte-for-byte exact with canonical `main` files (repo blobs `3bd862cb3526110b7793a511c96f854f717c0506` and `f6ca8454c56395e6085268c61831ffffe0326163`), deployed bundle SHA-256 `9ca527828da04bec19fba8e4b6afd82a710fe09b418e5f31112bacfe51f0e6ef`. Existing Storage RLS/policy/type/size guards remain PASS. M13 remains RED until M03 is GREEN and a normal authenticated user completes real byte upload/download/delete through the live function; no admin/auth bypass is used. — PARTIAL PASS"
         },
         {
           "id": "M14",
