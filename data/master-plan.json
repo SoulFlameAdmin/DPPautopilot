@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T21:09:00+03:00",
+  "updatedAt": "2026-09-20T21:16:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -390,7 +390,7 @@
           "acceptanceCriteria": "Actor/action/time/target/before-after metadata captured; app cannot alter past entries",
           "evidenceRequired": "DB policy tests",
           "status": "red",
-          "evidence": "PARTIAL immutable audit coverage now includes production-RPC RBAC membership INSERT/UPDATE/DELETE attribution. Existing `M12_TENANT_CONTEXT_AUDIT_PASS`, critical audit and append-only suites remain valid. Exact-head CI `35479402511` on `1a524ef3f58b3ffd3a855b4fb77a5ebc7eacb97f` completed SUCCESS; `Run M12 RBAC audit trail` proves owner-attributed member add INSERT audit with tenant/target/role snapshot, role-change before/after, deletion snapshot, and immutable history. PR #80 merged as `ab3296549376c4bde27dbb7b89e26c22eb3442b6`. M12 remains RED because M03 is not GREEN and deployed authenticated acceptance is unavailable. — PARTIAL PASS"
+          "evidence": "PARTIAL immutable critical audit coverage now includes recursive credential-key minimization before snapshot insertion. Migration `dpp_audit_snapshot_secret_redaction` is applied in bound Supabase as `20260920181053`; `dpp_redact_audit_json(jsonb)` redacts obvious credential-bearing JSON keys (password/passwd, secret/token variants, authorization, API-key variants, client secret, credential(s)) in audit copies only, while actor/tenant/target derivation uses the original row and source business/regulatory data remains unchanged. Direct anon/authenticated EXECUTE on the helper is revoked. Bound BEGIN/ROLLBACK regression returned `M12_AUDIT_LOG_SUBSET_PASS`; exact-head `d4b19cd997bb054f95e4df2e57207d258600133f` completed full CI `35528258200` SUCCESS and PR #132 merged as `db3cd9adf6bf9d6d66ff2f3e2cb70ac0bccb56df`. M12 remains RED because M03 is RED and broader accepted audit retention/minimization/deployed acceptance remain pending. — PARTIAL PASS"
         },
         {
           "id": "M13",
@@ -649,7 +649,7 @@
           "acceptanceCriteria": "Personal/business data, purpose, location, processor and retention recorded",
           "evidenceRequired": "`docs/PRIVACY_DATA_INVENTORY.md`",
           "status": "red",
-          "evidence": "PARTIAL privacy inventory is now synchronized to the actual deployed DPP data lifecycle rather than stale planned-Storage assumptions. PR #127 updates Supabase processor scope to Auth/Postgres/private Storage/Edge Functions, records deployed `dpp-evidence` + caller-JWT `dpp-evidence-object`, pre-upload SHA-256/size/type verification, implemented 30-day owner/admin terminal import purge, and non-destructive organization deletion-impact preview while keeping destructive deletion disabled. Exact-head `8a7af65ee0b2a4a9535bb629067dd64f8d8fdb23` completed full CI `35523068588` SUCCESS and merged as `2dc37959394ed4c55e93e647546f4492307cd9e3`. R07 remains RED pending M01-M13 GREEN, accepted retention periods/minimization, real authenticated evidence lifecycle acceptance, and external-registry recipient/live-payload acceptance. — PARTIAL PASS"
+          "evidence": "PARTIAL privacy inventory now includes deployed Storage/Edge/lifecycle controls plus a technical audit minimization precursor. Bound migration `dpp_audit_snapshot_secret_redaction` version `20260920181053` recursively removes obvious credential-bearing values from immutable audit copies without modifying source rows; inventory v3 records this control while preserving broader personal/confidential-field minimization and retention gaps. Transactional bound regression returned `M12_AUDIT_LOG_SUBSET_PASS`; exact-head full CI `35528258200` on `d4b19cd997bb054f95e4df2e57207d258600133f` SUCCESS; PR #132 merged as `db3cd9adf6bf9d6d66ff2f3e2cb70ac0bccb56df`. R07 remains RED pending M01-M13 GREEN plus accepted passport/registry/evidence/audit retention, external-recipient terms and destructive deletion policy. — PARTIAL PASS"
         },
         {
           "id": "R08",
@@ -658,7 +658,7 @@
           "acceptanceCriteria": "User/org deletion and export follow defined policy with audit-safe exceptions",
           "evidenceRequired": "Integration tests",
           "status": "red",
-          "evidence": "PARTIAL fail-closed retention/deletion/export precursor now includes a non-destructive owner/admin organization deletion-impact preview. Bound migration `dpp_org_deletion_impact_preview` is applied as `20260920162228`; `dpp_api_org_deletion_impact()` reports tenant-scoped membership/context/product/passport/import/registry/evidence/audit counts, declared evidence bytes, external Storage enumeration requirement, Auth-user boundary and six machine-readable blocker codes while explicitly returning `ready_for_destructive_delete=false` and exposing no destructive delete surface. Bound BEGIN/ROLLBACK regression returned `R08_RETENTION_DELETION_SUBSET_PASS`. Exact-head `f0d099853af80245f60f4c6eb56ea7116f4f37ef` completed full CI `35522533071` SUCCESS and PR #125 merged as `550f3535ef94b771b39c28067229bf3cbea54b3d`. R08 remains RED pending R07 plus accepted regulatory retention, exhaustive evidence packaging/storage deletion lifecycle, audit minimization and Auth account deletion workflow. — PARTIAL PASS"
+          "evidence": "PARTIAL fail-closed retention/deletion/export precursor now includes a non-destructive owner/admin organization deletion-impact preview. Bound migration `dpp_org_deletion_impact_preview` is applied as `20260920162228`; `dpp_api_org_deletion_impact()` reports tenant-scoped membership/context/product/passport/import/registry/evidence/audit counts, declared evidence bytes, external Storage enumeration requirement, Auth-user boundary and six machine-readable blocker codes while explicitly returning `ready_for_destructive_delete=false` and exposing no destructive delete surface. Bound BEGIN/ROLLBACK regression returned `R08_RETENTION_DELETION_SUBSET_PASS`. Exact-head `f0d099853af80245f60f4c6eb56ea7116f4f37ef` completed full CI `35522533071` SUCCESS and PR #125 merged as `550f3535ef94b771b39c28067229bf3cbea54b3d`. R08 remains RED pending R07 plus accepted regulatory retention, exhaustive evidence packaging/storage deletion lifecycle, audit minimization and Auth account deletion workflow. Audit privacy hardening now also redacts obvious credential-bearing JSON keys from immutable audit snapshots before insert via bound migration `20260920181053`; source rows remain unchanged and broader audit retention/minimization exceptions remain intentionally unresolved. Exact-head full CI `35528258200` SUCCESS; PR #132 merged as `db3cd9adf6bf9d6d66ff2f3e2cb70ac0bccb56df`. — PARTIAL PASS"
         },
         {
           "id": "R09",
