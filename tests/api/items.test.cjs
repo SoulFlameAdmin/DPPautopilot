@@ -123,7 +123,7 @@ test('passport-protected delete maps to stable conflict', async () => {
   global.fetch=async()=>({ok:false,async json(){return {code:'DP308',message:'do not leak'};}});
   try {
     const res=makeRes();
-    await handler(makeReq('DELETE',{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'}),res);
+    await handler(makeReq('DELETE',{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',expected_updated_at:'2026-09-20T00:00:00.000Z'}),res);
     assert.equal(res.statusCode,409);
     assert.equal(JSON.parse(res.body).error.code,'ITEM_HAS_PASSPORT');
   } finally { global.fetch=original; restore(); }
@@ -134,7 +134,7 @@ test('cross-tenant item not-found maps to 404 without detail leak', async () => 
   global.fetch=async()=>({ok:false,async json(){return {code:'DP306',message:'internal detail'};}});
   try {
     const res=makeRes();
-    await handler(makeReq('DELETE',{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'}),res);
+    await handler(makeReq('DELETE',{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',expected_updated_at:'2026-09-20T00:00:00.000Z'}),res);
     const payload=JSON.parse(res.body);
     assert.equal(res.statusCode,404);
     assert.equal(payload.error.code,'ITEM_NOT_FOUND');
@@ -216,5 +216,58 @@ test('stale item write maps DP309 to stable 409', async () => {
     assert.equal(res.statusCode,409);
     assert.equal(JSON.parse(res.body).error.code,'STALE_WRITE');
     assert.equal(res.body.includes('internal stale timestamp'),false);
+  } finally { global.fetch=original; restore(); }
+});
+
+
+test('DELETE requires expected_updated_at before upstream access', async () => {
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true; throw new Error('unexpected');};
+  try {
+    const res=makeRes();
+    await handler(makeReq('DELETE',{
+      id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+    }),res);
+    assert.equal(res.statusCode,428);
+    assert.equal(JSON.parse(res.body).error.code,'WRITE_PRECONDITION_REQUIRED');
+    assert.equal(called,false);
+  } finally { global.fetch=original; }
+});
+
+test('DELETE forwards optimistic concurrency token to checked item delete RPC', async () => {
+  const restore=withEnv(), original=global.fetch;
+  let seen;
+  global.fetch=async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';}};
+  };
+  try {
+    const res=makeRes();
+    await handler(makeReq('DELETE',{
+      id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      expected_updated_at:'2026-09-20T00:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,200);
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_items_delete_checked');
+    assert.deepEqual(JSON.parse(seen.options.body),{
+      p_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      p_expected_updated_at:'2026-09-20T00:00:00.000Z'
+    });
+  } finally { global.fetch=original; restore(); }
+});
+
+test('stale item delete maps DP309 to stable 409', async () => {
+  const restore=withEnv(), original=global.fetch;
+  global.fetch=async()=>({ok:false,async json(){return {code:'DP309',message:'internal stale delete timestamp'};}});
+  try {
+    const res=makeRes();
+    await handler(makeReq('DELETE',{
+      id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      expected_updated_at:'2026-09-20T00:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,409);
+    assert.equal(JSON.parse(res.body).error.code,'STALE_WRITE');
+    assert.equal(res.body.includes('internal stale delete timestamp'),false);
   } finally { global.fetch=original; restore(); }
 });
