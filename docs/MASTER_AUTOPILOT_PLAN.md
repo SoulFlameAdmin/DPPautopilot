@@ -479,3 +479,10 @@ Append evidence here only after verification.
 - Shared-backend denial returns canonical HTTP 429 before business RPC; shared-backend failure is fail-closed HTTP 503 `RATE_LIMIT_BACKEND_UNAVAILABLE`.
 - Anonymous public passport identifier GET remains deliberately local-only because the shared RPC is authenticated-only and no anonymous distributed identity bypass is introduced.
 - R05 remains RED/PARTIAL pending M17–M20 GREEN, explicit production enablement, anonymous distributed protection, multi-isolate evidence and real-network load/abuse acceptance.
+
+
+### M21/R08 bounded evidence-byte export precursor — 2026-09-20
+- PR #117 exact head `c869850c39b3c94c82025bf6a0ca5940fe915cf5` completed full CI `35520561209` SUCCESS and merged as `be1a9f28ecce3dbc9be67a24e200fc93f3be6ddf`.
+- Owner/admin `GET /api/export?include_evidence=1` now augments the existing tenant export with real private evidence bytes obtained through the caller-JWT `dpp-evidence-object` bridge.
+- Each object is checked against manifest `byte_size` and SHA-256 before inclusion; verified bytes are base64 encoded. Missing objects, integrity mismatch and aggregate inline size >25 MiB fail closed with stable public errors.
+- M21 and R08 remain RED/PARTIAL pending declared dependencies, exhaustive large-tenant packaging/streaming strategy, final authenticated Storage runtime acceptance, regulatory retention decisions and deployed production acceptance.
