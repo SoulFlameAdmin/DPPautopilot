@@ -180,6 +180,10 @@
     {
       "version": "20260920182832",
       "name": "dpp_registry_payload_credential_guard"
+    },
+    {
+      "version": "20260920183843",
+      "name": "dpp_registry_payload_guard_cleanup"
     }
   ],
   "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
