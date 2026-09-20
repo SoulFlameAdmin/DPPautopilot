@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/retention-deletion-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==4
+assert policy.get("version")==5
 assert policy.get("task")=="R08"
 assert policy.get("status")=="partial"
 assert policy.get("scope","").startswith("DPP Autopilot")
@@ -28,7 +28,16 @@ assert pagination.get("max_limit")==100
 assert pagination.get("byte_cap_scope")=="selected page only"
 for field in ["manifest_object_count","offset","limit","has_more","next_offset"]:
     assert field in pagination.get("page_metadata",[]), f"R08 evidence pagination missing {field}"
-assert "deterministic pagination" in export.get("current_gap","")
+resume=pagination.get("resume_manifest_sha256",{})
+assert resume.get("query_param")=="evidence_manifest_sha256"
+assert resume.get("response_field")=="manifest_sha256"
+assert resume.get("algorithm")=="SHA-256 over canonicalized evidence manifest identity/size/hash tuples"
+assert resume.get("mismatch_status")==409
+assert resume.get("mismatch_code")=="EVIDENCE_EXPORT_MANIFEST_CHANGED"
+assert resume.get("invalid_status")==400
+assert resume.get("invalid_code")=="EVIDENCE_EXPORT_MANIFEST_INVALID"
+assert resume.get("failure_stage")=="before evidence object download"
+assert "manifest SHA-256 consistency token" in export.get("current_gap","")
 
 rules={r["id"]:r for r in policy.get("retention_rules",[])}
 expected={
@@ -116,6 +125,7 @@ for token in [
     "evidencePageOptions",
     "next_offset",
     "has_more",
+    "evidenceManifestSha256",
 ]:
     assert token in export_api, f"R08/M21 evidence byte export missing {token}"
 for token in [
@@ -126,7 +136,8 @@ for token in [
     "paged include_evidence fetches only selected manifest slice",
     "paged include_evidence validates pagination before export RPC",
     "paged include_evidence ignores unselected oversized manifest objects",
+    "manifest consistency token allows deterministic resume",
 ]:
     assert token in export_test, f"R08/M21 export regression missing {token}"
 
-print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; terminal staging purge, deterministic paged integrity-checked evidence export and owner/admin non-destructive deletion-impact preview are implemented while final package/runtime/regulatory/storage/audit/auth blockers remain explicit")
+print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; terminal staging purge, deterministic paged/resumable integrity-checked evidence export and owner/admin non-destructive deletion-impact preview are implemented while final package/runtime/regulatory/storage/audit/auth blockers remain explicit")
