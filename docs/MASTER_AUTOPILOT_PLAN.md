@@ -561,3 +561,11 @@ Append evidence here only after verification.
 - Later pages may send `evidence_manifest_sha256`; changed manifests fail closed with `409 EVIDENCE_EXPORT_MANIFEST_CHANGED` before object download, malformed digests with `400 EVIDENCE_EXPORT_MANIFEST_INVALID` before export RPC.
 - Existing per-object byte-size/SHA-256 checks and 25 MiB per-page cap remain enforced.
 - M21/R08 remain RED/PARTIAL pending declared dependencies, final signed/archive/streaming package contract and real deployed large-tenant acceptance.
+
+
+### T03 resumable paged evidence export integration — 2026-09-20
+- PR #140 exact head `f39459abecd9471f8768887c21338eb181582468` completed full CI `35531391402` SUCCESS and merged as `44c74dec0c84063b47868992d96dcadd0c02f45e`.
+- The stateful model→item→passport→export flow now uses two evidence objects: page 1 captures `manifest_sha256` + `next_offset`, page 2 resumes with `evidence_manifest_sha256`.
+- Both pages verify SHA-256/base64 integrity through the production-shaped `dpp-evidence-object` route and keep a stable manifest digest.
+- The first PR run correctly failed on an outdated integration-report matrix-version assertion; that drift was fixed before acceptance.
+- T03 remains RED/PARTIAL pending M17–M23 GREEN plus real authenticated Storage, live manifest-drift and deployed HTTP integration acceptance.
