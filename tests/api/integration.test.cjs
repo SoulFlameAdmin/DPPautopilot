@@ -551,3 +551,89 @@ test('invalid import remains non-committable through HTTP semantic contract',asy
     assert.equal(res.body.includes('invalid commit internal'),false);
   }finally{global.fetch=original;restore();}
 });
+
+
+test('resumable export detects manifest drift between pages before object fetch',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const firstBytes=Buffer.from('stable-first-page','utf8');
+  const secondBytes=Buffer.from('stable-second-page','utf8');
+  const changedBytes=Buffer.from('changed-second-page','utf8');
+  const baseManifest=[
+    {
+      id:'11111111-1111-4111-8111-111111111111',
+      storage_path:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/drift/one.bin',
+      original_filename:'one.bin',
+      content_type:'application/octet-stream',
+      byte_size:firstBytes.length,
+      sha256_hex:crypto.createHash('sha256').update(firstBytes).digest('hex')
+    },
+    {
+      id:'22222222-2222-4222-8222-222222222222',
+      storage_path:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/drift/two.bin',
+      original_filename:'two.bin',
+      content_type:'application/octet-stream',
+      byte_size:secondBytes.length,
+      sha256_hex:crypto.createHash('sha256').update(secondBytes).digest('hex')
+    }
+  ];
+  const changedManifest=[
+    baseManifest[0],
+    {
+      ...baseManifest[1],
+      byte_size:changedBytes.length,
+      sha256_hex:crypto.createHash('sha256').update(changedBytes).digest('hex')
+    }
+  ];
+  let exportCalls=0;
+  let objectCalls=0;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      exportCalls+=1;
+      return {
+        ok:true,
+        async json(){
+          return {
+            schema_version:1,
+            organization_id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+            evidence_manifest:exportCalls===1?baseManifest:changedManifest
+          };
+        }
+      };
+    }
+    objectCalls+=1;
+    const parsed=new URL(String(url));
+    const path=parsed.searchParams.get('path');
+    assert.equal(path,baseManifest[0].storage_path);
+    return {
+      ok:true,
+      async arrayBuffer(){
+        return firstBytes.buffer.slice(firstBytes.byteOffset,firstBytes.byteOffset+firstBytes.byteLength);
+      }
+    };
+  };
+  try{
+    let res=makeRes();
+    await exportApi(req('GET',null,{
+      include_evidence:'1',
+      evidence_offset:'0',
+      evidence_limit:'1'
+    }),res);
+    assert.equal(res.statusCode,200);
+    const first=json(res).data;
+    assert.match(first.evidence_export.manifest_sha256,/^[0-9a-f]{64}$/);
+    assert.equal(first.evidence_export.next_offset,1);
+    assert.equal(objectCalls,1);
+
+    res=makeRes();
+    await exportApi(req('GET',null,{
+      include_evidence:'1',
+      evidence_offset:'1',
+      evidence_limit:'1',
+      evidence_manifest_sha256:first.evidence_export.manifest_sha256
+    }),res);
+    assert.equal(res.statusCode,409);
+    assert.equal(json(res).error.code,'EVIDENCE_EXPORT_MANIFEST_CHANGED');
+    assert.equal(objectCalls,1);
+    assert.equal(exportCalls,2);
+  }finally{global.fetch=original;restore();}
+});
