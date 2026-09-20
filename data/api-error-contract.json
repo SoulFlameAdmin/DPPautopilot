@@ -369,6 +369,18 @@
     "RATE_LIMIT_BACKEND_UNAVAILABLE": {
       "http_status": 503,
       "message": "Request protection is temporarily unavailable."
+    },
+    "EVIDENCE_EXPORT_TOO_LARGE": {
+      "http_status": 413,
+      "message": "Evidence bytes exceed the inline export limit."
+    },
+    "EVIDENCE_EXPORT_INTEGRITY_FAILED": {
+      "http_status": 502,
+      "message": "Evidence export integrity verification failed."
+    },
+    "EVIDENCE_EXPORT_OBJECT_UNAVAILABLE": {
+      "http_status": 502,
+      "message": "An evidence object could not be exported."
     }
   }
 }

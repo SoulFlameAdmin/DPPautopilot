@@ -2,6 +2,7 @@
 
 const test=require('node:test');
 const assert=require('node:assert/strict');
+const crypto=require('node:crypto');
 const handler=require('../../api/export.js');
 
 function makeRes(){
@@ -11,8 +12,8 @@ function makeRes(){
     end(value){this.body=value||'';}
   };
 }
-function makeReq(method='GET',auth='Bearer test-token'){
-  return {method,headers:auth?{authorization:auth}:{}};
+function makeReq(method='GET',auth='Bearer test-token',query={}){
+  return {method,headers:auth?{authorization:auth}:{},query};
 }
 function withEnv(){
   const oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
@@ -91,4 +92,148 @@ test('unsupported methods return 405',async()=>{
   await handler(makeReq('POST'),res);
   assert.equal(res.statusCode,405);
   assert.equal(res.headers.allow,'GET');
+});
+
+
+test('include_evidence downloads bytes through caller-JWT bridge and verifies integrity',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('M21 evidence bytes','utf8');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  const calls=[];
+  global.fetch=async(url,options)=>{
+    calls.push({url,options});
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {
+        ok:true,
+        async json(){return {
+          schema_version:1,
+          organization_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+          evidence_manifest:[{
+            id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+            storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/report.json',
+            original_filename:'report.json',
+            content_type:'application/json',
+            byte_size:bytes.length,
+            sha256_hex:sha256
+          }]
+        };}
+      };
+    }
+    assert.equal(
+      url,
+      'https://example.supabase.co/functions/v1/dpp-evidence-object?path=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa%2Fevidence%2Freport.json'
+    );
+    assert.equal(options.method,'GET');
+    assert.equal(options.headers.Authorization,'Bearer test-token');
+    assert.equal(options.headers.apikey,'anon-key');
+    return {
+      ok:true,
+      async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}
+    };
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{include_evidence:'1'}),res);
+    assert.equal(res.statusCode,200);
+    const payload=JSON.parse(res.body).data;
+    assert.equal(payload.evidence_export.included,true);
+    assert.equal(payload.evidence_export.object_count,1);
+    assert.equal(payload.evidence_export.total_bytes,bytes.length);
+    assert.equal(payload.evidence_export.integrity,'sha256_verified');
+    assert.equal(payload.evidence_objects[0].content_base64,bytes.toString('base64'));
+    assert.equal(payload.evidence_objects[0].sha256_hex,sha256);
+    assert.equal(calls.length,2);
+  }finally{global.fetch=original;restore();}
+});
+
+test('include_evidence fails closed on hash mismatch',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('tampered','utf8');
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {
+        ok:true,
+        async json(){return {
+          evidence_manifest:[{
+            id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+            storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/report.json',
+            original_filename:'report.json',
+            content_type:'application/json',
+            byte_size:bytes.length,
+            sha256_hex:'0'.repeat(64)
+          }]
+        };}
+      };
+    }
+    return {
+      ok:true,
+      async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}
+    };
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{include_evidence:'true'}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_INTEGRITY_FAILED');
+    assert.equal(res.body.includes('tampered'),false);
+  }finally{global.fetch=original;restore();}
+});
+
+test('include_evidence rejects declared total beyond inline memory limit before object download',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  let objectCalls=0;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {
+        ok:true,
+        async json(){return {
+          evidence_manifest:[{
+            id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+            storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/large.pdf',
+            original_filename:'large.pdf',
+            content_type:'application/pdf',
+            byte_size:handler._test.MAX_INLINE_EVIDENCE_BYTES+1,
+            sha256_hex:'a'.repeat(64)
+          }]
+        };}
+      };
+    }
+    objectCalls+=1;
+    throw new Error('object fetch must not occur');
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{include_evidence:'1'}),res);
+    assert.equal(res.statusCode,413);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_TOO_LARGE');
+    assert.equal(objectCalls,0);
+  }finally{global.fetch=original;restore();}
+});
+
+test('include_evidence maps unavailable object to stable export error',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {
+        ok:true,
+        async json(){return {
+          evidence_manifest:[{
+            id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+            storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/missing.pdf',
+            original_filename:'missing.pdf',
+            content_type:'application/pdf',
+            byte_size:5,
+            sha256_hex:'a'.repeat(64)
+          }]
+        };}
+      };
+    }
+    return {ok:false,status:404,async arrayBuffer(){return new ArrayBuffer(0);}};
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{include_evidence:'1'}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE');
+  }finally{global.fetch=original;restore();}
 });

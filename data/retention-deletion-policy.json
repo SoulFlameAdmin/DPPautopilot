@@ -1,12 +1,20 @@
 {
-  "version": 1,
+  "version": 2,
   "task": "R08",
   "status": "partial",
   "scope": "DPP Autopilot only; shared Supabase non-dpp_* data is excluded.",
   "export": {
-    "implementation": "M21 dpp_api_export_bundle() owner/admin active-tenant export",
+    "implementation": "M21 dpp_api_export_bundle() owner/admin active-tenant export + optional serverless evidence-byte augmentation",
     "required_before_org_deletion": true,
-    "current_gap": "Evidence object bytes are not included; only the evidence metadata manifest is exported."
+    "evidence_bytes_precursor": {
+      "endpoint": "GET /api/export?include_evidence=1",
+      "authorization": "owner/admin enforced by dpp_api_export_bundle(); caller JWT reused for private dpp-evidence object reads",
+      "integrity": "byte_size + SHA-256 verified against evidence_manifest before inclusion",
+      "encoding": "base64",
+      "inline_limit_bytes": 26214400,
+      "failure_mode": "fail closed on unavailable object, integrity mismatch, or size limit"
+    },
+    "current_gap": "Inline evidence bytes are implemented/tested only as a bounded precursor; exhaustive large-tenant export/package streaming and real authenticated Storage roundtrip/deployed acceptance remain unproven."
   },
   "retention_rules": [
     {
@@ -80,7 +88,7 @@
     "fail_closed": true,
     "readiness_rpc": "dpp_api_retention_status()",
     "blockers": [
-      "full export including evidence object bytes not proven",
+      "exhaustive production evidence-byte export/package acceptance not proven",
       "passport/version regulatory retention period not accepted",
       "registry submission retention/external recipient terms not accepted",
       "evidence storage deletion lifecycle not accepted",
