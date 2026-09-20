@@ -471,3 +471,11 @@ Append evidence here only after verification.
 - Bound runtime ACL evidence: `rls_enabled=true`, `anon_select=false`, `auth_select=false`, `anon_exec=false`, `auth_exec=true`, `security_definer=true`. Raw IP addresses and bearer credentials are not stored in shared bucket keys.
 - Exact-head CI `35519149174` on `7dd12e8dba2905c5a4bd946ae804341a7a544071` completed SUCCESS, including C04 applied-migration gate, clean PostgreSQL replay, R05 policy/API suite, `R05_SHARED_RATE_LIMIT_BACKEND_PASS`, global RLS/RPC security guards, restore drill and browser regression. PR #113 merged as `95bed9142570591f16f8fbb4eecf213fd633fb24`.
 - R05 remains RED/PARTIAL: M17–M20 are not all GREEN; deployed API enforcement is still process-local; anonymous public passport distributed protection and deployed multi-isolate/real-network load acceptance remain unproven. No Vercel deployment was attempted.
+
+
+### R05 shared runtime wiring — 2026-09-20
+- PR #115 exact head `cfe8302c3000a1757d3c7e6939627995a6315515` completed full CI `35520015959` SUCCESS and merged as `00ea0345448758a70087f9deaf9c61ae235ec0c6`.
+- All eight serverless API surfaces retain local pre-auth abuse budgets. Authenticated paths additionally consume atomic Supabase network+credential budgets when `DPP_SHARED_RATE_LIMIT_ENABLED=true`.
+- Shared-backend denial returns canonical HTTP 429 before business RPC; shared-backend failure is fail-closed HTTP 503 `RATE_LIMIT_BACKEND_UNAVAILABLE`.
+- Anonymous public passport identifier GET remains deliberately local-only because the shared RPC is authenticated-only and no anonymous distributed identity bypass is introduced.
+- R05 remains RED/PARTIAL pending M17–M20 GREEN, explicit production enablement, anonymous distributed protection, multi-isolate evidence and real-network load/abuse acceptance.
