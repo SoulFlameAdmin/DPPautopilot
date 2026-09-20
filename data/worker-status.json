@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T03 evidence-byte export integration merged and evidenced; continuing T07/R05 shared-limiter concurrency precursor",
+  "currentTask": "T07/R05 shared limiter concurrency merged and evidenced; continuing next independent non-deploy precursor",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #119 merged as 2bae81b3ee3e3b3dd7b4d3e5f029b835e98c7b25 after exact-head full CI 35521129684 SUCCESS; T03 now exercises opt-in SHA-256 verified evidence-byte export",
-  "nextTask": "Validate/merge T03 evidence sync, then add synthetic concurrent shared-limiter load coverage without promoting T07/R05 to GREEN.",
-  "message": "T03 now matches the current M21 evidence-byte export contract. Real deployed/authenticated Storage HTTP acceptance remains unresolved, so T03 stays RED/PARTIAL.",
+  "lastCompletedTask": "PR #121 merged as 79abc50529909d7213806947b91d0d95613ac1fd after exact-head full CI 35521547459 SUCCESS; shared concurrency profile proves 40 allowed / 10 denied with zero backend errors",
+  "nextTask": "Validate/merge T07/R05 evidence sync, then continue the earliest dependency-safe precursor reducing remaining internal acceptance gaps.",
+  "message": "Shared limiter concurrency is now covered in CI, but R05/T07 remain RED pending declared dependencies and real deployed multi-isolate/network load acceptance.",
   "deferredBlockers": [
     "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T19:09:00+03:00"
+  "updatedAt": "2026-09-20T19:10:00+03:00"
 }

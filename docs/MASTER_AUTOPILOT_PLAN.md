@@ -493,3 +493,10 @@ Append evidence here only after verification.
 - The stateful model→item→passport→export flow now requests `GET /api/export?include_evidence=1`.
 - The integration backend serves the evidence object through the production Edge Function route shape and proves byte-size/SHA-256 verification, `sha256_verified`, correct base64 content and no signed URL leakage.
 - T03 remains RED/PARTIAL pending M17–M23 GREEN plus real authenticated Storage and deployed HTTP integration acceptance.
+
+
+### T07/R05 shared limiter concurrency precursor — 2026-09-20
+- PR #121 exact head `b48a45a562005f539fc5248f61d23650fc0f5414` completed full CI `35521547459` SUCCESS and merged as `79abc50529909d7213806947b91d0d95613ac1fd`.
+- A synthetic atomic shared-backend load profile runs 50 concurrent authenticated-write checks against the same network+credential pseudonymous buckets.
+- Acceptance is exact: configured budget 40 → 40 allowed, 10 denied, 100 shared RPC calls, 2 shared buckets, 0 backend errors.
+- This is in-process/CI evidence only. R05/T07 remain RED/PARTIAL pending declared dependencies and real deployed HTTP/TLS, hosting isolation/cold starts, Supabase latency/pooling and production-like load acceptance.
