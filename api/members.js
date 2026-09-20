@@ -35,8 +35,8 @@ function mapDatabaseError(data){
 }
 
 async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch){
-  const base=env.SUPABASE_URL;
-  const key=env.SUPABASE_ANON_KEY;
+  const base=env.DPP_SUPABASE_URL||env.SUPABASE_URL;
+  const key=env.DPP_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
   if(!base||!key){
     const error=new Error('SERVER_CONFIGURATION_MISSING');
     error.status=500;
