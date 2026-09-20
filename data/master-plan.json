@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T19:18:00+03:00",
+  "updatedAt": "2026-09-20T19:27:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -658,7 +658,7 @@
           "acceptanceCriteria": "User/org deletion and export follow defined policy with audit-safe exceptions",
           "evidenceRequired": "Integration tests",
           "status": "red",
-          "evidence": "PARTIAL fail-closed retention/deletion/export precursor now includes bounded evidence-byte export in addition to terminal import purge and destructive-organization-delete guard. `GET /api/export?include_evidence=1` reuses caller JWT against the private evidence bridge, verifies byte_size + SHA-256, and includes verified base64 bytes with a 25 MiB aggregate inline limit; unavailable/tampered/oversize objects fail closed. Exact-head full CI `35520561209` on `c869850c39b3c94c82025bf6a0ca5940fe915cf5` SUCCESS; PR #117 merged as `be1a9f28ecce3dbc9be67a24e200fc93f3be6ddf`. R08 remains RED pending R07 plus final regulatory retention, exhaustive evidence packaging, authenticated Storage runtime acceptance, immutable audit/auth-account deletion rules and deployed acceptance. — PARTIAL PASS"
+          "evidence": "PARTIAL fail-closed retention/deletion/export precursor now includes a non-destructive owner/admin organization deletion-impact preview. Bound migration `dpp_org_deletion_impact_preview` is applied as `20260920162228`; `dpp_api_org_deletion_impact()` reports tenant-scoped membership/context/product/passport/import/registry/evidence/audit counts, declared evidence bytes, external Storage enumeration requirement, Auth-user boundary and six machine-readable blocker codes while explicitly returning `ready_for_destructive_delete=false` and exposing no destructive delete surface. Bound BEGIN/ROLLBACK regression returned `R08_RETENTION_DELETION_SUBSET_PASS`. Exact-head `f0d099853af80245f60f4c6eb56ea7116f4f37ef` completed full CI `35522533071` SUCCESS and PR #125 merged as `550f3535ef94b771b39c28067229bf3cbea54b3d`. R08 remains RED pending R07 plus accepted regulatory retention, exhaustive evidence packaging/storage deletion lifecycle, audit minimization and Auth account deletion workflow. — PARTIAL PASS"
         },
         {
           "id": "R09",
