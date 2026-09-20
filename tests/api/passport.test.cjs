@@ -215,3 +215,38 @@ test('stale passport write maps DP411 to stable 409', async () => {
     assert.equal(res.body.includes('internal stale timestamp'),false);
   } finally { global.fetch=original; restore(); }
 });
+
+test('public GET strips unexpected private and tenant metadata from upstream response', async () => {
+  const restore=withEnv(), original=global.fetch;
+  global.fetch=async()=>({
+    ok:true,
+    async json(){
+      return {
+        passport_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        battery_item_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        organization_id:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        unique_identifier:'urn:dpp:public-safe:1',
+        status:'active',
+        public_payload:{model:{identification:{model_id:'SAFE'}}},
+        private_payload:{secret_marker:'M10_HTTP_PRIVATE_SECRET'},
+        created_by:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        created_at:'2026-09-20T00:00:00.000Z',
+        updated_at:'2026-09-20T00:01:00.000Z'
+      };
+    }
+  });
+  try {
+    const res=makeRes();
+    await handler(makeReq('GET',null,{identifier:'urn:dpp:public-safe:1'},null),res);
+    assert.equal(res.statusCode,200);
+    const payload=JSON.parse(res.body).data;
+    assert.deepEqual(Object.keys(payload).sort(),[
+      'passport_id','public_payload','status','unique_identifier','updated_at'
+    ]);
+    assert.equal(JSON.stringify(payload).includes('M10_HTTP_PRIVATE_SECRET'),false);
+    assert.equal(Object.hasOwn(payload,'organization_id'),false);
+    assert.equal(Object.hasOwn(payload,'battery_item_id'),false);
+    assert.equal(Object.hasOwn(payload,'created_by'),false);
+    assert.equal(Object.hasOwn(payload,'created_at'),false);
+  } finally { global.fetch=original; restore(); }
+});
