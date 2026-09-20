@@ -147,6 +147,13 @@ begin
     raise exception 'R08 admin retention status wrong tenant';
   end if;
 
+  -- Organization deletion must remain impossible while retention blockers are unresolved.
+  if has_table_privilege('authenticated','public.dpp_organizations','DELETE')
+     or has_table_privilege('anon','public.dpp_organizations','DELETE')
+     or to_regprocedure('public.dpp_api_organizations_delete(uuid)') is not null then
+    raise exception 'R08 destructive org deletion surface unexpectedly available';
+  end if;
+
   if has_function_privilege('anon','public.dpp_api_retention_status()','EXECUTE')
      or has_function_privilege('anon','public.dpp_api_purge_import_staging(timestamptz)','EXECUTE') then
     raise exception 'R08 retention RPC leaked anon EXECUTE';
