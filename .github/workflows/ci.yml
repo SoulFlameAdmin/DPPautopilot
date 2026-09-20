@@ -317,6 +317,16 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_audit_log_subset.sql
+      - name: Run M12 RBAC audit trail
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_m12_rbac_audit.sql
+          rollback;
+          SQL
       - name: Run M12 tenant context audit subset
         env:
           PGPASSWORD: postgres
