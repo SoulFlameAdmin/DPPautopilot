@@ -344,3 +344,102 @@ test('paged include_evidence ignores unselected oversized manifest objects',asyn
     assert.equal(objectCalls,1);
   }finally{global.fetch=original;restore();}
 });
+
+
+test('manifest consistency token allows deterministic resume and exposes stable digest',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bodies=[Buffer.from('alpha'),Buffer.from('beta')];
+  const manifest=bodies.map((bytes,i)=>({
+    id:`00000000-0000-4000-8000-00000000000${i+1}`,
+    storage_path:`aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/resume-${i+1}.bin`,
+    original_filename:`resume-${i+1}.bin`,
+    content_type:'application/octet-stream',
+    byte_size:bytes.length,
+    sha256_hex:crypto.createHash('sha256').update(bytes).digest('hex')
+  }));
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:manifest};}};
+    }
+    const decoded=decodeURIComponent(String(url).split('path=')[1]||'');
+    const index=Number(decoded.match(/resume-(\d+)\.bin$/)?.[1]||0)-1;
+    const bytes=bodies[index];
+    return {ok:true,async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}};
+  };
+  try{
+    const first=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'0',
+      evidence_limit:'1'
+    }),first);
+    assert.equal(first.statusCode,200);
+    const firstData=JSON.parse(first.body).data;
+    const manifestSha=firstData.evidence_export.manifest_sha256;
+    assert.match(manifestSha,/^[0-9a-f]{64}$/);
+    assert.equal(firstData.evidence_export.has_more,true);
+    assert.equal(firstData.evidence_export.next_offset,1);
+
+    const second=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'1',
+      evidence_limit:'1',
+      evidence_manifest_sha256:manifestSha
+    }),second);
+    assert.equal(second.statusCode,200);
+    const secondData=JSON.parse(second.body).data;
+    assert.equal(secondData.evidence_export.manifest_sha256,manifestSha);
+    assert.equal(secondData.evidence_objects[0].original_filename,'resume-2.bin');
+  }finally{global.fetch=original;restore();}
+});
+
+test('manifest consistency token fails closed on manifest drift before object fetch',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('changed');
+  let objectCalls=0;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[{
+        id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/changed.bin',
+        original_filename:'changed.bin',
+        content_type:'application/octet-stream',
+        byte_size:bytes.length,
+        sha256_hex:crypto.createHash('sha256').update(bytes).digest('hex')
+      }]};}};
+    }
+    objectCalls+=1;
+    throw new Error('object fetch must not occur on manifest drift');
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'0',
+      evidence_limit:'1',
+      evidence_manifest_sha256:'0'.repeat(64)
+    }),res);
+    assert.equal(res.statusCode,409);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_MANIFEST_CHANGED');
+    assert.equal(objectCalls,0);
+  }finally{global.fetch=original;restore();}
+});
+
+test('manifest consistency token validates digest shape before export RPC',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('unexpected');};
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'0',
+      evidence_limit:'1',
+      evidence_manifest_sha256:'not-a-sha'
+    }),res);
+    assert.equal(res.statusCode,400);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_MANIFEST_INVALID');
+    assert.equal(called,false);
+  }finally{global.fetch=original;restore();}
+});
