@@ -59,12 +59,20 @@
   },
   "live_state": {
     "staging_acceptance_executed": false,
-    "canonical_preview_deployments_observed": 0,
+    "canonical_preview_deployments_observed": 1,
+    "observed_ready_preview": {
+      "deployment_id": "dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q",
+      "project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+      "state": "READY",
+      "environment": "preview",
+      "commit_sha": "77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7",
+      "url": "dpp-autopilot-95xeakbem-dimitar-lambovs-projects.vercel.app"
+    },
     "deployment_lease_required_for_this_precursor": false
   },
   "remaining": [
     "T10 must be GREEN with all mandatory suites accepted.",
-    "C02 must be GREEN with a real READY preview deployment for the exact candidate commit.",
+    "C02 must be GREEN with complete live route/TLS/header acceptance on the exact READY preview.",
     "A production-like but non-production staging configuration must be verified live.",
     "Live migration/schema, security-header and core-route smoke evidence must pass against staging."
   ]
