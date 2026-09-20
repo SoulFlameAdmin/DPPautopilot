@@ -5,7 +5,7 @@ R08 remains **RED** because R07 is not GREEN and several regulatory/storage/auth
 ## Implemented now
 
 - `data/retention-deletion-policy.json` is the machine-readable policy precursor.
-- Existing M21 owner/admin export is required before future organization deletion. `GET /api/export?include_evidence=1` now has a bounded serverless precursor that reads private evidence objects through the caller-JWT Storage bridge, verifies byte size + SHA-256 against the manifest, and includes verified base64 bytes. It fails closed on missing objects, integrity mismatch, or a 25 MiB inline aggregate cap.
+- Existing M21 owner/admin export is required before future organization deletion. `GET /api/export?include_evidence=1` reads private evidence objects through the caller-JWT Storage bridge, verifies byte size + SHA-256 against the manifest, and includes verified base64 bytes. Optional `evidence_offset` / `evidence_limit` parameters provide deterministic paging (default 25, max 100 objects when paging is requested); the 25 MiB inline cap applies to the selected page. Missing objects, integrity mismatch, invalid paging or page overflow fail closed.
 - Terminal import staging (`invalid` or `committed`) may be purged only after a minimum of 30 days.
 - `staged` and `validated` imports are preserved regardless of age by this precursor.
 - `dpp_api_retention_status()` reports the active tenant's deletion-readiness blockers and eligible import-staging count.
@@ -16,7 +16,7 @@ R08 remains **RED** because R07 is not GREEN and several regulatory/storage/auth
 
 Organization deletion remains disabled until all of these are accepted and tested:
 
-- exhaustive large-tenant production evidence-byte export/package acceptance beyond the bounded inline precursor;
+- final large-tenant archive/streaming package + resumable export-manifest acceptance beyond the paged JSON precursor;
 - passport/version regulatory retention period;
 - registry submission retention and external-recipient terms;
 - evidence Storage object deletion lifecycle;
@@ -27,4 +27,4 @@ The deletion-impact preview also marks external Storage enumeration as required,
 
 ## Evidence target
 
-`tests/db/test_retention_deletion_subset.sql` proves eligible terminal imports are removed, their child staging rows cascade, old non-terminal/recent terminal imports are preserved, viewer access is denied, owner/admin access is allowed, too-recent cutoffs fail closed, audit delete events survive, and the non-destructive deletion-impact preview reports exact tenant-scoped counts while keeping destructive deletion unavailable. `tests/api/export.test.cjs` additionally proves the bounded evidence-byte export happy path, SHA-256 mismatch denial, aggregate-size fail-closed behavior and unavailable-object error mapping without leaking bytes.
+`tests/db/test_retention_deletion_subset.sql` proves eligible terminal imports are removed, their child staging rows cascade, old non-terminal/recent terminal imports are preserved, viewer access is denied, owner/admin access is allowed, too-recent cutoffs fail closed, audit delete events survive, and the non-destructive deletion-impact preview reports exact tenant-scoped counts while keeping destructive deletion unavailable. `tests/api/export.test.cjs` additionally proves evidence-byte integrity, stable unavailable/tamper/oversize errors, deterministic slice selection, `has_more` / `next_offset`, pagination validation before upstream access, and page-scoped byte-cap behavior.
