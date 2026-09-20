@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-20T16:55:00+03:00",
+  "updatedAt": "2026-09-20T17:05:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -85,8 +85,8 @@
           "dependsOn": "F07",
           "acceptanceCriteria": "Production deployment READY; app and data JSON return 200",
           "evidenceRequired": "Deployment metadata + HTTP verification",
-          "status": "blocked",
-          "evidence": "BLOCKED production-deployment acceptance still lacks a verified production-target deployment. Latest Vercel provider evidence from PR #101 at 2026-09-20T13:42:48Z returned `api-deployments-free-per-day` with `try again in 1 day`; do not retry before 2026-09-21T13:42:48Z (2026-09-21 16:42:48 Europe/Sofia). Existing preview deployment remains READY but does not satisfy F08. No manual deployment was attempted. — BLOCKED"
+          "status": "green",
+          "evidence": "Vercel production deployment `dpl_GnAFHKWJVLcWit6QuPAUb7m4FsVW` is READY, target=`production`, source=`git`, project `prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr`, commit `7caf7ad1e37d21d0f6e81c6812c59ff1fe736b5d` on `main`. Canonical production alias `https://dpp-autopilot.vercel.app/` returned HTTP 200 and `https://dpp-autopilot.vercel.app/data/master-plan.json` returned HTTP 200 with JSON. Acceptance criteria satisfied — PASS"
         },
         {
           "id": "F09",
