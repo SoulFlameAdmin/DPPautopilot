@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M21/T03 production-shaped export integration merged and evidenced; continue earliest dependency-safe non-deploy M22/M23/security hardening",
+  "currentTask": "M22 stable public error contract merged and evidenced; continue earliest dependency-safe non-deploy M23/security hardening",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #95 merged as 62bb22fceb64fe964b51404142a6efa4e1448e44; exact-head CI 35512145377 SUCCESS with production-shaped M21 export integration",
-  "nextTask": "Inspect M22 shared error contract and remaining M23 concurrency/idempotency surfaces for a concrete independent gap; do not retry F08 without new evidence.",
-  "message": "Export integration now mirrors the production bundle including history/audit/evidence metadata and proves no object bytes/access URLs leak through the HTTP journey. M21/T03 remain RED only by upstream/final deployed acceptance.",
+  "lastCompletedTask": "PR #97 merged as a38aa45ac30f328ffc738085e2a81337839c8e1a; exact-head CI 35512753414 SUCCESS; M22 canonical message drift guard now enforced",
+  "nextTask": "Inspect remaining M23 concurrency/idempotency surfaces for a concrete independent gap; if none remains, continue earliest RED precursor that does not require blocked production acceptance.",
+  "message": "M22 now fails CI on public code/message drift and all current local validation messages are canonicalized. M22 remains RED only by upstream/final deployed acceptance.",
   "deferredBlockers": [
     "F08 — Vercel production acceptance remains externally blocked; do not retry without new quota/access evidence and always obey the global Supabase deployment lease law.",
     "M01 — final runtime recovery password-update acceptance remains blocked on a usable deployed recovery redirect.",
     "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
   ],
-  "updatedAt": "2026-09-20T16:03:00+03:00"
+  "updatedAt": "2026-09-20T16:15:00+03:00"
 }
