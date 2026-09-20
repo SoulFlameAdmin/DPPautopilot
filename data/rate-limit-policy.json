@@ -1,8 +1,8 @@
 {
-  "version": 7,
+  "version": 8,
   "task": "R05",
   "status": "partial",
-  "strategy": "dual_layer_process_local_plus_shared_authenticated_precursor",
+  "strategy": "dual_layer_local_plus_feature_gated_shared_authenticated_runtime",
   "privacy": "Limiter keys store only truncated SHA-256 digests. Every request consumes a hashed network/IP bucket; requests carrying Authorization also consume a separate hashed credential bucket. Raw IP addresses and raw bearer credentials are never stored in bucket keys or response metadata.",
   "rules": {
     "public_passport_read": {
@@ -79,7 +79,7 @@
     ]
   },
   "limitations": [
-    "The shared Supabase backend is implemented and regression-tested but is not yet wired into deployed API runtime; current request enforcement remains process-local.",
+    "Shared authenticated runtime enforcement is implemented behind DPP_SHARED_RATE_LIMIT_ENABLED=true; production enablement/deployed verification is not yet proven.",
     "Anonymous public passport traffic remains process-local until a safe distributed identity path is available without exposing a directly abusable anonymous consume RPC.",
     "Production acceptance still requires deployed multi-isolate/real-network abuse and load evidence."
   ],
@@ -97,7 +97,7 @@
     "active_request_buckets_protected_from_cap_eviction": true
   },
   "shared_backend": {
-    "status": "implemented_not_runtime_wired",
+    "status": "runtime_wired_feature_gated",
     "table": "dpp_rate_limit_buckets",
     "rpc": "dpp_rate_limit_consume(text,integer,integer,timestamptz)",
     "scope": "authenticated network/credential budgets only",
@@ -108,6 +108,9 @@
     "anon_rpc_execute": false,
     "authenticated_rpc_execute": true,
     "stale_row_retention": "opportunistic cleanup after reset_at + 10 minutes",
-    "application_key_contract": "surface|rule|network:<32 hex> or surface|rule|credential:<24 hex>"
+    "application_key_contract": "surface|rule|network:<32 hex> or surface|rule|credential:<24 hex>",
+    "runtime_gate": "DPP_SHARED_RATE_LIMIT_ENABLED=true",
+    "failure_mode": "fail_closed_503",
+    "public_anonymous_scope": "not_shared; local limiter remains authoritative for public passport identifier GET"
   }
 }
