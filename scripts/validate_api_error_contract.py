@@ -17,6 +17,10 @@ assert contract.get("local_codes",{}).get("RATE_LIMIT_BACKEND_UNAVAILABLE",{})==
     "http_status":503,
     "message":"Request protection is temporarily unavailable."
 }
+assert contract.get("local_codes",{}).get("EVIDENCE_EXPORT_PAGINATION_INVALID",{})=={
+    "http_status":400,
+    "message":"Evidence export pagination parameters are invalid."
+}
 
 valid_status={400,401,403,404,405,409,413,422,428,429,500,502,503}
 code_re=re.compile(r"^[A-Z][A-Z0-9_]*$")
