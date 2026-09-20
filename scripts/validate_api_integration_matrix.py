@@ -20,6 +20,7 @@ required={
   "conflicting_write_errors",
   "invalid_import_commit",
   "public_privacy_boundary",
+  "passport_create_retry",
 }
 scenarios=matrix.get("scenarios",[])
 assert {s["id"] for s in scenarios}==required, "T03 integration scenario set drifted"
@@ -42,6 +43,8 @@ for token in [
   "private_payload",
   "IMPORT_NOT_COMMITTABLE",
   "MODEL_CONFLICT",
+  "PASSPORT_CONFLICT",
+  "passportCreateWrites",
 ]:
     assert token in test_text, f"T03 integration test missing coverage token: {token}"
 
@@ -51,4 +54,4 @@ for rel in ["api/models.js","api/items.js","api/passport.js","api/imports.js","a
 remaining=matrix.get("remaining",[])
 assert remaining, "T03 must document deployed integration evidence still pending while partial"
 
-print("T03_API_INTEGRATION_MATRIX_PASS: 8 positive/negative multi-surface API integration scenarios are versioned")
+print("T03_API_INTEGRATION_MATRIX_PASS: 9 positive/negative multi-surface API integration scenarios are versioned")
