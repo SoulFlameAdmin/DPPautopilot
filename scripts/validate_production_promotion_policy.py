@@ -36,11 +36,21 @@ for needed in [
 
 assert policy['decision']['default']=='deny'
 assert policy['decision']['on_missing_or_mismatch']=='deny'
-assert policy['live_state']=={
-    'observed_deployments_for_canonical_project':0,
-    'promotion_executed':False,
-    'deployment_lease_required':False,
+live=policy['live_state']
+assert live['observed_deployments_for_canonical_project']>=1
+observed=live['observed_ready_preview']
+assert observed=={
+    'deployment_id':'dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q',
+    'state':'READY',
+    'environment':'preview',
+    'target':None,
+    'source':'git',
+    'commit_sha':'77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7',
+    'commit_ref':'m21-export-shape-fresh-main-20260920',
+    'url':'dpp-autopilot-95xeakbem-dimitar-lambovs-projects.vercel.app',
 }
+assert live['promotion_executed'] is False
+assert live['deployment_lease_required'] is False
 
 for token in [
     'Production deploys originate from `main`',
@@ -70,4 +80,4 @@ assert 'C02 must be GREEN' in remaining
 assert 'DAVID Vercel deployment lease' in remaining
 assert 'Post-promotion production smoke' in remaining
 
-print('C03_PROMOTION_POLICY_PASS: production is fail-closed to main + exact commit-aligned CI/preview/migration/security gates and canonical Vercel target; no live promotion is claimed')
+print('C03_PROMOTION_POLICY_PASS: READY preview is observed, but production promotion remains fail-closed to prerequisite/commit/lease/target gates; no live promotion is claimed')

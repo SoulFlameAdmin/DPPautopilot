@@ -450,3 +450,9 @@ Append evidence here only after verification.
 - PR #98 received Vercel provider error `api-deployments-free-per-day` at `2026-09-20T13:31:47Z` with explicit instruction `try again in 24 hours`. Production deployment must not be retried before `2026-09-21T13:31:47Z` (`2026-09-21 16:31:47 Europe/Sofia`), and any future attempt still requires the global Supabase deploy lease.
 - Preview multi-route acceptance remains fail-closed because connector access to `/data/auth-config.json` redirected through Vercel SSO; no SSO/login/MFA bypass was attempted.
 - M01 therefore advances from “no deployed recovery route” to “recovery route deployed, final valid recovery-session password update still unproven.”
+
+
+### READY preview release-state sync — 2026-09-20
+- R08 now has an explicit fail-closed regression proving authenticated/anon roles cannot DELETE `public.dpp_organizations` and no public organization-delete RPC exists while retention blockers remain unresolved. Bound Supabase ACL matched this state; PR #103 exact-head CI `35514662542` SUCCESS and merge `84ca5cf6241c714e68609d09e3c67472b6ad4bbd`.
+- C03/C06 release policies are being synchronized from stale “0 preview deployments” state to the observed canonical READY preview `dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q`, commit `77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7`.
+- This does not promote production or accept staging: C03 remains default-deny with `promotion_executed=false`; C06 remains `staging_acceptance_executed=false`; all existing prerequisite, commit-alignment, live smoke and deployment-lease gates remain mandatory.
