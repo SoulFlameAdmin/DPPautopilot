@@ -42,7 +42,7 @@ declare
   v_reset timestamptz;
   v_count integer;
 begin
-  if auth.uid() is null then
+  if public.dpp_request_user_id() is null then
     raise exception using errcode='DP601', message='authenticated rate-limit identity required';
   end if;
 
