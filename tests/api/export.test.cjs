@@ -450,6 +450,72 @@ test('manifest consistency token allows deterministic resume and exposes stable 
   }finally{global.fetch=original;restore();}
 });
 
+test('manifest resume remains deterministic when upstream manifest order changes',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bodies={
+    'a.bin':Buffer.from('alpha','utf8'),
+    'b.bin':Buffer.from('beta','utf8')
+  };
+  const items=[
+    {
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+      storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/a.bin',
+      original_filename:'a.bin',
+      content_type:'application/octet-stream',
+      byte_size:bodies['a.bin'].length,
+      sha256_hex:crypto.createHash('sha256').update(bodies['a.bin']).digest('hex')
+    },
+    {
+      id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2',
+      storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/b.bin',
+      original_filename:'b.bin',
+      content_type:'application/octet-stream',
+      byte_size:bodies['b.bin'].length,
+      sha256_hex:crypto.createHash('sha256').update(bodies['b.bin']).digest('hex')
+    }
+  ];
+  let rpcCalls=0;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      rpcCalls+=1;
+      const manifest=rpcCalls===1?[items[1],items[0]]:[items[0],items[1]];
+      return {ok:true,async json(){return {evidence_manifest:manifest};}};
+    }
+    const parsed=new URL(String(url));
+    const name=parsed.searchParams.get('path').split('/').pop();
+    const bytes=bodies[name];
+    return {
+      ok:true,
+      async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}
+    };
+  };
+  try{
+    let res=makeRes();
+    await handler(makeReq('GET','Bearer canonical-order-page-1',{
+      include_evidence:'1',
+      evidence_offset:'0',
+      evidence_limit:'1'
+    }),res);
+    assert.equal(res.statusCode,200);
+    const first=JSON.parse(res.body).data;
+    assert.equal(first.evidence_objects[0].original_filename,'a.bin');
+    const digest=first.evidence_export.manifest_sha256;
+
+    res=makeRes();
+    await handler(makeReq('GET','Bearer canonical-order-page-2',{
+      include_evidence:'1',
+      evidence_offset:'1',
+      evidence_limit:'1',
+      evidence_manifest_sha256:digest
+    }),res);
+    assert.equal(res.statusCode,200);
+    const second=JSON.parse(res.body).data;
+    assert.equal(second.evidence_export.manifest_sha256,digest);
+    assert.equal(second.evidence_objects[0].original_filename,'b.bin');
+    assert.equal(second.evidence_export.next_offset,null);
+  }finally{global.fetch=original;restore();}
+});
+
 test('manifest consistency token fails closed on manifest drift before object fetch',async()=>{
   const restore=withEnv(),original=global.fetch;
   const bytes=Buffer.from('changed');
