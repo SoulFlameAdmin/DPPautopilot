@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "task": "R08",
   "status": "partial",
   "scope": "DPP Autopilot only; shared Supabase non-dpp_* data is excluded.",
@@ -9,7 +9,7 @@
     "evidence_bytes_precursor": {
       "endpoint": "GET /api/export?include_evidence=1[&evidence_offset=N&evidence_limit=N]",
       "authorization": "owner/admin enforced by dpp_api_export_bundle(); caller JWT reused for private dpp-evidence object reads",
-      "integrity": "byte_size + SHA-256 verified against evidence_manifest before inclusion",
+      "integrity": "byte_size + SHA-256 + response Content-Type verified against evidence_manifest before inclusion",
       "encoding": "base64",
       "inline_limit_bytes": 26214400,
       "failure_mode": "fail closed on unavailable object, integrity mismatch, or size limit",
@@ -38,7 +38,7 @@
         }
       }
     },
-    "current_gap": "Integrity-checked evidence bytes now support deterministic pagination plus a manifest SHA-256 consistency token for stateless resume/drift detection, but a final archive/streaming package format, signed resumable export manifest, and real authenticated deployed large-tenant acceptance remain unproven."
+    "current_gap": "Integrity-checked evidence bytes now verify byte size, SHA-256 and response Content-Type and support deterministic pagination plus a manifest SHA-256 consistency token for stateless resume/drift detection, but a final archive/streaming package format, signed resumable export manifest, and real authenticated deployed large-tenant acceptance remain unproven."
   },
   "retention_rules": [
     {
