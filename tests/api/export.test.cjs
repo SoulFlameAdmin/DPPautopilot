@@ -12,8 +12,12 @@ function makeRes(){
     end(value){this.body=value||'';}
   };
 }
+let requestSequence=0;
 function makeReq(method='GET',auth='Bearer test-token',query={}){
-  return {method,headers:auth?{authorization:auth}:{},query};
+  requestSequence+=1;
+  const headers={'x-forwarded-for':`198.51.100.${requestSequence}`};
+  if(auth) headers.authorization=auth;
+  return {method,headers,query};
 }
 function withEnv(){
   const oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
