@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "T03",
   "status": "partial",
   "dependencies": [
@@ -99,6 +99,15 @@
         "M22"
       ],
       "expected": "page 2 with a stale evidence_manifest_sha256 fails closed with stable 409 EVIDENCE_EXPORT_MANIFEST_CHANGED before another evidence object download"
+    },
+    {
+      "id": "signed_export_manifest",
+      "covers": [
+        "M21",
+        "M22",
+        "R08"
+      ],
+      "expected": "signed evidence export emits versioned manifest metadata and supports resumable paging"
     }
   ],
   "executable_test": "tests/api/integration.test.cjs",
