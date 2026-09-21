@@ -18,6 +18,14 @@ function send(res,status,body){
   res.end(JSON.stringify(body));
 }
 
+function sendNdjson(res,status,body){
+  res.statusCode=status;
+  res.setHeader('Content-Type','application/x-ndjson; charset=utf-8');
+  res.setHeader('Cache-Control','no-store');
+  res.setHeader('Content-Disposition','attachment; filename="dpp-export.ndjson"');
+  res.end(ndjsonEvidencePackage(body));
+}
+
 function bearer(req){
   const value=req.headers&&(req.headers.authorization||req.headers.Authorization);
   return typeof value==='string'&&/^Bearer\s+\S+$/i.test(value)?value:null;
@@ -63,6 +71,30 @@ async function rpc(authorization,env=process.env,fetchImpl=fetch){
 function includeEvidenceRequested(req){
   const value=req&&req.query&&req.query.include_evidence;
   return value==='1'||value==='true'||value===true;
+}
+
+function evidencePackageFormat(req){
+  const value=req&&req.query&&req.query.evidence_format;
+  if(value===undefined||value===null||value==='') return 'json';
+  const normalized=String(value).trim().toLowerCase();
+  if(normalized==='json'||normalized==='ndjson') return normalized;
+  throw exportError(
+    'EVIDENCE_EXPORT_FORMAT_INVALID',
+    400,
+    'Evidence export format is invalid.'
+  );
+}
+
+function ndjsonEvidencePackage(bundle){
+  const source=bundle&&typeof bundle==='object'?bundle:{};
+  const objects=Array.isArray(source.evidence_objects)?source.evidence_objects:[];
+  const metadata={...source};
+  delete metadata.evidence_objects;
+  const lines=[JSON.stringify({type:'bundle',data:metadata})];
+  for(const object of objects){
+    lines.push(JSON.stringify({type:'evidence_object',data:object}));
+  }
+  return lines.join('\n')+'\n';
 }
 
 function exportError(code,status,message){
@@ -372,10 +404,12 @@ async function handler(req,res){
   try{
     const includeEvidence=includeEvidenceRequested(req);
     const page=includeEvidence?evidencePageOptions(req):null;
+    const format=includeEvidence?evidencePackageFormat(req):'json';
     const bundle=await rpc(authorization);
     const output=includeEvidence
       ?await inlineEvidenceBytes(bundle,authorization,process.env,fetch,page)
       :bundle;
+    if(includeEvidence&&format==='ndjson') return sendNdjson(res,200,output);
     return send(res,200,{data:output});
   }catch(error){
     const status=Number.isInteger(error.status)?error.status:502;
@@ -387,4 +421,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidencePackageFormat,ndjsonEvidencePackage,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
