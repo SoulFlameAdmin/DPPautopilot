@@ -46,3 +46,12 @@ The deletion-impact preview also marks external Storage enumeration as required,
 - A tampered but well-shaped token fails closed with `400 EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID` before evidence-object download.
 - A valid token for an older manifest fails closed with `409 EVIDENCE_EXPORT_MANIFEST_CHANGED`; missing signing configuration fails the signed path with `500 EVIDENCE_EXPORT_SIGNING_UNAVAILABLE`.
 - The existing unsigned `evidence_manifest_sha256` resume contract remains backward compatible. Final archive/streaming package format and real authenticated deployed large-tenant acceptance are still pending.
+
+
+## Export response Content-Type integrity hardening — 2026-09-21
+
+- PR #152 merged as `b5c20903b984e687550894d7f3826445d1088e82` after GitHub Actions CI run `35625285281` completed SUCCESS.
+- The M21 evidence export path now compares the live evidence-object response Content-Type with the manifest-declared Content-Type before reading object bytes.
+- A missing declared type or a conflicting live type fails closed as `502 EVIDENCE_EXPORT_INTEGRITY_FAILED`; the regression proves the response body is not read after a detected mismatch.
+- The export unit suite initially exposed shared local rate-limiter state across tests (429 instead of the intended signed-manifest failure). Test requests now use isolated synthetic network identities; the corrected full CI run passed.
+- This strengthens the existing size + SHA-256 verification but does not change R08 from RED: R07, final archive/streaming acceptance, real authenticated deployed acceptance and the documented retention/deletion decisions remain unresolved.
