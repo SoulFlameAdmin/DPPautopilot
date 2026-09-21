@@ -55,11 +55,12 @@ for token in [
   "sha256_verified",
   "content_base64",
   "evidence_offset",
-  "evidence_manifest_signed",
-  "evidence_manifest_token",
-  "HMAC-SHA256-v1",
 ]:
     assert token in test_text, f"T03 integration test missing coverage token: {token}"
+
+export_contract=(ROOT/"tests/api/export.test.cjs").read_text(encoding="utf-8")
+for token in ["evidence_manifest_signed","evidence_manifest_token","HMAC-SHA256-v1"]:
+    assert token in export_contract, f"T03 signed export contract missing coverage token: {token}"
 
 for rel in ["api/models.js","api/items.js","api/passport.js","api/imports.js","api/export.js"]:
     assert (ROOT/rel).is_file(), f"T03 API surface missing: {rel}"
