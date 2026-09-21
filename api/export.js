@@ -129,19 +129,23 @@ function exportError(code,status,message){
   return error;
 }
 
-function evidenceManifestSha256(manifest){
-  const canonical=(Array.isArray(manifest)?manifest:[])
-    .map(item=>({
-      id:item&&item.id||null,
-      storage_path:item&&item.storage_path||null,
-      byte_size:Number(item&&item.byte_size)||0,
-      sha256_hex:typeof (item&&item.sha256_hex)==='string'?item.sha256_hex.toLowerCase():''
-    }))
+function canonicalEvidenceManifest(manifest){
+  return (Array.isArray(manifest)?manifest:[])
+    .slice()
     .sort((a,b)=>{
-      const ak=String(a.storage_path||'')+'|'+String(a.id||'');
-      const bk=String(b.storage_path||'')+'|'+String(b.id||'');
+      const ak=String(a&&a.storage_path||'')+'|'+String(a&&a.id||'');
+      const bk=String(b&&b.storage_path||'')+'|'+String(b&&b.id||'');
       return ak<bk?-1:ak>bk?1:0;
     });
+}
+
+function evidenceManifestSha256(manifest){
+  const canonical=canonicalEvidenceManifest(manifest).map(item=>({
+    id:item&&item.id||null,
+    storage_path:item&&item.storage_path||null,
+    byte_size:Number(item&&item.byte_size)||0,
+    sha256_hex:typeof (item&&item.sha256_hex)==='string'?item.sha256_hex.toLowerCase():''
+  }));
   return crypto.createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
 }
 
@@ -260,7 +264,7 @@ function responseContentLength(response){
 }
 
 async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImpl=fetch,page={paged:false,offset:0,limit:null}){
-  const manifest=Array.isArray(bundle&&bundle.evidence_manifest)?bundle.evidence_manifest:[];
+  const manifest=canonicalEvidenceManifest(bundle&&bundle.evidence_manifest);
   const offset=page&&Number.isInteger(page.offset)?page.offset:0;
   const limit=page&&Number.isInteger(page.limit)?page.limit:null;
   const paged=Boolean(page&&page.paged);
@@ -463,4 +467,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,canonicalEvidenceManifest,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
