@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "task": "M03",
+  "status": "partial",
+  "roles": [
+    "owner",
+    "admin",
+    "editor",
+    "viewer"
+  ],
+  "principles": {
+    "default": "deny",
+    "tenant_context_required": true,
+    "role_enforcement": "server-side via dpp_require_active_role(text[])",
+    "cross_tenant": "deny",
+    "anonymous": "deny"
+  },
+  "capability_matrix": {
+    "tenant_switch": [
+      "owner",
+      "admin",
+      "editor",
+      "viewer"
+    ],
+    "read_private": [
+      "owner",
+      "admin",
+      "editor",
+      "viewer"
+    ],
+    "write_models_items_passports": [
+      "owner",
+      "admin",
+      "editor"
+    ],
+    "manage_members": [
+      "owner",
+      "admin"
+    ],
+    "export_tenant_data": [
+      "owner",
+      "admin"
+    ]
+  },
+  "note": "Contract precursor only. M03 remains RED until M01/M02 are GREEN and authenticated end-to-end authorization acceptance is proven."
+}
