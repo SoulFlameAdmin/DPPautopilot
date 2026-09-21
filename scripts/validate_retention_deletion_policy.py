@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/retention-deletion-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==5
+assert policy.get("version")==6
 assert policy.get("task")=="R08"
 assert policy.get("status")=="partial"
 assert policy.get("scope","").startswith("DPP Autopilot")
@@ -16,7 +16,7 @@ assert export.get("required_before_org_deletion") is True
 assert "dpp_api_export_bundle" in export.get("implementation","")
 precursor=export.get("evidence_bytes_precursor",{})
 assert precursor.get("endpoint")=="GET /api/export?include_evidence=1[&evidence_offset=N&evidence_limit=N]"
-assert precursor.get("integrity")=="byte_size + SHA-256 verified against evidence_manifest before inclusion"
+assert precursor.get("integrity")=="byte_size + SHA-256 + response Content-Type verified against evidence_manifest before inclusion"
 assert precursor.get("encoding")=="base64"
 assert precursor.get("inline_limit_bytes")==26_214_400
 assert "fail closed" in precursor.get("failure_mode","")
@@ -126,11 +126,13 @@ for token in [
     "next_offset",
     "has_more",
     "evidenceManifestSha256",
+    "responseContentType",
 ]:
     assert token in export_api, f"R08/M21 evidence byte export missing {token}"
 for token in [
     "include_evidence downloads bytes through caller-JWT bridge and verifies integrity",
     "include_evidence fails closed on hash mismatch",
+    "include_evidence fails closed on content type mismatch before bytes are read",
     "include_evidence rejects declared total beyond inline memory limit",
     "include_evidence maps unavailable object to stable export error",
     "paged include_evidence fetches only selected manifest slice",
@@ -140,4 +142,4 @@ for token in [
 ]:
     assert token in export_test, f"R08/M21 export regression missing {token}"
 
-print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; terminal staging purge, deterministic paged/resumable integrity-checked evidence export and owner/admin non-destructive deletion-impact preview are implemented while final package/runtime/regulatory/storage/audit/auth blockers remain explicit")
+print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; terminal staging purge, deterministic paged/resumable size/hash/content-type integrity-checked evidence export and owner/admin non-destructive deletion-impact preview are implemented while final package/runtime/regulatory/storage/audit/auth blockers remain explicit")
