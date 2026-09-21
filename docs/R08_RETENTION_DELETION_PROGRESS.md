@@ -56,3 +56,12 @@ The deletion-impact preview also marks external Storage enumeration as required,
 - Implementation merged in PR #154 as commit `b82a0e03f082602c44759fbf2e16a5c2ece8fc81`.
 - GitHub Actions run `35667737921` passed completely: M21 export HTTP contract tests PASS, R08 retention/deletion policy validator PASS, and the full validation job completed successfully with 139 completed steps and no failures.
 - This hardening does not change the top-level acceptance state: R08 remains RED and M21 remains RED until their remaining dependencies and final runtime/production acceptance are satisfied. No Vercel deployment was attempted for this block.
+
+
+## Versioned NDJSON export package precursor — 2026-09-22
+
+- `GET /api/export?format=ndjson` now selects evidence export automatically and emits `application/x-ndjson; charset=utf-8` with attachment filename `dpp-export.ndjson`.
+- Package version `ndjson-v1` has deterministic record classes: `dpp_export_header` → `dpp_bundle` → zero or more `dpp_evidence` records → `dpp_export_end`.
+- Existing tenant/RBAC export RPC, manifest SHA-256/signing, pagination, response metadata checks, byte-size and SHA-256 verification remain authoritative. Selected evidence is fully verified before the first NDJSON record is emitted, so an integrity failure cannot leave a partially emitted package.
+- The package stays compatible with paged/signed resume parameters and uses base64 evidence payloads.
+- This is intentionally a precursor, not final large-tenant acceptance: the selected page is still verified in memory before emission. Constant-memory object streaming, a final archive format and real authenticated deployed large-tenant evidence remain pending.
