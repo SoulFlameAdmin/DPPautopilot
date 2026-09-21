@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "task": "R08",
   "status": "partial",
   "scope": "DPP Autopilot only; shared Supabase non-dpp_* data is excluded.",
@@ -7,12 +7,12 @@
     "implementation": "M21 dpp_api_export_bundle() owner/admin active-tenant export + optional serverless evidence-byte augmentation",
     "required_before_org_deletion": true,
     "evidence_bytes_precursor": {
-      "endpoint": "GET /api/export?include_evidence=1[&evidence_offset=N&evidence_limit=N][&evidence_manifest_signed=1][&evidence_manifest_token=TOKEN]",
+      "endpoint": "GET /api/export?include_evidence=1[&evidence_offset=N&evidence_limit=N][&evidence_manifest_signed=1][&evidence_manifest_token=TOKEN][&format=ndjson]",
       "authorization": "owner/admin enforced by dpp_api_export_bundle(); caller JWT reused for private dpp-evidence object reads",
       "integrity": "byte_size + SHA-256 verified against evidence_manifest before inclusion",
       "encoding": "base64",
       "inline_limit_bytes": 26214400,
-      "failure_mode": "fail closed on unavailable object, integrity mismatch, or size limit",
+      "failure_mode": "fail closed on unavailable object, response metadata/integrity mismatch, or size limit",
       "pagination": {
         "offset_param": "evidence_offset",
         "limit_param": "evidence_limit",
@@ -54,7 +54,23 @@
         }
       }
     },
-    "current_gap": "Signed resumable evidence-manifest tokens are implemented as an opt-in HMAC-SHA256-v1 precursor while preserving the existing SHA-256 resume contract, but a final archive/streaming package format and real authenticated deployed large-tenant acceptance remain unproven."
+    "current_gap": "A versioned fail-closed NDJSON package precursor is implemented and remains compatible with signed resumable manifests, but constant-memory object streaming/final archive packaging and real authenticated deployed large-tenant acceptance remain unproven.",
+    "streaming_package_precursor": {
+      "query": "format=ndjson",
+      "media_type": "application/x-ndjson; charset=utf-8",
+      "package_version": "ndjson-v1",
+      "content_disposition": "attachment; filename=\"dpp-export.ndjson\"",
+      "record_order": [
+        "dpp_export_header",
+        "dpp_bundle",
+        "dpp_evidence (zero or more)",
+        "dpp_export_end"
+      ],
+      "evidence_encoding": "base64",
+      "integrity_gate": "selected evidence bytes and response metadata are verified before the first NDJSON record is emitted",
+      "signed_resume_compatible": true,
+      "current_limit": "selected evidence page is verified in memory before NDJSON emission; constant-memory object streaming and deployed large-tenant acceptance remain unproven"
+    }
   },
   "retention_rules": [
     {
