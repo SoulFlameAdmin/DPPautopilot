@@ -10,6 +10,7 @@
 | PostgreSQL/database URL/password | secret | Server-only secret store |
 | EU/registry provider client secret | secret | Server-only secret store |
 | Webhook/signing/private keys | secret | Server-only secret store |
+| Export manifest signing key (`DPP_EXPORT_MANIFEST_SIGNING_KEY`) | secret | Server-only secret store |
 
 A publishable Supabase key is intentionally client-safe; it does **not** replace database authorization. DPP tables remain deny-by-default until explicit server/RLS policies are introduced and tested.
 
@@ -25,6 +26,8 @@ A publishable Supabase key is intentionally client-safe; it does **not** replace
 Development uses synthetic data and local placeholders. Preview/staging must use separate non-production secret values when a runnable preview becomes available. Production secrets are scoped to production only and must not be copied into preview, GitHub, screenshots, logs, or evidence artifacts.
 
 ### Serverless Supabase runtime contract
+
+`DPP_EXPORT_MANIFEST_SIGNING_KEY` is a server-only HMAC key used only when the export caller opts into signed resumable evidence manifests. It must contain at least 32 random bytes, must never be exposed to browser/static assets, and missing/invalid configuration fails the signed export path closed without affecting the legacy unsigned SHA-256 resume contract.
 
 DPP serverless APIs use `DPP_SUPABASE_URL` and `DPP_SUPABASE_PUBLISHABLE_KEY` as the canonical runtime names. `DPP_SHARED_RATE_LIMIT_ENABLED` is a non-secret server runtime feature gate; only the exact value `true` enables the shared authenticated limiter, otherwise request handling keeps the local precursor behavior. During migration they retain backward-compatible fallback to `SUPABASE_URL` and `SUPABASE_ANON_KEY`. The committed `.env.example` intentionally contains placeholders only. Missing runtime values fail closed with `SERVER_CONFIGURATION_MISSING`; production acceptance must verify the values are actually present in the hosting environment without exposing them.
 
