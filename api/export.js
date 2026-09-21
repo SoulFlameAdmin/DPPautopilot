@@ -195,6 +195,14 @@ function responseContentType(response){
   return typeof value==='string'?value.split(';')[0].trim().toLowerCase():'';
 }
 
+function responseContentLength(response){
+  if(!response||!response.headers||typeof response.headers.get!=='function') return null;
+  const value=response.headers.get('content-length');
+  if(value===null||value===undefined||value==='') return null;
+  const normalized=String(value).trim();
+  return /^(0|[1-9]\d*)$/.test(normalized)?Number(normalized):Number.NaN;
+}
+
 async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImpl=fetch,page={paged:false,offset:0,limit:null}){
   const manifest=Array.isArray(bundle&&bundle.evidence_manifest)?bundle.evidence_manifest:[];
   const offset=page&&Number.isInteger(page.offset)?page.offset:0;
@@ -295,6 +303,17 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
     if(actualContentType!==null&&(!declaredContentType||actualContentType!==declaredContentType)){
       throw exportError('EVIDENCE_EXPORT_INTEGRITY_FAILED',502,'Evidence export integrity verification failed.');
     }
+    const declaredSize=Number(item.byte_size);
+    const actualContentLength=responseContentLength(response);
+    if(
+      actualContentLength!==null&&(
+        !Number.isInteger(declaredSize)||
+        !Number.isSafeInteger(actualContentLength)||
+        actualContentLength!==declaredSize
+      )
+    ){
+      throw exportError('EVIDENCE_EXPORT_INTEGRITY_FAILED',502,'Evidence export integrity verification failed.');
+    }
     const bytes=Buffer.from(await response.arrayBuffer());
     actualTotal+=bytes.byteLength;
     if(actualTotal>MAX_INLINE_EVIDENCE_BYTES){
@@ -305,7 +324,6 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
       );
     }
     const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
-    const declaredSize=Number(item.byte_size);
     const declaredHash=typeof item.sha256_hex==='string'?item.sha256_hex.toLowerCase():'';
     if(
       !Number.isInteger(declaredSize)||
@@ -387,4 +405,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
