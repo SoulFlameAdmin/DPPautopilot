@@ -583,6 +583,6 @@ Append evidence here only after verification.
 - Migration `dpp_evidence_object_metadata_rpc` applied as `20260920232617` adds tenant-aware SECURITY DEFINER `dpp_api_evidence_object_metadata(text)`, returning only byte size, SHA-256 and content type.
 - Transactional M13 regression and global SECURITY DEFINER guard passed; post-apply ACL is authenticated table SELECT=false, authenticated RPC EXECUTE=true, anon RPC EXECUTE=false.
 - PR #146 exact head `c7274c77232fc4295779417891b2bb731f3232ec` completed full CI `35544682162` SUCCESS.
-- Bound `dpp-evidence-object` is ACTIVE v5, `verify_jwt=true`, bundle SHA-256 `60c1388baa395eb59f541db6abc30f14931d1194edd1a10fcdee8f249a14b916`; deployed-source readback proves upload/download metadata lookup now uses the minimal RPC.
+- Bound `dpp-evidence-object` is ACTIVE v7, `verify_jwt=true`, bundle SHA-256 `60c1388baa395eb59f541db6abc30f14931d1194edd1a10fcdee8f249a14b916`; deployed-source readback proves upload/download metadata lookup now uses the minimal RPC.
 - M13 remains RED/PARTIAL pending M03 and a real authenticated byte lifecycle roundtrip.
 - Main merge is deferred because it auto-triggers Vercel; the latest lease-governed production attempt returned real `build-rate-limit` with no retry timestamp.
