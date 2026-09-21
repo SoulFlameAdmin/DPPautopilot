@@ -422,6 +422,22 @@ test('manifest consistency token allows deterministic resume and exposes stable 
   }finally{global.fetch=original;restore();}
 });
 
+test('manifest digest binds exported filename and content type metadata',()=>{
+  const base=[{
+    id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/report.json',
+    original_filename:'report.json',
+    content_type:'application/json',
+    byte_size:12,
+    sha256_hex:'a'.repeat(64)
+  }];
+  const original=handler._test.evidenceManifestSha256(base);
+  const renamed=handler._test.evidenceManifestSha256([{...base[0],original_filename:'renamed.json'}]);
+  const retyped=handler._test.evidenceManifestSha256([{...base[0],content_type:'image/png'}]);
+  assert.notEqual(renamed,original);
+  assert.notEqual(retyped,original);
+});
+
 test('manifest consistency token fails closed on manifest drift before object fetch',async()=>{
   const restore=withEnv(),original=global.fetch;
   const bytes=Buffer.from('changed');
