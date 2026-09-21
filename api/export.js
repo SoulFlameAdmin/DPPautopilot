@@ -65,6 +65,62 @@ function includeEvidenceRequested(req){
   return value==='1'||value==='true'||value===true;
 }
 
+function ndjsonPackageRequested(req){
+  const value=req&&req.query&&req.query.format;
+  return typeof value==='string'&&value.toLowerCase()==='ndjson';
+}
+
+function sendNdjsonPackage(res,output){
+  const source=output&&typeof output==='object'?output:{};
+  const objects=Array.isArray(source.evidence_objects)?source.evidence_objects:[];
+  const evidenceExport=source.evidence_export&&typeof source.evidence_export==='object'
+    ?source.evidence_export
+    :{
+      included:false,
+      object_count:0,
+      total_bytes:0,
+      integrity:'not_requested',
+      encoding:null,
+      manifest_object_count:Array.isArray(source.evidence_manifest)?source.evidence_manifest.length:0,
+      manifest_sha256:evidenceManifestSha256(source.evidence_manifest||[]),
+      paged:false,
+      offset:0,
+      limit:null,
+      has_more:false,
+      next_offset:null
+    };
+  const {evidence_objects:_objects,evidence_export:_export,...bundle}=source;
+  const header={
+    type:'dpp_export_header',
+    package_version:'ndjson-v1',
+    evidence_export:evidenceExport
+  };
+  const trailer={
+    type:'dpp_export_end',
+    package_version:'ndjson-v1',
+    object_count:objects.length,
+    total_bytes:objects.reduce((sum,item)=>sum+(Number(item&&item.byte_size)||0),0),
+    integrity:evidenceExport.integrity||null,
+    manifest_sha256:evidenceExport.manifest_sha256||null
+  };
+  const records=[
+    header,
+    {type:'dpp_bundle',package_version:'ndjson-v1',data:bundle},
+    ...objects.map(item=>({type:'dpp_evidence',package_version:'ndjson-v1',data:item})),
+    trailer
+  ];
+  res.statusCode=200;
+  res.setHeader('Content-Type','application/x-ndjson; charset=utf-8');
+  res.setHeader('Cache-Control','no-store');
+  res.setHeader('Content-Disposition','attachment; filename="dpp-export.ndjson"');
+  for(const record of records){
+    const line=JSON.stringify(record)+'\n';
+    if(typeof res.write==='function') res.write(line);
+    else if(typeof res.body==='string') res.body+=line;
+  }
+  return res.end();
+}
+
 function exportError(code,status,message){
   const error=new Error(code);
   error.status=status;
@@ -388,12 +444,14 @@ async function handler(req,res){
   if(sharedRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
   if(!sharedRateLimit.allowed) return send(res,429,rateLimitBody());
   try{
-    const includeEvidence=includeEvidenceRequested(req);
+    const ndjsonPackage=ndjsonPackageRequested(req);
+    const includeEvidence=includeEvidenceRequested(req)||ndjsonPackage;
     const page=includeEvidence?evidencePageOptions(req):null;
     const bundle=await rpc(authorization);
     const output=includeEvidence
       ?await inlineEvidenceBytes(bundle,authorization,process.env,fetch,page)
       :bundle;
+    if(ndjsonPackage) return sendNdjsonPackage(res,output);
     return send(res,200,{data:output});
   }catch(error){
     const status=Number.isInteger(error.status)?error.status:502;
@@ -405,4 +463,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
