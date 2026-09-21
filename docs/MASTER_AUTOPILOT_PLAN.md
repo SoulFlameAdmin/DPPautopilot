@@ -576,3 +576,10 @@ Append evidence here only after verification.
 - T03 now has 10 stateful integration scenarios. The new scenario mutates the evidence manifest between page 1 and page 2.
 - Reusing the stale `evidence_manifest_sha256` returns stable `409 EVIDENCE_EXPORT_MANIFEST_CHANGED` and proves no second evidence object is downloaded.
 - T03 remains RED/PARTIAL pending M17–M23 GREEN plus real authenticated Storage/live-data/deployed HTTP acceptance.
+
+### M13 deployed download-integrity synchronization — 2026-09-21
+- Canonical PR #144 download-integrity source is now synchronized to the bound Supabase project as `dpp-evidence-object` **ACTIVE version 6** with `verify_jwt=true`.
+- Live bundle SHA-256: `86839628d196b43512f70666213fe6f499863a4a6e7ce23b56bdee19f342ec42`.
+- Connector readback proves deployed `index.ts` is byte-for-byte equal to canonical GitHub `main`.
+- GET performs caller-RLS metadata lookup, downloads the object, recomputes SHA-256 and requires exact `byte_size` / `sha256_hex` / `content_type` agreement before bytes are returned; mismatch fails closed with `409 EVIDENCE_DOWNLOAD_INTEGRITY_FAILED`.
+- M13 remains RED/PARTIAL: declared dependency M03 is not GREEN and the required real authenticated upload→download/content verification→delete roundtrip is still unproven. No Vercel deployment was attempted.
