@@ -16,7 +16,7 @@ R08 remains **RED** because R07 is not GREEN and several regulatory/storage/auth
 
 Organization deletion remains disabled until all of these are accepted and tested:
 
-- final large-tenant archive/streaming package + resumable export-manifest acceptance beyond the paged JSON precursor;
+- final large-tenant archive/streaming package acceptance beyond the paged JSON precursor and signed resume-token precursor;
 - passport/version regulatory retention period;
 - registry submission retention and external-recipient terms;
 - evidence Storage object deletion lifecycle;
@@ -36,3 +36,13 @@ The deletion-impact preview also marks external Storage enumeration as required,
 - A later page may send `evidence_manifest_sha256`; if the manifest changed, export fails closed with `409 EVIDENCE_EXPORT_MANIFEST_CHANGED` before any object bytes are fetched.
 - Invalid digest shape fails closed with `400 EVIDENCE_EXPORT_MANIFEST_INVALID` before the export RPC.
 - This gives stateless resume/drift detection but is not yet a signed archive manifest or final streaming package.
+
+
+## Signed resumable evidence-manifest precursor — 2026-09-21
+
+- Paged evidence export can opt into a signed resume contract with `evidence_manifest_signed=1`.
+- The response includes `manifest_token` using `HMAC-SHA256-v1` over the canonical manifest SHA-256. Later pages send the token as `evidence_manifest_token`.
+- The HMAC key is server-only in `DPP_EXPORT_MANIFEST_SIGNING_KEY`, requires at least 32 bytes, and is never returned or embedded in client assets.
+- A tampered but well-shaped token fails closed with `400 EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID` before evidence-object download.
+- A valid token for an older manifest fails closed with `409 EVIDENCE_EXPORT_MANIFEST_CHANGED`; missing signing configuration fails the signed path with `500 EVIDENCE_EXPORT_SIGNING_UNAVAILABLE`.
+- The existing unsigned `evidence_manifest_sha256` resume contract remains backward compatible. Final archive/streaming package format and real authenticated deployed large-tenant acceptance are still pending.

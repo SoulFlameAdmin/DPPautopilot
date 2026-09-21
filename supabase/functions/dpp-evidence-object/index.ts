@@ -36,12 +36,9 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
 }
 
 async function loadEvidenceMetadata(client: ReturnType<typeof createClient>, path: string) {
-  const { data, error } = await client
-    .from("dpp_evidence_attachments")
-    .select("byte_size,sha256_hex,content_type")
-    .eq("storage_bucket", BUCKET)
-    .eq("storage_path", path)
-    .maybeSingle();
+  const { data, error } = await client.rpc("dpp_api_evidence_object_metadata", {
+    p_storage_path: path,
+  });
 
   if (error || !data) return null;
   return {

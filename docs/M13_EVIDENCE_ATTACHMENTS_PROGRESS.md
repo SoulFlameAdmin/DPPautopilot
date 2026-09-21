@@ -49,3 +49,13 @@ M13 remains **RED/PARTIAL**, not GREEN: a real authenticated user byte upload ->
 - Missing/inaccessible metadata remains non-enumerating as `404 EVIDENCE_NOT_AVAILABLE`; byte/type/hash mismatch fails closed with `409 EVIDENCE_DOWNLOAD_INTEGRITY_FAILED`.
 - The response `Content-Type` comes from verified metadata, not an untrusted object response alone.
 - M13 remains RED/PARTIAL until M03 is GREEN and a real authenticated upload→download/content verification→delete roundtrip is proven against the deployed function.
+
+
+## Minimal metadata RPC bridge fix — 2026-09-21
+
+- Live ACL inspection proved `authenticated` intentionally has no direct `SELECT` grant on `dpp_evidence_attachments`; only privileged roles had table grants.
+- The previous caller-JWT Edge implementation therefore could not reliably obtain integrity metadata through direct PostgREST table selection.
+- Migration `dpp_evidence_object_metadata_rpc` adds `dpp_api_evidence_object_metadata(text)`, a tenant-aware SECURITY DEFINER RPC that returns only `byte_size`, `sha256_hex` and `content_type` for a caller-member organization/path.
+- Direct table access remains denied. Live ACL after apply: authenticated table SELECT=false, authenticated RPC EXECUTE=true, anon RPC EXECUTE=false.
+- Transactional regression plus global SECURITY DEFINER guard passed before persistent apply; bound migration version is `20260920232617`.
+- Edge source now uses the minimal RPC for both upload and download integrity lookups. M13 remains RED/PARTIAL until M03 is GREEN and a real authenticated byte roundtrip is proven.

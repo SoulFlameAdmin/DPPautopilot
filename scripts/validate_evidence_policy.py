@@ -9,9 +9,10 @@ meta_sql=(ROOT/"supabase/migrations/20260919009000_dpp_evidence_attachments.sql"
 storage_sql=(ROOT/"supabase/migrations/20260919027000_dpp_evidence_storage.sql").read_text(encoding="utf-8")
 fix_sql=(ROOT/"supabase/migrations/20260919028000_dpp_evidence_storage_policy_fix.sql").read_text(encoding="utf-8")
 guard_sql=(ROOT/"supabase/migrations/20260919038000_dpp_evidence_storage_registration_tenant_guard.sql").read_text(encoding="utf-8")
+metadata_rpc_sql=(ROOT/"supabase/migrations/20260921003000_dpp_evidence_object_metadata_rpc.sql").read_text(encoding="utf-8")
 edge_fn=(ROOT/"supabase/functions/dpp-evidence-object/index.ts").read_text(encoding="utf-8")
 
-assert policy.get("version")==7
+assert policy.get("version")==8
 assert policy.get("task")=="M13"
 assert policy.get("bucket")=="dpp-evidence"
 assert policy.get("max_bytes")==10_485_760
@@ -43,6 +44,9 @@ assert storage["hosted_migrations"]==[
 ]
 assert storage["metadata_registration_tenant_guard"] is True
 assert storage["metadata_registration_helper"]=="public.dpp_evidence_storage_registered(text)"
+assert storage["metadata_lookup_rpc"]=="public.dpp_api_evidence_object_metadata(text)"
+assert storage["metadata_lookup_rpc_direct_table_grant_required"] is False
+assert storage["metadata_lookup_rpc_returns"]==["byte_size","sha256_hex","content_type"]
 edge=storage["edge_function"]
 assert edge["name"]=="dpp-evidence-object"
 assert edge["source"]=="supabase/functions/dpp-evidence-object/index.ts"
@@ -52,7 +56,7 @@ assert edge["operations"]==["upload","download","delete"]
 assert edge["overwrite_allowed"] is False
 assert edge["runtime_acceptance_required"] is True
 integrity=edge["upload_integrity"]
-assert integrity["metadata_lookup"]=="caller-RLS SELECT from dpp_evidence_attachments by storage_bucket + storage_path"
+assert integrity["metadata_lookup"]=="caller-JWT RPC public.dpp_api_evidence_object_metadata(text)"
 assert integrity["verifies"]==["byte_size","sha256_hex","content_type"]
 assert integrity["hash"]=="SHA-256 via Web Crypto"
 assert integrity["mismatch_status"]==409
@@ -61,7 +65,7 @@ assert integrity["missing_metadata_status"]==403
 assert integrity["missing_metadata_code"]=="EVIDENCE_METADATA_NOT_AVAILABLE"
 assert integrity["verify_before_storage_upload"] is True
 download_integrity=edge["download_integrity"]
-assert download_integrity["metadata_lookup"]=="caller-RLS SELECT from dpp_evidence_attachments by storage_bucket + storage_path"
+assert download_integrity["metadata_lookup"]=="caller-JWT RPC public.dpp_api_evidence_object_metadata(text)"
 assert download_integrity["verifies"]==["byte_size","sha256_hex","content_type"]
 assert download_integrity["hash"]=="SHA-256 via Web Crypto"
 assert download_integrity["mismatch_status"]==409
@@ -86,10 +90,8 @@ for token in [
  "EVIDENCE_UPLOAD_DENIED",
  "EVIDENCE_DELETE_DENIED",
  "sha256Hex",
- '.from("dpp_evidence_attachments")',
- '.select("byte_size,sha256_hex,content_type")',
- '.eq("storage_bucket", BUCKET)',
- '.eq("storage_path", path)',
+ '.rpc("dpp_api_evidence_object_metadata"',
+ 'p_storage_path: path',
  "EVIDENCE_METADATA_NOT_AVAILABLE",
  "EVIDENCE_METADATA_MISMATCH",
  "loadEvidenceMetadata",
@@ -97,7 +99,7 @@ for token in [
 ]:
     assert token in edge_fn, f"M13 Edge Function missing contract token: {token}"
 
-metadata_lookup_pos=edge_fn.index('.from("dpp_evidence_attachments")')
+metadata_lookup_pos=edge_fn.index('.rpc("dpp_api_evidence_object_metadata"')
 hash_pos=edge_fn.index('const actualSha256 = await sha256Hex(bytes)')
 upload_pos=edge_fn.index('.storage.from(BUCKET).upload(')
 assert 0 <= metadata_lookup_pos < hash_pos < upload_pos, "M13 metadata/hash verification must happen before Storage upload"
@@ -148,7 +150,24 @@ for token in [
 ]:
     assert token.lower() in guard_sql.lower(), f"M13 tenant guard migration missing contract token: {token}"
 
+for token in [
+  "create or replace function public.dpp_api_evidence_object_metadata(",
+  "security definer",
+  "set search_path=public,pg_temp",
+  "dpp_request_user_id()",
+  "dpp_evidence_storage_org_id",
+  "dpp_has_org_role",
+  "array['owner','admin','editor','viewer']",
+  "from public.dpp_evidence_attachments",
+  "'byte_size'",
+  "'sha256_hex'",
+  "'content_type'",
+  "revoke all on function public.dpp_api_evidence_object_metadata(text) from public,anon",
+  "grant execute on function public.dpp_api_evidence_object_metadata(text) to authenticated",
+]:
+    assert token.lower() in metadata_rpc_sql.lower(), f"M13 metadata RPC migration missing contract token: {token}"
+
 for content_type in expected_types:
     assert content_type in meta_sql and content_type in storage_sql
 
-print("M13_EVIDENCE_POLICY_PASS: tenant metadata plus private Storage bucket/RLS, tenant-guarded registration, caller-JWT Edge Function, pre-upload and pre-response download byte-size/SHA-256/content-type verification, MIME/size/path limits and no-overwrite integrity contract are declared")
+print("M13_EVIDENCE_POLICY_PASS: deny-by-default evidence table grants plus tenant-aware minimal metadata RPC, private Storage RLS, caller-JWT Edge Function, upload/download byte-size/SHA-256/content-type verification, MIME/size/path limits and no-overwrite integrity are declared")

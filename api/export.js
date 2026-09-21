@@ -8,6 +8,7 @@ const { startRequestObservability } = require('./_observability.js');
 
 const MAX_INLINE_EVIDENCE_BYTES=25*1024*1024;
 const MAX_EVIDENCE_PAGE_LIMIT=100;
+const SIGNED_MANIFEST_VERSION='v1';
 
 function send(res,status,body){
   res.statusCode=status;
@@ -88,15 +89,75 @@ function evidenceManifestSha256(manifest){
   return crypto.createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
 }
 
+function manifestSigningKey(env=process.env){
+  const raw=env&&env.DPP_EXPORT_MANIFEST_SIGNING_KEY;
+  if(typeof raw!=='string'||Buffer.byteLength(raw,'utf8')<32){
+    throw exportError(
+      'EVIDENCE_EXPORT_SIGNING_UNAVAILABLE',
+      500,
+      'Evidence export signing configuration is unavailable.'
+    );
+  }
+  return Buffer.from(raw,'utf8');
+}
+
+function signEvidenceManifestToken(manifestSha256,env=process.env){
+  const signature=crypto
+    .createHmac('sha256',manifestSigningKey(env))
+    .update(`dpp-export-manifest:${SIGNED_MANIFEST_VERSION}:${manifestSha256}`)
+    .digest('hex');
+  return `${SIGNED_MANIFEST_VERSION}.${manifestSha256}.${signature}`;
+}
+
+function verifyEvidenceManifestToken(token,currentManifestSha256,env=process.env){
+  const match=/^v1\.([0-9a-f]{64})\.([0-9a-f]{64})$/i.exec(String(token||''));
+  if(!match){
+    throw exportError(
+      'EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID',
+      400,
+      'Evidence export signed manifest token is invalid.'
+    );
+  }
+  const manifestSha256=match[1].toLowerCase();
+  const providedSignature=match[2].toLowerCase();
+  const expectedToken=signEvidenceManifestToken(manifestSha256,env);
+  const expectedSignature=expectedToken.slice(expectedToken.lastIndexOf('.')+1);
+  const signatureMatches=crypto.timingSafeEqual(
+    Buffer.from(providedSignature,'hex'),
+    Buffer.from(expectedSignature,'hex')
+  );
+  if(!signatureMatches){
+    throw exportError(
+      'EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID',
+      400,
+      'Evidence export signed manifest token is invalid.'
+    );
+  }
+  if(manifestSha256!==currentManifestSha256){
+    throw exportError(
+      'EVIDENCE_EXPORT_MANIFEST_CHANGED',
+      409,
+      'Evidence export manifest changed; restart the export.'
+    );
+  }
+  return manifestSha256;
+}
+
 function evidencePageOptions(req){
   const query=req&&req.query?req.query:{};
   const rawOffset=query.evidence_offset;
   const rawLimit=query.evidence_limit;
   const rawManifest=query.evidence_manifest_sha256;
+  const rawManifestToken=query.evidence_manifest_token;
+  const rawSigned=query.evidence_manifest_signed;
   const paged=rawOffset!==undefined||rawLimit!==undefined;
   const expectedManifestSha256=rawManifest===undefined||rawManifest===null||rawManifest===''
     ?null
     :String(rawManifest).toLowerCase();
+  const expectedManifestToken=rawManifestToken===undefined||rawManifestToken===null||rawManifestToken===''
+    ?null
+    :String(rawManifestToken);
+  const signedRequested=rawSigned==='1'||rawSigned==='true'||rawSigned===true||expectedManifestToken!==null;
   if(expectedManifestSha256!==null&&!/^[0-9a-f]{64}$/.test(expectedManifestSha256)){
     throw exportError(
       'EVIDENCE_EXPORT_MANIFEST_INVALID',
@@ -104,7 +165,14 @@ function evidencePageOptions(req){
       'Evidence export manifest SHA-256 is invalid.'
     );
   }
-  if(!paged) return {paged:false,offset:0,limit:null,expectedManifestSha256};
+  if(expectedManifestToken!==null&&!/^v1\.[0-9a-f]{64}\.[0-9a-f]{64}$/i.test(expectedManifestToken)){
+    throw exportError(
+      'EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID',
+      400,
+      'Evidence export signed manifest token is invalid.'
+    );
+  }
+  if(!paged) return {paged:false,offset:0,limit:null,expectedManifestSha256,expectedManifestToken,signedRequested};
 
   const offset=rawOffset===undefined?0:Number(rawOffset);
   const limit=rawLimit===undefined?25:Number(rawLimit);
@@ -118,7 +186,7 @@ function evidencePageOptions(req){
       'Evidence export pagination parameters are invalid.'
     );
   }
-  return {paged:true,offset,limit,expectedManifestSha256};
+  return {paged:true,offset,limit,expectedManifestSha256,expectedManifestToken,signedRequested};
 }
 
 async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImpl=fetch,page={paged:false,offset:0,limit:null}){
@@ -128,6 +196,7 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
   const paged=Boolean(page&&page.paged);
   const manifestSha256=evidenceManifestSha256(manifest);
   const expectedManifestSha256=page&&page.expectedManifestSha256?page.expectedManifestSha256:null;
+  const expectedManifestToken=page&&page.expectedManifestToken?page.expectedManifestToken:null;
   if(expectedManifestSha256&&expectedManifestSha256!==manifestSha256){
     throw exportError(
       'EVIDENCE_EXPORT_MANIFEST_CHANGED',
@@ -135,6 +204,15 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
       'Evidence export manifest changed; restart the export.'
     );
   }
+  if(expectedManifestToken){
+    verifyEvidenceManifestToken(expectedManifestToken,manifestSha256,env);
+  }
+  const signedMetadata=(page&&page.signedRequested)||expectedManifestToken
+    ?{
+      manifest_token:signEvidenceManifestToken(manifestSha256,env),
+      manifest_signature_algorithm:'HMAC-SHA256-v1'
+    }
+    :{};
   const selected=paged?manifest.slice(offset,offset+limit):manifest;
   if(manifest.length===0||selected.length===0){
     return {
@@ -149,6 +227,7 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
         inline_limit_bytes:MAX_INLINE_EVIDENCE_BYTES,
         manifest_object_count:manifest.length,
         manifest_sha256:manifestSha256,
+        ...signedMetadata,
         paged,
         offset:paged?offset:0,
         limit:paged?limit:null,
@@ -253,6 +332,7 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
       inline_limit_bytes:MAX_INLINE_EVIDENCE_BYTES,
       manifest_object_count:manifest.length,
       manifest_sha256:manifestSha256,
+      ...signedMetadata,
       paged,
       offset:paged?offset:0,
       limit:paged?limit:null,
@@ -296,4 +376,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,evidencePageOptions,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};

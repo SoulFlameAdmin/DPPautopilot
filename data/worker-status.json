@@ -2,15 +2,16 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "T03 fail-closed manifest-drift integration merged and evidenced",
+  "currentTask": "M21/R08 signed resumable evidence-manifest precursor implemented on stacked branch; deploy/PR gate held",
   "currentGate": "MVP / DATA / AUTH / API",
-  "lastCompletedTask": "PR #142 merged as d2bcd50f3d60291625c417f05bc4c389173b9cc2 after exact-head full CI 35531761114 SUCCESS; stale manifest token now fails 409 before second evidence object download",
-  "nextTask": "Validate/merge T03 manifest-drift evidence sync, then select the earliest dependency-safe non-deploy precursor from current main.",
-  "message": "T03 now covers positive resume and negative manifest drift in-process. It remains RED/PARTIAL pending M17-M23 and live authenticated/deployed integration.",
+  "lastCompletedTask": "Branch static validation: 13/13 signed-manifest syntax/policy/contract checks PASS; no GREEN claim because pull-request CI is not runnable without triggering Vercel while global deploy lease is denied",
+  "nextTask": "After global Vercel lease permits a preview-triggering PR, open stacked PR from m21-r08-signed-manifest-20260921 onto m13-evidence-metadata-rpc-20260921, run full CI, fix failures, then evidence-sync without retrying F08 production unless new evidence permits it.",
+  "message": "Opt-in HMAC-SHA256-v1 manifest_token is implemented with backward-compatible SHA-256 resume, tamper rejection, missing-key fail-closed behavior, R01 secret ownership, M22 errors and R08 policy/docs. Deployment-triggering PR is intentionally deferred.",
   "deferredBlockers": [
-    "F08 — READY production deployment exists, but required app/data JSON HTTP 200 acceptance is blocked by Vercel SSO redirect (observed 302). No SSO/login/MFA bypass allowed.",
-    "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; connector path to auth config is Vercel-SSO protected and no auth bypass is allowed.",
-    "M13 — final authenticated Storage byte-roundtrip acceptance remains pending real runtime/deployed path evidence."
+    "F08 — latest lease-governed production attempt for main@7ff3492e3fa62e480c786bc60b93fb83e914c126 returned real build-rate-limit; no retry timestamp was supplied. Also, required app/data JSON 200 acceptance remains behind Vercel SSO 302. Do not retry until new evidence.",
+    "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; no auth/login/MFA bypass allowed.",
+    "M13 — technical Edge metadata ACL mismatch is fixed and Edge v5 is deployed; final authenticated upload→download→delete byte roundtrip still requires a real user runtime path and M03.",
+    "GLOBAL VERCEL LEASE — claim for DPP_APP2/dpp-autopilot at branch head was denied; lease retry_after_at=2026-09-22T00:40:18Z. No PR/deploy was triggered."
   ],
-  "updatedAt": "2026-09-21T02:18:00+03:00"
+  "updatedAt": "2026-09-21T03:42:00+03:00"
 }
