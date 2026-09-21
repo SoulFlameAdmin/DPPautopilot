@@ -443,3 +443,162 @@ test('manifest consistency token validates digest shape before export RPC',async
     assert.equal(called,false);
   }finally{global.fetch=original;restore();}
 });
+
+
+test('signed manifest token supports deterministic paged resume',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const oldSigning=process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY;
+  process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY='k'.repeat(64);
+  const bytes1=Buffer.from('signed-page-one','utf8');
+  const bytes2=Buffer.from('signed-page-two','utf8');
+  const manifest=[
+    {
+      id:'11111111-1111-4111-8111-111111111111',
+      storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/one.bin',
+      original_filename:'one.bin',
+      content_type:'application/octet-stream',
+      byte_size:bytes1.length,
+      sha256_hex:crypto.createHash('sha256').update(bytes1).digest('hex')
+    },
+    {
+      id:'22222222-2222-4222-8222-222222222222',
+      storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/two.bin',
+      original_filename:'two.bin',
+      content_type:'application/octet-stream',
+      byte_size:bytes2.length,
+      sha256_hex:crypto.createHash('sha256').update(bytes2).digest('hex')
+    }
+  ];
+  let objectCalls=0;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {schema_version:1,evidence_manifest:manifest};}};
+    }
+    objectCalls+=1;
+    const parsed=new URL(String(url));
+    const path=parsed.searchParams.get('path');
+    const bytes=path.endsWith('/one.bin')?bytes1:bytes2;
+    return {
+      ok:true,
+      async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}
+    };
+  };
+  try{
+    let res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'0',
+      evidence_limit:'1',
+      evidence_manifest_signed:'1'
+    }),res);
+    assert.equal(res.statusCode,200);
+    const first=JSON.parse(res.body).data;
+    assert.equal(first.evidence_export.manifest_signature_algorithm,'HMAC-SHA256-v1');
+    assert.match(first.evidence_export.manifest_token,/^v1\.[0-9a-f]{64}\.[0-9a-f]{64}$/);
+    assert.equal(first.evidence_export.next_offset,1);
+    assert.equal(Buffer.from(first.evidence_objects[0].content_base64,'base64').toString('utf8'),'signed-page-one');
+
+    res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:String(first.evidence_export.next_offset),
+      evidence_limit:'1',
+      evidence_manifest_token:first.evidence_export.manifest_token
+    }),res);
+    assert.equal(res.statusCode,200);
+    const second=JSON.parse(res.body).data;
+    assert.equal(second.evidence_export.manifest_token,first.evidence_export.manifest_token);
+    assert.equal(second.evidence_export.next_offset,null);
+    assert.equal(Buffer.from(second.evidence_objects[0].content_base64,'base64').toString('utf8'),'signed-page-two');
+    assert.equal(objectCalls,2);
+  }finally{
+    global.fetch=original;
+    restore();
+    if(oldSigning===undefined) delete process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY;
+    else process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY=oldSigning;
+  }
+});
+
+test('signed manifest token rejects tampering before evidence object download',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const oldSigning=process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY;
+  process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY='s'.repeat(64);
+  const bytes=Buffer.from('signed-object','utf8');
+  const manifest=[{
+    id:'33333333-3333-4333-8333-333333333333',
+    storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/signed.bin',
+    original_filename:'signed.bin',
+    content_type:'application/octet-stream',
+    byte_size:bytes.length,
+    sha256_hex:crypto.createHash('sha256').update(bytes).digest('hex')
+  }];
+  const digest=handler._test.evidenceManifestSha256(manifest);
+  const valid=handler._test.signEvidenceManifestToken(digest,process.env);
+  const last=valid.endsWith('0')?'1':'0';
+  const tampered=valid.slice(0,-1)+last;
+  let objectCalls=0;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:manifest};}};
+    }
+    objectCalls+=1;
+    throw new Error('object fetch must not occur');
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'0',
+      evidence_limit:'1',
+      evidence_manifest_token:tampered
+    }),res);
+    assert.equal(res.statusCode,400);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID');
+    assert.equal(objectCalls,0);
+  }finally{
+    global.fetch=original;
+    restore();
+    if(oldSigning===undefined) delete process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY;
+    else process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY=oldSigning;
+  }
+});
+
+test('signed manifest request fails closed when signing key is unavailable',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const oldSigning=process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY;
+  delete process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY;
+  const bytes=Buffer.from('unsigned-object','utf8');
+  const manifest=[{
+    id:'44444444-4444-4444-8444-444444444444',
+    storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/unsigned.bin',
+    original_filename:'unsigned.bin',
+    content_type:'application/octet-stream',
+    byte_size:bytes.length,
+    sha256_hex:crypto.createHash('sha256').update(bytes).digest('hex')
+  }];
+  let objectCalls=0;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:manifest};}};
+    }
+    objectCalls+=1;
+    throw new Error('object fetch must not occur');
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_offset:'0',
+      evidence_limit:'1',
+      evidence_manifest_signed:'1'
+    }),res);
+    assert.equal(res.statusCode,500);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_SIGNING_UNAVAILABLE');
+    assert.equal(objectCalls,0);
+  }finally{
+    global.fetch=original;
+    restore();
+    if(oldSigning===undefined) delete process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY;
+    else process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY=oldSigning;
+  }
+});
