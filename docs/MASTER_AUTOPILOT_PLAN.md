@@ -586,3 +586,12 @@ Append evidence here only after verification.
 - Bound `dpp-evidence-object` is ACTIVE v5, `verify_jwt=true`, bundle SHA-256 `60c1388baa395eb59f541db6abc30f14931d1194edd1a10fcdee8f249a14b916`; deployed-source readback proves upload/download metadata lookup now uses the minimal RPC.
 - M13 remains RED/PARTIAL pending M03 and a real authenticated byte lifecycle roundtrip.
 - Main merge is deferred because it auto-triggers Vercel; the latest lease-governed production attempt returned real `build-rate-limit` with no retry timestamp.
+
+
+### M21/R08 response-integrity and NDJSON package precursor — 2026-09-22
+
+- PR #154 merged as `b82a0e03f082602c44759fbf2e16a5c2ece8fc81`: evidence export now rejects upstream `Content-Length` mismatch against manifest `byte_size` before object bytes are consumed. Full GitHub Actions run `35667737921` completed SUCCESS; M21 HTTP contract and R08 policy validation both PASS.
+- PR #157 merged as `ab4c34fe69b924c33a9e8db5dc4483af425f3a64`: `GET /api/export?format=ndjson` emits versioned `ndjson-v1` package records (`dpp_export_header` → `dpp_bundle` → zero or more `dpp_evidence` → `dpp_export_end`) using the existing tenant/RBAC, manifest-signing, pagination and evidence-integrity gates.
+- Exact-head full CI `35668573169` completed SUCCESS with 139 completed steps and no failures; M21 export HTTP contract tests and the R08 retention/deletion policy validator both PASS.
+- The package remains fail-closed before first NDJSON emission because the selected evidence page is verified first. This is not yet constant-memory object streaming and is not deployed large-tenant acceptance.
+- M21 remains RED pending M10-M13 GREEN plus constant-memory/final archive packaging and authenticated deployed large-tenant acceptance. R08 remains RED pending R07 plus the unresolved regulatory/storage/audit/Auth deletion lifecycle decisions and final production acceptance.
