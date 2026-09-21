@@ -27,7 +27,7 @@ The deletion-impact preview also marks external Storage enumeration as required,
 
 ## Evidence target
 
-`tests/db/test_retention_deletion_subset.sql` proves eligible terminal imports are removed, their child staging rows cascade, old non-terminal/recent terminal imports are preserved, viewer access is denied, owner/admin access is allowed, too-recent cutoffs fail closed, audit delete events survive, and the non-destructive deletion-impact preview reports exact tenant-scoped counts while keeping destructive deletion unavailable. `tests/api/export.test.cjs` additionally proves evidence-byte integrity, stable unavailable/tamper/oversize errors, deterministic slice selection, `has_more` / `next_offset`, pagination validation before upstream access, and page-scoped byte-cap behavior.
+`tests/db/test_retention_deletion_subset.sql` proves eligible terminal imports are removed, their child staging rows cascade, old non-terminal/recent terminal imports are preserved, viewer access is denied, owner/admin access is allowed, too-recent cutoffs fail closed, audit delete events survive, and the non-destructive deletion-impact preview reports exact tenant-scoped counts while keeping destructive deletion unavailable. `tests/api/export.test.cjs` additionally proves evidence-byte integrity, pre-read `Content-Type` and `Content-Length` metadata checks, stable unavailable/tamper/oversize errors, deterministic slice selection, `has_more` / `next_offset`, pagination validation before upstream access, and page-scoped byte-cap behavior.
 
 
 ## Resumable evidence export consistency precursor — 2026-09-20
@@ -46,3 +46,13 @@ The deletion-impact preview also marks external Storage enumeration as required,
 - A tampered but well-shaped token fails closed with `400 EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID` before evidence-object download.
 - A valid token for an older manifest fails closed with `409 EVIDENCE_EXPORT_MANIFEST_CHANGED`; missing signing configuration fails the signed path with `500 EVIDENCE_EXPORT_SIGNING_UNAVAILABLE`.
 - The existing unsigned `evidence_manifest_sha256` resume contract remains backward compatible. Final archive/streaming package format and real authenticated deployed large-tenant acceptance are still pending.
+
+
+## Evidence response metadata integrity hardening — 2026-09-22
+
+- Evidence byte export validates the object response `Content-Type` against manifest `content_type` before reading bytes.
+- It now also validates `Content-Length`, when the upstream provides it, against manifest `byte_size` before `arrayBuffer()` is consumed. Malformed, unsafe or mismatched lengths fail closed with `502 EVIDENCE_EXPORT_INTEGRITY_FAILED`.
+- Regression `include_evidence fails closed on content length mismatch before bytes are read` proves mismatch rejection occurs without consuming the evidence body.
+- Implementation merged in PR #154 as commit `b82a0e03f082602c44759fbf2e16a5c2ece8fc81`.
+- GitHub Actions run `35667737921` passed completely: M21 export HTTP contract tests PASS, R08 retention/deletion policy validator PASS, and the full validation job completed successfully with 139 completed steps and no failures.
+- This hardening does not change the top-level acceptance state: R08 remains RED and M21 remains RED until their remaining dependencies and final runtime/production acceptance are satisfied. No Vercel deployment was attempted for this block.
