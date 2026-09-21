@@ -595,3 +595,12 @@ Append evidence here only after verification.
 - Exact-head full CI `35668573169` completed SUCCESS with 139 completed steps and no failures; M21 export HTTP contract tests and the R08 retention/deletion policy validator both PASS.
 - The package remains fail-closed before first NDJSON emission because the selected evidence page is verified first. This is not yet constant-memory object streaming and is not deployed large-tenant acceptance.
 - M21 remains RED pending M10-M13 GREEN plus constant-memory/final archive packaging and authenticated deployed large-tenant acceptance. R08 remains RED pending R07 plus the unresolved regulatory/storage/audit/Auth deletion lifecycle decisions and final production acceptance.
+
+
+### M21/R08 canonical resumable pagination ordering — 2026-09-22
+
+- PR #158 merged as `1a6daed12bd77f359e3268113c10ea50e929f254`: evidence manifests are canonicalized by `storage_path|id` before both manifest SHA-256 generation and page slicing.
+- This closes the resume-order gap where the same manifest set could keep the same digest but produce different offset pages if the upstream RPC returned rows in another order.
+- Regression `manifest resume remains deterministic when upstream manifest order changes` and the updated T03 stateful export journey prove deterministic page 1/page 2 behavior.
+- Exact-head GitHub Actions run `35668964500` completed SUCCESS with 139 completed steps and no failures; M21 export HTTP tests, T03 stateful API integration, R08 policy validation and browser smoke all PASS.
+- M21 remains RED pending M10-M13 GREEN plus constant-memory/final archive packaging and authenticated deployed large-tenant acceptance. R08 remains RED pending R07 and the unresolved regulatory/storage/audit/Auth lifecycle and production acceptance dependencies.
