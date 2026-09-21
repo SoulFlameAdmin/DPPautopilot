@@ -179,6 +179,30 @@ test('include_evidence fails closed on hash mismatch',async()=>{
   }finally{global.fetch=original;restore();}
 });
 
+test('include_evidence fails closed on content type mismatch before bytes are read',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('content-type-check','utf8');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  let bytesRead=false;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[{
+        id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/report.json',
+        original_filename:'report.json',content_type:'application/json',byte_size:bytes.length,sha256_hex:sha256
+      }]};}};
+    }
+    return {ok:true,headers:{get(name){return String(name).toLowerCase()==='content-type'?'image/png':null;}},
+      async arrayBuffer(){bytesRead=true;return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}};
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{include_evidence:'1'}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_INTEGRITY_FAILED');
+    assert.equal(bytesRead,false);
+  }finally{global.fetch=original;restore();}
+});
+
 test('include_evidence rejects declared total beyond inline memory limit before object download',async()=>{
   const restore=withEnv(),original=global.fetch;
   let objectCalls=0;
