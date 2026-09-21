@@ -393,6 +393,14 @@
     "EVIDENCE_EXPORT_MANIFEST_CHANGED": {
       "http_status": 409,
       "message": "Evidence export manifest changed; restart the export."
+    },
+    "EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID": {
+      "http_status": 400,
+      "message": "Evidence export signed manifest token is invalid."
+    },
+    "EVIDENCE_EXPORT_SIGNING_UNAVAILABLE": {
+      "http_status": 500,
+      "message": "Evidence export signing configuration is unavailable."
     }
   }
 }
