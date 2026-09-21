@@ -5,7 +5,7 @@ R08 remains **RED** because R07 is not GREEN and several regulatory/storage/auth
 ## Implemented now
 
 - `data/retention-deletion-policy.json` is the machine-readable policy precursor.
-- Existing M21 owner/admin export is required before future organization deletion. `GET /api/export?include_evidence=1` reads private evidence objects through the caller-JWT Storage bridge, verifies byte size + SHA-256 against the manifest, and includes verified base64 bytes. Optional `evidence_offset` / `evidence_limit` parameters provide deterministic paging (default 25, max 100 objects when paging is requested); the 25 MiB inline cap applies to the selected page. Missing objects, integrity mismatch, invalid paging or page overflow fail closed.
+- Existing M21 owner/admin export is required before future organization deletion. `GET /api/export?include_evidence=1` reads private evidence objects through the caller-JWT Storage bridge, verifies byte size + SHA-256 against the manifest and verifies the live Edge response Content-Type before reading bytes, then includes verified base64 bytes. Optional `evidence_offset` / `evidence_limit` parameters provide deterministic paging (default 25, max 100 objects when paging is requested); the 25 MiB inline cap applies to the selected page. Missing objects, integrity mismatch, invalid paging or page overflow fail closed.
 - Terminal import staging (`invalid` or `committed`) may be purged only after a minimum of 30 days.
 - `staged` and `validated` imports are preserved regardless of age by this precursor.
 - `dpp_api_retention_status()` reports the active tenant's deletion-readiness blockers and eligible import-staging count.
@@ -36,3 +36,10 @@ The deletion-impact preview also marks external Storage enumeration as required,
 - A later page may send `evidence_manifest_sha256`; if the manifest changed, export fails closed with `409 EVIDENCE_EXPORT_MANIFEST_CHANGED` before any object bytes are fetched.
 - Invalid digest shape fails closed with `400 EVIDENCE_EXPORT_MANIFEST_INVALID` before the export RPC.
 - This gives stateless resume/drift detection but is not yet a signed archive manifest or final streaming package.
+
+
+## Evidence response Content-Type integrity precursor — 2026-09-21
+
+- M21 export now validates the live `dpp-evidence-object` response `Content-Type` against the manifest in addition to byte size and SHA-256.
+- A mismatched response type fails closed with `502 EVIDENCE_EXPORT_INTEGRITY_FAILED` before the object body is read or included in the export.
+- This is defense in depth on top of the Edge Function's own metadata/type verification and does not promote M21/R08 from RED/PARTIAL.
