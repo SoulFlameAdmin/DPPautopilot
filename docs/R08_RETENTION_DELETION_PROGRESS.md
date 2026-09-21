@@ -65,3 +65,14 @@ The deletion-impact preview also marks external Storage enumeration as required,
 - Existing tenant/RBAC export RPC, manifest SHA-256/signing, pagination, response metadata checks, byte-size and SHA-256 verification remain authoritative. Selected evidence is fully verified before the first NDJSON record is emitted, so an integrity failure cannot leave a partially emitted package.
 - The package stays compatible with paged/signed resume parameters and uses base64 evidence payloads.
 - This is intentionally a precursor, not final large-tenant acceptance: the selected page is still verified in memory before emission. Constant-memory object streaming, a final archive format and real authenticated deployed large-tenant evidence remain pending.
+
+
+## Canonical resumable pagination ordering — 2026-09-22
+
+- Evidence paging now canonicalizes the manifest by `storage_path|id` before both SHA-256 calculation and page slicing.
+- This closes a resume consistency gap where the same manifest set returned in a different upstream row order could previously preserve the same digest while changing which object appeared at a given offset.
+- Regression `manifest resume remains deterministic when upstream manifest order changes` proves page 1/page 2 remain stable across reordered RPC responses.
+- The T03 stateful export journey was updated to assert the canonical page order rather than incidental RPC row order.
+- Implementation merged in PR #158 as commit `1a6daed12bd77f359e3268113c10ea50e929f254`.
+- GitHub Actions run `35668964500` completed successfully with 139 completed steps and no failures; M21 export HTTP tests, T03 stateful API integration, R08 retention/deletion validation, and browser smoke all PASS.
+- M21 and R08 remain RED at top level because their declared dependencies and production/runtime acceptance are not yet fully satisfied. No Vercel deployment was performed for this block.
