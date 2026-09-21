@@ -7,9 +7,10 @@ const handler=require('../../api/export.js');
 
 function makeRes(){
   return {
-    statusCode:0,headers:{},body:'',
+    statusCode:0,headers:{},body:'',writeCount:0,
     setHeader(name,value){this.headers[String(name).toLowerCase()]=value;},
-    end(value){this.body=value||'';}
+    write(value){this.writeCount+=1;this.body+=String(value);return true;},
+    end(value){if(value!==undefined)this.body=value||'';}
   };
 }
 let requestSequence=0;
@@ -60,6 +61,104 @@ test('GET forwards caller bearer to owner/admin export RPC',async()=>{
     assert.equal(res.headers['cache-control'],'no-store');
     assert.equal(res.headers['content-disposition'],'attachment; filename="dpp-export.json"');
     assert.equal(JSON.parse(res.body).data.schema_version,1);
+  }finally{global.fetch=original;restore();}
+});
+
+
+test('ndjson package emits versioned verified bundle evidence and trailer records',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('ndjson-evidence','utf8');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {
+        schema_version:1,
+        organization_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        battery_models:[{id:'model-1'}],
+        evidence_manifest:[{
+          id:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+          storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/ndjson.bin',
+          original_filename:'ndjson.bin',
+          content_type:'application/octet-stream',
+          byte_size:bytes.length,
+          sha256_hex:sha256
+        }]
+      };}};
+    }
+    return {
+      ok:true,
+      headers:{get(name){
+        const key=String(name).toLowerCase();
+        if(key==='content-type') return 'application/octet-stream';
+        if(key==='content-length') return String(bytes.length);
+        return null;
+      }},
+      async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}
+    };
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer ndjson-package-token',{
+      format:'ndjson',
+      evidence_offset:'0',
+      evidence_limit:'1'
+    }),res);
+    assert.equal(res.statusCode,200);
+    assert.equal(res.headers['content-type'],'application/x-ndjson; charset=utf-8');
+    assert.equal(res.headers['content-disposition'],'attachment; filename="dpp-export.ndjson"');
+    const records=res.body.trim().split('\n').map(line=>JSON.parse(line));
+    assert.deepEqual(records.map(record=>record.type),[
+      'dpp_export_header','dpp_bundle','dpp_evidence','dpp_export_end'
+    ]);
+    assert.equal(records[0].package_version,'ndjson-v1');
+    assert.match(records[0].evidence_export.manifest_sha256,/^[0-9a-f]{64}$/);
+    assert.equal(records[0].evidence_export.object_count,1);
+    assert.equal(records[1].data.schema_version,1);
+    assert.equal(records[1].data.evidence_objects,undefined);
+    assert.equal(records[1].data.evidence_export,undefined);
+    assert.equal(records[2].data.original_filename,'ndjson.bin');
+    assert.equal(Buffer.from(records[2].data.content_base64,'base64').toString('utf8'),'ndjson-evidence');
+    assert.equal(records[3].object_count,1);
+    assert.equal(records[3].total_bytes,bytes.length);
+    assert.equal(records[3].integrity,'sha256_verified');
+    assert.equal(records[3].manifest_sha256,records[0].evidence_export.manifest_sha256);
+    assert.equal(res.writeCount,4);
+  }finally{global.fetch=original;restore();}
+});
+
+test('ndjson package fails closed before first record on evidence integrity mismatch',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('ndjson-fail-closed','utf8');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[{
+        id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+        storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/fail.bin',
+        original_filename:'fail.bin',
+        content_type:'application/octet-stream',
+        byte_size:bytes.length,
+        sha256_hex:sha256
+      }]};}};
+    }
+    return {
+      ok:true,
+      headers:{get(name){
+        const key=String(name).toLowerCase();
+        if(key==='content-type') return 'application/octet-stream';
+        if(key==='content-length') return String(bytes.length+1);
+        return null;
+      }},
+      async arrayBuffer(){throw new Error('bytes must not be read');}
+    };
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer ndjson-fail-closed-token',{format:'ndjson'}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_INTEGRITY_FAILED');
+    assert.equal(res.writeCount,0);
+    assert.equal(res.headers['content-type'],'application/json; charset=utf-8');
   }finally{global.fetch=original;restore();}
 });
 
