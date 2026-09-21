@@ -228,7 +228,7 @@ test('include_evidence fails closed on content length mismatch before bytes are 
   };
   try{
     const res=makeRes();
-    await handler(makeReq('GET','Bearer test-token',{include_evidence:'1'}),res);
+    await handler(makeReq('GET','Bearer content-length-integrity-token',{include_evidence:'1'}),res);
     assert.equal(res.statusCode,502);
     assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_INTEGRITY_FAILED');
     assert.equal(bytesRead,false);
