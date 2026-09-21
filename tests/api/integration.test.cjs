@@ -403,7 +403,7 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     assert.equal(Object.prototype.hasOwnProperty.call(bundle.evidence_manifest[0],'signed_url'),false);
     assert.equal(bundle.evidence_export.included,true);
     assert.equal(bundle.evidence_export.object_count,1);
-    assert.equal(bundle.evidence_export.total_bytes,EVIDENCE_BYTES.length);
+    assert.equal(bundle.evidence_export.total_bytes,EVIDENCE_BYTES_2.length);
     assert.equal(bundle.evidence_export.integrity,'sha256_verified');
     assert.equal(bundle.evidence_export.paged,true);
     assert.equal(bundle.evidence_export.offset,0);
@@ -411,11 +411,11 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     assert.equal(bundle.evidence_export.has_more,true);
     assert.equal(bundle.evidence_export.next_offset,1);
     assert.match(bundle.evidence_export.manifest_sha256,/^[0-9a-f]{64}$/);
-    assert.equal(bundle.evidence_objects[0].storage_path,'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf');
-    assert.equal(bundle.evidence_objects[0].byte_size,EVIDENCE_BYTES.length);
-    assert.equal(bundle.evidence_objects[0].sha256_hex,EVIDENCE_SHA256);
-    assert.equal(bundle.evidence_objects[0].content_base64,EVIDENCE_BYTES.toString('base64'));
-    assert.equal(Buffer.from(bundle.evidence_objects[0].content_base64,'base64').toString('utf8'),'T03 evidence object bytes');
+    assert.equal(bundle.evidence_objects[0].storage_path,'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report-2.pdf');
+    assert.equal(bundle.evidence_objects[0].byte_size,EVIDENCE_BYTES_2.length);
+    assert.equal(bundle.evidence_objects[0].sha256_hex,EVIDENCE_SHA256_2);
+    assert.equal(bundle.evidence_objects[0].content_base64,EVIDENCE_BYTES_2.toString('base64'));
+    assert.equal(Buffer.from(bundle.evidence_objects[0].content_base64,'base64').toString('utf8'),'T03 evidence object bytes second page');
 
     res=makeRes();
     await exportApi(req('GET',null,{
@@ -431,9 +431,9 @@ test('stateful model -> item -> passport -> public/private -> export journey',as
     assert.equal(secondPage.evidence_export.has_more,false);
     assert.equal(secondPage.evidence_export.next_offset,null);
     assert.equal(secondPage.evidence_objects.length,1);
-    assert.equal(secondPage.evidence_objects[0].storage_path,'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report-2.pdf');
-    assert.equal(secondPage.evidence_objects[0].sha256_hex,EVIDENCE_SHA256_2);
-    assert.equal(Buffer.from(secondPage.evidence_objects[0].content_base64,'base64').toString('utf8'),'T03 evidence object bytes second page');
+    assert.equal(secondPage.evidence_objects[0].storage_path,'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/evidence/passport/report.pdf');
+    assert.equal(secondPage.evidence_objects[0].sha256_hex,EVIDENCE_SHA256);
+    assert.equal(Buffer.from(secondPage.evidence_objects[0].content_base64,'base64').toString('utf8'),'T03 evidence object bytes');
     assert.equal(backend.state.exportCalls,2);
   }finally{global.fetch=original;restore();}
 });
