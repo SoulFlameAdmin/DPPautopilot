@@ -207,6 +207,34 @@ test('include_evidence fails closed on content type mismatch before bytes are re
   }finally{global.fetch=original;restore();}
 });
 
+test('include_evidence fails closed on content length mismatch before bytes are read',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('content-length-check','utf8');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  let bytesRead=false;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[{
+        id:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/report.bin',
+        original_filename:'report.bin',content_type:'application/octet-stream',byte_size:bytes.length,sha256_hex:sha256
+      }]};}};
+    }
+    return {ok:true,headers:{get(name){
+      const key=String(name).toLowerCase();
+      if(key==='content-type') return 'application/octet-stream';
+      if(key==='content-length') return String(bytes.length+1);
+      return null;
+    }},async arrayBuffer(){bytesRead=true;return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}};
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer content-length-integrity-token',{include_evidence:'1'}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_INTEGRITY_FAILED');
+    assert.equal(bytesRead,false);
+  }finally{global.fetch=original;restore();}
+});
+
 test('include_evidence rejects declared total beyond inline memory limit before object download',async()=>{
   const restore=withEnv(),original=global.fetch;
   let objectCalls=0;
