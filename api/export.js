@@ -121,6 +121,32 @@ function evidencePageOptions(req){
   return {paged:true,offset,limit,expectedManifestSha256};
 }
 
+function manifestSignatureRequested(req){
+  const value=req&&req.query&&req.query.evidence_manifest_signature;
+  return value==='1'||value==='true'||value===true;
+}
+
+function signEvidenceManifest(manifestSha256,env=process.env){
+  const secret=env.DPP_EXPORT_MANIFEST_SIGNING_SECRET;
+  if(typeof secret!=='string'||Buffer.byteLength(secret,'utf8')<32){
+    throw exportError(
+      'EXPORT_SIGNING_CONFIGURATION_MISSING',
+      500,
+      'Evidence export signing configuration is incomplete.'
+    );
+  }
+  const keyId=typeof env.DPP_EXPORT_MANIFEST_SIGNING_KEY_ID==='string'&&env.DPP_EXPORT_MANIFEST_SIGNING_KEY_ID.trim()
+    ?env.DPP_EXPORT_MANIFEST_SIGNING_KEY_ID.trim()
+    :'default';
+  const payload=`dpp-evidence-manifest:v1:${manifestSha256}`;
+  return {
+    algorithm:'hmac-sha256',
+    key_id:keyId,
+    payload_format:'dpp-evidence-manifest:v1:<sha256>',
+    signature_hex:crypto.createHmac('sha256',secret).update(payload).digest('hex')
+  };
+}
+
 function responseContentType(response){
   if(!response||!response.headers||typeof response.headers.get!=='function') return null;
   const value=response.headers.get('content-type');
@@ -296,10 +322,20 @@ async function handler(req,res){
   try{
     const includeEvidence=includeEvidenceRequested(req);
     const page=includeEvidence?evidencePageOptions(req):null;
+    const signManifest=includeEvidence&&manifestSignatureRequested(req);
     const bundle=await rpc(authorization);
-    const output=includeEvidence
+    let output=includeEvidence
       ?await inlineEvidenceBytes(bundle,authorization,process.env,fetch,page)
       :bundle;
+    if(signManifest){
+      output={
+        ...output,
+        evidence_export:{
+          ...output.evidence_export,
+          manifest_signature:signEvidenceManifest(output.evidence_export.manifest_sha256,process.env)
+        }
+      };
+    }
     return send(res,200,{data:output});
   }catch(error){
     const status=Number.isInteger(error.status)?error.status:502;
@@ -311,4 +347,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,evidencePageOptions,responseContentType,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,evidencePageOptions,manifestSignatureRequested,signEvidenceManifest,responseContentType,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT};
