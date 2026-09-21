@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/retention-deletion-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==6
+assert policy.get("version")==7
 assert policy.get("task")=="R08"
 assert policy.get("status")=="partial"
 assert policy.get("scope","").startswith("DPP Autopilot")
@@ -15,7 +15,7 @@ export=policy.get("export",{})
 assert export.get("required_before_org_deletion") is True
 assert "dpp_api_export_bundle" in export.get("implementation","")
 precursor=export.get("evidence_bytes_precursor",{})
-assert precursor.get("endpoint")=="GET /api/export?include_evidence=1[&evidence_offset=N&evidence_limit=N][&evidence_manifest_signed=1][&evidence_manifest_token=TOKEN]"
+assert precursor.get("endpoint")=="GET /api/export?include_evidence=1[&evidence_offset=N&evidence_limit=N][&evidence_manifest_signed=1][&evidence_manifest_token=TOKEN][&format=ndjson]"
 assert precursor.get("integrity")=="byte_size + SHA-256 verified against evidence_manifest before inclusion"
 assert precursor.get("encoding")=="base64"
 assert precursor.get("inline_limit_bytes")==26_214_400
@@ -52,7 +52,22 @@ assert signed.get("signing_unavailable_code")=="EVIDENCE_EXPORT_SIGNING_UNAVAILA
 assert signed.get("manifest_drift_status")==409
 assert signed.get("manifest_drift_code")=="EVIDENCE_EXPORT_MANIFEST_CHANGED"
 assert signed.get("failure_stage")=="before evidence object download"
-assert "final archive/streaming package format" in export.get("current_gap","")
+streaming=export.get("streaming_package_precursor",{})
+assert streaming.get("query")=="format=ndjson"
+assert streaming.get("media_type")=="application/x-ndjson; charset=utf-8"
+assert streaming.get("package_version")=="ndjson-v1"
+assert streaming.get("content_disposition")=='attachment; filename="dpp-export.ndjson"'
+assert streaming.get("record_order")==[
+    "dpp_export_header",
+    "dpp_bundle",
+    "dpp_evidence (zero or more)",
+    "dpp_export_end",
+]
+assert streaming.get("evidence_encoding")=="base64"
+assert "verified before the first NDJSON record is emitted" in streaming.get("integrity_gate","")
+assert streaming.get("signed_resume_compatible") is True
+assert "constant-memory object streaming" in streaming.get("current_limit","")
+assert "constant-memory object streaming/final archive packaging" in export.get("current_gap","")
 
 rules={r["id"]:r for r in policy.get("retention_rules",[])}
 expected={
@@ -143,6 +158,12 @@ for token in [
     "evidenceManifestSha256",
     "responseContentType",
     "responseContentLength",
+    "ndjsonPackageRequested",
+    "sendNdjsonPackage",
+    "application/x-ndjson",
+    "dpp_export_header",
+    "dpp_evidence",
+    "dpp_export_end",
     "signEvidenceManifestToken",
     "verifyEvidenceManifestToken",
     "DPP_EXPORT_MANIFEST_SIGNING_KEY",
@@ -155,6 +176,8 @@ for token in [
     "include_evidence fails closed on hash mismatch",
     "include_evidence fails closed on content type mismatch before bytes are read",
     "include_evidence fails closed on content length mismatch before bytes are read",
+    "ndjson package emits versioned verified bundle evidence and trailer records",
+    "ndjson package fails closed before first record on evidence integrity mismatch",
     "include_evidence rejects declared total beyond inline memory limit",
     "include_evidence maps unavailable object to stable export error",
     "paged include_evidence fetches only selected manifest slice",
@@ -167,4 +190,4 @@ for token in [
 ]:
     assert token in export_test, f"R08/M21 export regression missing {token}"
 
-print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; deterministic paged/resumable integrity-checked evidence export now includes opt-in HMAC-signed manifest tokens while final archive/streaming/runtime/regulatory/storage/audit/auth blockers remain explicit")
+print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; deterministic paged/resumable integrity-checked evidence export now includes opt-in HMAC-signed manifest tokens and a versioned fail-closed NDJSON package precursor while constant-memory/final-archive/runtime/regulatory/storage/audit/auth blockers remain explicit")
