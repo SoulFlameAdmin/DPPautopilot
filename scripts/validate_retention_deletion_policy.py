@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/retention-deletion-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==5
+assert policy.get("version")==6
 assert policy.get("task")=="R08"
 assert policy.get("status")=="partial"
 assert policy.get("scope","").startswith("DPP Autopilot")
@@ -15,7 +15,7 @@ export=policy.get("export",{})
 assert export.get("required_before_org_deletion") is True
 assert "dpp_api_export_bundle" in export.get("implementation","")
 precursor=export.get("evidence_bytes_precursor",{})
-assert precursor.get("endpoint")=="GET /api/export?include_evidence=1[&evidence_offset=N&evidence_limit=N]"
+assert precursor.get("endpoint")=="GET /api/export?include_evidence=1[&evidence_offset=N&evidence_limit=N][&evidence_manifest_signed=1][&evidence_manifest_token=TOKEN]"
 assert precursor.get("integrity")=="byte_size + SHA-256 verified against evidence_manifest before inclusion"
 assert precursor.get("encoding")=="base64"
 assert precursor.get("inline_limit_bytes")==26_214_400
@@ -37,7 +37,22 @@ assert resume.get("mismatch_code")=="EVIDENCE_EXPORT_MANIFEST_CHANGED"
 assert resume.get("invalid_status")==400
 assert resume.get("invalid_code")=="EVIDENCE_EXPORT_MANIFEST_INVALID"
 assert resume.get("failure_stage")=="before evidence object download"
-assert "manifest SHA-256 consistency token" in export.get("current_gap","")
+signed=pagination.get("signed_resume_manifest",{})
+assert signed.get("request_flag")=="evidence_manifest_signed"
+assert signed.get("request_token_param")=="evidence_manifest_token"
+assert signed.get("response_token_field")=="manifest_token"
+assert signed.get("response_algorithm_field")=="manifest_signature_algorithm"
+assert signed.get("algorithm")=="HMAC-SHA256-v1 over canonical manifest SHA-256"
+assert signed.get("signing_key_env")=="DPP_EXPORT_MANIFEST_SIGNING_KEY"
+assert signed.get("minimum_signing_key_bytes")==32
+assert signed.get("tamper_status")==400
+assert signed.get("tamper_code")=="EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID"
+assert signed.get("signing_unavailable_status")==500
+assert signed.get("signing_unavailable_code")=="EVIDENCE_EXPORT_SIGNING_UNAVAILABLE"
+assert signed.get("manifest_drift_status")==409
+assert signed.get("manifest_drift_code")=="EVIDENCE_EXPORT_MANIFEST_CHANGED"
+assert signed.get("failure_stage")=="before evidence object download"
+assert "final archive/streaming package format" in export.get("current_gap","")
 
 rules={r["id"]:r for r in policy.get("retention_rules",[])}
 expected={
@@ -126,6 +141,11 @@ for token in [
     "next_offset",
     "has_more",
     "evidenceManifestSha256",
+    "signEvidenceManifestToken",
+    "verifyEvidenceManifestToken",
+    "DPP_EXPORT_MANIFEST_SIGNING_KEY",
+    "EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID",
+    "EVIDENCE_EXPORT_SIGNING_UNAVAILABLE",
 ]:
     assert token in export_api, f"R08/M21 evidence byte export missing {token}"
 for token in [
@@ -137,7 +157,10 @@ for token in [
     "paged include_evidence validates pagination before export RPC",
     "paged include_evidence ignores unselected oversized manifest objects",
     "manifest consistency token allows deterministic resume",
+    "signed manifest token supports deterministic paged resume",
+    "signed manifest token rejects tampering before evidence object download",
+    "signed manifest request fails closed when signing key is unavailable",
 ]:
     assert token in export_test, f"R08/M21 export regression missing {token}"
 
-print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; terminal staging purge, deterministic paged/resumable integrity-checked evidence export and owner/admin non-destructive deletion-impact preview are implemented while final package/runtime/regulatory/storage/audit/auth blockers remain explicit")
+print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; deterministic paged/resumable integrity-checked evidence export now includes opt-in HMAC-signed manifest tokens while final archive/streaming/runtime/regulatory/storage/audit/auth blockers remain explicit")
