@@ -49,3 +49,11 @@ M13 remains **RED/PARTIAL**, not GREEN: a real authenticated user byte upload ->
 - Missing/inaccessible metadata remains non-enumerating as `404 EVIDENCE_NOT_AVAILABLE`; byte/type/hash mismatch fails closed with `409 EVIDENCE_DOWNLOAD_INTEGRITY_FAILED`.
 - The response `Content-Type` comes from verified metadata, not an untrusted object response alone.
 - M13 remains RED/PARTIAL until M03 is GREEN and a real authenticated upload→download/content verification→delete roundtrip is proven against the deployed function.
+
+## Deployed download-integrity synchronization — 2026-09-21
+
+- Bound Supabase Edge Function `dpp-evidence-object` is ACTIVE **version 6** with `verify_jwt=true`.
+- Live bundle SHA-256: `86839628d196b43512f70666213fe6f499863a4a6e7ce23b56bdee19f342ec42`.
+- Connector readback proves deployed `index.ts` exactly matches canonical GitHub `main`.
+- The deployed GET path performs the new caller-RLS metadata lookup and pre-response byte-size/SHA-256/content-type verification from PR #144.
+- M13 remains RED/PARTIAL until M03 is GREEN and a real authenticated upload→download/content verification→delete roundtrip is proven.
