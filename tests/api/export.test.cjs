@@ -475,3 +475,73 @@ test('manifest consistency token validates digest shape before export RPC',async
     assert.equal(called,false);
   }finally{global.fetch=original;restore();}
 });
+
+
+test('opt-in manifest signature authenticates the stable evidence manifest digest',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const oldSecret=process.env.DPP_EXPORT_MANIFEST_SIGNING_SECRET;
+  const oldKeyId=process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY_ID;
+  const secret='0123456789abcdef0123456789abcdef';
+  process.env.DPP_EXPORT_MANIFEST_SIGNING_SECRET=secret;
+  process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY_ID='export-key-v1';
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[]};}};
+    }
+    throw new Error('unexpected object fetch');
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_manifest_signature:'1'
+    }),res);
+    assert.equal(res.statusCode,200);
+    const data=JSON.parse(res.body).data;
+    const manifestSha=data.evidence_export.manifest_sha256;
+    const signature=data.evidence_export.manifest_signature;
+    assert.equal(signature.algorithm,'hmac-sha256');
+    assert.equal(signature.key_id,'export-key-v1');
+    assert.equal(signature.payload_format,'dpp-evidence-manifest:v1:<sha256>');
+    assert.equal(
+      signature.signature_hex,
+      crypto.createHmac('sha256',secret)
+        .update(`dpp-evidence-manifest:v1:${manifestSha}`)
+        .digest('hex')
+    );
+    assert.equal(res.body.includes(secret),false);
+  }finally{
+    global.fetch=original;
+    restore();
+    if(oldSecret===undefined) delete process.env.DPP_EXPORT_MANIFEST_SIGNING_SECRET;
+    else process.env.DPP_EXPORT_MANIFEST_SIGNING_SECRET=oldSecret;
+    if(oldKeyId===undefined) delete process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY_ID;
+    else process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY_ID=oldKeyId;
+  }
+});
+
+test('manifest signature request fails closed when signing secret is missing or weak',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const oldSecret=process.env.DPP_EXPORT_MANIFEST_SIGNING_SECRET;
+  delete process.env.DPP_EXPORT_MANIFEST_SIGNING_SECRET;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[]};}};
+    }
+    throw new Error('unexpected object fetch');
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{
+      include_evidence:'1',
+      evidence_manifest_signature:'true'
+    }),res);
+    assert.equal(res.statusCode,500);
+    assert.equal(JSON.parse(res.body).error.code,'EXPORT_SIGNING_CONFIGURATION_MISSING');
+  }finally{
+    global.fetch=original;
+    restore();
+    if(oldSecret===undefined) delete process.env.DPP_EXPORT_MANIFEST_SIGNING_SECRET;
+    else process.env.DPP_EXPORT_MANIFEST_SIGNING_SECRET=oldSecret;
+  }
+});
