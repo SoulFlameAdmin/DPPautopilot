@@ -46,3 +46,11 @@ The deletion-impact preview also marks external Storage enumeration as required,
 - A tampered but well-shaped token fails closed with `400 EVIDENCE_EXPORT_MANIFEST_TOKEN_INVALID` before evidence-object download.
 - A valid token for an older manifest fails closed with `409 EVIDENCE_EXPORT_MANIFEST_CHANGED`; missing signing configuration fails the signed path with `500 EVIDENCE_EXPORT_SIGNING_UNAVAILABLE`.
 - The existing unsigned `evidence_manifest_sha256` resume contract remains backward compatible. Final archive/streaming package format and real authenticated deployed large-tenant acceptance are still pending.
+
+
+## Evidence manifest metadata-integrity precursor — 2026-09-21
+
+- Branch `test/m21-manifest-metadata-integrity-20260921` extends `evidenceManifestSha256()` so the resumable/signed manifest digest binds `original_filename` and normalized `content_type` in addition to id/path/size/SHA-256.
+- Focused Node regression PASS proves a filename-only change and a Content-Type-only change each produce a different manifest SHA-256.
+- This closes a metadata-only drift gap between paged export requests, but does not change R08 from RED and does not claim full CI.
+- Global Vercel lease claim for branch head `54a0c29a42c1fbdf2f7ced65ef1f4cddf8903c9b` returned `granted=false` with `retry_after_at=2026-09-22T00:40:18Z`; no PR/preview/deploy was triggered.
