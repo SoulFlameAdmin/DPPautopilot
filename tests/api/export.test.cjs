@@ -162,6 +162,106 @@ test('ndjson package fails closed before first record on evidence integrity mism
   }finally{global.fetch=original;restore();}
 });
 
+
+test('ndjson package incrementally spools streamed evidence without arrayBuffer',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('streamed-ndjson-evidence-crosses-base64-boundaries','utf8');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  let arrayBufferCalled=false;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {
+        schema_version:1,
+        evidence_manifest:[{
+          id:'12121212-1212-4212-8212-121212121212',
+          storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/streamed.bin',
+          original_filename:'streamed.bin',
+          content_type:'application/octet-stream',
+          byte_size:bytes.length,
+          sha256_hex:sha256
+        }]
+      };}};
+    }
+    const chunks=[bytes.subarray(0,5),bytes.subarray(5,17),bytes.subarray(17)];
+    let index=0;
+    return {
+      ok:true,
+      headers:{get(name){
+        const key=String(name).toLowerCase();
+        if(key==='content-type') return 'application/octet-stream';
+        if(key==='content-length') return String(bytes.length);
+        return null;
+      }},
+      body:{getReader(){return {
+        async read(){
+          if(index>=chunks.length) return {done:true,value:undefined};
+          return {done:false,value:chunks[index++]};
+        },
+        releaseLock(){}
+      };}},
+      async arrayBuffer(){arrayBufferCalled=true;throw new Error('arrayBuffer fallback must not run');}
+    };
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer ndjson-stream-token',{format:'ndjson'}),res);
+    assert.equal(res.statusCode,200);
+    assert.equal(arrayBufferCalled,false);
+    const records=res.body.trim().split('\n').map(line=>JSON.parse(line));
+    assert.deepEqual(records.map(record=>record.type),[
+      'dpp_export_header','dpp_bundle','dpp_evidence','dpp_export_end'
+    ]);
+    assert.equal(records[0].evidence_export.spool,'verified_tmpfile_v1');
+    assert.equal(records[2].data.sha256_hex,sha256);
+    assert.equal(Buffer.from(records[2].data.content_base64,'base64').toString('utf8'),bytes.toString('utf8'));
+    assert.equal(records[3].total_bytes,bytes.length);
+  }finally{global.fetch=original;restore();}
+});
+
+test('ndjson streamed hash mismatch fails closed before response emission',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('streamed-integrity-mismatch','utf8');
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[{
+        id:'13131313-1313-4313-8313-131313131313',
+        storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/hash-mismatch.bin',
+        original_filename:'hash-mismatch.bin',
+        content_type:'application/octet-stream',
+        byte_size:bytes.length,
+        sha256_hex:'0'.repeat(64)
+      }]};}};
+    }
+    let sent=false;
+    return {
+      ok:true,
+      headers:{get(name){
+        const key=String(name).toLowerCase();
+        if(key==='content-type') return 'application/octet-stream';
+        if(key==='content-length') return String(bytes.length);
+        return null;
+      }},
+      body:{getReader(){return {
+        async read(){
+          if(sent) return {done:true,value:undefined};
+          sent=true;
+          return {done:false,value:bytes};
+        },
+        releaseLock(){}
+      };}},
+      async arrayBuffer(){throw new Error('arrayBuffer fallback must not run');}
+    };
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer ndjson-stream-fail-token',{format:'ndjson'}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_INTEGRITY_FAILED');
+    assert.equal(res.writeCount,0);
+    assert.equal(res.headers['content-type'],'application/json; charset=utf-8');
+  }finally{global.fetch=original;restore();}
+});
+
 test('RBAC denial maps to stable 403 without DB detail leak',async()=>{
   const restore=withEnv(),original=global.fetch;
   global.fetch=async()=>({ok:false,async json(){return {code:'DP104',message:'viewer role detail'};}});
