@@ -107,7 +107,7 @@
         "M22",
         "R08"
       ],
-      "expected": "signed evidence export emits versioned manifest metadata and supports resumable paging"
+      "expected": "signed evidence export contract emits versioned manifest metadata and supports resumable paging; covered by the export handler contract suite pending deployed integration"
     }
   ],
   "executable_test": "tests/api/integration.test.cjs",
