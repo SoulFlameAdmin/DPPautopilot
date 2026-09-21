@@ -189,6 +189,12 @@ function evidencePageOptions(req){
   return {paged:true,offset,limit,expectedManifestSha256,expectedManifestToken,signedRequested};
 }
 
+function responseContentType(response){
+  if(!response||!response.headers||typeof response.headers.get!=='function') return null;
+  const value=response.headers.get('content-type');
+  return typeof value==='string'?value.split(';')[0].trim().toLowerCase():'';
+}
+
 async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImpl=fetch,page={paged:false,offset:0,limit:null}){
   const manifest=Array.isArray(bundle&&bundle.evidence_manifest)?bundle.evidence_manifest:[];
   const offset=page&&Number.isInteger(page.offset)?page.offset:0;
@@ -284,6 +290,11 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
         'An evidence object could not be exported.'
       );
     }
+    const declaredContentType=typeof item.content_type==='string'?item.content_type.trim().toLowerCase():'';
+    const actualContentType=responseContentType(response);
+    if(actualContentType!==null&&(!declaredContentType||actualContentType!==declaredContentType)){
+      throw exportError('EVIDENCE_EXPORT_INTEGRITY_FAILED',502,'Evidence export integrity verification failed.');
+    }
     const bytes=Buffer.from(await response.arrayBuffer());
     actualTotal+=bytes.byteLength;
     if(actualTotal>MAX_INLINE_EVIDENCE_BYTES){
@@ -376,4 +387,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
