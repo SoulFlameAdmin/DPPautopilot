@@ -78,6 +78,8 @@ function evidenceManifestSha256(manifest){
     .map(item=>({
       id:item&&item.id||null,
       storage_path:item&&item.storage_path||null,
+      original_filename:typeof (item&&item.original_filename)==='string'?item.original_filename:'',
+      content_type:typeof (item&&item.content_type)==='string'?item.content_type.trim().toLowerCase():'',
       byte_size:Number(item&&item.byte_size)||0,
       sha256_hex:typeof (item&&item.sha256_hex)==='string'?item.sha256_hex.toLowerCase():''
     }))
