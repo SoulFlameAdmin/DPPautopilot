@@ -141,6 +141,7 @@ for token in [
     "next_offset",
     "has_more",
     "evidenceManifestSha256",
+    "responseContentType",
     "signEvidenceManifestToken",
     "verifyEvidenceManifestToken",
     "DPP_EXPORT_MANIFEST_SIGNING_KEY",
@@ -151,6 +152,7 @@ for token in [
 for token in [
     "include_evidence downloads bytes through caller-JWT bridge and verifies integrity",
     "include_evidence fails closed on hash mismatch",
+    "include_evidence fails closed on content type mismatch before bytes are read",
     "include_evidence rejects declared total beyond inline memory limit",
     "include_evidence maps unavailable object to stable export error",
     "paged include_evidence fetches only selected manifest slice",

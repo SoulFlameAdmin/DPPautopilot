@@ -12,8 +12,12 @@ function makeRes(){
     end(value){this.body=value||'';}
   };
 }
+let requestSequence=0;
 function makeReq(method='GET',auth='Bearer test-token',query={}){
-  return {method,headers:auth?{authorization:auth}:{},query};
+  requestSequence+=1;
+  const headers={'x-forwarded-for':`198.51.100.${requestSequence}`};
+  if(auth) headers.authorization=auth;
+  return {method,headers,query};
 }
 function withEnv(){
   const oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
@@ -176,6 +180,30 @@ test('include_evidence fails closed on hash mismatch',async()=>{
     assert.equal(res.statusCode,502);
     assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_INTEGRITY_FAILED');
     assert.equal(res.body.includes('tampered'),false);
+  }finally{global.fetch=original;restore();}
+});
+
+test('include_evidence fails closed on content type mismatch before bytes are read',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('content-type-check','utf8');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  let bytesRead=false;
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[{
+        id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/report.json',
+        original_filename:'report.json',content_type:'application/json',byte_size:bytes.length,sha256_hex:sha256
+      }]};}};
+    }
+    return {ok:true,headers:{get(name){return String(name).toLowerCase()==='content-type'?'image/png':null;}},
+      async arrayBuffer(){bytesRead=true;return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}};
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{include_evidence:'1'}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'EVIDENCE_EXPORT_INTEGRITY_FAILED');
+    assert.equal(bytesRead,false);
   }finally{global.fetch=original;restore();}
 });
 
