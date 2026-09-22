@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "task": "R05",
   "status": "partial",
   "strategy": "dual_layer_local_plus_feature_gated_shared_authenticated_runtime",
@@ -58,6 +58,7 @@
       "POST": "authenticated_write"
     },
     "organizations": {
+      "GET": "authenticated_read",
       "POST": "authenticated_write"
     },
     "members": {
