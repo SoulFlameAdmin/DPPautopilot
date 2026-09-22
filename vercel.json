@@ -48,7 +48,8 @@
   ],
   "git": {
     "deploymentEnabled": {
-      "fix/r02-strict-csp-20260922": false
+      "fix/r02-strict-csp-20260922": false,
+      "main": false
     }
   }
 }
