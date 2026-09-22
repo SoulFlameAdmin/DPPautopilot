@@ -59,7 +59,7 @@ test('GET forwards caller bearer to tenant context RPC',async()=>{
   });
 });
 
-test('tenant RPC aborts with a stable timeout error when Supabase stalls',async()=>{
+test('tenant RPC aborts with a stable timeout error when Supabase stalls before headers',async()=>{
   const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
   const fetchImpl=async(_url,options)=>new Promise((_resolve,reject)=>{
     options.signal.addEventListener('abort',()=>{
@@ -67,6 +67,30 @@ test('tenant RPC aborts with a stable timeout error when Supabase stalls',async(
       error.name='AbortError';
       reject(error);
     },{once:true});
+  });
+
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_tenant_context',{},'Bearer tenant-token',env,fetchImpl,5),
+    error=>{
+      assert.equal(error.status,504);
+      assert.equal(error.publicCode,'UPSTREAM_TIMEOUT');
+      assert.equal(error.publicMessage,'Database request timed out.');
+      return true;
+    }
+  );
+});
+
+test('tenant RPC timeout remains active while Supabase response body stalls',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async(_url,options)=>({
+    ok:true,
+    json:()=>new Promise((_resolve,reject)=>{
+      options.signal.addEventListener('abort',()=>{
+        const error=new Error('aborted body');
+        error.name='AbortError';
+        reject(error);
+      },{once:true});
+    })
   });
 
   await assert.rejects(
