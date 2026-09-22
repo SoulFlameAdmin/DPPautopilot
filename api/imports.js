@@ -37,7 +37,25 @@ function mapDatabaseError(data){
   return [mapped.status,mapped.code,mapped.message];
 }
 
-async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch){
+const DEFAULT_RPC_TIMEOUT_MS=8000;
+
+function upstreamTimeoutError(){
+  const error=new Error('UPSTREAM_TIMEOUT');
+  error.status=504;
+  error.publicCode='UPSTREAM_TIMEOUT';
+  error.publicMessage='Database request timed out.';
+  return error;
+}
+
+function upstreamInvalidJsonError(){
+  const error=new Error('UPSTREAM_ERROR');
+  error.status=502;
+  error.publicCode='UPSTREAM_ERROR';
+  error.publicMessage='Database request failed.';
+  return error;
+}
+
+async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,timeoutMs=DEFAULT_RPC_TIMEOUT_MS){
   const base=env.DPP_SUPABASE_URL||env.SUPABASE_URL;
   const key=env.DPP_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
   if(!base||!key){
@@ -46,7 +64,12 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch){
     throw error;
   }
 
-  const response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/${name}`,{
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),timeoutMs);
+  let response;
+  let data=null;
+  try{
+    response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/${name}`,{
     method:'POST',
     headers:{
       apikey:key,
@@ -54,11 +77,20 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch){
       'Content-Type':'application/json',
       Accept:'application/json'
     },
-    body:JSON.stringify(payload||{})
+    body:JSON.stringify(payload||{}),
+    signal:controller.signal
   });
-
-  let data=null;
-  try{data=await response.json();}catch(_){data=null;}
+    try{data=await response.json();}catch(error){
+      if(controller.signal.aborted||error&&error.name==='AbortError') throw upstreamTimeoutError();
+      if(response.ok) throw upstreamInvalidJsonError();
+      data=null;
+    }
+  }catch(error){
+    if(controller.signal.aborted||error&&error.name==='AbortError') throw upstreamTimeoutError();
+    throw error;
+  }finally{
+    clearTimeout(timeout);
+  }
 
   if(!response.ok){
     const [status,publicCode,publicMessage]=mapDatabaseError(data);
@@ -145,4 +177,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validUuid,validRows,mapDatabaseError,rpc};
+module.exports._test={bearer,validUuid,validRows,mapDatabaseError,rpc,DEFAULT_RPC_TIMEOUT_MS};
