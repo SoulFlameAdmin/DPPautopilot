@@ -3,38 +3,14 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DPP Autopilot · Completeness</title>
-<style>
-:root{--bg:#07090d;--panel:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--green:#39d98a;--amber:#ffbd52}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:1000px;margin:auto;padding:24px}.card{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:18px;margin:14px 0}.score{font-size:58px;font-weight:850;line-height:1}.ok{color:var(--green)}.warn{color:var(--amber)}.muted{color:var(--muted)}.bar{height:12px;background:#151c25;border-radius:999px;overflow:hidden;margin:12px 0}.fill{height:100%;background:linear-gradient(90deg,#39d98a,#69a7ff)}.warning{border:1px solid #554522;background:#17130b;border-radius:12px;padding:12px;margin:10px 0}.path{font:12px ui-monospace,monospace}.action{font-weight:700;margin-top:5px}@media(max-width:650px){.shell{padding:14px}.score{font-size:44px}}
-</style>
+<link rel="stylesheet" href="/assets/csp/completeness.css">
+<link rel="stylesheet" href="/assets/csp/progress-widths.css">
 </head>
 <body data-completeness-ready="false" data-score="" data-missing-count="">
 <main class="shell">
 <a href="/">← Dashboard</a>
-<div class="card"><h1>Data completeness</h1><div id="summary" class="muted">Зареждане…</div><div class="bar"><div id="fill" class="fill" style="width:0%"></div></div></div>
+<div class="card"><h1>Data completeness</h1><div id="summary" class="muted">Зареждане…</div><div class="bar"><div id="fill" class="fill pct10-0"></div></div></div>
 <section id="warnings" class="card"></section>
 </main>
-<script>
-const getPath=(obj,path)=>{let cur=obj;for(const p of path.split('.')){if(cur==null||typeof cur!=='object'||!(p in cur))return undefined;cur=cur[p]}return cur};
-const present=v=>v!==undefined&&v!==null&&(!(typeof v==='string')||v.trim()!=='');
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-(async()=>{
- try{
-  const [cr,sr]=await Promise.all([fetch('/data/dpp-field-catalog.json',{cache:'no-store'}),fetch('/data/sample-battery.json',{cache:'no-store'})]);
-  if(!cr.ok||!sr.ok) throw new Error('catalog/sample load failed');
-  const catalog=await cr.json(), fixture=await sr.json(), item=fixture.items[0];
-  if(new URLSearchParams(location.search).get('missing')==='manufacturerContact') delete fixture.model.identification.manufacturer.contact;
-  const req=catalog.fields.filter(f=>f.required===true), missing=[];
-  for(const f of req){
-   const value=f.path.startsWith('model.')?getPath(fixture,f.path):f.path.startsWith('item.')?getPath(item,f.path.slice(5)):undefined;
-   if(!present(value)) missing.push(f);
-  }
-  const done=req.length-missing.length, score=req.length?Math.round((done/req.length)*1000)/10:100;
-  summary.innerHTML=`<div class="score ${score===100?'ok':'warn'}" data-score-text>${score}%</div><div>${done} / ${req.length} required fields present</div>`;
-  fill.style.width=score+'%';
-  warnings.innerHTML=missing.length===0?'<h2 class="ok">No required fields missing</h2><p class="muted">Synthetic fixture satisfies the current required catalog contract.</p>':'<h2 class="warn">Action required</h2>'+missing.map(f=>`<article class="warning" data-missing-field="${esc(f.path)}"><div class="path">${esc(f.path)}</div><div>${esc(f.source)}</div><div class="action">Complete: ${esc(f.uiTarget)}</div></article>`).join('');
-  document.body.dataset.completenessReady='true';document.body.dataset.score=String(score);document.body.dataset.missingCount=String(missing.length);
- }catch(e){summary.textContent=e.message;document.body.dataset.completenessReady='false'}
-})();
-</script>
+<script src="/assets/csp/completeness-inline-1.js"></script>
 </body></html>
