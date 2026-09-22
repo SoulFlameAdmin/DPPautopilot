@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-22T09:00:00+03:00",
+  "updatedAt": "2026-09-22T09:06:24+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -631,7 +631,7 @@
           "acceptanceCriteria": "Sensitive/public endpoints have documented limits and 429 behavior",
           "evidenceRequired": "Load/abuse tests",
           "status": "red",
-          "evidence": "PARTIAL shared authenticated rate limiting now has applied atomic Supabase backend, feature-gated runtime wiring across all eight API surfaces, and synthetic concurrent shared-budget evidence. PR #121 versioned a T07 profile with 50 concurrent authenticated-write checks against the same pseudonymous network+credential shared buckets; exact result is 40 allowed, 10 denied, 100 shared RPC calls, two shared buckets and zero backend errors. Exact-head `b48a45a562005f539fc5248f61d23650fc0f5414` passed full CI `35521547459` and merged as `79abc50529909d7213806947b91d0d95613ac1fd`. R05 remains RED because M17-M20 are not all GREEN and production enablement, anonymous distributed protection plus real multi-isolate/network acceptance remain unproven. — PARTIAL PASS"
+          "evidence": "PARTIAL shared authenticated rate limiting now has applied atomic Supabase backend, feature-gated runtime wiring across all eight API surfaces, and synthetic concurrent shared-budget evidence. PR #121 versioned a T07 profile with 50 concurrent authenticated-write checks against the same pseudonymous network+credential shared buckets; exact result is 40 allowed, 10 denied, 100 shared RPC calls, two shared buckets and zero backend errors. Exact-head `b48a45a562005f539fc5248f61d23650fc0f5414` passed full CI `35521547459` and merged as `79abc50529909d7213806947b91d0d95613ac1fd`. R05 remains RED because M17-M20 are not all GREEN and production enablement, anonymous distributed protection plus real multi-isolate/network acceptance remain unproven. — PARTIAL PASS PR #207 exact tested head `1aaed7b01db573f2696c16c318ac3302dffab6fe` completed GitHub Actions CI `35693099730` SUCCESS with 139/139 completed steps and zero failures. Shared Supabase limiter calls now use one bounded AbortController through both fetch and response-body parsing; stalled backend calls fail closed as stable 503 `RATE_LIMIT_BACKEND_UNAVAILABLE`. Regression coverage proves both pseudonymous network/credential bucket requests abort on pre-header stall and response-body stall. PR #207 merged to main as `df469ef3157a8729cfed60d4de61dafd431edc5b`. R05 remains RED/PARTIAL because M17-M20 are not all GREEN and production enablement, anonymous distributed protection, and real multi-isolate/network abuse acceptance remain unproven."
         },
         {
           "id": "R06",
