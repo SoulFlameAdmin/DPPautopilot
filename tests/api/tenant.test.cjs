@@ -104,6 +104,24 @@ test('tenant RPC timeout remains active while Supabase response body stalls',asy
   );
 });
 
+
+test('tenant RPC rejects malformed successful upstream JSON',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:true,
+    async json(){throw new SyntaxError('invalid json');}
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_tenant_context',{},'Bearer tenant-token',env,fetchImpl,50),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'UPSTREAM_INVALID_RESPONSE');
+      assert.equal(error.publicMessage,'Database returned an invalid response.');
+      return true;
+    }
+  );
+});
+
 test('POST rejects malformed organization id without upstream call',async()=>{
   let called=false;
   await withEnvFetch(async()=>{called=true;throw new Error('should not call');},async()=>{
