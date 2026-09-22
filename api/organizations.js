@@ -34,7 +34,17 @@ function mapDatabaseError(data){
   return [mapped.status,mapped.code,mapped.message];
 }
 
-async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch){
+const DEFAULT_RPC_TIMEOUT_MS=8000;
+
+function upstreamTimeoutError(){
+  const error=new Error('UPSTREAM_TIMEOUT');
+  error.status=504;
+  error.publicCode='UPSTREAM_TIMEOUT';
+  error.publicMessage='Database request timed out.';
+  return error;
+}
+
+async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,timeoutMs=DEFAULT_RPC_TIMEOUT_MS){
   const base=env.DPP_SUPABASE_URL||env.SUPABASE_URL;
   const key=env.DPP_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
   if(!base||!key){
@@ -42,11 +52,22 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch){
     error.status=500;
     throw error;
   }
-  const response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/${name}`,{
-    method:'POST',
-    headers:{apikey:key,Authorization:authorization,'Content-Type':'application/json',Accept:'application/json'},
-    body:JSON.stringify(payload||{})
-  });
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),timeoutMs);
+  let response;
+  try{
+    response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/${name}`,{
+      method:'POST',
+      headers:{apikey:key,Authorization:authorization,'Content-Type':'application/json',Accept:'application/json'},
+      body:JSON.stringify(payload||{}),
+      signal:controller.signal
+    });
+  }catch(error){
+    if(controller.signal.aborted||error&&error.name==='AbortError') throw upstreamTimeoutError();
+    throw error;
+  }finally{
+    clearTimeout(timeout);
+  }
   let data=null;
   try{data=await response.json();}catch(_){data=null;}
   if(!response.ok){
@@ -119,4 +140,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validateCreate,mapDatabaseError,rpc,SLUG_RE};
+module.exports._test={bearer,validateCreate,mapDatabaseError,rpc,SLUG_RE,DEFAULT_RPC_TIMEOUT_MS};
