@@ -326,6 +326,10 @@
       "http_status": 502,
       "message": "Database request failed."
     },
+    "UPSTREAM_TIMEOUT": {
+      "http_status": 504,
+      "message": "Database request timed out."
+    },
     "PAYLOAD_TOO_LARGE": {
       "http_status": 413,
       "message": "Request body exceeds the 1 MiB limit."
