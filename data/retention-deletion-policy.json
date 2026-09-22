@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "task": "R08",
   "status": "partial",
   "scope": "DPP Autopilot only; shared Supabase non-dpp_* data is excluded.",
@@ -54,7 +54,7 @@
         }
       }
     },
-    "current_gap": "A versioned fail-closed NDJSON package precursor is implemented and remains compatible with signed resumable manifests, but constant-memory object streaming/final archive packaging and real authenticated deployed large-tenant acceptance remain unproven.",
+    "current_gap": "The ndjson-v1 path now uses incremental response-body processing and verified temporary spooling instead of page-wide evidence byte/base64 accumulation. Final archive packaging and real authenticated deployed large-tenant acceptance remain unproven.",
     "streaming_package_precursor": {
       "query": "format=ndjson",
       "media_type": "application/x-ndjson; charset=utf-8",
@@ -69,7 +69,9 @@
       "evidence_encoding": "base64",
       "integrity_gate": "selected evidence bytes and response metadata are verified before the first NDJSON record is emitted",
       "signed_resume_compatible": true,
-      "current_limit": "selected evidence page is verified in memory before NDJSON emission; constant-memory object streaming and deployed large-tenant acceptance remain unproven"
+      "current_limit": "final archive format and real authenticated deployed large-tenant acceptance remain unproven",
+      "memory_strategy": "incremental response-body chunks with incremental SHA-256/base64 into a verified temporary spool before response emission",
+      "spool_contract": "verified_tmpfile_v1"
     }
   },
   "retention_rules": [
