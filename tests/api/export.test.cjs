@@ -307,6 +307,24 @@ test('evidence object fetch timeout fails closed with stable 504 before response
   }finally{global.fetch=original;restore();}
 });
 
+test('evidence object network failure maps to stable 502 without leaking transport detail',async()=>{
+  await assert.rejects(
+    ()=>handler._test.fetchEvidenceObject(
+      'https://example.supabase.co/functions/v1/dpp-evidence-object?path=x',
+      {method:'GET'},
+      async()=>{throw new Error('socket reset secret transport detail');},
+      50
+    ),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE');
+      assert.equal(error.publicMessage,'An evidence object could not be exported.');
+      assert.equal(String(error.message).includes('secret transport detail'),false);
+      return true;
+    }
+  );
+});
+
 test('evidence object response-body abort maps to stable timeout',async()=>{
   const controller=new AbortController();
   const response={

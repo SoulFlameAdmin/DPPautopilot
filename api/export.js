@@ -67,7 +67,12 @@ async function fetchEvidenceObject(url,options,fetchImpl=fetch,timeoutMs=DEFAULT
   }catch(error){
     clearTimeout(timeout);
     if(controller.signal.aborted||error&&error.name==='AbortError') throw evidenceObjectTimeoutError();
-    throw error;
+    if(error&&error.publicCode==='EVIDENCE_EXPORT_OBJECT_UNAVAILABLE') throw error;
+    throw exportError(
+      'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE',
+      502,
+      'An evidence object could not be exported.'
+    );
   }
 }
 
