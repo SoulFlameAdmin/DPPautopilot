@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "R09",
   "status": "partial",
   "event_name": "dpp_http_request",
@@ -48,7 +48,7 @@
     "imports",
     "export"
   ],
-  "runtime_gap": "Production/runtime log aggregation and deployed request-correlation evidence remain blocked by F08 and incomplete M02/M17-M20 acceptance.",
+  "runtime_gap": "Production/runtime log aggregation and deployed request-correlation evidence remain pending full M17-M19 acceptance plus production logging-backend and retention evidence.",
   "failure_mode": {
     "logging_sink": "fail_open",
     "response_behavior": "Always complete the original HTTP response even if logger.info/warn/error throws.",
