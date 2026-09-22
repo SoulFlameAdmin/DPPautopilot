@@ -3,6 +3,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const handler=require('../../api/organizations.js');
+const tenantHandler=require('../../api/tenant.js');
 
 function makeRes(){
   return {
@@ -59,6 +60,94 @@ test('GET lists only caller organizations and explicit active tenant state',asyn
     assert.equal(body.data.length,1);
     assert.equal(body.data[0].active,true);
     assert.equal(body.data[0].role,'owner');
+  });
+});
+
+test('GET organization discovery recovers explicit active tenant through tenant switch',async()=>{
+  const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  let activeOrganizationId=null;
+  const calls=[];
+  await withEnvFetch(async(url,options)=>{
+    calls.push({url,options});
+    const rpcName=url.split('/').pop();
+    const payload=JSON.parse(options.body||'{}');
+    if(rpcName==='dpp_api_organizations_list'){
+      return {ok:true,async json(){return [{
+        organization_id:id,
+        name:'Pilot Org',
+        slug:'pilot-org',
+        role:'owner',
+        active:activeOrganizationId===id
+      }];}};
+    }
+    if(rpcName==='dpp_api_tenant_context_set'){
+      if(payload.p_organization_id!==id){
+        return {ok:false,async json(){return {code:'DP102',message:'not a member'};}};
+      }
+      activeOrganizationId=id;
+      return {ok:true,async json(){return {
+        active_organization_id:id,
+        memberships:[{organization_id:id,role:'owner',active:true}]
+      };}};
+    }
+    throw new Error('unexpected RPC '+rpcName);
+  },async()=>{
+    const before=makeRes();
+    await handler(req('GET',null),before);
+    assert.equal(before.statusCode,200);
+    assert.equal(JSON.parse(before.body).data[0].active,false);
+
+    const switched=makeRes();
+    await tenantHandler({
+      method:'POST',body:{organization_id:id},query:{},headers:{authorization:'Bearer onboarding-token'}
+    },switched);
+    assert.equal(switched.statusCode,200);
+    assert.equal(JSON.parse(switched.body).data.active_organization_id,id);
+
+    const after=makeRes();
+    await handler(req('GET',null),after);
+    assert.equal(after.statusCode,200);
+    assert.equal(JSON.parse(after.body).data[0].active,true);
+    assert.equal(calls.filter(call=>call.url.endsWith('/dpp_api_organizations_list')).length,2);
+    assert.equal(calls.filter(call=>call.url.endsWith('/dpp_api_tenant_context_set')).length,1);
+    assert.ok(calls.every(call=>call.options.headers.Authorization==='Bearer onboarding-token'));
+  });
+});
+
+test('failed non-member tenant switch cannot change discovered active tenant',async()=>{
+  const memberId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  const outsiderId='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+  let activeOrganizationId=memberId;
+  await withEnvFetch(async(url,options)=>{
+    const rpcName=url.split('/').pop();
+    const payload=JSON.parse(options.body||'{}');
+    if(rpcName==='dpp_api_organizations_list'){
+      return {ok:true,async json(){return [{
+        organization_id:memberId,
+        name:'Pilot Org',slug:'pilot-org',role:'owner',active:activeOrganizationId===memberId
+      }];}};
+    }
+    if(rpcName==='dpp_api_tenant_context_set'){
+      if(payload.p_organization_id===outsiderId){
+        return {ok:false,async json(){return {code:'DP102',message:'private membership detail'};}};
+      }
+      throw new Error('unexpected tenant switch');
+    }
+    throw new Error('unexpected RPC '+rpcName);
+  },async()=>{
+    const denied=makeRes();
+    await tenantHandler({
+      method:'POST',body:{organization_id:outsiderId},query:{},headers:{authorization:'Bearer onboarding-token'}
+    },denied);
+    assert.equal(denied.statusCode,403);
+    assert.equal(JSON.parse(denied.body).error.code,'FORBIDDEN');
+    assert.equal(denied.body.includes('private membership detail'),false);
+
+    const after=makeRes();
+    await handler(req('GET',null),after);
+    assert.equal(after.statusCode,200);
+    assert.equal(JSON.parse(after.body).data[0].active,true);
+    assert.equal(activeOrganizationId,memberId);
   });
 });
 
