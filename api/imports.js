@@ -77,7 +77,9 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
       'Content-Type':'application/json',
       Accept:'application/json'
     },
-    body:JSON.stringify(payload||{}));
+    body:JSON.stringify(payload||{}),
+    signal:controller.signal
+  });
     try{data=await response.json();}catch(error){
       if(controller.signal.aborted||error&&error.name==='AbortError') throw upstreamTimeoutError();
       if(response.ok) throw upstreamInvalidJsonError();
