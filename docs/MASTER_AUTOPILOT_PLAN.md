@@ -614,3 +614,13 @@ Append evidence here only after verification.
 - The recovery page now validates the exact bound Supabase project URL and modern `sb_publishable_` key before a recovery token can be used. Any auth-config fetch/validation/init failure clears the in-memory recovery token and config, resets the recovery state to missing and fails closed.
 - This closes a token-lifecycle/config-binding precursor gap but does not satisfy M01 final acceptance. M01 remains BLOCKED until a valid real recovery session completes the deployed password-update flow; no login/MFA/protection bypass was attempted.
 - F08 was not retried and no Vercel deployment was attempted in this block.
+
+
+## Execution evidence — M01 main auth exact Supabase binding — 2026-09-22
+
+- PR #167 merged to main as commit `1c4606f31e56bf5b5ce64b37f377f9554fed615f`.
+- Exact-head GitHub Actions CI `35672218898` completed SUCCESS with 139 completed steps and no failures. `Validate M01 authentication client contract` and `Validate M01 recovery completion contract` both passed.
+- Cross-browser run `35672218927` and U07 visual regression run `35672218974` also completed SUCCESS.
+- The main authentication page now requires the exact bound Supabase project URL and a modern `sb_publishable_` key before any Auth API call can proceed. Any auth-config fetch/validation/init failure clears config/session state and leaves `data-auth-ready=false`, matching the fail-closed recovery-page boundary added previously.
+- This closes a config-drift/auth-target precursor gap without changing final acceptance. M01 remains BLOCKED until a valid real recovery session completes a deployed password-update flow; no login/MFA/protection bypass was attempted.
+- F08 was not retried and no Vercel deployment was attempted in this block.
