@@ -151,6 +151,26 @@ test('failed non-member tenant switch cannot change discovered active tenant',as
   });
 });
 
+test('organization RPC aborts with a stable timeout error when Supabase stalls',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async(_url,options)=>new Promise((_resolve,reject)=>{
+    options.signal.addEventListener('abort',()=>{
+      const error=new Error('aborted');
+      error.name='AbortError';
+      reject(error);
+    },{once:true});
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_organizations_list',{},'Bearer onboarding-token',env,fetchImpl,5),
+    error=>{
+      assert.equal(error.status,504);
+      assert.equal(error.publicCode,'UPSTREAM_TIMEOUT');
+      assert.equal(error.publicMessage,'Database request timed out.');
+      return true;
+    }
+  );
+});
+
 test('POST validates and forwards organization creation RPC',async()=>{
   let seen;
   await withEnvFetch(async(url,options)=>{
