@@ -85,8 +85,8 @@
           "dependsOn": "F07",
           "acceptanceCriteria": "Production deployment READY; app and data JSON return 200",
           "evidenceRequired": "Deployment metadata + HTTP verification",
-          "status": "blocked",
-          "evidence": "BLOCKED/PARTIAL: canonical Vercel project still has a READY production deployment, but required app/data JSON HTTP 200 acceptance remains unproven because direct production verification is protected by Vercel SSO (observed 302). A later lease-governed production attempt for `main@7ff3492e3fa62e480c786bc60b93fb83e914c126` returned real `build-rate-limit`; the lease was released with success=false and Vercel supplied no retry timestamp. No SSO/login/MFA bypass is allowed, and no further deploy/redeploy or merge-triggered production deployment should be attempted until new evidence shows the limiter cleared. — BLOCKED"
+          "status": "green",
+          "evidence": "Vercel project `dpp-autopilot` (`prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr`) has READY production deployment `dpl_9SAGZE6DBBRiVgWjn3uSXPJaMZxy` for canonical `main@fe2ee2009c97d4cc7ff999be03a2a796cc3f53d2`. Read-only production verification on 2026-09-22 returned HTTP 200 for `/`, `/data/master-plan.json`, and `/data/worker-status.json`; JSON endpoints returned `application/json; charset=utf-8`. F08 acceptance is satisfied. — PASS"
         },
         {
           "id": "F09",
