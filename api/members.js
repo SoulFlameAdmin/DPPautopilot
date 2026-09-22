@@ -55,6 +55,7 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),timeoutMs);
   let response;
+  let data=null;
   try{
     response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/${name}`,{
       method:'POST',
@@ -62,14 +63,16 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
       body:JSON.stringify(payload||{}),
       signal:controller.signal
     });
+    try{data=await response.json();}catch(error){
+      if(controller.signal.aborted||error&&error.name==='AbortError') throw upstreamTimeoutError();
+      data=null;
+    }
   }catch(error){
     if(controller.signal.aborted||error&&error.name==='AbortError') throw upstreamTimeoutError();
     throw error;
   }finally{
     clearTimeout(timeout);
   }
-  let data=null;
-  try{data=await response.json();}catch(_){data=null;}
   if(!response.ok){
     const [status,publicCode,publicMessage]=mapDatabaseError(data);
     const error=new Error(publicCode);
