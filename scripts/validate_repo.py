@@ -60,7 +60,7 @@ def main():
     require(not missing_worker, f"worker status missing fields: {missing_worker}")
 
     html = (ROOT / "index.html").read_text(encoding="utf-8")
-    script_srcs = re.findall(r'<script\\b[^>]*\\bsrc=["\']([^"\']+)["\'][^>]*>', html, re.I)
+    script_srcs = re.findall(r'<script\b[^>]*\bsrc=["\']([^"\']+)["\'][^>]*>', html, re.I)
     local_script_text = []
     for src in script_srcs:
         if src.startswith("/") and not src.startswith("//"):
