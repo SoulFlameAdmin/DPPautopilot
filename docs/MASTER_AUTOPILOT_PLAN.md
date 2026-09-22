@@ -682,3 +682,12 @@ Append evidence here only after verification.
 - PR #199 merged to main as `910bd4ce67a946c741ee1f3b8559f7fd46207412`.
 - Vercel GitHub integration reported the real free-plan deployment quota blocker (`api-deployments-free-per-day`, “try again in 24 hours”) on this PR; no explicit Vercel deployment or quota bypass was attempted.
 - M21 remains RED/PARTIAL because M10-M13 and final deployed authenticated acceptance are non-GREEN.
+
+
+### M17-M20 RPC network failure contract — 2026-09-22
+
+- PR #204 exact tested head `84eb4b9f640c9213d2071336302e3d258e10c7d4` completed GitHub Actions `validate` run `35692664975` SUCCESS.
+- Models, items, passport and imports normalize Supabase RPC transport exceptions to stable HTTP 502 `UPSTREAM_ERROR` without leaking raw transport detail; existing timeout and structured upstream error contracts remain distinct.
+- Vercel reported the exact-head preview deployment completed successfully.
+- PR #204 merged to `main` as `de6b915261830f3b02456dd84a4e713b5cf76f4e`.
+- M17-M19 remain RED because declared auth/RBAC/access dependencies and final deployed authenticated acceptance are non-GREEN; M20 remains GREEN with additional reliability evidence.
