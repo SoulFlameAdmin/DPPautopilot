@@ -48,6 +48,11 @@ function sanitizePublicPassport(value) {
   return out;
 }
 
+function mapDatabaseError(data) {
+  const mapped = mapSharedDatabaseError('passport', data);
+  return [mapped.status, mapped.code, mapped.message];
+}
+
 function sanitizeOrganizationPrivatePassport(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
   const out = { ...value };
@@ -55,11 +60,6 @@ function sanitizeOrganizationPrivatePassport(value) {
     out.private_payload = sanitizeOrganizationPrivatePayload(value.private_payload);
   }
   return out;
-}
-
-function mapDatabaseError(data) {
-  const mapped = mapSharedDatabaseError('passport', data);
-  return [mapped.status, mapped.code, mapped.message];
 }
 
 const DEFAULT_RPC_TIMEOUT_MS = 8000;
