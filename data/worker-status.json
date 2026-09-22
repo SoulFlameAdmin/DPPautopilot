@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M02 tenant-recovery precursor merged and evidenced; mandatory GREEN progression is waiting on M01 recovery acceptance and R02 Vercel retry window",
+  "currentTask": "M21 evidence-object timeout hardening merged and evidenced; continue dependency-safe non-deploy work",
   "currentGate": "SECURITY / PRIVACY / OPERATIONS",
-  "lastCompletedTask": "M02 tenant-recovery HTTP precursor — PR #176 / CI 35684651596 PASS 139/139",
+  "lastCompletedTask": "M21 bounded evidence-object waits — PR #193 / CI 35689323773 PASS",
   "nextTask": "Continue only dependency-safe non-deploy work; M01 requires a real recovery-session password-update acceptance. R02 may retry only at/after 2026-09-23T02:19:01Z after claiming the DPP_APP2 Vercel lease.",
-  "message": "D01-D14 and F08 are GREEN. M02 has fresh partial PASS evidence but cannot become GREEN before M01. R02 code is proven; production acceptance remains quota-blocked until the explicit retry window.",
+  "message": "D01-D14 and F08 are GREEN. PR #193 bounded M21 evidence-object fetch/body waits and fails closed on timeout. M21 remains RED/PARTIAL on declared dependencies and deployed acceptance.",
   "deferredBlockers": [
     "R02 — Vercel `api-deployments-free-per-day`; explicit retry window begins 2026-09-23T02:19:01Z. Do not deploy earlier.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; no auth/login/MFA bypass allowed.",
     "M13 — technical Edge metadata ACL mismatch is fixed and Edge v5 is deployed; final authenticated upload→download→delete byte roundtrip still requires a real user runtime path and M03."
   ],
-  "updatedAt": "2026-09-22T07:08:00+03:00"
+  "updatedAt": "2026-09-22T08:15:00+03:00"
 }
