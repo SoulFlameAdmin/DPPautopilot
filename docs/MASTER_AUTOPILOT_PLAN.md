@@ -682,3 +682,18 @@ Append evidence here only after verification.
 - PR #199 merged to main as `910bd4ce67a946c741ee1f3b8559f7fd46207412`.
 - Vercel GitHub integration reported the real free-plan deployment quota blocker (`api-deployments-free-per-day`, “try again in 24 hours”) on this PR; no explicit Vercel deployment or quota bypass was attempted.
 - M21 remains RED/PARTIAL because M10-M13 and final deployed authenticated acceptance are non-GREEN.
+
+
+### M02/M03 and M17-M20 RPC transport fail-closed hardening — 2026-09-22
+
+- PR #201 exact tested head `a6313a360414f45af94a2ffc86c0b21ad6e30830` completed GitHub Actions CI `35692450808` SUCCESS with 139/139 steps and zero failures; merged as `126e8b03a62eda0d12d4a064b72362d8f967c958`.
+- Tenant, organization and member RPC transport exceptions now normalize to stable HTTP 502 `UPSTREAM_ERROR` without leaking raw network detail. M02/M03 remain RED/PARTIAL because M01/final authenticated acceptance are not GREEN.
+- PR #204 exact tested head `84eb4b9f640c9213d2071336302e3d258e10c7d4` completed GitHub Actions CI `35692664975` SUCCESS with 139/139 steps and zero failures; merged as `de6b915261830f3b02456dd84a4e713b5cf76f4e`.
+- Models/items/passport/imports RPC transport exceptions now normalize to stable HTTP 502 `UPSTREAM_ERROR` without raw transport detail; timeout and structured upstream contracts remain distinct. M17-M19 remain RED/PARTIAL; M20 remains GREEN with added reliability evidence.
+
+### R02 strict production header deployment gate — 2026-09-22
+
+- PR #204 Vercel preview `dpl_BsCjFqn3MwMc8BpuQDcAuVjUqaFx` is READY and read-only HTTPS verification returned HTTP 200 with strict CSP (no `unsafe-inline`/`unsafe-eval`), HSTS, `nosniff`, `DENY` framing, no-referrer and restrictive Permissions-Policy.
+- Current production still serves the older CSP containing `script-src 'self' 'unsafe-inline'` and `style-src 'self' 'unsafe-inline'`, so R02 cannot be GREEN yet.
+- Exact production-trigger commit `0d37fc97887044832b69fb1d1abb55828bc71897` was created without updating `main`. Global Supabase lease claim by `DPP_APP2` was denied with `retry_after_at=2026-09-23T02:19:01Z`; therefore `main` was not moved and no production deploy was attempted.
+- R02 remains BLOCKED pending the lease-governed production deployment and live header/core-flow acceptance.
