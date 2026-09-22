@@ -653,3 +653,12 @@ Append evidence here only after verification.
 - Fetch or response-body aborts fail closed as HTTP 504 `EVIDENCE_EXPORT_OBJECT_TIMEOUT`; NDJSON evidence packaging still emits nothing before verification completes.
 - Deterministic M21 regression tests cover evidence-object fetch timeout and response-body abort behavior.
 - M21 remains RED/PARTIAL because M10-M13 and final deployed authenticated large-tenant acceptance are non-GREEN. No Vercel deployment was requested.
+
+
+### M21 evidence-object network failure contract — 2026-09-22
+
+- PR #195 exact tested head `e23b981d0f5c0c8b632a99fbc95115be9df90564` completed GitHub Actions CI `35690104987` SUCCESS.
+- Evidence-object network/transport exceptions are normalized to HTTP 502 `EVIDENCE_EXPORT_OBJECT_UNAVAILABLE` with stable public messaging; raw transport exception detail is not surfaced.
+- AbortController timeout behavior remains distinct and stable as HTTP 504 `EVIDENCE_EXPORT_OBJECT_TIMEOUT`.
+- PR #195 merged to main as `07eb48381bd899c73c3ba19e424fa51f758ecd7c`.
+- M21 remains RED/PARTIAL because M10-M13 and final deployed authenticated acceptance are non-GREEN. No Vercel deployment was requested.
