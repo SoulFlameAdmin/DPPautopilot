@@ -8,6 +8,10 @@ const models=require('../../api/models.js');
 const tenant=require('../../api/tenant.js');
 const organizations=require('../../api/organizations.js');
 const members=require('../../api/members.js');
+const items=require('../../api/items.js');
+const passport=require('../../api/passport.js');
+const imports=require('../../api/imports.js');
+const exportApi=require('../../api/export.js');
 
 function makeRes(){
   return {
@@ -203,6 +207,46 @@ test('real tenant handler emits correlated redacted 401 structured event',async(
   assert.equal(captured[0].includes('Bearer authentication'),false);
 });
 
+
+test('all authenticated API surfaces emit correlated redacted 401 events',async()=>{
+  const originalWarn=console.warn;
+  try{
+    const cases=[
+      ['tenant',tenant,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['organizations',organizations,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['members',members,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['models',models,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['items',items,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['imports',imports,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['export',exportApi,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['passport',passport,{
+        method:'GET',
+        headers:{},
+        query:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',secret:'must-not-appear'}
+      }]
+    ];
+
+    for(const [surface,handler,request] of cases){
+      const captured=[];
+      console.warn=(line)=>captured.push(String(line));
+      request.headers['x-request-id']=surface+'-401-coverage';
+      const res=makeRes();
+      await handler(request,res);
+      assert.equal(res.statusCode,401,surface);
+      assert.equal(res.headers['x-request-id'],surface+'-401-coverage',surface);
+      assert.equal(captured.length,1,surface);
+      const event=JSON.parse(captured[0]);
+      assert.equal(event.surface,surface);
+      assert.equal(event.status,401);
+      assert.equal(event.error_code,'AUTH_REQUIRED');
+      assert.equal(event.auth_present,false);
+      assert.equal(captured[0].includes('must-not-appear'),false);
+      assert.equal(captured[0].includes('Bearer authentication'),false);
+    }
+  }finally{
+    console.warn=originalWarn;
+  }
+});
 
 test('logging sink failure never blocks the response',()=>{
   const res=makeRes();
