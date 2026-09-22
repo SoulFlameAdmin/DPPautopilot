@@ -68,10 +68,10 @@ assert inline == {
 }
 
 html_files = [ROOT / "index.html", *sorted((ROOT / "demo").glob("*.html"))]
-inline_script = re.compile(r"<script\\b(?![^>]*\\bsrc\\s*=)[^>]*>", re.I)
-inline_style = re.compile(r"<style\\b", re.I)
-event_attr = re.compile(r"\\son[a-z]+\\s*=", re.I)
-style_attr = re.compile(r"\\sstyle\\s*=", re.I)
+inline_script = re.compile(r"<script\b(?![^>]*\bsrc\s*=)[^>]*>", re.I)
+inline_style = re.compile(r"<style\b", re.I)
+event_attr = re.compile(r"\son[a-z]+\s*=", re.I)
+style_attr = re.compile(r"\sstyle\s*=", re.I)
 asset_ref = re.compile(r"""(?:src|href)=["'](/assets/csp/[^"']+)["']""", re.I)
 
 referenced_assets = set()
@@ -89,7 +89,7 @@ for asset in referenced_assets:
     assert asset.is_file(), f"R02 referenced CSP asset missing: {asset.relative_to(ROOT)}"
 
 client_js = [*sorted((ROOT / "demo").glob("*.js")), *sorted((ROOT / "assets/csp").glob("*.js"))]
-dynamic_style = re.compile(r"\\.style(?:\\.|\\s*=)|setAttribute\\(\\s*['\"]style|createElement\\(\\s*['\"]style", re.I)
+dynamic_style = re.compile(r"\.style(?:\.|\s*=)|setAttribute\(\s*['\"]style|createElement\(\s*['\"]style", re.I)
 for js_path in client_js:
     source = js_path.read_text(encoding="utf-8")
     assert not dynamic_style.search(source), f"R02 dynamic inline style write remains: {js_path.relative_to(ROOT)}"
