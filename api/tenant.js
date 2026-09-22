@@ -37,6 +37,14 @@ function upstreamTimeoutError(){
   return error;
 }
 
+function upstreamInvalidResponseError(){
+  const error=new Error('UPSTREAM_INVALID_RESPONSE');
+  error.status=502;
+  error.publicCode='UPSTREAM_INVALID_RESPONSE';
+  error.publicMessage='Database returned an invalid response.';
+  return error;
+}
+
 async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,timeoutMs=DEFAULT_RPC_TIMEOUT_MS){
   const base=env.DPP_SUPABASE_URL||env.SUPABASE_URL;
   const key=env.DPP_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
@@ -65,6 +73,7 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
 
     try{data=await response.json();}catch(error){
       if(controller.signal.aborted||error&&error.name==='AbortError') throw upstreamTimeoutError();
+      if(response&&response.ok) throw upstreamInvalidResponseError();
       data=null;
     }
   }catch(error){
