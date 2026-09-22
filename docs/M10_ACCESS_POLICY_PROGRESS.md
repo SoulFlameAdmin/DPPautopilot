@@ -25,3 +25,6 @@ This does **not** claim full M10 completion. M10 remains RED because M03 is RED 
 - Full run `35399171822` on `2d04f47fde6c5dcbe9a2a94627c07dca02e1212e` is SUCCESS; UI artifact `10569812847`.
 - M10 remains RED because M03 is RED and role-aware server/API enforcement is not yet available.
 
+## Evidence — authority-only organization boundary — 2026-09-22
+
+- PR #191 exact tested head `ddb549a7cf858bcda59f54db3463de436b42e81e` completed GitHub Actions CI `35688583724` SUCCESS with 139/139 steps and zero failures. `api/_access_policy.js` now derives catalog `authority_only` paths separately from `legitimate_interest`; organization-authenticated private passport GET strips authority-only data while preserving legitimate-interest data, and POST/PATCH fail closed with 403 before upstream access when `private_payload` contains authority-only paths. `Validate M10 access-class policy`, `Validate R04 API tenant isolation matrix`, and `Run M19 passport HTTP contract unit tests` all passed. PR #191 merged to `main` as `5ce34ddcadfa002007749017caf96b660b73c047`. M10 remains RED/PARTIAL because M03 is not GREEN and no separate authority context/deployed authority acceptance is claimed. Vercel preview creation was blocked by the known free daily deployment quota; no quota bypass or deployment retry was attempted.
