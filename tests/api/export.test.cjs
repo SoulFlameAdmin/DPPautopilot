@@ -265,6 +265,52 @@ test('ndjson streamed hash mismatch fails closed before response emission',async
 
 
 
+test('ndjson streamed transport failure is normalized before response emission',async()=>{
+  const bytes=Buffer.from('ndjson-stream-network-failure','utf8');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  const bundle={evidence_manifest:[{
+    id:'17171717-1717-4717-8717-171717171717',
+    storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/network-failure.bin',
+    original_filename:'network-failure.bin',
+    content_type:'application/octet-stream',
+    byte_size:bytes.length,
+    sha256_hex:sha256
+  }]};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:true,
+    headers:{get(name){
+      const key=String(name).toLowerCase();
+      if(key==='content-type') return 'application/octet-stream';
+      if(key==='content-length') return String(bytes.length);
+      return null;
+    }},
+    body:{getReader(){return {
+      async read(){throw new Error('raw stream socket detail');},
+      releaseLock(){}
+    };}}
+  });
+  const res=makeRes();
+  await assert.rejects(
+    ()=>handler._test.sendNdjsonSpoolPackage(
+      res,
+      bundle,
+      'Bearer test-token',
+      env,
+      fetchImpl,
+      {paged:false,offset:0,limit:null}
+    ),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE');
+      assert.equal(error.publicMessage,'An evidence object could not be exported.');
+      assert.equal(String(error).includes('raw stream socket detail'),false);
+      return true;
+    }
+  );
+  assert.equal(res.writeCount,0);
+});
+
 test('evidence object fetch timeout fails closed with stable 504 before response emission',async()=>{
   const restore=withEnv(),original=global.fetch;
   const oldTimeout=handler._test.DEFAULT_EVIDENCE_OBJECT_TIMEOUT_MS;
