@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
@@ -24,10 +24,11 @@
       "name": "Vercel",
       "role": "application runtime/processor",
       "services": [
-        "Serverless API hosting"
+        "Serverless API hosting",
+        "Runtime Logs"
       ],
-      "data": "HTTP request metadata and DPP API payloads when deployed",
-      "status": "preview/production deployment evidence exists, but final production acceptance is blocked by Vercel SSO/build constraints and incomplete dependent gates"
+      "data": "HTTP request metadata, DPP API payloads in transit, and restricted structured request-log metadata",
+      "status": "Production deployment is active; structured DPP runtime logging is observed, while final log retention/backend acceptance remains pending."
     },
     {
       "name": "GitHub",
@@ -285,6 +286,25 @@
         "direct anon/authenticated table privileges revoked with RLS enabled",
         "shared consume RPC requires authenticated request-user context and validated pseudonymous key format",
         "canonical 429 behavior remains process-local until shared runtime wiring is accepted"
+      ]
+    },
+    {
+      "id": "runtime_observability_logs",
+      "classification": "pseudonymous_operational_security_metadata",
+      "purpose": "Request correlation, failure diagnosis and security/availability monitoring without storing DPP payloads or credentials",
+      "location": "Vercel runtime logs for the deployed DPP serverless API",
+      "processor": "Vercel",
+      "tables": [],
+      "fields": "event, timestamp_ms, request_id, API surface, HTTP method/status, outcome, duration_ms, auth-present boolean and stable public error code; request/response bodies, query parameters, bearer/access/refresh tokens, Supabase keys, cookies, emails/phones, passport identifiers and raw IP addresses are prohibited",
+      "retention": {
+        "status": "pending_platform_configuration_acceptance",
+        "current_behavior": "Structured dpp_http_request events are emitted by the deployed API and can be queried through Vercel runtime observability; the accepted production retention period/backend ownership policy is not yet recorded."
+      },
+      "controls": [
+        "X-Request-ID accepts only a bounded safe pattern; unsafe/missing IDs are replaced by UUID v4",
+        "logs contain only the R09 allowlisted structured fields",
+        "request/response bodies, query parameters, credentials, cookies, direct identifiers and raw IP addresses are prohibited",
+        "logging sink failure is fail-open for the original HTTP response"
       ]
     }
   ],
