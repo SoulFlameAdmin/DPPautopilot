@@ -15,6 +15,7 @@ R05 remains **RED** because its declared dependencies M17–M20 are not all GREE
 - Shared rows are pseudonymous only: validated network/credential digests, counters and fixed-window timestamps. Raw IPs and bearer credentials are never persisted. Stale rows older than reset+10 minutes are opportunistically pruned.
 - Client bucket keys use normalized IP plus a truncated SHA-256 digest of the Authorization header. Raw bearer credentials are not stored in buckets or response metadata.
 - All eight current serverless API surfaces retain the local pre-auth limiter. Authenticated paths additionally call the shared limiter after bearer validation when the feature gate is enabled; public passport identifier GET deliberately remains local-only because the shared RPC is not exposed to anonymous callers.
+- The versioned surface matrix explicitly covers organization discovery `GET /api/organizations` as `authenticated_read`, preventing documentation/policy drift from the implemented route.
 - Denied requests return HTTP 429 with stable `RATE_LIMITED` JSON plus `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`.
 - `tests/api/rate-limit.test.cjs` covers budget classification, credential hashing, fixed-window reset, bucket separation, authenticated write exhaustion and anonymous public passport exhaustion.
 
