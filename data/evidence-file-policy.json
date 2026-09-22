@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "task": "M13",
   "bucket": "dpp-evidence",
   "max_bytes": 10485760,
@@ -19,7 +19,7 @@
   ],
   "storage_path_rule": "<organization_uuid>/<object path>; '..' segments are forbidden",
   "sha256_format": "64 lowercase hexadecimal characters",
-  "note": "Project file policy, not a legal requirement. Private Storage bucket/RLS, deny-by-default evidence table grants, tenant-aware minimal metadata RPC, caller-JWT Edge Function, upload verification, and download byte-integrity verification are versioned; M13 remains RED until a real authenticated byte upload/download/delete roundtrip passes and M03 is GREEN.",
+  "note": "Project file policy, not a legal requirement. Private Storage bucket/RLS, deny-by-default evidence table grants, tenant-aware minimal metadata RPC, caller-JWT Edge Function, bounded upload streaming, upload verification, and download byte-integrity verification are versioned; M13 remains RED until a real authenticated byte upload/download/delete roundtrip passes and M03 is GREEN.",
   "storage": {
     "private_bucket": true,
     "metadata_registration_required_before_upload": true,
@@ -72,7 +72,16 @@
         "mismatch_code": "EVIDENCE_METADATA_MISMATCH",
         "missing_metadata_status": 403,
         "missing_metadata_code": "EVIDENCE_METADATA_NOT_AVAILABLE",
-        "verify_before_storage_upload": true
+        "verify_before_storage_upload": true,
+        "bounded_body_read": {
+          "max_bytes": 10485760,
+          "reader": "readBodyBounded",
+          "reject_before_full_buffer": true,
+          "oversize_status": 413,
+          "oversize_code": "EVIDENCE_TOO_LARGE",
+          "read_failure_status": 400,
+          "read_failure_code": "EVIDENCE_BODY_READ_FAILED"
+        }
       },
       "download_integrity": {
         "metadata_lookup": "caller-JWT RPC public.dpp_api_evidence_object_metadata(text)",
