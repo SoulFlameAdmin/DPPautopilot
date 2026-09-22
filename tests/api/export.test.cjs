@@ -924,3 +924,45 @@ test('signed manifest request fails closed when signing key is unavailable',asyn
     else process.env.DPP_EXPORT_MANIFEST_SIGNING_KEY=oldSigning;
   }
 });
+
+
+test('M21 export RPC times out while upstream response body stalls',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async(_url,options)=>({
+    ok:true,
+    json:()=>new Promise((_resolve,reject)=>{
+      options.signal.addEventListener('abort',()=>{
+        const error=new Error('aborted body');
+        error.name='AbortError';
+        reject(error);
+      },{once:true});
+    })
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('Bearer test-token',env,fetchImpl,5),
+    error=>{
+      assert.equal(error.status,504);
+      assert.equal(error.publicCode,'UPSTREAM_TIMEOUT');
+      assert.equal(error.publicMessage,'Database request timed out.');
+      return true;
+    }
+  );
+});
+
+test('M21 export RPC rejects malformed successful upstream JSON',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:true,
+    async json(){throw new SyntaxError('malformed upstream json');}
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('Bearer test-token',env,fetchImpl,50),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'UPSTREAM_ERROR');
+      assert.equal(error.publicMessage,'Database request failed.');
+      assert.equal(String(error).includes('malformed upstream json'),false);
+      return true;
+    }
+  );
+});
