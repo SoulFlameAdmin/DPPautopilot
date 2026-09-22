@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-22T07:44:00+03:00",
+  "updatedAt": "2026-09-22T07:57:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -372,7 +372,7 @@
           "acceptanceCriteria": "Every passport field has explicit access class; API enforces it",
           "evidenceRequired": "API/security tests",
           "status": "red",
-          "evidence": "PARTIAL public/private enforcement now has defense-in-depth on both read and write HTTP paths. Catalog-driven response sanitization strips non-public nested fields even if an upstream public RPC regresses; POST/PATCH `/api/passport` now also rejects any canonical field whose access class is not `public` or `public_identifier` before contacting Supabase. Fresh-main exact-head CI `35480591789` on `d752fe19f98b368916014c5f9662e9e5ef0e4699` completed SUCCESS, including M10 access-class policy, M19 passport HTTP contract, bound M10 runtime subset and all security/browser regressions. PR #86 merged as `97c65011e28a973fde58306e5d541ebbb4dd6bc7`. Existing bound `M10_PUBLIC_PRIVATE_RUNTIME_PASS` remains valid. M10 remains RED because M03 is not GREEN and deployed acceptance is unavailable. — PARTIAL PASS"
+          "evidence": "PARTIAL public/private enforcement now has defense-in-depth on both read and write HTTP paths. Catalog-driven response sanitization strips non-public nested fields even if an upstream public RPC regresses; POST/PATCH `/api/passport` now also rejects any canonical field whose access class is not `public` or `public_identifier` before contacting Supabase. Fresh-main exact-head CI `35480591789` on `d752fe19f98b368916014c5f9662e9e5ef0e4699` completed SUCCESS, including M10 access-class policy, M19 passport HTTP contract, bound M10 runtime subset and all security/browser regressions. PR #86 merged as `97c65011e28a973fde58306e5d541ebbb4dd6bc7`. Existing bound `M10_PUBLIC_PRIVATE_RUNTIME_PASS` remains valid. M10 remains RED because M03 is not GREEN and deployed acceptance is unavailable. — PARTIAL PASS PR #191 exact tested head `ddb549a7cf858bcda59f54db3463de436b42e81e` completed GitHub Actions CI `35688583724` SUCCESS with 139/139 steps and zero failures. `api/_access_policy.js` now derives catalog `authority_only` paths separately from `legitimate_interest`; organization-authenticated private passport GET strips authority-only data while preserving legitimate-interest data, and POST/PATCH fail closed with 403 before upstream access when `private_payload` contains authority-only paths. `Validate M10 access-class policy`, `Validate R04 API tenant isolation matrix`, and `Run M19 passport HTTP contract unit tests` all passed. PR #191 merged to `main` as `5ce34ddcadfa002007749017caf96b660b73c047`. M10 remains RED/PARTIAL because M03 is not GREEN and no separate authority context/deployed authority acceptance is claimed. Vercel preview creation was blocked by the known free daily deployment quota; no quota bypass or deployment retry was attempted."
         },
         {
           "id": "M11",
