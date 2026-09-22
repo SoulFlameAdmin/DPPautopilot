@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/retention-deletion-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==7
+assert policy.get("version")==8
 assert policy.get("task")=="R08"
 assert policy.get("status")=="partial"
 assert policy.get("scope","").startswith("DPP Autopilot")
@@ -66,8 +66,10 @@ assert streaming.get("record_order")==[
 assert streaming.get("evidence_encoding")=="base64"
 assert "verified before the first NDJSON record is emitted" in streaming.get("integrity_gate","")
 assert streaming.get("signed_resume_compatible") is True
-assert "constant-memory object streaming" in streaming.get("current_limit","")
-assert "constant-memory object streaming/final archive packaging" in export.get("current_gap","")
+assert "incremental response-body chunks" in streaming.get("memory_strategy","")
+assert streaming.get("spool_contract")=="verified_tmpfile_v1"
+assert "final archive format" in streaming.get("current_limit","")
+assert "incremental response-body processing" in export.get("current_gap","")
 
 rules={r["id"]:r for r in policy.get("retention_rules",[])}
 expected={
@@ -161,6 +163,10 @@ for token in [
     "responseContentLength",
     "ndjsonPackageRequested",
     "sendNdjsonPackage",
+    "responseBodyChunks",
+    "writeBase64VerifiedSpool",
+    "sendNdjsonSpoolPackage",
+    "verified_tmpfile_v1",
     "application/x-ndjson",
     "dpp_export_header",
     "dpp_evidence",
@@ -179,6 +185,8 @@ for token in [
     "include_evidence fails closed on content length mismatch before bytes are read",
     "ndjson package emits versioned verified bundle evidence and trailer records",
     "ndjson package fails closed before first record on evidence integrity mismatch",
+    "ndjson package incrementally spools streamed evidence without arrayBuffer",
+    "ndjson streamed hash mismatch fails closed before response emission",
     "include_evidence rejects declared total beyond inline memory limit",
     "include_evidence maps unavailable object to stable export error",
     "paged include_evidence fetches only selected manifest slice",
@@ -192,4 +200,4 @@ for token in [
 ]:
     assert token in export_test, f"R08/M21 export regression missing {token}"
 
-print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; deterministic paged/resumable integrity-checked evidence export now includes opt-in HMAC-signed manifest tokens and a versioned fail-closed NDJSON package precursor while constant-memory/final-archive/runtime/regulatory/storage/audit/auth blockers remain explicit")
+print("R08_RETENTION_POLICY_PASS: org deletion remains fail-closed; deterministic paged/resumable integrity-checked evidence export includes signed manifests and bounded-memory verified NDJSON spooling while final-archive/runtime/regulatory/storage/audit/auth blockers remain explicit")
