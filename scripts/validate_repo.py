@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,8 +60,16 @@ def main():
     require(not missing_worker, f"worker status missing fields: {missing_worker}")
 
     html = (ROOT / "index.html").read_text(encoding="utf-8")
-    require("data/master-plan.json" in html, "index.html must load data/master-plan.json")
-    require("data/worker-status.json" in html, "index.html must load data/worker-status.json")
+    script_srcs = re.findall(r'<script\\b[^>]*\\bsrc=["\']([^"\']+)["\'][^>]*>', html, re.I)
+    local_script_text = []
+    for src in script_srcs:
+        if src.startswith("/") and not src.startswith("//"):
+            script_path = ROOT / src.lstrip("/")
+            require(script_path.is_file(), f"index.html local script missing: {src}")
+            local_script_text.append(script_path.read_text(encoding="utf-8"))
+    executable_surface = html + "\n" + "\n".join(local_script_text)
+    require("data/master-plan.json" in executable_surface, "dashboard must load data/master-plan.json")
+    require("data/worker-status.json" in executable_surface, "dashboard must load data/worker-status.json")
     require("MASTER PLAN" in html or "Етапи" in html, "index.html must expose master plan/stages UI")
     require('id="menuToggle"' in html and 'id="stagesButton"' in html, "index.html must expose burger menu and stages control")
 
