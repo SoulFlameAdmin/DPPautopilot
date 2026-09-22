@@ -73,6 +73,13 @@ function findRestrictedPublicPaths(payload) {
     .map(parts => parts.join('.'));
 }
 
+function findAuthorityOnlyPaths(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return [];
+  return AUTHORITY_ONLY_PATHS
+    .filter(parts => pathExists(payload, parts))
+    .map(parts => parts.join('.'));
+}
+
 function sanitizeDeniedPaths(payload, deniedPaths) {
   const out = cloneJson(payload);
   if (!out || typeof out !== 'object' || Array.isArray(out)) return out;
@@ -96,5 +103,6 @@ module.exports = {
   sanitizePublicPayload,
   sanitizeOrganizationPrivatePayload,
   findRestrictedPublicPaths,
+  findAuthorityOnlyPaths,
   _test: { deletePath, pathExists, restrictedCatalogPaths, authorityOnlyCatalogPaths, catalogPathsByAccess, cloneJson, pruneEmptyObjects, sanitizeDeniedPaths }
 };
