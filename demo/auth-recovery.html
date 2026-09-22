@@ -13,6 +13,7 @@
 const formUx=window.DPPFormUX;
 const invalidDemo=new URLSearchParams(location.search).get('invalid')==='1';
 let cfg=null,accessToken=null;
+const AUTH_REQUEST_TIMEOUT_MS=15000;
 function parseHash(){return Object.fromEntries(new URLSearchParams(location.hash.replace(/^#/,'')))}
 function setState(msg,cls=''){status.className=cls;status.textContent=msg}
 async function init(){
@@ -41,11 +42,22 @@ save.onclick=async()=>{
  if(!accessToken){document.body.dataset.passwordUpdate='blocked';return setState('Recovery session required.','bad')}
  if(!passwordOk){document.body.dataset.passwordUpdate='blocked';return setState('Password must be at least 8 characters.','bad')}
  try{
-  const r=await fetch(cfg.supabaseUrl+'/auth/v1/user',{
-   method:'PATCH',
-   headers:{'apikey':cfg.publishableKey,'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},
-   body:JSON.stringify({password:password.value})
-  });
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),AUTH_REQUEST_TIMEOUT_MS);
+  let r;
+  try{
+   r=await fetch(cfg.supabaseUrl+'/auth/v1/user',{
+    method:'PATCH',
+    headers:{'apikey':cfg.publishableKey,'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},
+    body:JSON.stringify({password:password.value}),
+    signal:controller.signal
+   });
+  }catch(e){
+   if(e?.name==='AbortError')throw new Error('Password update timed out. Please try again.');
+   throw e;
+  }finally{
+   clearTimeout(timeout);
+  }
   const body=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(body.msg||body.message||('HTTP '+r.status));
   accessToken=null;
