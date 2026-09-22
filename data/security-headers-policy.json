@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "task": "R02",
   "status": "partial",
   "deployment_config": "vercel.json",
@@ -23,12 +23,16 @@
           "'self'"
         ],
         "script-src": [
-          "'self'",
-          "'unsafe-inline'"
+          "'self'"
+        ],
+        "script-src-attr": [
+          "'none'"
         ],
         "style-src": [
-          "'self'",
-          "'unsafe-inline'"
+          "'self'"
+        ],
+        "style-src-attr": [
+          "'none'"
         ],
         "img-src": [
           "'self'",
@@ -52,7 +56,19 @@
         ],
         "upgrade-insecure-requests": []
       },
-      "known_gap": "Current static prototype uses inline script/style, so CSP temporarily requires unsafe-inline. Production hardening should migrate scripts/styles to external assets or nonce/hash-based CSP."
+      "forbidden_tokens": [
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        "http://"
+      ],
+      "inline_code_policy": {
+        "inline_script_elements": false,
+        "inline_style_elements": false,
+        "event_handler_attributes": false,
+        "style_attributes": false,
+        "dynamic_style_writes": false
+      },
+      "known_gap": null
     },
     "Strict-Transport-Security": "max-age=31536000",
     "X-Content-Type-Options": "nosniff",
@@ -67,34 +83,15 @@
   },
   "tls": {
     "runtime_verified": false,
-    "claim": "A real HTTPS preview response and committed security headers are verified on /demo/auth-recovery.html; production hostname/certificate-chain and full multi-route acceptance remain unverified while F08 is blocked.",
+    "preview_runtime_verified": false,
+    "claim": "F08 is GREEN. CSP v2 removes unsafe-inline and all inline script/style execution surfaces, but exact-commit CI/preview and production TLS/header acceptance are still required before R02 can become GREEN.",
     "required_before_green": [
-      "Production deployment exists and is READY",
+      "Exact-head CI validates the de-inlined browser surfaces and security-header policy",
+      "Exact hardened commit receives a READY Vercel deployment",
       "HTTPS endpoint is reachable on the real production hostname",
       "Live response headers match the committed policy on HTML, /data/* and /api/* routes",
       "TLS certificate chain and hostname validation pass",
       "No CSP violation breaks authentication, API calls or core UI flows"
-    ],
-    "preview_runtime_verified": true
-  },
-  "preview_observation": {
-    "deployment_id": "dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q",
-    "project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
-    "commit_sha": "77fe2a39a18fcb26887b9cee2cc9fd0df5a95da7",
-    "url": "dpp-autopilot-95xeakbem-dimitar-lambovs-projects.vercel.app",
-    "path": "/demo/auth-recovery.html",
-    "observed_at": "2026-09-20T13:33:02Z",
-    "https_reachable": true,
-    "status": 200,
-    "headers": {
-      "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://frhletkiuupgksmgxoxc.supabase.co; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests",
-      "Strict-Transport-Security": "max-age=31536000",
-      "X-Content-Type-Options": "nosniff",
-      "X-Frame-Options": "DENY",
-      "Referrer-Policy": "no-referrer",
-      "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
-    },
-    "certificate_chain_verified": false,
-    "note": "Read-only Vercel connector observed this preview response. Production hostname/certificate-chain acceptance and protected multi-route smoke remain unverified; no SSO/login/MFA bypass was attempted."
+    ]
   }
 }

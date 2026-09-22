@@ -1,25 +1,22 @@
-# R02 Security Headers / TLS — Partial Progress
+# R02 Security Headers / TLS — CSP v2 hardening
 
-R02 remains **RED** because F08 is blocked and no live production endpoint exists for TLS/header verification.
+R02 remains **RED** until the hardened exact commit passes CI and the same policy is verified on a real READY production deployment. F08 is already GREEN, so R02 is dependency-safe.
 
-## Deploy-time header policy
+## Implemented hardening
 
-`vercel.json` now applies these controls globally:
+The browser surface no longer depends on CSP `'unsafe-inline'`.
 
-- **Content-Security-Policy** with same-origin defaults, disabled objects/framing, same-origin forms, local scripts/styles, local/data/blob asset allowances where the current static UI requires them, exact HTTPS connectivity to the bound Supabase endpoint, and `upgrade-insecure-requests`.
-- **Strict-Transport-Security:** `max-age=31536000`.
-- **X-Content-Type-Options:** `nosniff`.
-- **X-Frame-Options:** `DENY`.
-- **Referrer-Policy:** `no-referrer`.
-- **Permissions-Policy:** camera, microphone, geolocation, payment and USB are denied.
-- `/data/*` keeps `Cache-Control: no-store, max-age=0`.
+- Every inline `<style>` block from `index.html` and `demo/*.html` is externalized under `/assets/csp/`.
+- Every inline `<script>` block is externalized under `/assets/csp/`.
+- Dashboard `onclick` handlers are replaced by same-origin event listeners.
+- All HTML `style=` attributes and client-side `.style.*` writes are removed.
+- Dynamic progress widths use finite external CSS classes instead of inline style mutation.
+- CSP now uses `script-src 'self'`, `style-src 'self'`, `script-src-attr 'none'`, and `style-src-attr 'none'`.
+- `'unsafe-inline'`, `'unsafe-eval'`, and plaintext `http://` sources are forbidden by the R02 validator.
+- Existing HSTS, frame denial, MIME sniffing protection, referrer policy, permissions policy and no-store data policy remain enforced.
 
-The CSP does not allow plaintext HTTP sources or `'unsafe-eval'`. `connect-src` is restricted to same-origin plus the exact bound Supabase endpoint `https://frhletkiuupgksmgxoxc.supabase.co`.
+## Verification contract
 
-## Deliberate compatibility exception
+`scripts/validate_security_headers.py` fails if browser HTML reintroduces inline script/style elements, event-handler attributes, style attributes, dynamic client style writes, missing extracted assets, CSP drift, or unsafe tokens.
 
-The current static prototype still contains inline script/style content, so `script-src` and `style-src` temporarily require `'unsafe-inline'`. This is explicitly recorded as a remaining hardening gap; a future nonce/hash or external-asset refactor should remove it before final production hardening.
-
-## Before GREEN
-
-No live TLS/header claim is made by this precursor. R02 requires a real READY production deployment, reachable HTTPS hostname, passing certificate/hostname validation, live HTML/`data`/`api` header verification, and a CSP-compatible auth/API/UI smoke flow before it can become GREEN. F08 is not retried here.
+Before R02 can become GREEN, the exact hardened head must have applicable CI PASS and the production deployment must prove HTTPS reachability, certificate/hostname validation, live HTML/data/API headers matching this policy, and CSP-compatible core UI/auth/API behavior.
