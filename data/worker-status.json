@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "R02 implementation and exact-head CI are PASS; production acceptance deferred until Vercel quota backoff expires",
+  "currentTask": "M02 tenant-recovery precursor merged and evidenced; mandatory GREEN progression is waiting on M01 recovery acceptance and R02 Vercel retry window",
   "currentGate": "SECURITY / PRIVACY / OPERATIONS",
-  "lastCompletedTask": "R02 implementation hardening — CI 35681026877 + Cross-browser 35681024203 + U07 35681024197 PASS",
-  "nextTask": "At or after 2026-09-23T02:19:01Z, claim the DPP_APP2 Vercel lease, re-enable main deployment, deploy exactly once, then verify production TLS/security headers and CSP-compatible core flows before promoting R02 to GREEN.",
-  "message": "M01 remains an external auth-recovery acceptance blocker. R02 code is proven but live production acceptance is BLOCKED only by the explicit Vercel 24h deployment quota backoff.",
+  "lastCompletedTask": "M02 tenant-recovery HTTP precursor — PR #176 / CI 35684651596 PASS 139/139",
+  "nextTask": "Continue only dependency-safe non-deploy work; M01 requires a real recovery-session password-update acceptance. R02 may retry only at/after 2026-09-23T02:19:01Z after claiming the DPP_APP2 Vercel lease.",
+  "message": "D01-D14 and F08 are GREEN. M02 has fresh partial PASS evidence but cannot become GREEN before M01. R02 code is proven; production acceptance remains quota-blocked until the explicit retry window.",
   "deferredBlockers": [
     "R02 — Vercel `api-deployments-free-per-day`; explicit retry window begins 2026-09-23T02:19:01Z. Do not deploy earlier.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; no auth/login/MFA bypass allowed.",
     "M13 — technical Edge metadata ACL mismatch is fixed and Edge v5 is deployed; final authenticated upload→download→delete byte roundtrip still requires a real user runtime path and M03."
   ],
-  "updatedAt": "2026-09-22T05:59:00+03:00"
+  "updatedAt": "2026-09-22T07:08:00+03:00"
 }
