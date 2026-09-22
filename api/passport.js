@@ -95,7 +95,9 @@ async function rpc(name, payload, authorization, env = process.env, fetchImpl = 
     response = await fetchImpl(`${base.replace(/\/$/, '')}/rest/v1/rpc/${name}`, {
     method: 'POST',
     headers,
-    body: JSON.stringify(payload || {}));
+    body: JSON.stringify(payload || {}),
+    signal: controller.signal
+  });
     try {
       data = await response.json();
     } catch (error) {
