@@ -662,3 +662,13 @@ Append evidence here only after verification.
 - AbortController timeout behavior remains distinct and stable as HTTP 504 `EVIDENCE_EXPORT_OBJECT_TIMEOUT`.
 - PR #195 merged to main as `07eb48381bd899c73c3ba19e424fa51f758ecd7c`.
 - M21 remains RED/PARTIAL because M10-M13 and final deployed authenticated acceptance are non-GREEN. No Vercel deployment was requested.
+
+
+### M21 inline evidence response-body failure contract — 2026-09-22
+
+- PR #197 exact tested head `4687942cbc8f88cf2b6013f9bcee74a89eb901fc` completed GitHub Actions CI `35691707333` SUCCESS with 139/139 completed steps and zero failures.
+- Inline JSON evidence response-body transport failures now fail closed as HTTP 502 `EVIDENCE_EXPORT_OBJECT_UNAVAILABLE` with stable public messaging and no raw transport detail; timeout behavior remains HTTP 504 `EVIDENCE_EXPORT_OBJECT_TIMEOUT`.
+- The first PR probe failed only because the new regression test consumed the shared in-memory rate-limit bucket; the test was isolated to call `inlineEvidenceBytes` directly, then the exact-head full CI passed.
+- PR #197 merged to main as `7f4043e68452f6028bec263761b9083d933ad03d`.
+- Vercel GitHub integration produced a READY preview for the exact head. Read-only root verification returned HTTP 200 and the hardened CSP/security headers; protected `/api/export` remained behind Vercel preview authentication and no protection bypass was attempted.
+- M21 remains RED/PARTIAL because M10-M13 and final deployed authenticated acceptance are non-GREEN.
