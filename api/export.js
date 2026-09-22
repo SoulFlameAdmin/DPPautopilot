@@ -617,14 +617,23 @@ async function sendNdjsonSpoolPackage(res,bundle,authorization,env=process.env,f
       integrity:'sha256_verified',
       manifest_sha256:manifestSha256
     };
+    const headerLine=JSON.stringify(header)+'\n';
+    const bundleLine=JSON.stringify({type:'dpp_bundle',package_version:'ndjson-v1',data:bundle})+'\n';
+    const trailerLine=JSON.stringify(trailer)+'\n';
+    let contentLength=Buffer.byteLength(headerLine)+Buffer.byteLength(bundleLine)+Buffer.byteLength(trailerLine);
+    for(const spoolPath of spoolFiles){
+      const stat=await fsp.stat(spoolPath);
+      contentLength+=stat.size;
+    }
     res.statusCode=200;
     res.setHeader('Content-Type','application/x-ndjson; charset=utf-8');
     res.setHeader('Cache-Control','no-store');
     res.setHeader('Content-Disposition','attachment; filename="dpp-export.ndjson"');
-    res.write(JSON.stringify(header)+'\n');
-    res.write(JSON.stringify({type:'dpp_bundle',package_version:'ndjson-v1',data:bundle})+'\n');
+    res.setHeader('Content-Length',String(contentLength));
+    res.write(headerLine);
+    res.write(bundleLine);
     for(const spoolPath of spoolFiles) await emitSpoolFile(res,spoolPath);
-    res.write(JSON.stringify(trailer)+'\n');
+    res.write(trailerLine);
     return res.end();
   }finally{
     if(tempDir) await fsp.rm(tempDir,{recursive:true,force:true}).catch(()=>{});
