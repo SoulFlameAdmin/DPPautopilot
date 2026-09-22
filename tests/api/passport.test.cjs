@@ -73,6 +73,35 @@ test('private GET forwards caller bearer', async () => {
   } finally { global.fetch=original; restore(); }
 });
 
+test('private GET strips authority-only fields while preserving legitimate-interest data', async () => {
+  const restore=withEnv(), original=global.fetch;
+  global.fetch=async()=>({
+    ok:true,
+    async json(){
+      return {
+        passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        private_payload:{
+          model:{
+            restricted_composition:{cathode:'NMC-811'},
+            compliance_test_reports:['AUTHORITY-ONLY-REPORT']
+          },
+          item:{state_of_health:{percent:97}}
+        }
+      };
+    }
+  });
+  try {
+    const res=makeRes();
+    await handler(makeReq('GET',null,{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'}),res);
+    assert.equal(res.statusCode,200);
+    const data=JSON.parse(res.body).data;
+    assert.equal(data.private_payload.model.compliance_test_reports,undefined);
+    assert.equal(data.private_payload.model.restricted_composition.cathode,'NMC-811');
+    assert.equal(data.private_payload.item.state_of_health.percent,97);
+    assert.equal(res.body.includes('AUTHORITY-ONLY-REPORT'),false);
+  } finally { global.fetch=original; restore(); }
+});
+
 test('POST requires auth and validates item/payload shapes', async () => {
   let res=makeRes();
   await handler(makeReq('POST',{battery_item_id:'bad'},null,null),res);
