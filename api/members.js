@@ -65,6 +65,13 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
     });
     try{data=await response.json();}catch(error){
       if(controller.signal.aborted||error&&error.name==='AbortError') throw upstreamTimeoutError();
+      if(response.ok){
+        const invalid=new Error('UPSTREAM_ERROR');
+        invalid.status=502;
+        invalid.publicCode='UPSTREAM_ERROR';
+        invalid.publicMessage='Database request failed.';
+        throw invalid;
+      }
       data=null;
     }
   }catch(error){
