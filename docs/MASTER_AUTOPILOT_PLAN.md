@@ -672,3 +672,13 @@ Append evidence here only after verification.
 - PR #197 merged to main as `7f4043e68452f6028bec263761b9083d933ad03d`.
 - Vercel GitHub integration produced a READY preview for the exact head. Read-only root verification returned HTTP 200 and the hardened CSP/security headers; protected `/api/export` remained behind Vercel preview authentication and no protection bypass was attempted.
 - M21 remains RED/PARTIAL because M10-M13 and final deployed authenticated acceptance are non-GREEN.
+
+
+### M21 NDJSON response-body failure contract — 2026-09-22
+
+- PR #199 exact tested head `29e02be0c4b64b31e4fe43ed1d58412c7b25ced4` completed GitHub Actions CI `35692054474` SUCCESS with 139/139 completed steps and zero failures.
+- NDJSON evidence stream transport failures are normalized to HTTP 502 `EVIDENCE_EXPORT_OBJECT_UNAVAILABLE` with no raw transport detail and zero response records emitted before failure.
+- Existing structured export failures with a `publicCode` remain unchanged, preserving integrity/size contracts; AbortController failures remain HTTP 504 `EVIDENCE_EXPORT_OBJECT_TIMEOUT`.
+- PR #199 merged to main as `910bd4ce67a946c741ee1f3b8559f7fd46207412`.
+- Vercel GitHub integration reported the real free-plan deployment quota blocker (`api-deployments-free-per-day`, “try again in 24 hours”) on this PR; no explicit Vercel deployment or quota bypass was attempted.
+- M21 remains RED/PARTIAL because M10-M13 and final deployed authenticated acceptance are non-GREEN.
