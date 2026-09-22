@@ -1,6 +1,10 @@
 'use strict';
 
 const crypto=require('node:crypto');
+const fs=require('node:fs');
+const fsp=require('node:fs/promises');
+const os=require('node:os');
+const path=require('node:path');
 
 const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
@@ -431,6 +435,202 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
   };
 }
 
+
+async function* responseBodyChunks(response){
+  if(response&&response.body&&typeof response.body.getReader==='function'){
+    const reader=response.body.getReader();
+    try{
+      while(true){
+        const part=await reader.read();
+        if(part.done) break;
+        if(part.value&&part.value.byteLength) yield Buffer.from(part.value);
+      }
+    }finally{
+      if(typeof reader.releaseLock==='function') reader.releaseLock();
+    }
+    return;
+  }
+  yield Buffer.from(await response.arrayBuffer());
+}
+
+function ndjsonEvidencePrefix(item){
+  const base={
+    type:'dpp_evidence',
+    package_version:'ndjson-v1',
+    data:{
+      id:item.id,
+      storage_path:item.storage_path,
+      original_filename:item.original_filename,
+      content_type:item.content_type,
+      byte_size:Number(item.byte_size),
+      sha256_hex:typeof item.sha256_hex==='string'?item.sha256_hex.toLowerCase():'',
+      encoding:'base64'
+    }
+  };
+  const json=JSON.stringify(base);
+  return json.slice(0,-2)+',"content_base64":"';
+}
+
+async function writeBase64VerifiedSpool(response,item,fileHandle){
+  const declaredSize=Number(item&&item.byte_size);
+  const declaredHash=typeof (item&&item.sha256_hex)==='string'?item.sha256_hex.toLowerCase():'';
+  const hash=crypto.createHash('sha256');
+  let byteSize=0;
+  let carry=Buffer.alloc(0);
+  await fileHandle.write(ndjsonEvidencePrefix(item));
+  for await (const incoming of responseBodyChunks(response)){
+    const chunk=Buffer.isBuffer(incoming)?incoming:Buffer.from(incoming);
+    byteSize+=chunk.byteLength;
+    if(byteSize>MAX_INLINE_EVIDENCE_BYTES){
+      throw exportError('EVIDENCE_EXPORT_TOO_LARGE',413,'Evidence bytes exceed the inline export limit.');
+    }
+    hash.update(chunk);
+    const merged=carry.length?Buffer.concat([carry,chunk]):chunk;
+    const complete=merged.length-(merged.length%3);
+    if(complete>0) await fileHandle.write(merged.subarray(0,complete).toString('base64'));
+    carry=complete<merged.length?Buffer.from(merged.subarray(complete)):Buffer.alloc(0);
+  }
+  if(carry.length) await fileHandle.write(carry.toString('base64'));
+  const sha256=hash.digest('hex');
+  if(
+    !Number.isInteger(declaredSize)||
+    declaredSize!==byteSize||
+    !/^[0-9a-f]{64}$/.test(declaredHash)||
+    declaredHash!==sha256
+  ){
+    throw exportError('EVIDENCE_EXPORT_INTEGRITY_FAILED',502,'Evidence export integrity verification failed.');
+  }
+  await fileHandle.write('"}}\n');
+  return {byteSize,sha256};
+}
+
+async function emitSpoolFile(res,filePath){
+  for await (const chunk of fs.createReadStream(filePath)) res.write(chunk);
+}
+
+async function sendNdjsonSpoolPackage(res,bundle,authorization,env=process.env,fetchImpl=fetch,page={paged:false,offset:0,limit:null}){
+  const manifest=canonicalEvidenceManifest(bundle&&bundle.evidence_manifest);
+  const offset=page&&Number.isInteger(page.offset)?page.offset:0;
+  const limit=page&&Number.isInteger(page.limit)?page.limit:null;
+  const paged=Boolean(page&&page.paged);
+  const manifestSha256=evidenceManifestSha256(manifest);
+  const expectedManifestSha256=page&&page.expectedManifestSha256?page.expectedManifestSha256:null;
+  const expectedManifestToken=page&&page.expectedManifestToken?page.expectedManifestToken:null;
+  if(expectedManifestSha256&&expectedManifestSha256!==manifestSha256){
+    throw exportError('EVIDENCE_EXPORT_MANIFEST_CHANGED',409,'Evidence export manifest changed; restart the export.');
+  }
+  if(expectedManifestToken) verifyEvidenceManifestToken(expectedManifestToken,manifestSha256,env);
+  const signedMetadata=(page&&page.signedRequested)||expectedManifestToken
+    ?{
+      manifest_token:signEvidenceManifestToken(manifestSha256,env),
+      manifest_signature_algorithm:'HMAC-SHA256-v1'
+    }
+    :{};
+  const selected=paged?manifest.slice(offset,offset+limit):manifest;
+  const declaredTotal=selected.reduce((sum,item)=>{
+    const size=Number(item&&item.byte_size);
+    return sum+(Number.isFinite(size)&&size>0?size:0);
+  },0);
+  if(declaredTotal>MAX_INLINE_EVIDENCE_BYTES){
+    throw exportError('EVIDENCE_EXPORT_TOO_LARGE',413,'Evidence bytes exceed the inline export limit.');
+  }
+
+  const base=env.DPP_SUPABASE_URL||env.SUPABASE_URL;
+  const key=env.DPP_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
+  if(!base||!key) throw exportError('SERVER_CONFIGURATION_MISSING',500,'Server configuration is incomplete.');
+
+  let tempDir=null;
+  let actualTotal=0;
+  const spoolFiles=[];
+  try{
+    tempDir=await fsp.mkdtemp(path.join(os.tmpdir(),'dpp-export-'));
+    for(let index=0;index<selected.length;index+=1){
+      const item=selected[index];
+      const objectPath=typeof item.storage_path==='string'?item.storage_path:'';
+      if(!objectPath){
+        throw exportError('EVIDENCE_EXPORT_INTEGRITY_FAILED',502,'Evidence export integrity verification failed.');
+      }
+      const response=await fetchImpl(
+        base.replace(/\/$/,'')+'/functions/v1/dpp-evidence-object?path='+encodeURIComponent(objectPath),
+        {
+          method:'GET',
+          headers:{apikey:key,Authorization:authorization,Accept:'application/octet-stream'}
+        }
+      );
+      if(!response.ok){
+        throw exportError('EVIDENCE_EXPORT_OBJECT_UNAVAILABLE',502,'An evidence object could not be exported.');
+      }
+      const declaredContentType=typeof item.content_type==='string'?item.content_type.trim().toLowerCase():'';
+      const actualContentType=responseContentType(response);
+      if(actualContentType!==null&&(!declaredContentType||actualContentType!==declaredContentType)){
+        throw exportError('EVIDENCE_EXPORT_INTEGRITY_FAILED',502,'Evidence export integrity verification failed.');
+      }
+      const declaredSize=Number(item.byte_size);
+      const actualContentLength=responseContentLength(response);
+      if(
+        actualContentLength!==null&&(
+          !Number.isInteger(declaredSize)||
+          !Number.isSafeInteger(actualContentLength)||
+          actualContentLength!==declaredSize
+        )
+      ){
+        throw exportError('EVIDENCE_EXPORT_INTEGRITY_FAILED',502,'Evidence export integrity verification failed.');
+      }
+      const spoolPath=path.join(tempDir,String(index).padStart(4,'0')+'.ndjson');
+      const fileHandle=await fsp.open(spoolPath,'wx');
+      let verified;
+      try{
+        verified=await writeBase64VerifiedSpool(response,item,fileHandle);
+      }finally{
+        await fileHandle.close();
+      }
+      actualTotal+=verified.byteSize;
+      if(actualTotal>MAX_INLINE_EVIDENCE_BYTES){
+        throw exportError('EVIDENCE_EXPORT_TOO_LARGE',413,'Evidence bytes exceed the inline export limit.');
+      }
+      spoolFiles.push(spoolPath);
+    }
+
+    const evidenceExport={
+      included:true,
+      object_count:selected.length,
+      total_bytes:actualTotal,
+      integrity:'sha256_verified',
+      encoding:'base64',
+      inline_limit_bytes:MAX_INLINE_EVIDENCE_BYTES,
+      manifest_object_count:manifest.length,
+      manifest_sha256:manifestSha256,
+      ...signedMetadata,
+      paged,
+      offset:paged?offset:0,
+      limit:paged?limit:null,
+      has_more:paged?(offset+selected.length<manifest.length):false,
+      next_offset:paged&&offset+selected.length<manifest.length?offset+selected.length:null,
+      spool:'verified_tmpfile_v1'
+    };
+    const header={type:'dpp_export_header',package_version:'ndjson-v1',evidence_export:evidenceExport};
+    const trailer={
+      type:'dpp_export_end',
+      package_version:'ndjson-v1',
+      object_count:selected.length,
+      total_bytes:actualTotal,
+      integrity:'sha256_verified',
+      manifest_sha256:manifestSha256
+    };
+    res.statusCode=200;
+    res.setHeader('Content-Type','application/x-ndjson; charset=utf-8');
+    res.setHeader('Cache-Control','no-store');
+    res.setHeader('Content-Disposition','attachment; filename="dpp-export.ndjson"');
+    res.write(JSON.stringify(header)+'\n');
+    res.write(JSON.stringify({type:'dpp_bundle',package_version:'ndjson-v1',data:bundle})+'\n');
+    for(const spoolPath of spoolFiles) await emitSpoolFile(res,spoolPath);
+    res.write(JSON.stringify(trailer)+'\n');
+    return res.end();
+  }finally{
+    if(tempDir) await fsp.rm(tempDir,{recursive:true,force:true}).catch(()=>{});
+  }
+}
+
 async function handler(req,res){
   startRequestObservability(req,res,'export');
   const rateLimit=enforceRateLimit(req,res,'export');
@@ -452,10 +652,10 @@ async function handler(req,res){
     const includeEvidence=includeEvidenceRequested(req)||ndjsonPackage;
     const page=includeEvidence?evidencePageOptions(req):null;
     const bundle=await rpc(authorization);
+    if(ndjsonPackage) return await sendNdjsonSpoolPackage(res,bundle,authorization,process.env,fetch,page);
     const output=includeEvidence
       ?await inlineEvidenceBytes(bundle,authorization,process.env,fetch,page)
       :bundle;
-    if(ndjsonPackage) return sendNdjsonPackage(res,output);
     return send(res,200,{data:output});
   }catch(error){
     const status=Number.isInteger(error.status)?error.status:502;
@@ -467,4 +667,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,canonicalEvidenceManifest,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
+module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,canonicalEvidenceManifest,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,responseBodyChunks,writeBase64VerifiedSpool,sendNdjsonSpoolPackage,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION};
