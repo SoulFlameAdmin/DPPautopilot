@@ -3,6 +3,7 @@
 const catalog = require('../data/dpp-field-catalog.json');
 
 const PUBLIC_ACCESS = new Set(['public','public_identifier']);
+const AUTHORITY_ONLY_ACCESS = new Set(['authority_only']);
 
 function cloneJson(value) {
   if (value == null) return value;
@@ -36,14 +37,23 @@ function pruneEmptyObjects(value) {
   return value;
 }
 
-function restrictedCatalogPaths() {
+function catalogPathsByAccess(predicate) {
   return (catalog.fields || [])
-    .filter(field => !PUBLIC_ACCESS.has(field.access))
+    .filter(field => predicate(field.access))
     .map(field => String(field.path || '').split('.').filter(Boolean))
     .filter(parts => parts.length > 1);
 }
 
+function restrictedCatalogPaths() {
+  return catalogPathsByAccess(access => !PUBLIC_ACCESS.has(access));
+}
+
+function authorityOnlyCatalogPaths() {
+  return catalogPathsByAccess(access => AUTHORITY_ONLY_ACCESS.has(access));
+}
+
 const RESTRICTED_PATHS = restrictedCatalogPaths();
+const AUTHORITY_ONLY_PATHS = authorityOnlyCatalogPaths();
 
 function pathExists(root, segments) {
   let node = root;
@@ -63,17 +73,36 @@ function findRestrictedPublicPaths(payload) {
     .map(parts => parts.join('.'));
 }
 
-function sanitizePublicPayload(payload) {
+function findAuthorityOnlyPaths(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return [];
+  return AUTHORITY_ONLY_PATHS
+    .filter(parts => pathExists(payload, parts))
+    .map(parts => parts.join('.'));
+}
+
+function sanitizeDeniedPaths(payload, deniedPaths) {
   const out = cloneJson(payload);
   if (!out || typeof out !== 'object' || Array.isArray(out)) return out;
-  for (const parts of RESTRICTED_PATHS) deletePath(out, parts);
+  for (const parts of deniedPaths) deletePath(out, parts);
   return pruneEmptyObjects(out);
+}
+
+function sanitizePublicPayload(payload) {
+  return sanitizeDeniedPaths(payload, RESTRICTED_PATHS);
+}
+
+function sanitizeOrganizationPrivatePayload(payload) {
+  return sanitizeDeniedPaths(payload, AUTHORITY_ONLY_PATHS);
 }
 
 module.exports = {
   PUBLIC_ACCESS,
+  AUTHORITY_ONLY_ACCESS,
   RESTRICTED_PATHS,
+  AUTHORITY_ONLY_PATHS,
   sanitizePublicPayload,
+  sanitizeOrganizationPrivatePayload,
   findRestrictedPublicPaths,
-  _test: { deletePath, pathExists, restrictedCatalogPaths, cloneJson, pruneEmptyObjects }
+  findAuthorityOnlyPaths,
+  _test: { deletePath, pathExists, restrictedCatalogPaths, authorityOnlyCatalogPaths, catalogPathsByAccess, cloneJson, pruneEmptyObjects, sanitizeDeniedPaths }
 };
