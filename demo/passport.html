@@ -4,9 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>DPP Autopilot · Public Battery Passport</title>
-  <style>
-    :root{--bg:#07090d;--panel:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--blue:#69a7ff;--green:#39d98a;--red:#ff5c6c}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:1100px;margin:auto;padding:24px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px}.top a{color:#cbd7e5;text-decoration:none}.badge{font-size:11px;color:var(--blue);font-weight:800;letter-spacing:.14em;text-transform:uppercase}.hero{border:1px solid var(--line);border-radius:18px;padding:20px;margin:18px 0;background:linear-gradient(180deg,#101722,#0a0e14)}.uid{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#b7c9df;word-break:break-all}.notice{margin-top:10px;color:#8fa0b4;font-size:12px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:14px}.label{font-size:11px;color:#7f8fa4;margin-bottom:6px}.path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;color:#68778b;margin-top:8px}.value{font-weight:650;overflow-wrap:anywhere;white-space:pre-wrap}.access{display:inline-block;font-size:10px;color:var(--green);border:1px solid #245d43;border-radius:999px;padding:2px 6px;margin-top:8px}.error{border:1px solid #66303a;color:var(--red);padding:14px;border-radius:12px;margin-top:18px}.empty{color:var(--muted)}@media(max-width:720px){.grid{grid-template-columns:1fr}.shell{padding:14px}}
-  </style>
+  <link rel="stylesheet" href="/assets/csp/passport.css">
 </head>
 <body data-passport-ready="false" data-restricted-leak="unknown" data-public-field-count="0">
 <main class="shell">
@@ -15,44 +13,7 @@
   <section class="grid" id="publicFields" aria-label="Public passport fields"></section>
 </main>
 <script src="/demo/async-state.js"></script>
-<script>
-const u02=window.DPPAsyncState;
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-function getPath(obj,path){let cur=obj;for(const p of path.split('.')){if(cur==null||typeof cur!=='object'||!(p in cur))return undefined;cur=cur[p]}return cur}
-function display(value){if(value===undefined||value===null)return '—';if(typeof value==='object')return JSON.stringify(value,null,2);return String(value)}
-u02.set('loading',hero,'Зареждане…');
-(async()=>{
-  try{
-    if(u02.gate(hero,{
-      loading:'Зареждане на public passport…',
-      empty:'Няма public passport за показване.',
-      error:'Public passport could not be loaded.'
-    })) return;
-    const [cr,sr]=await Promise.all([fetch('/data/dpp-field-catalog.json',{cache:'no-store'}),fetch('/data/sample-battery.json',{cache:'no-store'})]);
-    if(!cr.ok||!sr.ok)throw new Error('catalog/sample load failed');
-    const catalog=await cr.json();const fixture=await sr.json();
-    const requested=new URLSearchParams(location.search).get('id')||fixture.items[0].unique_identifier;
-    const item=fixture.items.find(x=>x.unique_identifier===requested);
-    if(!item){hero.innerHTML=`<div class="empty" data-passport-not-found="true">Passport not found for identifier: ${esc(requested)}</div>`;document.body.dataset.passportReady='false';document.body.dataset.restrictedLeak='false';u02.set('empty',hero);return}
-    hero.innerHTML=`<div class="badge">PUBLIC PASSPORT · SYNTHETIC DEMO</div><h2>${esc(fixture.model.identification.manufacturer.name)} · ${esc(fixture.model.identification.model_id)}</h2><div class="uid" data-public-uid>${esc(item.unique_identifier)}</div><div class="notice">Only fields classified as public/public_identifier are rendered. Restricted and authority-only fields are intentionally excluded.</div>`;
-    const rendered=[];
-    for(const f of catalog.fields){
-      if(!['public','public_identifier'].includes(f.access))continue;
-      let value;
-      if(f.path.startsWith('model.')) value=getPath(fixture,f.path);
-      else if(f.path==='item.unique_identifier') value=item.unique_identifier;
-      else continue;
-      if(value===undefined)continue;
-      rendered.push({field:f,value});
-    }
-    publicFields.innerHTML=rendered.map(({field,value})=>`<article class="card" data-public-field="${esc(field.path)}" data-access="${esc(field.access)}"><div class="label">${esc(field.apiTarget)}</div><div class="value">${esc(display(value))}</div><div class="path">${esc(field.path)}</div><span class="access">${esc(field.access)}</span></article>`).join('');
-    const restrictedMarkers=[fixture.model.restricted_composition?.cathode,fixture.model.safety_measures?.transport,fixture.model.compliance_test_reports?.[0]?.document_ref].filter(v=>v!==undefined).map(String);
-    const visible=publicFields.textContent+' '+hero.textContent;
-    const leak=restrictedMarkers.some(marker=>marker && visible.includes(marker));
-    document.body.dataset.passportReady='true';document.body.dataset.restrictedLeak=String(leak);document.body.dataset.publicFieldCount=String(rendered.length);document.body.dataset.passportId=item.unique_identifier;u02.set('success',hero);
-  }catch(e){hero.innerHTML=`<div class="error">${esc(e.message)}</div>`;document.body.dataset.passportReady='false';document.body.dataset.restrictedLeak='unknown';u02.set('error',hero)}
-})();
-</script>
+<script src="/assets/csp/passport-inline-1.js"></script>
 <script src="/demo/responsive-probe.js"></script>
 <script src="/demo/accessibility-probe.js"></script>
 </body>
