@@ -278,3 +278,29 @@ test('unsupported methods return 405 with Allow header',async()=>{
   assert.equal(res.statusCode,405);
   assert.equal(res.headers.allow,'GET, POST');
 });
+
+test('GET fails closed when successful organization RPC returns malformed shape',async()=>{
+  await withEnvFetch(async()=>({
+    ok:true,
+    async json(){return [{organization_id:'not-a-uuid',name:'Leaked',slug:'pilot-org',role:'owner',active:true}];}
+  }),async()=>{
+    const res=makeRes();
+    await handler(req('GET',null),res);
+    const body=JSON.parse(res.body);
+    assert.equal(res.statusCode,502);
+    assert.equal(body.error.code,'UPSTREAM_ERROR');
+    assert.equal(res.body.includes('Leaked'),false);
+  });
+});
+
+test('POST fails closed when organization create RPC omits required tenant fields',async()=>{
+  await withEnvFetch(async()=>({
+    ok:true,
+    async json(){return {organization_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',name:'Pilot Org',slug:'pilot-org'};}
+  }),async()=>{
+    const res=makeRes();
+    await handler(req('POST',{name:'Pilot Org',slug:'pilot-org'}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
+  });
+});

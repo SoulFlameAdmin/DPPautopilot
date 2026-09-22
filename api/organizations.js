@@ -29,6 +29,32 @@ function validateCreate(body){
   return null;
 }
 
+function upstreamShapeError(){
+  const error=new Error('UPSTREAM_ERROR');
+  error.status=502;
+  error.publicCode='UPSTREAM_ERROR';
+  error.publicMessage='Database request failed.';
+  return error;
+}
+
+function validOrganization(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    validUuid(value.organization_id)&&typeof value.name==='string'&&value.name.length>0&&
+    typeof value.slug==='string'&&SLUG_RE.test(value.slug)&&
+    typeof value.role==='string'&&['owner','admin','editor','viewer'].includes(value.role)&&
+    typeof value.active==='boolean';
+}
+
+function validUuid(value){
+  return typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function validateRpcShape(name,data){
+  if(name==='dpp_api_organizations_list') return Array.isArray(data)&&data.every(validOrganization);
+  if(name==='dpp_api_organization_create') return validOrganization(data);
+  return true;
+}
+
 function mapDatabaseError(data){
   const mapped=mapSharedDatabaseError('organizations',data);
   return [mapped.status,mapped.code,mapped.message];
@@ -93,6 +119,7 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
     error.publicMessage=publicMessage;
     throw error;
   }
+  if(!validateRpcShape(name,data)) throw upstreamShapeError();
   return data;
 }
 
@@ -155,4 +182,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validateCreate,mapDatabaseError,rpc,SLUG_RE,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,validateCreate,mapDatabaseError,rpc,validateRpcShape,validOrganization,SLUG_RE,DEFAULT_RPC_TIMEOUT_MS};

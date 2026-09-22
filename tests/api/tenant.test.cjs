@@ -183,3 +183,22 @@ test('unsupported methods return 405',async()=>{
   assert.equal(res.statusCode,405);
   assert.equal(res.headers.allow,'GET, POST');
 });
+
+
+test('GET rejects inconsistent tenant context shape',async()=>{
+  await withEnvFetch(async()=>({
+    ok:true,
+    async json(){return {
+      active_organization_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      memberships:[
+        {organization_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',role:'owner',active:true},
+        {organization_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',role:'viewer',active:true}
+      ]
+    };}
+  }),async()=>{
+    const res=makeRes();
+    await handler(makeReq('GET'),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
+  });
+});
