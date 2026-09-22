@@ -64,7 +64,11 @@ function setSession(data){
 }
 async function init(){
  cfg=await fetch('/data/auth-config.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('auth config unavailable');return r.json()});
- if(!cfg.supabaseUrl.startsWith('https://')||!cfg.publishableKey.startsWith('sb_publishable_')) throw new Error('invalid auth config');
+ if(cfg.supabaseUrl!=='https://frhletkiuupgksmgxoxc.supabase.co'||!String(cfg.publishableKey||'').startsWith('sb_publishable_')){
+  cfg=null;
+  setSession(null);
+  throw new Error('invalid auth config');
+ }
  setSession(null);document.body.dataset.authReady='true';
 }
 signup.onclick=async()=>{if(!validateAuth())return out('Check the highlighted fields.','bad');try{const d=await call('/auth/v1/signup',{method:'POST',body:{email:email.value.trim(),password:password.value}});setSession(d);out(d.session?'Sign-up created authenticated session.':'Sign-up accepted; email confirmation is required by current project settings.','ok')}catch(e){out(e.message,'bad')}};
@@ -79,7 +83,7 @@ init().then(()=>{
    password.value='';
    signin.click();
  }
-}).catch(e=>out(e.message,'bad'));
+}).catch(e=>{cfg=null;setSession(null);document.body.dataset.authReady='false';out(e.message,'bad')});
 </script><script src="/demo/responsive-probe.js"></script>
 <script src="/demo/accessibility-probe.js"></script>
 </body></html>

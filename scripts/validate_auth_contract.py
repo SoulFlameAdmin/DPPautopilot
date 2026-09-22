@@ -11,6 +11,9 @@ def require(c,m):
     if not c: raise AssertionError(m)
 
 require(cfg["supabaseUrl"]=="https://frhletkiuupgksmgxoxc.supabase.co","wrong Supabase project URL")
+require("cfg.supabaseUrl!==\'https://frhletkiuupgksmgxoxc.supabase.co\'" in html,"M01 auth page must pin the bound Supabase project before auth calls")
+require("String(cfg.publishableKey||\'\').startsWith(\'sb_publishable_\')" in html,"M01 auth page must require a modern publishable key before auth calls")
+require("cfg=null;setSession(null);document.body.dataset.authReady=\'false\'" in html,"M01 auth init failure must clear config/session and remain not-ready")
 require(cfg["publishableKey"].startswith("sb_publishable_"),"M01 must use modern publishable key")
 require("service_role" not in json.dumps(cfg).lower(),"service role must never be in client config")
 require(cfg["authSettingsEvidence"]["emailSignup"] is True,"email signup evidence missing")
@@ -33,4 +36,4 @@ require("new URL('/demo/auth-recovery.html',location.origin).href" in html,"R06 
 require("redirect_to='+encodeURIComponent(redirectTo)" in html,"R06 recovery redirect must be URL-encoded")
 require("If the account is eligible, a password reset email will be sent." in html,"R06 reset response must be account-enumeration resistant")
 require('<meta name="referrer" content="no-referrer">' in html,"R06 auth page must set no-referrer policy")
-print("M01_AUTH_CONTRACT_PASS: signup/signin/refresh/reset/signout session flows exist, refresh rotation stays in memory with bounded TTL-aware scheduling, the verified publishable key is used, and tokens are not persisted")
+print("M01_AUTH_CONTRACT_PASS: signup/signin/refresh/reset/signout session flows exist, auth is pinned to the bound Supabase project, init failure clears config/session, refresh rotation stays in memory with bounded TTL-aware scheduling, and tokens are not persisted")
