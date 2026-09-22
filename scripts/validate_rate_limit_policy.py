@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==8
+assert policy.get("version")==9
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
 assert policy.get("strategy")=="dual_layer_local_plus_feature_gated_shared_authenticated_runtime"
@@ -47,6 +47,17 @@ api_surface_inventory={
     if not path.name.startswith("_")
 }
 assert set(surfaces)==api_surface_inventory, f"R05 uncovered public API surface(s): {sorted(api_surface_inventory-set(surfaces))}"
+expected_surface_rules={
+    "tenant":{"GET":"authenticated_read","POST":"authenticated_write"},
+    "organizations":{"GET":"authenticated_read","POST":"authenticated_write"},
+    "members":{"GET":"authenticated_read","POST":"authenticated_write","PATCH":"authenticated_write","DELETE":"authenticated_write"},
+    "models":{"GET":"authenticated_read","POST":"authenticated_write","PATCH":"authenticated_write","DELETE":"authenticated_write"},
+    "items":{"GET":"authenticated_read","POST":"authenticated_write","PATCH":"authenticated_write","DELETE":"authenticated_write"},
+    "passport":{"public_GET":"public_passport_read","private_GET":"authenticated_read","POST":"authenticated_write","PATCH":"authenticated_write"},
+    "imports":{"GET":"authenticated_read","POST":"import_write","PATCH":"import_write"},
+    "export":{"GET":"export_read"},
+}
+assert surfaces==expected_surface_rules, "R05 surface/method policy drift"
 
 response=policy.get("response",{})
 assert response.get("http_status")==429
