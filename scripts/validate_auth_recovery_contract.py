@@ -15,6 +15,11 @@ for snippet in [
     "data-password-update",
     "history.replaceState",
     "Recovery token cleared from the URL",
+    "AUTH_REQUEST_TIMEOUT_MS=15000",
+    "new AbortController()",
+    "signal:controller.signal",
+    "clearTimeout(timeout)",
+    "Password update timed out. Please try again.",
 ]:
     require(snippet in html,f"M01 recovery completion contract missing: {snippet}")
 
@@ -30,4 +35,4 @@ require('<meta name="referrer" content="no-referrer">' in html,"R06 recovery pag
 require(html.index("const h=parseHash()") < html.index("fetch('/data/auth-config.json'"),"R06 recovery fragment must be parsed before any config network request")
 require(html.index("history.replaceState") < html.index("fetch('/data/auth-config.json'"),"R06 recovery fragment must be scrubbed before any config network request")
 require(html.index("history.replaceState") < html.index("save.onclick"),"R06 recovery fragment must be cleared during init before password submission")
-print("M01_RECOVERY_CONTRACT_PASS: recovery fragment is synchronously parsed and scrubbed before network I/O, bound Supabase config is pinned before token use, password update uses authenticated PATCH /auth/v1/user, and any init failure clears in-memory recovery state")
+print("M01_RECOVERY_CONTRACT_PASS: recovery fragment is synchronously parsed and scrubbed before network I/O, bound Supabase config is pinned before token use, password update uses a bounded authenticated PATCH /auth/v1/user with deterministic timeout cleanup, and any init failure clears in-memory recovery state")
