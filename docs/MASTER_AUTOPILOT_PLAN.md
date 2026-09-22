@@ -604,3 +604,13 @@ Append evidence here only after verification.
 - The NDJSON export path now consumes evidence response bodies incrementally, verifies byte count and SHA-256 while producing base64 into temporary spool files, and begins NDJSON response emission only after every selected object passes integrity checks. The JSON export path is unchanged.
 - This removes page-wide evidence byte/base64 accumulation from the NDJSON path while preserving fail-closed pre-emission integrity. M21 and R08 remain RED because their declared dependencies and final production/runtime acceptance are incomplete; final archive packaging and real authenticated deployed large-tenant acceptance remain pending.
 - F08 was not retried and no Vercel deployment was attempted in this block.
+
+
+## Execution evidence — M01 fail-closed recovery config binding — 2026-09-22
+
+- PR #165 merged to main as commit `eca7bb0228d9f5b7c34512ee5af959f625e1af3c`.
+- Exact-head GitHub Actions CI `35671255854` completed SUCCESS with 139 completed steps and no failures. `Validate M01 authentication client contract` and `Validate M01 recovery completion contract` both passed.
+- Cross-browser run `35671255855` and U07 visual regression run `35671255865` also completed SUCCESS.
+- The recovery page now validates the exact bound Supabase project URL and modern `sb_publishable_` key before a recovery token can be used. Any auth-config fetch/validation/init failure clears the in-memory recovery token and config, resets the recovery state to missing and fails closed.
+- This closes a token-lifecycle/config-binding precursor gap but does not satisfy M01 final acceptance. M01 remains BLOCKED until a valid real recovery session completes the deployed password-update flow; no login/MFA/protection bypass was attempted.
+- F08 was not retried and no Vercel deployment was attempted in this block.
