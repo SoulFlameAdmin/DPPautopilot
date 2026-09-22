@@ -603,8 +603,8 @@
           "dependsOn": "F08",
           "acceptanceCriteria": "Production serves TLS and required headers; unsafe defaults removed",
           "evidenceRequired": "HTTP header test",
-          "status": "red",
-          "evidence": "PARTIAL deploy-time security policy now includes real preview-runtime evidence. Read-only Vercel observation on deployment `dpl_kMC7McYaaUaPVdmEXgW5TeUYxd2Q` / commit `77fe2a39...` proved HTTPS `/demo/auth-recovery.html` HTTP 200 with committed CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy and Permissions-Policy. `data/security-headers-policy.json` now records this exact preview observation, and the validator checks the live header values while still requiring production hostname/certificate-chain/full multi-route acceptance before GREEN. PR #101 exact-head CI `35514306896` SUCCESS; PR #101 merged as `aabbc021d93f8db8394364eff9b1b55beae1fd82`. R02 remains RED because production TLS/certificate-chain and full live production header smoke are unverified. — PARTIAL PASS"
+          "status": "blocked",
+          "evidence": "CSP v2 hardening removes `unsafe-inline`/`unsafe-eval`, externalizes all browser scripts/styles, denies script/style attributes, and fixes discovered D13/auth-recovery DOM-global collisions. Exact implementation head `9c725a64692e25f56b3d9b5841a58c47473c8e38` passed CI run `35681026877`, Cross-browser `35681024203`, and U07 visual regression `35681024197`. Live production acceptance is externally BLOCKED because Vercel returned `api-deployments-free-per-day` on PR #174 at 2026-09-22T02:19:01Z with explicit `try again in 24 hours`; next eligible retry is 2026-09-23T02:19:01Z. `main` auto-deploy is temporarily disabled in `vercel.json` to respect the backoff. R02 cannot become GREEN until the hardened commit is deployed and live TLS/header/core-flow acceptance passes. — BLOCKED"
         },
         {
           "id": "R03",

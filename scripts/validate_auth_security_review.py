@@ -2,13 +2,26 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 review=json.loads((ROOT/"data/auth-security-review.json").read_text(encoding="utf-8"))
-auth=(ROOT/"demo/auth.html").read_text(encoding="utf-8")
-recovery=(ROOT/"demo/auth-recovery.html").read_text(encoding="utf-8")
 docs=(ROOT/"docs/R06_AUTH_SECURITY_REVIEW.md").read_text(encoding="utf-8")
+
+def read_surface(rel):
+    html=(ROOT/rel).read_text(encoding="utf-8")
+    parts=[html]
+    for src in re.findall(r'<script\b[^>]*\bsrc=["\']([^"\']+)["\'][^>]*>',html,re.I):
+        if src.startswith("/") and not src.startswith("//"):
+            path=ROOT/src.lstrip("/")
+            if not path.is_file():
+                raise AssertionError(f"R06 local script missing: {src}")
+            parts.append(path.read_text(encoding="utf-8"))
+    return html,"\n".join(parts)
+
+auth_html,auth=read_surface("demo/auth.html")
+recovery_html,recovery=read_surface("demo/auth-recovery.html")
 
 assert review.get("version")==1
 assert review.get("task")=="R06"
@@ -38,7 +51,7 @@ assert "new URL('/demo/auth-recovery.html',location.origin).href" in auth
 assert "redirect_to='+encodeURIComponent(redirectTo)" in auth
 assert "If the account is eligible, a password reset email will be sent." in auth
 assert "localStorage" not in auth and "sessionStorage" not in auth
-assert '<meta name="referrer" content="no-referrer">' in auth
+assert '<meta name="referrer" content="no-referrer">' in auth_html
 
 assert "h.type==='recovery'" in recovery
 assert "expiresAt*1000>Date.now()" in recovery
@@ -47,7 +60,7 @@ assert recovery.index("history.replaceState") < recovery.index("save.onclick")
 assert "method:'PATCH'" in recovery and "/auth/v1/user" in recovery
 assert "accessToken=null" in recovery
 assert "localStorage" not in recovery and "sessionStorage" not in recovery
-assert '<meta name="referrer" content="no-referrer">' in recovery
+assert '<meta name="referrer" content="no-referrer">' in recovery_html
 
 runtime=review.get("external_runtime_evidence_required",[])
 assert len(runtime)>=4

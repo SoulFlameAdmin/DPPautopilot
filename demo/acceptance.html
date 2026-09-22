@@ -1,20 +1,7 @@
 <!doctype html>
 <html lang="bg">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DPP Autopilot · Demo acceptance</title>
-<style>:root{--bg:#07090d;--p:#0d1118;--line:#202936;--text:#eef3f8;--muted:#8c97a6;--green:#39d98a;--red:#ff5c6c}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}.shell{max-width:950px;margin:auto;padding:24px}.step{border:1px solid var(--line);background:var(--p);border-radius:14px;padding:14px;margin:10px 0}.pass{border-color:#245d43}.fail{border-color:#66303a}.ok{color:var(--green)}.bad{color:var(--red)}.muted{color:var(--muted)}</style></head>
+<link rel="stylesheet" href="/assets/csp/acceptance.css"></head>
 <body data-acceptance-ready="false" data-acceptance-pass="false" data-runtime-errors="0" data-steps-passed="0">
 <main class="shell"><a href="/">← Dashboard</a><h1>D14 Demo acceptance</h1><p class="muted">Synthetic end-to-end journey: import → validate → passport → QR.</p><div id="steps"></div><div id="final" class="step">Running…</div></main>
-<script>
-let runtimeErrors=0;addEventListener('error',()=>{runtimeErrors++;document.body.dataset.runtimeErrors=String(runtimeErrors)});addEventListener('unhandledrejection',()=>{runtimeErrors++;document.body.dataset.runtimeErrors=String(runtimeErrors)});
-const results=[];function record(name,pass,detail){results.push({name,pass,detail});steps.innerHTML=results.map(x=>`<div class="step ${x.pass?'pass':'fail'}"><strong class="${x.pass?'ok':'bad'}">${x.pass?'PASS':'FAIL'}</strong> · ${x.name}<div class="muted">${x.detail}</div></div>`).join('')}
-const csvParse=t=>{const [h,...rows]=t.trim().split(/\r?\n/);const headers=h.split(',');return {headers,rows:rows.map(r=>r.split(','))}};
-const get=(o,p)=>{let c=o;for(const x of p.split('.')){if(c==null||typeof c!=='object'||!(x in c))return undefined;c=c[x]}return c};
-(async()=>{try{
- const [csvR,catR,fixR]=await Promise.all([fetch('/data/sample-import.csv',{cache:'no-store'}),fetch('/data/dpp-field-catalog.json',{cache:'no-store'}),fetch('/data/sample-battery.json',{cache:'no-store'})]);
- const importOk=csvR.ok;const csv=csvParse(await csvR.text());record('Create / import',importOk&&csv.headers.length>0&&csv.rows.length>0,`${csv.rows.length} synthetic rows, ${csv.headers.length} columns`);
- const catalog=await catR.json(),fixture=await fixR.json(),item=fixture.items[0];const req=catalog.fields.filter(f=>f.required===true);const missing=req.filter(f=>{const v=f.path.startsWith('model.')?get(fixture,f.path):f.path.startsWith('item.')?get(item,f.path.slice(5)):undefined;return v===undefined||v===null||(typeof v==='string'&&v.trim()==='')});record('Validate required data',catR.ok&&fixR.ok&&missing.length===0,`${req.length} required fields, ${missing.length} missing`);
- const id=encodeURIComponent(item.unique_identifier);const passportUrl='/demo/passport.html?id='+id;const passR=await fetch(passportUrl,{cache:'no-store'});const passText=await passR.text();record('Public passport',passR.ok&&passText.includes('Public Battery Passport'),`HTTP ${passR.status} · exact item route`);
- const qrR=await fetch('/demo/qr.html',{cache:'no-store'});const qrText=await qrR.text();record('QR carrier',qrR.ok&&qrText.includes('data-embedded-qr="true"')&&qrText.includes('NSD-EV-82-DEMO%3A000001'),`HTTP ${qrR.status} · exact passport target embedded`);
- const passed=results.filter(x=>x.pass).length,ok=passed===4&&runtimeErrors===0;document.body.dataset.stepsPassed=String(passed);document.body.dataset.runtimeErrors=String(runtimeErrors);document.body.dataset.acceptancePass=String(ok);document.body.dataset.acceptanceReady='true';final.className='step '+(ok?'pass':'fail');final.innerHTML=ok?'<strong class="ok">DEMO ACCEPTANCE PASS</strong> · import → validate → passport → QR completed with zero runtime errors':'<strong class="bad">DEMO ACCEPTANCE FAIL</strong>';
-}catch(e){runtimeErrors++;document.body.dataset.runtimeErrors=String(runtimeErrors);document.body.dataset.acceptanceReady='true';final.className='step fail';final.textContent=e.message}})();
-</script></body></html>
+<script src="/assets/csp/acceptance-inline-1.js"></script></body></html>

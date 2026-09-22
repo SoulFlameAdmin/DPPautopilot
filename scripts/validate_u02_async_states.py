@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -51,7 +52,13 @@ def main() -> None:
     for view,meta in VIEWS.items():
         source=(root/meta["source"]).read_text(encoding="utf-8")
         require('/demo/async-state.js' in source,f"U02 {view} does not load shared async state helper")
-        require("u02." in source,f"U02 {view} does not use shared async state contract")
+        executable=[source]
+        for src in re.findall(r'<script\b[^>]*\bsrc=["\']([^"\']+)["\'][^>]*>',source,re.I):
+            if src.startswith("/") and not src.startswith("//"):
+                script_path=root/src.lstrip("/")
+                require(script_path.is_file(),f"U02 {view} local script missing: {src}")
+                executable.append(script_path.read_text(encoding="utf-8"))
+        require("u02." in "\n".join(executable),f"U02 {view} does not use shared async state contract")
 
         for state in STATES:
             dom_path=artifacts/f"u02-{view}-{state}.html"

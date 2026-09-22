@@ -1,25 +1,34 @@
-# R02 Security Headers / TLS — Partial Progress
+# R02 Security Headers / TLS — CSP v2 hardening
 
-R02 remains **RED** because F08 is blocked and no live production endpoint exists for TLS/header verification.
+R02 implementation is proven, but the task is **BLOCKED** on live production acceptance until the explicit Vercel deployment quota backoff expires. F08 is GREEN.
 
-## Deploy-time header policy
+## Implemented hardening
 
-`vercel.json` now applies these controls globally:
+The browser surface no longer depends on CSP `'unsafe-inline'`.
 
-- **Content-Security-Policy** with same-origin defaults, disabled objects/framing, same-origin forms, local scripts/styles, local/data/blob asset allowances where the current static UI requires them, exact HTTPS connectivity to the bound Supabase endpoint, and `upgrade-insecure-requests`.
-- **Strict-Transport-Security:** `max-age=31536000`.
-- **X-Content-Type-Options:** `nosniff`.
-- **X-Frame-Options:** `DENY`.
-- **Referrer-Policy:** `no-referrer`.
-- **Permissions-Policy:** camera, microphone, geolocation, payment and USB are denied.
-- `/data/*` keeps `Cache-Control: no-store, max-age=0`.
+- Every inline `<style>` block from `index.html` and `demo/*.html` is externalized under `/assets/csp/`.
+- Every inline `<script>` block is externalized under `/assets/csp/`.
+- Dashboard `onclick` handlers are replaced by same-origin event listeners.
+- All HTML `style=` attributes and client-side `.style.*` writes are removed.
+- Dynamic progress widths use finite external CSS classes instead of inline style mutation.
+- CSP now uses `script-src 'self'`, `style-src 'self'`, `script-src-attr 'none'`, and `style-src-attr 'none'`.
+- `'unsafe-inline'`, `'unsafe-eval'`, and plaintext `http://` sources are forbidden by the R02 validator.
+- Existing HSTS, frame denial, MIME sniffing protection, referrer policy, permissions policy and no-store data policy remain enforced.
 
-The CSP does not allow plaintext HTTP sources or `'unsafe-eval'`. `connect-src` is restricted to same-origin plus the exact bound Supabase endpoint `https://frhletkiuupgksmgxoxc.supabase.co`.
+## Verification contract
 
-## Deliberate compatibility exception
+`scripts/validate_security_headers.py` fails if browser HTML reintroduces inline script/style elements, event-handler attributes, style attributes, dynamic client style writes, missing extracted assets, CSP drift, or unsafe tokens.
 
-The current static prototype still contains inline script/style content, so `script-src` and `style-src` temporarily require `'unsafe-inline'`. This is explicitly recorded as a remaining hardening gap; a future nonce/hash or external-asset refactor should remove it before final production hardening.
+Before R02 can become GREEN, the exact hardened head must have applicable CI PASS and the production deployment must prove HTTPS reachability, certificate/hostname validation, live HTML/data/API headers matching this policy, and CSP-compatible core UI/auth/API behavior.
 
-## Before GREEN
+## Proven implementation evidence
 
-No live TLS/header claim is made by this precursor. R02 requires a real READY production deployment, reachable HTTPS hostname, passing certificate/hostname validation, live HTML/`data`/`api` header verification, and a CSP-compatible auth/API/UI smoke flow before it can become GREEN. F08 is not retried here.
+- Exact hardened head `9c725a64692e25f56b3d9b5841a58c47473c8e38`.
+- CI `35681026877`: SUCCESS.
+- Cross-browser `35681024203`: SUCCESS.
+- U07 visual regression `35681024197`: SUCCESS.
+- The CSP validator, DB/API/security contracts and real browser smoke all passed on that head.
+
+## External production blocker
+
+Vercel returned `api-deployments-free-per-day` on PR #174 at `2026-09-22T02:19:01Z` with the explicit instruction `try again in 24 hours`. The next eligible retry is therefore `2026-09-23T02:19:01Z`. `main` automatic deployment is temporarily disabled in `vercel.json` so merging the proven code cannot violate that backoff. No deployment should be attempted before the retry window and global deploy lease are both available.
