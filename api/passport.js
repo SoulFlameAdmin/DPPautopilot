@@ -4,7 +4,7 @@ const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
-const { sanitizePublicPayload, findRestrictedPublicPaths } = require('./_access_policy.js');
+const { sanitizePublicPayload, sanitizeOrganizationPrivatePayload, findRestrictedPublicPaths } = require('./_access_policy.js');
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -44,6 +44,15 @@ function sanitizePublicPassport(value) {
   const out = {};
   for (const key of allowed) {
     if (Object.prototype.hasOwnProperty.call(value, key)) out[key] = key === 'public_payload' ? sanitizePublicPayload(value[key]) : value[key];
+  }
+  return out;
+}
+
+function sanitizeOrganizationPrivatePassport(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+  const out = { ...value };
+  if (Object.prototype.hasOwnProperty.call(value, 'private_payload')) {
+    out.private_payload = sanitizeOrganizationPrivatePayload(value.private_payload);
   }
   return out;
 }
@@ -165,7 +174,7 @@ async function handler(req, res) {
       if(sharedPrivateRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
       if(!sharedPrivateRateLimit.allowed) return send(res,429,rateLimitBody());
       const passport = await rpc('dpp_api_passport_private', { p_id: id }, authorization);
-      return send(res, 200, { data: passport });
+      return send(res, 200, { data: sanitizeOrganizationPrivatePassport(passport) });
     }
 
     const authorization = bearer(req);
@@ -242,4 +251,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, validatePublicPayloadAccess, sanitizePublicPassport, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, validatePublicPayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
