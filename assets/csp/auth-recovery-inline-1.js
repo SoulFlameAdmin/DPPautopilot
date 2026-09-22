@@ -2,8 +2,9 @@ const formUx=window.DPPFormUX;
 const invalidDemo=new URLSearchParams(location.search).get('invalid')==='1';
 let cfg=null,accessToken=null;
 const AUTH_REQUEST_TIMEOUT_MS=15000;
+const statusEl=document.getElementById('status');
 function parseHash(){return Object.fromEntries(new URLSearchParams(location.hash.replace(/^#/,'')))}
-function setState(msg,cls=''){status.className=cls;status.textContent=msg}
+function setState(msg,cls=''){statusEl.className=cls;statusEl.textContent=msg}
 async function init(){
  const h=parseHash();
  history.replaceState(null,'',location.pathname);
