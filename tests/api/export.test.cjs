@@ -207,6 +207,7 @@ test('ndjson package incrementally spools streamed evidence without arrayBuffer'
     await handler(makeReq('GET','Bearer ndjson-stream-token',{format:'ndjson'}),res);
     assert.equal(res.statusCode,200);
     assert.equal(arrayBufferCalled,false);
+    assert.equal(Number(res.headers['content-length']),Buffer.byteLength(res.body));
     const records=res.body.trim().split('\n').map(line=>JSON.parse(line));
     assert.deepEqual(records.map(record=>record.type),[
       'dpp_export_header','dpp_bundle','dpp_evidence','dpp_export_end'
