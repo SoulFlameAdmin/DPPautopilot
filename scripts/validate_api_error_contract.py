@@ -17,6 +17,10 @@ assert contract.get("local_codes",{}).get("RATE_LIMIT_BACKEND_UNAVAILABLE",{})==
     "http_status":503,
     "message":"Request protection is temporarily unavailable."
 }
+assert contract.get("local_codes",{}).get("UPSTREAM_TIMEOUT",{})=={
+    "http_status":504,
+    "message":"Database request timed out."
+}
 assert contract.get("local_codes",{}).get("EVIDENCE_EXPORT_PAGINATION_INVALID",{})=={
     "http_status":400,
     "message":"Evidence export pagination parameters are invalid."
@@ -38,7 +42,7 @@ assert contract.get("local_codes",{}).get("EVIDENCE_EXPORT_SIGNING_UNAVAILABLE",
     "message":"Evidence export signing configuration is unavailable."
 }
 
-valid_status={400,401,403,404,405,409,413,422,428,429,500,502,503}
+valid_status={400,401,403,404,405,409,413,422,428,429,500,502,503,504}
 code_re=re.compile(r"^[A-Z][A-Z0-9_]*$")
 sql_re=re.compile(r"^(?:DP\d{3}|23\d{3})$")
 
