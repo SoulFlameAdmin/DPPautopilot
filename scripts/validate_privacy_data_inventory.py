@@ -51,8 +51,7 @@ runtime_store=next(s for s in stores if s["id"]=="runtime_observability_logs")
 assert runtime_store["processor"]=="Vercel"
 assert runtime_store["tables"]==[]
 observability=json.loads((ROOT/"data/observability-policy.json").read_text(encoding="utf-8"))
-for field in observability["logged_fields"]:
-    assert field in runtime_store["fields"], f"R07 runtime log inventory missing R09 field {field}"
+assert runtime_store.get("logged_fields")==observability["logged_fields"], "R07 runtime log field allowlist drifted from R09"
 for prohibited in ["bodies","query parameters","bearer","cookies","raw IP"]:
     assert prohibited.lower() in runtime_store["fields"].lower(), f"R07 runtime log inventory missing prohibited-field boundary {prohibited}"
 assert "retention" in runtime_store and "pending" in runtime_store["retention"]["status"]
