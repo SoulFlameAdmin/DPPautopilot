@@ -305,6 +305,18 @@
         "logs contain only the R09 allowlisted structured fields",
         "request/response bodies, query parameters, credentials, cookies, direct identifiers and raw IP addresses are prohibited",
         "logging sink failure is fail-open for the original HTTP response"
+      ],
+      "logged_fields": [
+        "event",
+        "timestamp_ms",
+        "request_id",
+        "surface",
+        "method",
+        "status",
+        "outcome",
+        "duration_ms",
+        "auth_present",
+        "error_code"
       ]
     }
   ],
