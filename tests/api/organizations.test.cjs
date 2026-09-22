@@ -194,6 +194,24 @@ test('organization RPC timeout remains active while Supabase response body stall
   );
 });
 
+test('organization RPC rejects malformed successful upstream JSON',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:true,
+    async json(){throw new SyntaxError('malformed json');}
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_organizations_list',{},'Bearer onboarding-token',env,fetchImpl,50),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'UPSTREAM_ERROR');
+      assert.equal(error.publicMessage,'Database request failed.');
+      assert.equal(String(error).includes('malformed json'),false);
+      return true;
+    }
+  );
+});
+
 test('POST validates and forwards organization creation RPC',async()=>{
   let seen;
   await withEnvFetch(async(url,options)=>{
