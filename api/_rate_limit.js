@@ -6,6 +6,7 @@ const policy=require('../data/rate-limit-policy.json');
 const buckets=new Map();
 const DEFAULT_MAX_BUCKETS=10000;
 const PRUNE_INTERVAL_MS=10000;
+const DEFAULT_SHARED_RATE_LIMIT_TIMEOUT_MS=8000;
 let lastPruneMs=0;
 
 function firstHeader(req,name){
@@ -115,6 +116,9 @@ async function checkSharedRateLimit(req,surface,authorization,options={}){
 
   const now=new Date(Number.isFinite(options.nowMs)?options.nowMs:Date.now()).toISOString();
   const keys=sharedBucketKeys(req,surface,ruleName);
+  const timeoutMs=Number.isFinite(options.timeoutMs)&&options.timeoutMs>0?options.timeoutMs:DEFAULT_SHARED_RATE_LIMIT_TIMEOUT_MS;
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),timeoutMs);
   try{
     const rows=await Promise.all(keys.map(async bucketKey=>{
       const response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/dpp_rate_limit_consume`,{
@@ -130,7 +134,8 @@ async function checkSharedRateLimit(req,surface,authorization,options={}){
           p_window_seconds:rule.window_seconds,
           p_limit:rule.limit,
           p_now:now
-        })
+        }),
+        signal:controller.signal
       });
       if(!response.ok) throw new Error('SHARED_RATE_LIMIT_RPC_FAILED');
       const data=await response.json();
@@ -151,6 +156,8 @@ async function checkSharedRateLimit(req,surface,authorization,options={}){
     };
   }catch(_){
     return {enforced:true,allowed:false,error:true,status:503,code:'RATE_LIMIT_BACKEND_UNAVAILABLE'};
+  }finally{
+    clearTimeout(timeout);
   }
 }
 
@@ -245,6 +252,7 @@ module.exports={
     resetForTests,
     buckets,
     DEFAULT_MAX_BUCKETS,
-    PRUNE_INTERVAL_MS
+    PRUNE_INTERVAL_MS,
+    DEFAULT_SHARED_RATE_LIMIT_TIMEOUT_MS
   }
 };
