@@ -76,3 +76,14 @@ The deletion-impact preview also marks external Storage enumeration as required,
 - Implementation merged in PR #158 as commit `1a6daed12bd77f359e3268113c10ea50e929f254`.
 - GitHub Actions run `35668964500` completed successfully with 139 completed steps and no failures; M21 export HTTP tests, T03 stateful API integration, R08 retention/deletion validation, and browser smoke all PASS.
 - M21 and R08 remain RED at top level because their declared dependencies and production/runtime acceptance are not yet fully satisfied. No Vercel deployment was performed for this block.
+
+
+## Bounded-memory verified NDJSON spool — 2026-09-22
+
+- PR #162 merged as commit `70eb3f8e75de48de399010cbd6f903622c133202`.
+- The `format=ndjson` path no longer accumulates the selected page's evidence byte/base64 payloads in process memory before emission. It consumes upstream response-body chunks incrementally, updates SHA-256 and base64 incrementally, and writes verified NDJSON evidence records to temporary spool files.
+- The fail-closed integrity contract is preserved: Content-Type / Content-Length checks happen before body consumption where available, byte-size and SHA-256 are verified before any NDJSON response record is emitted, and a streamed hash mismatch returns `502 EVIDENCE_EXPORT_INTEGRITY_FAILED` with zero NDJSON writes.
+- Verified spool files are streamed only after every selected object passes integrity checks; temporary spool state is cleaned after completion/failure.
+- Regression `ndjson package incrementally spools streamed evidence without arrayBuffer` proves the streamed-body path avoids `arrayBuffer()`; regression `ndjson streamed hash mismatch fails closed before response emission` proves the pre-emission integrity guarantee on streamed data.
+- GitHub Actions run `35669935627` completed SUCCESS with 139 completed steps and no failures. `Run M21 export HTTP contract unit tests` and `Validate R08 retention deletion policy` both passed.
+- Top-level M21 and R08 remain RED because their declared dependencies and production/runtime acceptance are still incomplete. Final archive packaging and real authenticated deployed large-tenant acceptance remain pending. No Vercel deployment was performed for this block.

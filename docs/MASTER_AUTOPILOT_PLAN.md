@@ -595,3 +595,12 @@ Append evidence here only after verification.
 - Exact-head full CI `35668573169` completed SUCCESS with 139 completed steps and no failures; M21 export HTTP contract tests and the R08 retention/deletion policy validator both PASS.
 - The package remains fail-closed before first NDJSON emission because the selected evidence page is verified first. This is not yet constant-memory object streaming and is not deployed large-tenant acceptance.
 - M21 remains RED pending M10-M13 GREEN plus constant-memory/final archive packaging and authenticated deployed large-tenant acceptance. R08 remains RED pending R07 plus the unresolved regulatory/storage/audit/Auth deletion lifecycle decisions and final production acceptance.
+
+
+## Execution evidence — M21/R08 bounded-memory NDJSON spool — 2026-09-22
+
+- PR #162 merged to main as commit `70eb3f8e75de48de399010cbd6f903622c133202`.
+- GitHub Actions run `35669935627` completed SUCCESS with 139 completed steps and no failures; M21 export HTTP tests and R08 retention/deletion validation passed.
+- The NDJSON export path now consumes evidence response bodies incrementally, verifies byte count and SHA-256 while producing base64 into temporary spool files, and begins NDJSON response emission only after every selected object passes integrity checks. The JSON export path is unchanged.
+- This removes page-wide evidence byte/base64 accumulation from the NDJSON path while preserving fail-closed pre-emission integrity. M21 and R08 remain RED because their declared dependencies and final production/runtime acceptance are incomplete; final archive packaging and real authenticated deployed large-tenant acceptance remain pending.
+- F08 was not retried and no Vercel deployment was attempted in this block.
