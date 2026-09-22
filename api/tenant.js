@@ -22,6 +22,26 @@ function validUuid(value){
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+const TENANT_ROLES=new Set(['owner','admin','editor','viewer']);
+
+function upstreamShapeError(){
+  const error=new Error('UPSTREAM_ERROR');
+  error.status=502;
+  error.publicCode='UPSTREAM_ERROR';
+  error.publicMessage='Database request failed.';
+  return error;
+}
+
+function validTenantContext(value){
+  if(!value||typeof value!=='object'||Array.isArray(value)||!Array.isArray(value.memberships)) return false;
+  if(value.active_organization_id!==null&&!validUuid(value.active_organization_id)) return false;
+  if(!value.memberships.every(member=>member&&typeof member==='object'&&!Array.isArray(member)&&
+    validUuid(member.organization_id)&&TENANT_ROLES.has(member.role)&&typeof member.active==='boolean')) return false;
+  const active=value.memberships.filter(member=>member.active);
+  if(value.active_organization_id===null) return active.length===0;
+  return active.length===1&&active[0].organization_id===value.active_organization_id;
+}
+
 function mapDatabaseError(data){
   const mapped=mapSharedDatabaseError('tenant',data);
   return [mapped.status,mapped.code,mapped.message];
@@ -94,6 +114,7 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
     error.publicMessage=publicMessage;
     throw error;
   }
+  if((name==='dpp_api_tenant_context'||name==='dpp_api_tenant_context_set')&&!validTenantContext(data)) throw upstreamShapeError();
   return data;
 }
 
@@ -151,4 +172,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validUuid,mapDatabaseError,rpc,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,validUuid,validTenantContext,mapDatabaseError,rpc,TENANT_ROLES,DEFAULT_RPC_TIMEOUT_MS};
