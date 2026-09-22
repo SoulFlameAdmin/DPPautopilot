@@ -644,3 +644,12 @@ Append evidence here only after verification.
 ## Execution evidence — M10 authority-only organization boundary — 2026-09-22
 
 - PR #191 exact tested head `ddb549a7cf858bcda59f54db3463de436b42e81e` completed GitHub Actions CI `35688583724` SUCCESS with 139/139 steps and zero failures. `api/_access_policy.js` now derives catalog `authority_only` paths separately from `legitimate_interest`; organization-authenticated private passport GET strips authority-only data while preserving legitimate-interest data, and POST/PATCH fail closed with 403 before upstream access when `private_payload` contains authority-only paths. `Validate M10 access-class policy`, `Validate R04 API tenant isolation matrix`, and `Run M19 passport HTTP contract unit tests` all passed. PR #191 merged to `main` as `5ce34ddcadfa002007749017caf96b660b73c047`. M10 remains RED/PARTIAL because M03 is not GREEN and no separate authority context/deployed authority acceptance is claimed. Vercel preview creation was blocked by the known free daily deployment quota; no quota bypass or deployment retry was attempted.
+
+
+### M21 evidence-object download timeout hardening — 2026-09-22
+
+- PR #193 implementation is present on main as `a96e4b3a67e40e2d6b62179fcc27fa8368a00477`.
+- `api/export.js` now applies a bounded 8-second AbortController to evidence-object fetches and keeps the timeout active while evidence response bytes are consumed.
+- Fetch or response-body aborts fail closed as HTTP 504 `EVIDENCE_EXPORT_OBJECT_TIMEOUT`; NDJSON evidence packaging still emits nothing before verification completes.
+- Deterministic M21 regression tests cover evidence-object fetch timeout and response-body abort behavior.
+- M21 remains RED/PARTIAL because M10-M13 and final deployed authenticated large-tenant acceptance are non-GREEN. No Vercel deployment was requested.
