@@ -58,6 +58,26 @@ test('GET forwards bearer to active-tenant member list RPC',async()=>{
   });
 });
 
+test('member RPC aborts with a stable timeout error when Supabase stalls',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async(_url,options)=>new Promise((_resolve,reject)=>{
+    options.signal.addEventListener('abort',()=>{
+      const error=new Error('aborted');
+      error.name='AbortError';
+      reject(error);
+    },{once:true});
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_members_list',{},'Bearer member-token',env,fetchImpl,5),
+    error=>{
+      assert.equal(error.status,504);
+      assert.equal(error.publicCode,'UPSTREAM_TIMEOUT');
+      assert.equal(error.publicMessage,'Database request timed out.');
+      return true;
+    }
+  );
+});
+
 test('POST PATCH DELETE route to tenant-scoped member RPCs',async()=>{
   const calls=[];
   await withEnvFetch(async(url,options)=>{
