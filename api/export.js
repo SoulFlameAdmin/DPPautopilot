@@ -656,7 +656,12 @@ async function sendNdjsonSpoolPackage(res,bundle,authorization,env=process.env,f
         verified=await writeBase64VerifiedSpool(response,item,fileHandle);
       }catch(error){
         if(controller.signal.aborted||error&&error.name==='AbortError') throw evidenceObjectTimeoutError();
-        throw error;
+        if(error&&error.publicCode) throw error;
+        throw exportError(
+          'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE',
+          502,
+          'An evidence object could not be exported.'
+        );
       }finally{
         clearTimeout(timeout);
         await fileHandle.close();
