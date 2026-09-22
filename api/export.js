@@ -33,6 +33,7 @@ function mapDatabaseError(data){
 }
 
 const DEFAULT_RPC_TIMEOUT_MS=8000;
+const DEFAULT_EVIDENCE_OBJECT_TIMEOUT_MS=8000;
 
 function upstreamTimeoutError(){
   const error=new Error('UPSTREAM_TIMEOUT');
@@ -40,6 +41,34 @@ function upstreamTimeoutError(){
   error.publicCode='UPSTREAM_TIMEOUT';
   error.publicMessage='Database request timed out.';
   return error;
+}
+
+function evidenceObjectTimeoutError(){
+  return exportError(
+    'EVIDENCE_EXPORT_OBJECT_TIMEOUT',
+    504,
+    'Evidence object download timed out.'
+  );
+}
+
+async function fetchEvidenceObject(url,options,fetchImpl=fetch,timeoutMs=DEFAULT_EVIDENCE_OBJECT_TIMEOUT_MS){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const response=await fetchImpl(url,{...options,signal:controller.signal});
+    if(!response.ok){
+      throw exportError(
+        'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE',
+        502,
+        'An evidence object could not be exported.'
+      );
+    }
+    return {response,controller,timeout};
+  }catch(error){
+    clearTimeout(timeout);
+    if(controller.signal.aborted||error&&error.name==='AbortError') throw evidenceObjectTimeoutError();
+    throw error;
+  }
 }
 
 function upstreamInvalidJsonError(){
@@ -377,7 +406,7 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
         'Evidence export integrity verification failed.'
       );
     }
-    const response=await fetchImpl(
+    const evidenceRequest=await fetchEvidenceObject(
       `${base.replace(/\/$/,'')}/functions/v1/dpp-evidence-object?path=${encodeURIComponent(path)}`,
       {
         method:'GET',
@@ -386,15 +415,10 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
           Authorization:authorization,
           Accept:'application/octet-stream'
         }
-      }
+      },
+      fetchImpl
     );
-    if(!response.ok){
-      throw exportError(
-        'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE',
-        502,
-        'An evidence object could not be exported.'
-      );
-    }
+    const {response,controller,timeout}=evidenceRequest;
     const declaredContentType=typeof item.content_type==='string'?item.content_type.trim().toLowerCase():'';
     const actualContentType=responseContentType(response);
     if(actualContentType!==null&&(!declaredContentType||actualContentType!==declaredContentType)){
@@ -411,7 +435,15 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
     ){
       throw exportError('EVIDENCE_EXPORT_INTEGRITY_FAILED',502,'Evidence export integrity verification failed.');
     }
-    const bytes=Buffer.from(await response.arrayBuffer());
+    let bytes;
+    try{
+      bytes=Buffer.from(await response.arrayBuffer());
+    }catch(error){
+      if(controller.signal.aborted||error&&error.name==='AbortError') throw evidenceObjectTimeoutError();
+      throw error;
+    }finally{
+      clearTimeout(timeout);
+    }
     actualTotal+=bytes.byteLength;
     if(actualTotal>MAX_INLINE_EVIDENCE_BYTES){
       throw exportError(
@@ -583,16 +615,15 @@ async function sendNdjsonSpoolPackage(res,bundle,authorization,env=process.env,f
       if(!objectPath){
         throw exportError('EVIDENCE_EXPORT_INTEGRITY_FAILED',502,'Evidence export integrity verification failed.');
       }
-      const response=await fetchImpl(
+      const evidenceRequest=await fetchEvidenceObject(
         base.replace(/\/$/,'')+'/functions/v1/dpp-evidence-object?path='+encodeURIComponent(objectPath),
         {
           method:'GET',
           headers:{apikey:key,Authorization:authorization,Accept:'application/octet-stream'}
-        }
+        },
+        fetchImpl
       );
-      if(!response.ok){
-        throw exportError('EVIDENCE_EXPORT_OBJECT_UNAVAILABLE',502,'An evidence object could not be exported.');
-      }
+      const {response,controller,timeout}=evidenceRequest;
       const declaredContentType=typeof item.content_type==='string'?item.content_type.trim().toLowerCase():'';
       const actualContentType=responseContentType(response);
       if(actualContentType!==null&&(!declaredContentType||actualContentType!==declaredContentType)){
@@ -614,7 +645,11 @@ async function sendNdjsonSpoolPackage(res,bundle,authorization,env=process.env,f
       let verified;
       try{
         verified=await writeBase64VerifiedSpool(response,item,fileHandle);
+      }catch(error){
+        if(controller.signal.aborted||error&&error.name==='AbortError') throw evidenceObjectTimeoutError();
+        throw error;
       }finally{
+        clearTimeout(timeout);
         await fileHandle.close();
       }
       actualTotal+=verified.byteSize;
@@ -709,4 +744,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,canonicalEvidenceManifest,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,responseBodyChunks,writeBase64VerifiedSpool,sendNdjsonSpoolPackage,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,mapDatabaseError,rpc,fetchEvidenceObject,evidenceObjectTimeoutError,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,canonicalEvidenceManifest,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,responseBodyChunks,writeBase64VerifiedSpool,sendNdjsonSpoolPackage,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION,DEFAULT_RPC_TIMEOUT_MS,DEFAULT_EVIDENCE_OBJECT_TIMEOUT_MS};
