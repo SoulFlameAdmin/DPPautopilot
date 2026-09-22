@@ -596,6 +596,37 @@ test('include_evidence maps unavailable object to stable export error',async()=>
 });
 
 
+test('inline evidence body transport failure is normalized without leaking raw detail',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const bytes=Buffer.from('body-failure','utf8');
+  const sha=crypto.createHash('sha256').update(bytes).digest('hex');
+  global.fetch=async(url)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[{
+        id:'99999999-9999-4999-8999-999999999999',
+        storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/body-failure.bin',
+        original_filename:'body-failure.bin',
+        content_type:'application/octet-stream',
+        byte_size:bytes.length,
+        sha256_hex:sha
+      }]};}};
+    }
+    return {
+      ok:true,
+      async arrayBuffer(){throw new Error('socket reset raw transport detail');}
+    };
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET','Bearer test-token',{include_evidence:'1'}),res);
+    assert.equal(res.statusCode,502);
+    const payload=JSON.parse(res.body);
+    assert.equal(payload.error.code,'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE');
+    assert.equal(payload.error.message,'An evidence object could not be exported.');
+    assert.equal(res.body.includes('socket reset raw transport detail'),false);
+  }finally{global.fetch=original;restore();}
+});
+
 test('paged include_evidence fetches only selected manifest slice and exposes next_offset',async()=>{
   const restore=withEnv(),original=global.fetch;
   const bodies=[Buffer.from('one'),Buffer.from('two'),Buffer.from('three')];
