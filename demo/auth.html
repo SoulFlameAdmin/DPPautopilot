@@ -45,12 +45,18 @@ async function refreshSession(){
   return false;
  }
 }
+function refreshDelayMs(expiresIn){
+ const ttlSeconds=Number(expiresIn);
+ if(!Number.isFinite(ttlSeconds)||ttlSeconds<=0)return 0;
+ const ttlMs=ttlSeconds*1000;
+ const leadMs=Math.min(60000,Math.max(1000,Math.floor(ttlMs*0.1)));
+ return Math.max(1000,ttlMs-leadMs);
+}
 function setSession(data){
  if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null}
  accessToken=data?.access_token||null;refreshToken=data?.refresh_token||null;
- const expiresIn=Number(data?.expires_in||0);
- if(accessToken&&refreshToken&&expiresIn>0){
-  const refreshAfter=Math.max(1000,(expiresIn-60)*1000);
+ const refreshAfter=refreshDelayMs(data?.expires_in);
+ if(accessToken&&refreshToken&&refreshAfter>0){
   refreshTimer=setTimeout(refreshSession,refreshAfter);
  }
  document.body.dataset.sessionState=accessToken?'authenticated':'anonymous';
