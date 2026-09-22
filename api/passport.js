@@ -4,7 +4,7 @@ const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
-const { sanitizePublicPayload, sanitizeOrganizationPrivatePayload, findRestrictedPublicPaths } = require('./_access_policy.js');
+const { sanitizePublicPayload, sanitizeOrganizationPrivatePayload, findRestrictedPublicPaths, findAuthorityOnlyPaths } = require('./_access_policy.js');
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -36,6 +36,12 @@ function validatePublicPayloadAccess(value) {
   const restricted = findRestrictedPublicPaths(value);
   if (restricted.length === 0) return null;
   return 'public_payload contains fields that are not public';
+}
+
+function validateOrganizationPrivatePayloadAccess(value) {
+  const authorityOnly = findAuthorityOnlyPaths(value);
+  if (authorityOnly.length === 0) return null;
+  return 'private_payload contains authority-only fields';
 }
 
 function sanitizePublicPassport(value) {
@@ -200,6 +206,10 @@ async function handler(req, res) {
       if (!validObject(body.private_payload)) {
         return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
+      const privateAccessProblem = validateOrganizationPrivatePayloadAccess(body.private_payload);
+      if (privateAccessProblem) {
+        return send(res, 403, { error: { code: 'FORBIDDEN', message: 'Authority-only fields are not available to organization users.' } });
+      }
 
       const passport = await rpc('dpp_api_passport_create', {
         p_battery_item_id: body.battery_item_id,
@@ -229,6 +239,10 @@ async function handler(req, res) {
     if (!validObject(body.private_payload)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
     }
+    const privateAccessProblem = validateOrganizationPrivatePayloadAccess(body.private_payload);
+    if (privateAccessProblem) {
+      return send(res, 403, { error: { code: 'FORBIDDEN', message: 'Authority-only fields are not available to organization users.' } });
+    }
 
     const passport = await rpc('dpp_api_passport_update_checked', {
       p_id: id,
@@ -251,4 +265,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, validatePublicPayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
