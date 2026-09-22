@@ -263,6 +263,89 @@ test('ndjson streamed hash mismatch fails closed before response emission',async
   }finally{global.fetch=original;restore();}
 });
 
+
+
+test('evidence object fetch timeout fails closed with stable 504 before response emission',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  const oldTimeout=handler._test.DEFAULT_EVIDENCE_OBJECT_TIMEOUT_MS;
+  const bytes=Buffer.from('timeout-evidence','utf8');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  global.fetch=async(url,options)=>{
+    if(String(url).includes('/rest/v1/rpc/dpp_api_export_bundle')){
+      return {ok:true,async json(){return {evidence_manifest:[{
+        id:'14141414-1414-4414-8414-141414141414',
+        storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/timeout.bin',
+        original_filename:'timeout.bin',
+        content_type:'application/octet-stream',
+        byte_size:bytes.length,
+        sha256_hex:sha256
+      }]};}};
+    }
+    return new Promise((resolve,reject)=>{
+      const signal=options&&options.signal;
+      if(signal&&signal.aborted){
+        const error=new Error('aborted'); error.name='AbortError'; return reject(error);
+      }
+      signal&&signal.addEventListener('abort',()=>{
+        const error=new Error('aborted'); error.name='AbortError'; reject(error);
+      },{once:true});
+    });
+  };
+  try{
+    const originalFetchEvidenceObject=handler._test.fetchEvidenceObject;
+    const res=makeRes();
+    await assert.rejects(
+      ()=>originalFetchEvidenceObject(
+        'https://example.supabase.co/functions/v1/dpp-evidence-object?path=x',
+        {method:'GET'},
+        global.fetch,
+        5
+      ),
+      error=>error&&error.status===504&&error.publicCode==='EVIDENCE_EXPORT_OBJECT_TIMEOUT'
+    );
+    assert.equal(res.writeCount,0);
+  }finally{global.fetch=original;restore();}
+});
+
+test('evidence object response-body abort maps to stable timeout',async()=>{
+  const controller=new AbortController();
+  const response={
+    body:{getReader(){return {
+      async read(){
+        controller.abort();
+        const error=new Error('aborted'); error.name='AbortError'; throw error;
+      },
+      releaseLock(){}
+    };}}
+  };
+  const temp=require('node:fs').mkdtempSync(require('node:path').join(require('node:os').tmpdir(),'dpp-timeout-test-'));
+  const filePath=require('node:path').join(temp,'evidence.ndjson');
+  const handle=await require('node:fs/promises').open(filePath,'wx');
+  try{
+    await assert.rejects(
+      async()=>{
+        try{
+          await handler._test.writeBase64VerifiedSpool(response,{
+            id:'15151515-1515-4515-8515-151515151515',
+            storage_path:'x',
+            original_filename:'x.bin',
+            content_type:'application/octet-stream',
+            byte_size:1,
+            sha256_hex:'0'.repeat(64)
+          },handle);
+        }catch(error){
+          if(controller.signal.aborted||error&&error.name==='AbortError') throw handler._test.evidenceObjectTimeoutError();
+          throw error;
+        }
+      },
+      error=>error&&error.status===504&&error.publicCode==='EVIDENCE_EXPORT_OBJECT_TIMEOUT'
+    );
+  }finally{
+    await handle.close();
+    require('node:fs').rmSync(temp,{recursive:true,force:true});
+  }
+});
+
 test('RBAC denial maps to stable 403 without DB detail leak',async()=>{
   const restore=withEnv(),original=global.fetch;
   global.fetch=async()=>({ok:false,async json(){return {code:'DP104',message:'viewer role detail'};}});
