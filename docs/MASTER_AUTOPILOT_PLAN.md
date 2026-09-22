@@ -604,3 +604,12 @@ Append evidence here only after verification.
 - The NDJSON export path now consumes evidence response bodies incrementally, verifies byte count and SHA-256 while producing base64 into temporary spool files, and begins NDJSON response emission only after every selected object passes integrity checks. The JSON export path is unchanged.
 - This removes page-wide evidence byte/base64 accumulation from the NDJSON path while preserving fail-closed pre-emission integrity. M21 and R08 remain RED because their declared dependencies and final production/runtime acceptance are incomplete; final archive packaging and real authenticated deployed large-tenant acceptance remain pending.
 - F08 was not retried and no Vercel deployment was attempted in this block.
+
+
+## Execution evidence — M01 bounded refresh scheduler — 2026-09-22
+
+- PR #164 merged to main as commit `b8b0fa77a86c605045b9f280a297f44c5a9b47ef`.
+- The in-memory auth session scheduler now derives refresh timing from TTL with a bounded proportional lead instead of a fixed 60-second lead, preventing short-lived sessions from degenerating into a 1-second refresh loop.
+- Exact-head GitHub Actions CI run `35670768214` completed SUCCESS with 139 completed steps and no failures; `Validate M01 authentication client contract` passed.
+- Cross-browser run `35670768196` completed SUCCESS and U07 visual regression run `35670768253` completed SUCCESS.
+- M01 remains BLOCKED because final real recovery-session password-update completion has not been executed. No Vercel deployment was attempted and F08 was not retried.
