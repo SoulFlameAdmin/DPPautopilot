@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 inventory=json.loads((ROOT/"data/privacy-data-inventory.json").read_text(encoding="utf-8"))
 doc=(ROOT/"docs/PRIVACY_DATA_INVENTORY.md").read_text(encoding="utf-8")
 
-assert inventory.get("version")==4
+assert inventory.get("version")==5
 assert inventory.get("task")=="R07"
 assert inventory.get("status")=="partial"
 assert "DPP Autopilot only" in inventory.get("scope","")
@@ -46,6 +46,18 @@ assert not extra, f"R07 inventory references unknown DPP migration tables: {sort
 
 auth_store=next(s for s in stores if s["id"]=="auth_identity")
 assert "auth.users" in auth_store["tables"]
+
+runtime_store=next(s for s in stores if s["id"]=="runtime_observability_logs")
+assert runtime_store["processor"]=="Vercel"
+assert runtime_store["tables"]==[]
+observability=json.loads((ROOT/"data/observability-policy.json").read_text(encoding="utf-8"))
+for field in observability["logged_fields"]:
+    assert field in runtime_store["fields"], f"R07 runtime log inventory missing R09 field {field}"
+for prohibited in ["bodies","query parameters","bearer","cookies","raw IP"]:
+    assert prohibited.lower() in runtime_store["fields"].lower(), f"R07 runtime log inventory missing prohibited-field boundary {prohibited}"
+assert "retention" in runtime_store and "pending" in runtime_store["retention"]["status"]
+assert "dpp_http_request" in runtime_store["retention"]["current_behavior"]
+
 rate_store=next(s for s in stores if s["id"]=="rate_limit_transient")
 assert rate_store["tables"]==["dpp_rate_limit_buckets"]
 assert "raw IP" in rate_store["fields"] or "raw ip" in rate_store["fields"].lower()
@@ -91,6 +103,7 @@ for token in [
     "Import staging",
     "Audit",
     "Rate-limit metadata",
+    "Runtime observability logs",
     "Shared Supabase boundary",
 ]:
     assert token in doc, f"R07 document missing {token}"
