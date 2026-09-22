@@ -596,6 +596,34 @@ test('include_evidence maps unavailable object to stable export error',async()=>
 });
 
 
+test('inline evidence body transport failure is normalized without leaking raw detail',async()=>{
+  const bytes=Buffer.from('body-failure','utf8');
+  const sha=crypto.createHash('sha256').update(bytes).digest('hex');
+  const bundle={evidence_manifest:[{
+    id:'99999999-9999-4999-8999-999999999999',
+    storage_path:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/evidence/body-failure.bin',
+    original_filename:'body-failure.bin',
+    content_type:'application/octet-stream',
+    byte_size:bytes.length,
+    sha256_hex:sha
+  }]};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:true,
+    async arrayBuffer(){throw new Error('socket reset raw transport detail');}
+  });
+  await assert.rejects(
+    ()=>handler._test.inlineEvidenceBytes(bundle,'Bearer test-token',env,fetchImpl),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE');
+      assert.equal(error.publicMessage,'An evidence object could not be exported.');
+      assert.equal(String(error).includes('socket reset raw transport detail'),false);
+      return true;
+    }
+  );
+});
+
 test('paged include_evidence fetches only selected manifest slice and exposes next_offset',async()=>{
   const restore=withEnv(),original=global.fetch;
   const bodies=[Buffer.from('one'),Buffer.from('two'),Buffer.from('three')];

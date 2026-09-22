@@ -445,7 +445,11 @@ async function inlineEvidenceBytes(bundle,authorization,env=process.env,fetchImp
       bytes=Buffer.from(await response.arrayBuffer());
     }catch(error){
       if(controller.signal.aborted||error&&error.name==='AbortError') throw evidenceObjectTimeoutError();
-      throw error;
+      throw exportError(
+        'EVIDENCE_EXPORT_OBJECT_UNAVAILABLE',
+        502,
+        'An evidence object could not be exported.'
+      );
     }finally{
       clearTimeout(timeout);
     }
