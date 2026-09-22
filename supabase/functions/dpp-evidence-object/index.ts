@@ -35,6 +35,38 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
   return Array.from(new Uint8Array(digest), (value) => value.toString(16).padStart(2, "0")).join("");
 }
 
+async function readBodyBounded(req: Request, maxBytes: number): Promise<Uint8Array | null> {
+  if (!req.body) return new Uint8Array();
+
+  const reader = req.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value?.byteLength) continue;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel("body too large").catch(() => {});
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
+
 async function loadEvidenceMetadata(client: ReturnType<typeof createClient>, path: string) {
   const { data, error } = await client.rpc("dpp_api_evidence_object_metadata", {
     p_storage_path: path,
@@ -88,9 +120,14 @@ Deno.serve(async (req: Request) => {
     const declared = Number(req.headers.get("Content-Length") ?? "0");
     if (Number.isFinite(declared) && declared > MAX_BYTES) return json(413, "EVIDENCE_TOO_LARGE");
 
-    const bytes = new Uint8Array(await req.arrayBuffer());
+    let bytes: Uint8Array | null;
+    try {
+      bytes = await readBodyBounded(req, MAX_BYTES);
+    } catch {
+      return json(400, "EVIDENCE_BODY_READ_FAILED");
+    }
+    if (bytes === null) return json(413, "EVIDENCE_TOO_LARGE");
     if (bytes.byteLength === 0) return json(400, "EVIDENCE_EMPTY");
-    if (bytes.byteLength > MAX_BYTES) return json(413, "EVIDENCE_TOO_LARGE");
 
     const metadata = await loadEvidenceMetadata(client, path);
     if (!validMetadata(metadata)) return json(403, "EVIDENCE_METADATA_NOT_AVAILABLE");
