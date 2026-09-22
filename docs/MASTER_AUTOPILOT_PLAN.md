@@ -697,3 +697,11 @@ Append evidence here only after verification.
 - Current production still serves the older CSP containing `script-src 'self' 'unsafe-inline'` and `style-src 'self' 'unsafe-inline'`, so R02 cannot be GREEN yet.
 - Exact production-trigger commit `0d37fc97887044832b69fb1d1abb55828bc71897` was created without updating `main`. Global Supabase lease claim by `DPP_APP2` was denied with `retry_after_at=2026-09-23T02:19:01Z`; therefore `main` was not moved and no production deploy was attempted.
 - R02 remains BLOCKED pending the lease-governed production deployment and live header/core-flow acceptance.
+
+### R05 shared limiter backend timeout hardening — 2026-09-22
+
+- PR #207 exact tested head `1aaed7b01db573f2696c16c318ac3302dffab6fe` completed GitHub Actions CI `35693099730` SUCCESS with 139/139 completed steps and zero failures.
+- Shared Supabase rate-limit backend requests now use one bounded AbortController across both initial fetch and response-body parsing; stalled calls fail closed as stable HTTP 503 `RATE_LIMIT_BACKEND_UNAVAILABLE`.
+- Deterministic tests prove both pseudonymous network and credential bucket calls are aborted for pre-header and response-body stalls.
+- PR #207 merged to `main` as `df469ef3157a8729cfed60d4de61dafd431edc5b`.
+- R05 remains RED/PARTIAL because M17-M20 are not all GREEN and production enablement, anonymous distributed protection, and real multi-isolate/network abuse acceptance remain unproven.
