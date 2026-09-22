@@ -80,6 +80,21 @@ test('tenant RPC aborts with a stable timeout error when Supabase stalls before 
   );
 });
 
+test('tenant RPC network failure maps to stable 502 without leaking transport detail',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>{throw new Error('socket reset private transport detail');};
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_tenant_context',{},'Bearer tenant-token',env,fetchImpl,50),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'UPSTREAM_ERROR');
+      assert.equal(error.publicMessage,'Database request failed.');
+      assert.equal(String(error).includes('private transport detail'),false);
+      return true;
+    }
+  );
+});
+
 test('tenant RPC timeout remains active while Supabase response body stalls',async()=>{
   const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
   const fetchImpl=async(_url,options)=>({
