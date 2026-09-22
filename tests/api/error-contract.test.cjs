@@ -76,6 +76,9 @@ test('local error catalog exposes stable public messages',()=>{
   assert.deepEqual(errors.localError('SERVER_CONFIGURATION_MISSING'),{
     status:500,code:'SERVER_CONFIGURATION_MISSING',message:'Server configuration is incomplete.'
   });
+  assert.deepEqual(errors.localError('UPSTREAM_TIMEOUT'),{
+    status:504,code:'UPSTREAM_TIMEOUT',message:'Database request timed out.'
+  });
 });
 
 test('errorBody returns exact machine-readable envelope',()=>{
