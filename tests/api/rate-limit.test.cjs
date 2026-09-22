@@ -359,6 +359,73 @@ test('feature-gated shared limiter consumes both pseudonymous buckets',async()=>
   assert.equal(calls.map(call=>call.options.body).join('|').includes('shared-runtime'),false);
 });
 
+test('shared limiter times out stalled backend and fails closed',async()=>{
+  let aborts=0;
+  const fetchImpl=async(_url,options)=>new Promise((_resolve,reject)=>{
+    options.signal.addEventListener('abort',()=>{
+      aborts+=1;
+      const error=new Error('raw stalled backend detail');
+      error.name='AbortError';
+      reject(error);
+    },{once:true});
+  });
+  const decision=await limiter.checkSharedRateLimit(
+    req('POST',{},{} ,'Bearer shared-timeout','203.0.113.94'),
+    'models',
+    'Bearer shared-timeout',
+    {
+      env:{
+        DPP_SHARED_RATE_LIMIT_ENABLED:'true',
+        DPP_SUPABASE_URL:'https://example.supabase.co',
+        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+      },
+      fetchImpl,
+      timeoutMs:5
+    }
+  );
+  assert.equal(decision.enforced,true);
+  assert.equal(decision.allowed,false);
+  assert.equal(decision.error,true);
+  assert.equal(decision.status,503);
+  assert.equal(decision.code,'RATE_LIMIT_BACKEND_UNAVAILABLE');
+  assert.equal(aborts,2);
+});
+
+test('shared limiter timeout remains active while backend response body stalls',async()=>{
+  let bodyAborts=0;
+  const fetchImpl=async(_url,options)=>({
+    ok:true,
+    json:()=>new Promise((_resolve,reject)=>{
+      options.signal.addEventListener('abort',()=>{
+        bodyAborts+=1;
+        const error=new Error('raw stalled body detail');
+        error.name='AbortError';
+        reject(error);
+      },{once:true});
+    })
+  });
+  const decision=await limiter.checkSharedRateLimit(
+    req('POST',{},{} ,'Bearer shared-body-timeout','203.0.113.95'),
+    'models',
+    'Bearer shared-body-timeout',
+    {
+      env:{
+        DPP_SHARED_RATE_LIMIT_ENABLED:'true',
+        DPP_SUPABASE_URL:'https://example.supabase.co',
+        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+      },
+      fetchImpl,
+      timeoutMs:5
+    }
+  );
+  assert.equal(decision.enforced,true);
+  assert.equal(decision.allowed,false);
+  assert.equal(decision.error,true);
+  assert.equal(decision.status,503);
+  assert.equal(decision.code,'RATE_LIMIT_BACKEND_UNAVAILABLE');
+  assert.equal(bodyAborts,2);
+});
+
 test('shared limiter fails closed when its backend is unavailable',async()=>{
   const decision=await limiter.checkSharedRateLimit(
     req('GET',null,{} ,'Bearer shared-runtime','203.0.113.92'),
