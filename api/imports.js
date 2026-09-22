@@ -87,7 +87,8 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
     }
   }catch(error){
     if(controller.signal.aborted||error&&error.name==='AbortError') throw upstreamTimeoutError();
-    throw error;
+    if(error&&error.publicCode) throw error;
+    throw upstreamInvalidJsonError();
   }finally{
     clearTimeout(timeout);
   }

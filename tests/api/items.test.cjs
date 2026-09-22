@@ -273,6 +273,20 @@ test('stale item delete maps DP309 to stable 409', async () => {
 });
 
 
+test('M18 item RPC network failure maps to stable 502 without leaking transport detail',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_items_list',{},'Bearer item-token',env,async()=>{throw new Error('socket reset private transport detail');},50),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'UPSTREAM_ERROR');
+      assert.equal(error.publicMessage,'Database request failed.');
+      assert.equal(String(error).includes('private transport detail'),false);
+      return true;
+    }
+  );
+});
+
 test('M18 item RPC times out while upstream response body stalls', async () => {
   const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
   const fetchImpl=async(_url,options)=>({
