@@ -98,8 +98,39 @@ python scripts/david_autopilot.py \
 
 The generated draft message is marked as unsent. State transitions are append-only in the request history returned by the state machine.
 
+## Deterministic evidence extraction
+
+DAVID can now extract configured DPP claims from caller-provided evidence text while preserving document provenance and confidence.
+
+The MVP extraction contract requires:
+
+- a stable `documentId`;
+- a SHA-256 for the source document;
+- deterministic text input;
+- a configured extractor rule and fixed confidence;
+- the exact matched character span plus a bounded excerpt;
+- `approval_required` for every extracted claim;
+- `autoAccepted=false` for every claim.
+
+Initial deterministic rules cover:
+
+- carbon-footprint values in `kg CO2e/kWh`, including an optional study reference;
+- EU Declaration of Conformity references.
+
+The extractor never writes a DPP record. Its output is converted into the existing evidence-adapter format, so evidence candidates continue through the same human-approval boundary.
+
+Example:
+
+```bash
+python scripts/david_autopilot.py \
+  --api-snapshot api.json \
+  --raw-evidence raw-evidence.json \
+  --output plan.json
+```
+
+The output contains both `evidenceExtraction` and, when evidence matches an open planner action, `sourceDiscovery` with approval-gated candidates.
+
 ## Next slices
 
-1. Add evidence extraction with provenance and confidence, never silent auto-acceptance.
-2. Add registry submission orchestration behind explicit policy/approval.
-3. Expose the queue in the product UI with audit events and retry state.
+1. Add registry submission orchestration behind explicit policy/approval.
+2. Expose the queue in the product UI with audit events and retry state.
