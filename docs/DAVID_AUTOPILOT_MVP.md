@@ -130,7 +130,36 @@ python scripts/david_autopilot.py \
 
 The output contains both `evidenceExtraction` and, when evidence matches an open planner action, `sourceDiscovery` with approval-gated candidates.
 
+## Registry submission orchestration
+
+DAVID now has a provider-neutral local registry orchestration contract aligned with the existing DPP registry database lifecycle:
+
+`draft -> queued -> submitted -> accepted/rejected/retry_wait/failed`
+
+with the existing cancellation/retry transitions preserved.
+
+The orchestration layer is intentionally not a registry network client:
+
+- a DPP plan must be complete with zero open actions before a registry draft can exist;
+- `queued` requires an explicit approval reference;
+- `submitted` requires a receipt from an external/manual registry adapter, including an external reference;
+- accepted/rejected states require a registry response;
+- retry state requires explicit error/retry evidence;
+- registry request payloads reject credential-like fields;
+- deterministic semantic fingerprints and idempotency keys are generated from the tenant/item/passport/provider/environment/payload tuple;
+- `networkSubmissionAllowed=false` remains fixed.
+
+Example:
+
+```bash
+python scripts/david_autopilot.py \
+  --api-snapshot api.json \
+  --registry-context registry-context.json \
+  --output plan.json
+```
+
+This creates a local `registryOrchestration` draft only. An external adapter must perform any real submission and return a receipt before DAVID can record the state as submitted.
+
 ## Next slices
 
-1. Add registry submission orchestration behind explicit policy/approval.
-2. Expose the queue in the product UI with audit events and retry state.
+1. Expose the queue in the product UI with audit events and retry state.
