@@ -100,6 +100,35 @@ assert any("TLS certificate" in x for x in tls["required_before_green"])
 assert any("Live response headers" in x for x in tls["required_before_green"])
 if policy["status"] == "green":
     assert tls.get("runtime_verified") is True
+    assert tls.get("preview_runtime_verified") is True
+    evidence = tls.get("production_runtime_evidence", {})
+    assert evidence.get("project_id") == "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr"
+    assert re.fullmatch(r"dpl_[A-Za-z0-9]+", evidence.get("deployment_id", ""))
+    assert re.fullmatch(r"[0-9a-f]{40}", evidence.get("commit_sha", ""))
+    assert evidence.get("hostname") == "dpp-autopilot.vercel.app"
+    assert evidence.get("deployment_state") == "READY"
+    assert evidence.get("target") == "production"
+    assert evidence.get("https_reachable") is True
+    assert evidence.get("tls_certificate_and_hostname_verified") is True
+    ci = evidence.get("ci", {})
+    assert isinstance(ci.get("run_id"), int) and ci["run_id"] > 0
+    assert re.fullmatch(r"[0-9a-f]{40}", ci.get("head_sha", ""))
+    assert ci.get("conclusion") == "success"
+    preview = evidence.get("preview", {})
+    assert re.fullmatch(r"dpl_[A-Za-z0-9]+", preview.get("deployment_id", ""))
+    assert preview.get("state") == "READY"
+    assert re.fullmatch(r"[0-9a-f]{40}", preview.get("head_sha", ""))
+    assert evidence.get("headers") == actual, "R02 live production header evidence drift"
+    routes = {row.get("path"): row for row in evidence.get("routes", [])}
+    assert routes.get("/", {}).get("status") == 200
+    assert routes.get("/data/master-plan.json", {}).get("status") == 200
+    assert routes.get("/data/master-plan.json", {}).get("cache_control") == "no-store, max-age=0"
+    assert routes.get("/api/models", {}).get("status") == 401
+    assert routes.get("/api/models", {}).get("auth_error_code") == "AUTH_REQUIRED"
+    assert routes.get("/api/models", {}).get("request_id_present") is True
+    live_csp = evidence["headers"]["Content-Security-Policy"]
+    for forbidden in csp_policy.get("forbidden_tokens", []):
+        assert forbidden.lower() not in live_csp.lower(), f"R02 live CSP forbidden token present: {forbidden}"
 else:
     assert tls.get("runtime_verified") is False
 
