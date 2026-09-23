@@ -60,7 +60,7 @@ class DavidEvidenceExtractionTests(unittest.TestCase):
             carbon["value"],
             {
                 "total_kg_co2e_per_kwh": 51.2,
-                "study_reference": "CF-VERIFIED-001.",
+                "study_reference": "CF-VERIFIED-001",
             },
         )
         self.assertEqual(carbon["confidence"], 0.95)
