@@ -16,6 +16,7 @@ if str(SCRIPTS) not in sys.path:
 
 from completeness import score_fixture  # noqa: E402
 from david_source_adapters import attach_source_candidates  # noqa: E402
+from david_supplier_queue import attach_supplier_queue  # noqa: E402
 
 
 class AutopilotPolicyError(ValueError):
@@ -333,6 +334,8 @@ def main() -> None:
     parser.add_argument("--item-id")
     parser.add_argument("--source-snapshot", type=Path)
     parser.add_argument("--adapter-policy", type=Path, default=ROOT / "data/david-source-adapter-policy.json")
+    parser.add_argument("--include-supplier-queue", action="store_true")
+    parser.add_argument("--supplier-queue-policy", type=Path, default=ROOT / "data/david-supplier-queue-policy.json")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
@@ -357,6 +360,10 @@ def main() -> None:
         source_snapshot = load_json(args.source_snapshot)
         adapter_policy = load_json(args.adapter_policy)
         plan = attach_source_candidates(plan, source_snapshot, adapter_policy)
+
+    if args.include_supplier_queue:
+        supplier_queue_policy = load_json(args.supplier_queue_policy)
+        plan = attach_supplier_queue(plan, supplier_queue_policy)
 
     payload = json.dumps(plan, indent=2, ensure_ascii=False) + "\n"
 
