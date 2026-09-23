@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DPP Autopilot · DAVID Queue Control</title>
+  <meta name="description" content="Synthetic DAVID DPP Autopilot queue UI with approval, audit and retry visibility." />
+  <link rel="stylesheet" href="/assets/csp/autopilot.css">
+</head>
+<body data-autopilot-ready="false" data-external-delivery="disabled" data-registry-network="disabled">
+<main class="shell">
+  <header class="top">
+    <div>
+      <div class="badge">DAVID DPP AUTOPILOT · Synthetic control room</div>
+      <h1>Action, evidence, supplier & registry queues</h1>
+      <p class="lead">Read-only UI evidence for deterministic queue state, approval boundaries, audit history and retry visibility.</p>
+    </div>
+    <nav class="top-links" aria-label="Primary">
+      <a href="/">← Dashboard</a>
+      <a href="/demo/settings.html?sample=1">Settings</a>
+    </nav>
+  </header>
+
+  <div class="notice" id="safetyNotice">
+    Synthetic evidence only. External supplier delivery and live registry network submission are disabled in this UI.
+  </div>
+
+  <section class="summary" aria-label="Autopilot summary">
+    <article class="metric"><span class="metric-label">Open actions</span><strong id="actionCount">—</strong></article>
+    <article class="metric"><span class="metric-label">Source candidates</span><strong id="candidateCount">—</strong></article>
+    <article class="metric"><span class="metric-label">Supplier requests</span><strong id="supplierCount">—</strong></article>
+    <article class="metric"><span class="metric-label">Registry state</span><strong id="registryState">—</strong></article>
+  </section>
+
+  <section class="grid" aria-label="DAVID queues">
+    <article class="card" data-queue="actions">
+      <div class="card-head"><div><span class="eyebrow">Planner</span><h2>Action queue</h2></div><span class="pill neutral">deterministic</span></div>
+      <div id="actionQueue" class="queue-list" role="list"></div>
+    </article>
+
+    <article class="card" data-queue="sources">
+      <div class="card-head"><div><span class="eyebrow">Discovery</span><h2>Source candidates</h2></div><span class="pill approval">approval gated</span></div>
+      <div id="sourceQueue" class="queue-list" role="list"></div>
+    </article>
+
+    <article class="card" data-queue="supplier">
+      <div class="card-head"><div><span class="eyebrow">Supplier</span><h2>Request queue</h2></div><span class="pill disabled">delivery disabled</span></div>
+      <div id="supplierQueue" class="queue-list" role="list"></div>
+      <div class="controls" aria-label="Supplier actions">
+        <button type="button" disabled data-side-effect-disabled="supplier-send">Send externally</button>
+      </div>
+    </article>
+
+    <article class="card" data-queue="registry">
+      <div class="card-head"><div><span class="eyebrow">Registry</span><h2>Submission orchestration</h2></div><span class="pill disabled">network disabled</span></div>
+      <div id="registryQueue" class="queue-list" role="list"></div>
+      <div id="retryState" class="retry" aria-live="polite"></div>
+      <div class="controls" aria-label="Registry actions">
+        <button type="button" disabled data-side-effect-disabled="registry-submit">Submit to registry</button>
+      </div>
+    </article>
+  </section>
+
+  <section class="card audit-card" aria-labelledby="auditTitle">
+    <div class="card-head"><div><span class="eyebrow">Evidence</span><h2 id="auditTitle">Audit timeline</h2></div><span class="pill neutral">append-only view</span></div>
+    <ol id="auditTimeline" class="timeline"></ol>
+  </section>
+
+  <div class="status" id="autopilotStatus" role="status" aria-live="polite">Loading DAVID Autopilot queue fixture…</div>
+</main>
+
+<script src="/assets/csp/autopilot-inline-1.js"></script>
+<script src="/demo/responsive-probe.js"></script>
+<script src="/demo/accessibility-probe.js"></script>
+</body>
+</html>
