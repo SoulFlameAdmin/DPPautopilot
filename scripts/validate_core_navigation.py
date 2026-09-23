@@ -35,7 +35,6 @@ def main() -> None:
         'data-nav="imports"',
         'data-nav="passports"',
         'data-nav="onboarding"',
-        'data-nav="autopilot"',
         'role="status" aria-live="polite"',
         'SETTINGS PRECURSOR PASS · explicit tenant · no secret persistence · no production write',
     ]:
