@@ -71,9 +71,35 @@ python scripts/david_autopilot.py \
 
 The output adds `sourceDiscovery` with deterministic candidates, provenance, unresolved-action count and the next candidate. Candidate values are proposals only; this slice does not mutate the authenticated API snapshot or database.
 
+## Supplier request queue
+
+DAVID can now turn supplier-facing planner actions into a deterministic local queue without sending anything externally.
+
+The queue lifecycle is:
+
+`draft -> approved -> ready_to_send -> awaiting_response -> response_received -> ingested`
+
+Safety gates are explicit:
+
+- `approved` requires an approval reference;
+- `awaiting_response` requires a delivery receipt supplied by an external/manual delivery step;
+- `response_received` requires response evidence;
+- `ingested` requires explicit human review;
+- the queue implementation itself has `externalDeliveryAllowed=false` and contains no mail/network sender.
+
+CLI example:
+
+```bash
+python scripts/david_autopilot.py \
+  --api-snapshot api.json \
+  --include-supplier-queue \
+  --output plan.json
+```
+
+The generated draft message is marked as unsent. State transitions are append-only in the request history returned by the state machine.
+
 ## Next slices
 
-1. Add a supplier-request queue with draft -> approve -> send -> await -> ingest states.
-2. Add evidence extraction with provenance and confidence, never silent auto-acceptance.
-3. Add registry submission orchestration behind explicit policy/approval.
-4. Expose the queue in the product UI with audit events and retry state.
+1. Add evidence extraction with provenance and confidence, never silent auto-acceptance.
+2. Add registry submission orchestration behind explicit policy/approval.
+3. Expose the queue in the product UI with audit events and retry state.
