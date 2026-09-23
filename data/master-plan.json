@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.5",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-22T09:06:24+03:00",
+  "updatedAt": "2026-09-23T18:10:06+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -603,8 +603,8 @@
           "dependsOn": "F08",
           "acceptanceCriteria": "Production serves TLS and required headers; unsafe defaults removed",
           "evidenceRequired": "HTTP header test",
-          "status": "blocked",
-          "evidence": "CSP v2 hardening removes `unsafe-inline`/`unsafe-eval`, externalizes all browser scripts/styles, denies script/style attributes, and fixes discovered D13/auth-recovery DOM-global collisions. Exact implementation head `9c725a64692e25f56b3d9b5841a58c47473c8e38` passed CI run `35681026877`, Cross-browser `35681024203`, and U07 visual regression `35681024197`. Live production acceptance is externally BLOCKED because Vercel returned `api-deployments-free-per-day` on PR #174 at 2026-09-22T02:19:01Z with explicit `try again in 24 hours`; next eligible retry is 2026-09-23T02:19:01Z. `main` auto-deploy is temporarily disabled in `vercel.json` to respect the backoff. R02 cannot become GREEN until the hardened commit is deployed and live TLS/header/core-flow acceptance passes. — BLOCKED New read-only Vercel preview evidence on PR #204: deployment `dpl_BsCjFqn3MwMc8BpuQDcAuVjUqaFx` returned HTTP 200 over TLS with strict CSP (`script-src 'self'`, `script-src-attr 'none'`, `style-src 'self'`, `style-src-attr 'none'`) plus HSTS, X-Content-Type-Options nosniff, X-Frame-Options DENY, Referrer-Policy no-referrer and restrictive Permissions-Policy. Read-only production comparison still serves the old CSP with `script-src 'self' 'unsafe-inline'` and `style-src 'self' 'unsafe-inline'`. A precise production deployment commit `0d37fc97887044832b69fb1d1abb55828bc71897` was prepared without moving main, then global lease claim for owner `DPP_APP2` was denied by the Supabase broker with `retry_after_at=2026-09-23T02:19:01Z`; main was not moved and no production deploy occurred. R02 remains BLOCKED until broker permits the controlled production deployment and live acceptance passes."
+          "status": "green",
+          "evidence": "Production acceptance PASS on 2026-09-23: release head `24ce73989793848ea39efbba656ff88be78b96c2` passed full CI `35879001610`; READY preview `dpl_AMr7nnBk1KUu3zHeqbo7UeEQkzG9`; merged production commit `1cb4cea91006baf2aadc195976bd030d465e81b1` deployed READY as `dpl_EHNFvRsgXuFXCmuJ46mRwbaBqRFg`. Live canonical HTTPS `/`, `/data/master-plan.json`, and `/api/models` matched strict CSP/HSTS/nosniff/frame/referrer/permissions policy; CSP has no unsafe-inline/unsafe-eval; data route is no-store; protected API returns 401 AUTH_REQUIRED with request ID. TLS-validating production fetch completed without certificate/hostname error. — PASS"
         },
         {
           "id": "R03",
