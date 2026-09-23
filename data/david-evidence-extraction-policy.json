@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "name": "DAVID deterministic evidence extraction policy",
+  "mode": "deterministic_text_extraction_no_auto_accept",
+  "rules": [
+    {
+      "id": "carbon_footprint_v1",
+      "extractor": "carbon_footprint_v1",
+      "fieldPath": "model.carbon_footprint",
+      "confidence": 0.95
+    },
+    {
+      "id": "eu_declaration_v1",
+      "extractor": "eu_declaration_v1",
+      "fieldPath": "model.eu_declaration_of_conformity",
+      "confidence": 0.97
+    }
+  ],
+  "safety": {
+    "allowAutoAccept": false,
+    "requireHumanApproval": true,
+    "requireDocumentSha256": true,
+    "requireDeterministicExtractor": true,
+    "preserveEvidenceSpan": true,
+    "maxExcerptChars": 240
+  }
+}
