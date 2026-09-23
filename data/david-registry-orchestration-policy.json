@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "name": "DAVID registry orchestration policy",
+  "mode": "provider_neutral_no_network_submission",
+  "defaultProvider": "eu_dpp_registry",
+  "defaultEnvironment": "test",
+  "allowedEnvironments": ["test", "live"],
+  "transitions": {
+    "draft": ["queued", "cancelled"],
+    "queued": ["submitted", "cancelled", "failed"],
+    "submitted": ["accepted", "rejected", "retry_wait", "failed"],
+    "accepted": [],
+    "rejected": ["retry_wait", "cancelled"],
+    "retry_wait": ["queued", "cancelled", "failed"],
+    "failed": [],
+    "cancelled": []
+  },
+  "safety": {
+    "allowNetworkSubmission": false,
+    "requireCompletePlan": true,
+    "requireApprovalToQueue": true,
+    "requireExternalReceiptToMarkSubmitted": true,
+    "requireRegistryResponseForDecision": true,
+    "requireRetryEvidence": true,
+    "requireDeterministicIdempotency": true
+  }
+}
