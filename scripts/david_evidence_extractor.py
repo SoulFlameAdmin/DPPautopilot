@@ -190,7 +190,7 @@ def _extract_carbon(
     start = match.start()
     end = match.end()
     if study is not None:
-        value["study_reference"] = study.group("reference")
+        value["study_reference"] = study.group("reference").rstrip(".,;:")
         start = min(start, study.start())
         end = max(end, study.end())
 
@@ -219,7 +219,7 @@ def _extract_eu_declaration(
         _claim(
             rule=rule,
             document=document,
-            value=match.group("reference"),
+            value=match.group("reference").rstrip(".,;:"),
             start=match.start(),
             end=match.end(),
             excerpt=_excerpt(text, match.start(), match.end(), max_excerpt),
