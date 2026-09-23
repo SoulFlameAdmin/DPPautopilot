@@ -121,7 +121,7 @@ Browser UI -> application/API layer -> Supabase Auth/Postgres/Storage. The curre
 | ID | Task | Depends on | Acceptance criteria | Evidence required | Status |
 |---|---|---|---|---|---|
 | R01 | Environment/secret management | F10,F13 | No service-role secrets client-side; env scope documented and verified | Config inspection | GREEN |
-| R02 | Security headers / TLS | F08 | Production serves TLS and required headers; unsafe defaults removed | HTTP header test | BLOCKED |
+| R02 | Security headers / TLS | F08 | Production serves TLS and required headers; unsafe defaults removed | HTTP header test | GREEN |
 | R03 | Input/file validation | M13,M17-M20 | Server rejects malformed/oversize/disallowed payloads | Negative tests | RED |
 | R04 | Tenant isolation security suite | M05,M17-M21 | Cross-tenant attack cases consistently deny access | Security test report | RED |
 | R05 | Rate limiting / abuse controls | M17-M20 | Sensitive/public endpoints have documented limits and 429 behavior | Load/abuse tests | RED |
@@ -705,3 +705,10 @@ Append evidence here only after verification.
 - Deterministic tests prove both pseudonymous network and credential bucket calls are aborted for pre-header and response-body stalls.
 - PR #207 merged to `main` as `df469ef3157a8729cfed60d4de61dafd431edc5b`.
 - R05 remains RED/PARTIAL because M17-M20 are not all GREEN and production enablement, anonymous distributed protection, and real multi-isolate/network abuse acceptance remain unproven.
+
+### R02 production strict-header acceptance — 2026-09-23
+- Release head `24ce73989793848ea39efbba656ff88be78b96c2` completed full GitHub Actions CI `35879001610` with conclusion SUCCESS. The exact head also received READY preview deployment `dpl_AMr7nnBk1KUu3zHeqbo7UeEQkzG9` and live preview headers matched the strict CSP v2 policy.
+- PR #223 merged as production commit `1cb4cea91006baf2aadc195976bd030d465e81b1`. Vercel production deployment `dpl_EHNFvRsgXuFXCmuJ46mRwbaBqRFg` is READY for canonical project `prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr` and aliases `dpp-autopilot.vercel.app`.
+- Live canonical HTTPS checks on `/`, `/data/master-plan.json`, and `/api/models` returned respectively 200, 200 and the expected unauthenticated 401 `AUTH_REQUIRED`. All three expose the committed CSP/HSTS/nosniff/frame/referrer/permissions headers; CSP contains neither `'unsafe-inline'` nor `'unsafe-eval'`; the data route is `no-store, max-age=0`; the protected API exposes a request correlation ID.
+- HTTPS production fetch through the TLS-validating Vercel connector completed without certificate/hostname error. Concrete deployment/route/header/TLS evidence is recorded in `data/security-headers-policy.json` and is now enforced by `scripts/validate_security_headers.py` whenever R02 is GREEN.
+- R02 acceptance criteria are satisfied. Status: GREEN.
