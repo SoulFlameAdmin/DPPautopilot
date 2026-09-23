@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "name": "DAVID supplier request queue policy",
+  "mode": "draft_only_no_delivery",
+  "eligibleActions": [
+    "request_supplier_master_data",
+    "request_or_extract_verified_evidence",
+    "extract_from_evidence"
+  ],
+  "eligibleSources": [
+    "supplier_master_data",
+    "supplier_declaration_or_test_report",
+    "verified_carbon_footprint_declaration",
+    "due_diligence_or_supplier_evidence",
+    "supplier_declaration_or_verified_report"
+  ],
+  "transitions": {
+    "draft": ["approved"],
+    "approved": ["ready_to_send"],
+    "ready_to_send": ["awaiting_response"],
+    "awaiting_response": ["response_received"],
+    "response_received": ["ingested"],
+    "ingested": []
+  },
+  "safety": {
+    "allowExternalDelivery": false,
+    "requireApprovalReference": true,
+    "requireDeliveryReceiptToMarkSent": true,
+    "requireResponseEvidence": true,
+    "requireHumanReviewBeforeIngest": true
+  }
+}
