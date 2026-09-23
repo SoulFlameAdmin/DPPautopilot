@@ -9,7 +9,7 @@ R07 remains **RED/PARTIAL** until M01–M13 are fully accepted and retention/del
 | Party | Role | DPP data | Current status |
 | --- | --- | --- | --- |
 | Supabase | Platform/processor | Auth identity, DPP Postgres records, evidence metadata and private object bytes | Active for Auth/Postgres/Storage/Edge; final authenticated evidence lifecycle acceptance incomplete |
-| Vercel | Application runtime/processor | HTTP request metadata and DPP API payloads | Deployment evidence exists; final production acceptance remains blocked/incomplete |
+| Vercel | Application runtime/processor | HTTP request metadata, DPP API payloads in transit, restricted structured runtime-log metadata | Production deployment is active; runtime-log retention/backend acceptance remains pending |
 | GitHub | Development/CI processor | Source and synthetic test data only | Production personal data is prohibited in repo/CI |
 | EU DPP registry provider | Planned external recipient | Approved registry request payload + submission metadata | Live provider integration not accepted |
 
@@ -28,12 +28,14 @@ R07 remains **RED/PARTIAL** until M01–M13 are fully accepted and retention/del
 | Audit | Accountability and security trail | `dpp_audit_log` | Actor UUID + before/after snapshots | Append-only; audit copies now redact obvious credential-bearing JSON keys; broader minimization + retention/deletion exception pending |
 | App binding | DPP namespace binding | `dpp_app_binding` | Non-personal configuration | Application binding lifetime |
 | Rate-limit metadata | Abuse prevention | Process-local API memory + `dpp_rate_limit_buckets` for shared authenticated counters | Truncated SHA-256 network/credential bucket digests + counters/window timestamps; raw IP/bearer values are not stored | Local buckets are pruned/capped; shared rows older than reset+10 min are opportunistically deleted; deployed/public distributed acceptance pending |
+| Runtime observability logs | Request correlation, failure diagnosis, security/availability monitoring | Vercel runtime logs | Allowlisted `dpp_http_request` metadata only: request ID, API surface, method/status, outcome, duration, auth-present boolean and stable public error code; bodies/query/credentials/direct identifiers/raw IP are prohibited | Runtime events are observable; accepted production retention period/backend ownership remains pending |
 
 ## Data minimization rules
 
 - Flexible `canonical_data`, passport private payloads, import JSON, registry payloads and evidence metadata must not become general-purpose personal-data containers.
 - Public passport responses remain restricted by the M10 classification policy and HTTP allowlist.
 - Raw bearer credentials must never be persisted in rate-limit keys, logs or evidence.
+- Runtime logs must remain limited to the R09 structured allowlist; request/response bodies, query parameters, credentials, cookies, direct identifiers and raw IP addresses are prohibited.
 - CI/repository fixtures must remain synthetic and must not contain production personal data.
 - Evidence filenames/files can expose personal data; production acceptance requires explicit minimization/redaction and deletion rules.
 
