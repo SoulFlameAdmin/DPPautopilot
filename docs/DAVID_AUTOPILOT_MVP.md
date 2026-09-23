@@ -49,10 +49,31 @@ python scripts/david_autopilot.py --api-snapshot snapshot.json --output plan.jso
 
 Optional `--model-id`, `--item-id`, and `--item-index` selectors make the target explicit. The generated plan records only non-secret provenance identifiers/status and keeps the existing approval gates unchanged.
 
+## Local source adapters
+
+DAVID can now enrich a plan with **read-only candidate discovery** from authorized local/exported source snapshots:
+
+- ERP records for manufacturing/master data;
+- BMS records for item telemetry and lifecycle data;
+- PLM records for engineering/model data;
+- evidence-document claims with document SHA-256, confidence and extractor provenance.
+
+The source layer never writes values into a passport, never performs external network actions, and never accepts credential material as snapshot data. Internal ERP/BMS/PLM candidates inherit the planner action's approval boundary. Evidence-derived candidates are always `approval_required`, even when the same field could otherwise be populated by safe local automation.
+
+Example:
+
+```bash
+python scripts/david_autopilot.py \
+  --api-snapshot api.json \
+  --source-snapshot sources.json \
+  --output plan.json
+```
+
+The output adds `sourceDiscovery` with deterministic candidates, provenance, unresolved-action count and the next candidate. Candidate values are proposals only; this slice does not mutate the authenticated API snapshot or database.
+
 ## Next slices
 
-1. Add source adapters for ERP/BMS/PLM and evidence documents.
-2. Add a supplier-request queue with draft -> approve -> send -> await -> ingest states.
-3. Add evidence extraction with provenance and confidence, never silent auto-acceptance.
-4. Add registry submission orchestration behind explicit policy/approval.
-5. Expose the queue in the product UI with audit events and retry state.
+1. Add a supplier-request queue with draft -> approve -> send -> await -> ingest states.
+2. Add evidence extraction with provenance and confidence, never silent auto-acceptance.
+3. Add registry submission orchestration behind explicit policy/approval.
+4. Expose the queue in the product UI with audit events and retry state.
