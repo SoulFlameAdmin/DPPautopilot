@@ -16,6 +16,7 @@ if str(SCRIPTS) not in sys.path:
 
 from completeness import score_fixture  # noqa: E402
 from david_source_adapters import attach_source_candidates  # noqa: E402
+from david_evidence_extractor import extract_evidence, merge_with_source_snapshot  # noqa: E402
 from david_supplier_queue import attach_supplier_queue  # noqa: E402
 
 
@@ -334,6 +335,8 @@ def main() -> None:
     parser.add_argument("--item-id")
     parser.add_argument("--source-snapshot", type=Path)
     parser.add_argument("--adapter-policy", type=Path, default=ROOT / "data/david-source-adapter-policy.json")
+    parser.add_argument("--raw-evidence", type=Path)
+    parser.add_argument("--evidence-extraction-policy", type=Path, default=ROOT / "data/david-evidence-extraction-policy.json")
     parser.add_argument("--include-supplier-queue", action="store_true")
     parser.add_argument("--supplier-queue-policy", type=Path, default=ROOT / "data/david-supplier-queue-policy.json")
     parser.add_argument("--output", type=Path)
@@ -356,8 +359,16 @@ def main() -> None:
         fixture = load_json(fixture_path)
         plan = build_plan(catalog, fixture, policy, item_index=args.item_index)
 
-    if args.source_snapshot:
-        source_snapshot = load_json(args.source_snapshot)
+    source_snapshot = load_json(args.source_snapshot) if args.source_snapshot else None
+
+    if args.raw_evidence:
+        raw_evidence = load_json(args.raw_evidence)
+        extraction_policy = load_json(args.evidence_extraction_policy)
+        extraction = extract_evidence(raw_evidence, extraction_policy)
+        plan["evidenceExtraction"] = extraction
+        source_snapshot = merge_with_source_snapshot(source_snapshot, extraction)
+
+    if source_snapshot is not None:
         adapter_policy = load_json(args.adapter_policy)
         plan = attach_source_candidates(plan, source_snapshot, adapter_policy)
 
