@@ -27,3 +27,13 @@ M02 and M03 remain RED until M01 authentication is fully accepted and the applic
 - Browser smoke: PASS; artifact `10569034799`.
 - M02/M03 remain RED because M01 runtime recovery completion is still externally blocked and app/API consumption has not yet been accepted.
 
+## Live production / bound-DB readback — 2026-09-23
+
+- Canonical production endpoints `/api/tenant`, `/api/organizations` and `/api/members` each returned HTTP 401 `AUTH_REQUIRED` without a bearer token, with `Cache-Control: no-store`, a correlation `X-Request-ID` and the strict production CSP.
+- Bound Supabase readback confirms `dpp_organizations`, `dpp_organization_members` and `dpp_user_tenant_context` exist with RLS enabled.
+- The active-tenant row is database-bound to real membership by `FOREIGN KEY (user_id, active_organization_id) REFERENCES dpp_organization_members(user_id, organization_id) ON DELETE CASCADE`.
+- Authenticated callers have EXECUTE on the narrow tenant/organization RPCs while anon does not; authenticated direct SELECT on the organization/member/context tables remains revoked.
+- `dpp_api_authorization_context`, membership-management RPCs, `dpp_has_org_role` and `dpp_require_active_role` are SECURITY DEFINER with fixed `search_path=public, pg_temp`.
+- The membership role CHECK remains exactly `owner | admin | editor | viewer`.
+- These checks add fresh deployed/runtime evidence but do not promote M02/M03: M01 recovery completion is still not GREEN, so dependency order remains enforced.
+
