@@ -21,6 +21,7 @@ def main() -> None:
         "/demo/import.html?sample=1",
         "/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001",
         "/demo/settings.html?sample=1",
+        "/demo/autopilot.html?sample=1",
     ]
     for route in dashboard_routes:
         require(route in dashboard, f"U01 dashboard navigation missing route: {route}")
@@ -34,6 +35,7 @@ def main() -> None:
         'data-nav="imports"',
         'data-nav="passports"',
         'data-nav="onboarding"',
+        'data-nav="autopilot"',
         'role="status" aria-live="polite"',
         'SETTINGS PRECURSOR PASS · explicit tenant · no secret persistence · no production write',
     ]:
