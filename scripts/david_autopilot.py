@@ -18,6 +18,7 @@ from completeness import score_fixture  # noqa: E402
 from david_source_adapters import attach_source_candidates  # noqa: E402
 from david_evidence_extractor import extract_evidence, merge_with_source_snapshot  # noqa: E402
 from david_supplier_queue import attach_supplier_queue  # noqa: E402
+from david_registry_orchestrator import attach_registry_submission  # noqa: E402
 
 
 class AutopilotPolicyError(ValueError):
@@ -339,6 +340,8 @@ def main() -> None:
     parser.add_argument("--evidence-extraction-policy", type=Path, default=ROOT / "data/david-evidence-extraction-policy.json")
     parser.add_argument("--include-supplier-queue", action="store_true")
     parser.add_argument("--supplier-queue-policy", type=Path, default=ROOT / "data/david-supplier-queue-policy.json")
+    parser.add_argument("--registry-context", type=Path)
+    parser.add_argument("--registry-policy", type=Path, default=ROOT / "data/david-registry-orchestration-policy.json")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
@@ -375,6 +378,11 @@ def main() -> None:
     if args.include_supplier_queue:
         supplier_queue_policy = load_json(args.supplier_queue_policy)
         plan = attach_supplier_queue(plan, supplier_queue_policy)
+
+    if args.registry_context:
+        registry_context = load_json(args.registry_context)
+        registry_policy = load_json(args.registry_policy)
+        plan = attach_registry_submission(plan, registry_context, registry_policy)
 
     payload = json.dumps(plan, indent=2, ensure_ascii=False) + "\n"
 
