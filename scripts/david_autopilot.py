@@ -15,6 +15,7 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 from completeness import score_fixture  # noqa: E402
+from david_source_adapters import attach_source_candidates  # noqa: E402
 
 
 class AutopilotPolicyError(ValueError):
@@ -330,6 +331,8 @@ def main() -> None:
     parser.add_argument("--item-index", type=int, default=0)
     parser.add_argument("--model-id")
     parser.add_argument("--item-id")
+    parser.add_argument("--source-snapshot", type=Path)
+    parser.add_argument("--adapter-policy", type=Path, default=ROOT / "data/david-source-adapter-policy.json")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
@@ -349,6 +352,12 @@ def main() -> None:
         fixture_path = args.fixture or (ROOT / "data/sample-battery.json")
         fixture = load_json(fixture_path)
         plan = build_plan(catalog, fixture, policy, item_index=args.item_index)
+
+    if args.source_snapshot:
+        source_snapshot = load_json(args.source_snapshot)
+        adapter_policy = load_json(args.adapter_policy)
+        plan = attach_source_candidates(plan, source_snapshot, adapter_policy)
+
     payload = json.dumps(plan, indent=2, ensure_ascii=False) + "\n"
 
     if args.output:
