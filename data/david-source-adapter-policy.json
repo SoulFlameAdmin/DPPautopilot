@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "name": "DAVID DPP local source adapter policy",
+  "mode": "read_only_candidate_discovery",
+  "adapterOrder": ["erp", "bms", "plm", "evidence"],
+  "sourceToAdapters": {
+    "supplier_master_data": ["erp", "plm"],
+    "erp_or_manufacturing_master": ["erp", "plm"],
+    "supplier_declaration_or_test_report": ["evidence"],
+    "verified_carbon_footprint_declaration": ["evidence"],
+    "due_diligence_or_supplier_evidence": ["evidence"],
+    "supplier_declaration_or_verified_report": ["evidence"],
+    "erp_bms_plm_or_evidence": ["erp", "bms", "plm", "evidence"],
+    "bms_mes_or_item_record": ["bms", "erp"]
+  },
+  "internalAdapters": ["erp", "bms", "plm"],
+  "evidenceAdapter": "evidence",
+  "safety": {
+    "allowWrites": false,
+    "allowExternalSideEffects": false,
+    "evidenceRequiresApproval": true,
+    "requireProvenance": true
+  }
+}
