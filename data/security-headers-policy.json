@@ -1,7 +1,7 @@
 {
   "version": 2,
   "task": "R02",
-  "status": "partial",
+  "status": "green",
   "deployment_config": "vercel.json",
   "scope": "all routes including static app, data files and API responses",
   "global_headers": {
@@ -82,9 +82,9 @@
     "value": "no-store, max-age=0"
   },
   "tls": {
-    "runtime_verified": false,
-    "preview_runtime_verified": false,
-    "claim": "F08 is GREEN. CSP v2 removes unsafe-inline and all inline script/style execution surfaces, but exact-commit CI/preview and production TLS/header acceptance are still required before R02 can become GREEN.",
+    "runtime_verified": true,
+    "preview_runtime_verified": true,
+    "claim": "R02 production acceptance is verified on canonical main: exact-head CI and READY preview passed, production deployment is READY, and live HTTPS responses on the canonical hostname match the strict committed header policy without unsafe-inline/unsafe-eval.",
     "required_before_green": [
       "Exact-head CI validates the de-inlined browser surfaces and security-header policy",
       "Exact hardened commit receives a READY Vercel deployment",
@@ -92,6 +92,56 @@
       "Live response headers match the committed policy on HTML, /data/* and /api/* routes",
       "TLS certificate chain and hostname validation pass",
       "No CSP violation breaks authentication, API calls or core UI flows"
-    ]
+    ],
+    "production_runtime_evidence": {
+      "verified_at": "2026-09-23T15:10:06Z",
+      "project_id": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+      "deployment_id": "dpl_EHNFvRsgXuFXCmuJ46mRwbaBqRFg",
+      "commit_sha": "1cb4cea91006baf2aadc195976bd030d465e81b1",
+      "hostname": "dpp-autopilot.vercel.app",
+      "deployment_state": "READY",
+      "target": "production",
+      "https_reachable": true,
+      "tls_certificate_and_hostname_verified": true,
+      "ci": {
+        "run_id": 35879001610,
+        "head_sha": "24ce73989793848ea39efbba656ff88be78b96c2",
+        "conclusion": "success"
+      },
+      "preview": {
+        "deployment_id": "dpl_AMr7nnBk1KUu3zHeqbo7UeEQkzG9",
+        "state": "READY",
+        "head_sha": "24ce73989793848ea39efbba656ff88be78b96c2"
+      },
+      "routes": [
+        {
+          "path": "/",
+          "status": 200,
+          "content_type": "text/html; charset=utf-8",
+          "cache_control": "public, max-age=0, must-revalidate"
+        },
+        {
+          "path": "/data/master-plan.json",
+          "status": 200,
+          "content_type": "application/json; charset=utf-8",
+          "cache_control": "no-store, max-age=0"
+        },
+        {
+          "path": "/api/models",
+          "status": 401,
+          "content_type": "application/json; charset=utf-8",
+          "auth_error_code": "AUTH_REQUIRED",
+          "request_id_present": true
+        }
+      ],
+      "headers": {
+        "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://frhletkiuupgksmgxoxc.supabase.co; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests",
+        "Strict-Transport-Security": "max-age=31536000",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "no-referrer",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+      }
+    }
   }
 }
