@@ -1,34 +1,28 @@
-# R02 Security Headers / TLS — CSP v2 hardening
+# R02 Security Headers / TLS — production acceptance
 
-R02 implementation is proven, but the task is **BLOCKED** on live production acceptance until the explicit Vercel deployment quota backoff expires. F08 is GREEN.
+R02 is **GREEN**. The strict CSP implementation is deployed to canonical production and the live production hostname has been verified against the committed security-header policy.
 
 ## Implemented hardening
 
-The browser surface no longer depends on CSP `'unsafe-inline'`.
+- Browser surfaces contain no inline `<script>` or `<style>` blocks.
+- Inline event handlers, `style=` attributes and dynamic inline style writes are removed.
+- CSP uses `script-src 'self'`, `style-src 'self'`, `script-src-attr 'none'` and `style-src-attr 'none'`.
+- `'unsafe-inline'`, `'unsafe-eval'` and plaintext `http://` sources are forbidden.
+- HSTS, `nosniff`, frame denial, no-referrer and restrictive Permissions-Policy are enforced.
+- `/data/*` remains `Cache-Control: no-store, max-age=0`.
 
-- Every inline `<style>` block from `index.html` and `demo/*.html` is externalized under `/assets/csp/`.
-- Every inline `<script>` block is externalized under `/assets/csp/`.
-- Dashboard `onclick` handlers are replaced by same-origin event listeners.
-- All HTML `style=` attributes and client-side `.style.*` writes are removed.
-- Dynamic progress widths use finite external CSS classes instead of inline style mutation.
-- CSP now uses `script-src 'self'`, `style-src 'self'`, `script-src-attr 'none'`, and `style-src-attr 'none'`.
-- `'unsafe-inline'`, `'unsafe-eval'`, and plaintext `http://` sources are forbidden by the R02 validator.
-- Existing HSTS, frame denial, MIME sniffing protection, referrer policy, permissions policy and no-store data policy remain enforced.
+## Verified acceptance — 2026-09-23
 
-## Verification contract
+- Exact release PR head: `24ce73989793848ea39efbba656ff88be78b96c2`.
+- GitHub Actions CI `35879001610`: **SUCCESS**.
+- READY preview: `dpl_AMr7nnBk1KUu3zHeqbo7UeEQkzG9`.
+- Production commit: `1cb4cea91006baf2aadc195976bd030d465e81b1`.
+- READY production deployment: `dpl_EHNFvRsgXuFXCmuJ46mRwbaBqRFg`.
+- Canonical hostname: `https://dpp-autopilot.vercel.app`.
+- Live `/`: HTTP 200 with the strict CSP and all required global headers.
+- Live `/data/master-plan.json`: HTTP 200, JSON, strict headers and `Cache-Control: no-store, max-age=0`.
+- Live `/api/models` without bearer: HTTP 401 `AUTH_REQUIRED`, request correlation ID present, strict headers intact.
+- HTTPS fetch on the canonical production hostname completed successfully through the TLS-validating Vercel connector; certificate/hostname validation produced no TLS error.
+- Live CSP contains neither `'unsafe-inline'` nor `'unsafe-eval'`.
 
-`scripts/validate_security_headers.py` fails if browser HTML reintroduces inline script/style elements, event-handler attributes, style attributes, dynamic client style writes, missing extracted assets, CSP drift, or unsafe tokens.
-
-Before R02 can become GREEN, the exact hardened head must have applicable CI PASS and the production deployment must prove HTTPS reachability, certificate/hostname validation, live HTML/data/API headers matching this policy, and CSP-compatible core UI/auth/API behavior.
-
-## Proven implementation evidence
-
-- Exact hardened head `9c725a64692e25f56b3d9b5841a58c47473c8e38`.
-- CI `35681026877`: SUCCESS.
-- Cross-browser `35681024203`: SUCCESS.
-- U07 visual regression `35681024197`: SUCCESS.
-- The CSP validator, DB/API/security contracts and real browser smoke all passed on that head.
-
-## External production blocker
-
-Vercel returned `api-deployments-free-per-day` on PR #174 at `2026-09-22T02:19:01Z` with the explicit instruction `try again in 24 hours`. The next eligible retry is therefore `2026-09-23T02:19:01Z`. `main` automatic deployment is temporarily disabled in `vercel.json` so merging the proven code cannot violate that backoff. No deployment should be attempted before the retry window and global deploy lease are both available.
+The concrete runtime tuple is stored in `data/security-headers-policy.json`. `scripts/validate_security_headers.py` now requires that production evidence whenever R02 is marked GREEN.
