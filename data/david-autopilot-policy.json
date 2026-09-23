@@ -1,0 +1,92 @@
+{
+  "version": "1.0.0",
+  "name": "DAVID DPP Autopilot MVP policy",
+  "mode": "advisory_with_safe_local_automation",
+  "description": "Deterministic planning policy for turning missing required Battery DPP fields into evidence-backed next actions. External or compliance-significant actions remain approval gated.",
+  "sourceRules": [
+    {
+      "prefix": "model.identification.manufacturer.",
+      "source": "supplier_master_data",
+      "action": "request_supplier_master_data",
+      "executionMode": "propose",
+      "approvalRequired": true,
+      "priority": 10
+    },
+    {
+      "prefix": "model.identification.",
+      "source": "erp_or_manufacturing_master",
+      "action": "inspect_internal_master_data",
+      "executionMode": "auto_local",
+      "approvalRequired": false,
+      "priority": 20
+    },
+    {
+      "prefix": "model.composition.",
+      "source": "supplier_declaration_or_test_report",
+      "action": "extract_from_evidence",
+      "executionMode": "propose",
+      "approvalRequired": true,
+      "priority": 30
+    },
+    {
+      "prefix": "model.carbon_footprint",
+      "source": "verified_carbon_footprint_declaration",
+      "action": "request_or_extract_verified_evidence",
+      "executionMode": "propose",
+      "approvalRequired": true,
+      "priority": 30
+    },
+    {
+      "prefix": "model.responsible_sourcing",
+      "source": "due_diligence_or_supplier_evidence",
+      "action": "request_or_extract_verified_evidence",
+      "executionMode": "propose",
+      "approvalRequired": true,
+      "priority": 30
+    },
+    {
+      "prefix": "model.recycled_content",
+      "source": "supplier_declaration_or_verified_report",
+      "action": "request_or_extract_verified_evidence",
+      "executionMode": "propose",
+      "approvalRequired": true,
+      "priority": 30
+    },
+    {
+      "prefix": "model.",
+      "source": "erp_bms_plm_or_evidence",
+      "action": "inspect_connected_sources",
+      "executionMode": "auto_local",
+      "approvalRequired": false,
+      "priority": 40
+    },
+    {
+      "prefix": "item.",
+      "source": "bms_mes_or_item_record",
+      "action": "inspect_item_telemetry_or_record",
+      "executionMode": "auto_local",
+      "approvalRequired": false,
+      "priority": 20
+    }
+  ],
+  "defaultRule": {
+    "source": "unknown",
+    "action": "request_human_source_mapping",
+    "executionMode": "propose",
+    "approvalRequired": true,
+    "priority": 90
+  },
+  "humanApprovalRequiredFor": [
+    "external_supplier_message",
+    "compliance_claim",
+    "registry_submission",
+    "public_passport_publish",
+    "destructive_change"
+  ],
+  "safety": {
+    "allowExternalSideEffects": false,
+    "allowUnsupportedComplianceClaims": false,
+    "requireCatalogEvidence": true,
+    "requireDeterministicPlan": true
+  }
+}
