@@ -39,7 +39,7 @@ def main() -> None:
     ]:
         require(marker in settings, f"U01 settings surface missing evidence: {marker}")
 
-    print("U01_CORE_NAVIGATION_PASS: dashboard exposes models/items/imports/passports/settings and settings returns to core synthetic workflows without secret persistence")
+    print("U01_CORE_NAVIGATION_PASS: dashboard exposes models/items/imports/passports/settings/DAVID Autopilot and settings returns to core synthetic workflows without secret persistence")
 
 
 if __name__ == "__main__":
