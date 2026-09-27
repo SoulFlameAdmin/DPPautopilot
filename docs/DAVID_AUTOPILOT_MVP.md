@@ -160,6 +160,19 @@ python scripts/david_autopilot.py \
 
 This creates a local `registryOrchestration` draft only. An external adapter must perform any real submission and return a receipt before DAVID can record the state as submitted.
 
+## DAVID queue control UI
+
+The synthetic browser control room at `/demo/autopilot.html` exposes the current DAVID Autopilot contracts without enabling side effects:
+
+- planner action queue with approval/safe-local state;
+- source/evidence candidates with confidence and provenance;
+- supplier request state plus approval/delivery evidence;
+- registry orchestration state plus retry evidence;
+- combined supplier/registry audit timeline;
+- disabled external-send and registry-submit controls.
+
+The UI is rendered from `data/david-autopilot-ui-demo.json`, validated in real headless Chromium, and keeps `externalDeliveryAllowed=false` / `networkSubmissionAllowed=false` visible.
+
 ## Next slices
 
-1. Expose the queue in the product UI with audit events and retry state.
+1. Replace the synthetic queue fixture with authenticated tenant-scoped persisted queue endpoints and audit events.

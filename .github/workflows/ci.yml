@@ -695,6 +695,13 @@ jobs:
             'http://127.0.0.1:8000/demo/settings.html?sample=1'
           python scripts/validate_core_navigation.py artifacts/d01-dom.html artifacts/u01-settings-dom.html
 
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --dump-dom 'http://127.0.0.1:8000/demo/autopilot.html?sample=1' > artifacts/david-autopilot-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3000 \
+            --window-size=1440,1100 --screenshot=artifacts/david-autopilot.png \
+            'http://127.0.0.1:8000/demo/autopilot.html?sample=1'
+          python scripts/validate_david_autopilot_ui.py artifacts/david-autopilot-dom.html
+
           # U02 deterministic async-state evidence: every async core view must expose
           # loading / empty / success / error states in a real browser.
           for STATE in loading empty success error; do

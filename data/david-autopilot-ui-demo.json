@@ -1,0 +1,85 @@
+{
+  "version": "1.0.0",
+  "synthetic": true,
+  "disclaimer": "Synthetic DAVID Autopilot UI evidence only. No supplier message or registry submission is sent.",
+  "actionQueue": [
+    {
+      "id": "david-demo-action-001",
+      "fieldPath": "model.identification.manufacturer.contact",
+      "action": "request_supplier_master_data",
+      "source": "supplier_master_data",
+      "state": "approval_required",
+      "approvalRequired": true,
+      "priority": 10
+    },
+    {
+      "id": "david-demo-action-002",
+      "fieldPath": "model.identification.place_of_manufacture",
+      "action": "inspect_internal_master_data",
+      "source": "erp_or_manufacturing_master",
+      "state": "ready_for_safe_local_automation",
+      "approvalRequired": false,
+      "priority": 20
+    }
+  ],
+  "sourceDiscovery": {
+    "candidates": [
+      {
+        "actionId": "david-demo-action-003",
+        "fieldPath": "model.carbon_footprint",
+        "adapter": "evidence",
+        "state": "approval_required",
+        "approvalRequired": true,
+        "value": {
+          "total_kg_co2e_per_kwh": 48.7,
+          "study_reference": "CF-LAB-2026-007"
+        },
+        "provenance": {
+          "documentId": "cf-report-demo-001",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "confidence": 0.95,
+          "extractor": "carbon_footprint_v1"
+        }
+      }
+    ]
+  },
+  "supplierQueue": {
+    "requests": [
+      {
+        "id": "supplier-demo-001",
+        "fieldPath": "model.identification.manufacturer.contact",
+        "state": "awaiting_response",
+        "approvalRequired": true,
+        "externalDeliveryAllowed": false,
+        "approvalReference": "APPROVAL-DEMO-001",
+        "deliveryReceipt": "MAIL-RECEIPT-DEMO-001",
+        "history": [
+          {"from": null, "to": "draft", "event": "created"},
+          {"from": "draft", "to": "approved", "event": "approved"},
+          {"from": "approved", "to": "ready_to_send", "event": "prepared_for_delivery"},
+          {"from": "ready_to_send", "to": "awaiting_response", "event": "delivery_recorded"}
+        ]
+      }
+    ]
+  },
+  "registryOrchestration": {
+    "id": "registry-demo-001",
+    "environment": "test",
+    "provider": "eu_dpp_registry",
+    "status": "retry_wait",
+    "networkSubmissionAllowed": false,
+    "attemptCount": 1,
+    "externalReference": "REG-DEMO-0001",
+    "retryEvidence": {
+      "errorCode": "TEMP_VALIDATION",
+      "nextRetryAt": "2026-09-24T10:00:00Z"
+    },
+    "history": [
+      {"from": null, "to": "draft", "event": "created"},
+      {"from": "draft", "to": "queued", "event": "queued"},
+      {"from": "queued", "to": "submitted", "event": "external_submission_recorded"},
+      {"from": "submitted", "to": "rejected", "event": "registry_rejected"},
+      {"from": "rejected", "to": "retry_wait", "event": "retry_scheduled"}
+    ]
+  }
+}

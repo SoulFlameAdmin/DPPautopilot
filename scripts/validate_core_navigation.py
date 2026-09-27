@@ -21,6 +21,7 @@ def main() -> None:
         "/demo/import.html?sample=1",
         "/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001",
         "/demo/settings.html?sample=1",
+        "/demo/autopilot.html?sample=1",
     ]
     for route in dashboard_routes:
         require(route in dashboard, f"U01 dashboard navigation missing route: {route}")
@@ -39,7 +40,7 @@ def main() -> None:
     ]:
         require(marker in settings, f"U01 settings surface missing evidence: {marker}")
 
-    print("U01_CORE_NAVIGATION_PASS: dashboard exposes models/items/imports/passports/settings and settings returns to core synthetic workflows without secret persistence")
+    print("U01_CORE_NAVIGATION_PASS: dashboard exposes models/items/imports/passports/settings/DAVID Autopilot and settings returns to core synthetic workflows without secret persistence")
 
 
 if __name__ == "__main__":
