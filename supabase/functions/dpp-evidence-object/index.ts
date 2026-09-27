@@ -137,6 +137,7 @@ Deno.serve(async (req: Request) => {
 
     const headers = new Headers(CORS);
     headers.set("Content-Type", metadata.contentType);
+    headers.set("Content-Length", String(bytes.byteLength));
     headers.set("Cache-Control", "private, no-store");
     return new Response(bytes, { status: 200, headers });
   }
