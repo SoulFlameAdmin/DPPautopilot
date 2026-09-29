@@ -82,7 +82,9 @@ function makeBackend(){
         model_identifier:body.p_model_identifier,
         manufacturer_name:body.p_manufacturer_name,
         category:body.p_category,
-        canonical_data:body.p_canonical_data
+        canonical_data:body.p_canonical_data,
+        created_at:'2026-09-19T00:00:00Z',
+        updated_at:'2026-09-19T00:00:00Z'
       };
       return ok(state.model);
     }
@@ -105,7 +107,9 @@ function makeBackend(){
         model_id:body.p_model_id,
         unique_identifier:body.p_unique_identifier,
         lifecycle_status:body.p_lifecycle_status,
-        canonical_data:body.p_canonical_data
+        canonical_data:body.p_canonical_data,
+        created_at:'2026-09-19T00:00:00Z',
+        updated_at:'2026-09-19T00:00:00Z'
       };
       return ok(state.item);
     }
