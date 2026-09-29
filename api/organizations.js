@@ -50,7 +50,11 @@ function validUuid(value){
 }
 
 function validateRpcShape(name,data){
-  if(name==='dpp_api_organizations_list') return Array.isArray(data)&&data.every(validOrganization);
+  if(name==='dpp_api_organizations_list'){
+    if(!Array.isArray(data)||!data.every(validOrganization)) return false;
+    const ids=data.map(value=>value.organization_id);
+    return new Set(ids).size===ids.length&&data.filter(value=>value.active).length<=1;
+  }
   if(name==='dpp_api_organization_create') return validOrganization(data);
   return true;
 }
