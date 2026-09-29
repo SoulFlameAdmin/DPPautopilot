@@ -200,17 +200,7 @@ function makeBackend(){
       record.status=record.error_count?'invalid':'validated';
       record.validated_at='2026-09-19T00:11:00Z';
       record.updated_at='2026-09-19T00:11:00Z';
-      return ok({
-        import_id:record.import_id,
-        mapping_id:record.mapping_id,
-        status:record.status,
-        row_count:record.row_count,
-        error_count:record.error_count,
-        validated_at:record.validated_at,
-        committed_at:record.committed_at,
-        created_at:record.created_at,
-        updated_at:record.updated_at
-      });
+      return ok({import_id:record.import_id,status:record.status,row_count:record.row_count,error_count:record.error_count});
     }
     if(rpc==='dpp_api_import_commit'){
       const record=state.imports.get(body.p_import_id);
@@ -228,7 +218,17 @@ function makeBackend(){
     if(rpc==='dpp_api_import_get'){
       const record=state.imports.get(body.p_import_id);
       if(!record) return fail('DP001');
-      return ok({import_id:record.import_id,status:record.status,row_count:record.row_count,error_count:record.error_count});
+      return ok({
+        import_id:record.import_id,
+        mapping_id:record.mapping_id,
+        status:record.status,
+        row_count:record.row_count,
+        error_count:record.error_count,
+        validated_at:record.validated_at,
+        committed_at:record.committed_at,
+        created_at:record.created_at,
+        updated_at:record.updated_at
+      });
     }
 
     if(rpc==='dpp_api_export_bundle'){
