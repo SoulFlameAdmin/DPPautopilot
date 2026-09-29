@@ -224,3 +224,42 @@ test('unsupported methods return 405 with Allow header',async()=>{
   assert.equal(res.statusCode,405);
   assert.equal(res.headers.allow,'GET, POST, PATCH, DELETE');
 });
+
+
+test('GET fails closed when successful member list RPC returns malformed shape',async()=>{
+  await withEnvFetch(async()=>({
+    ok:true,
+    async json(){return [{user_id:'not-a-uuid',role:'viewer'}];}
+  }),async()=>{
+    const res=makeRes();
+    await handler(req('GET'),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
+    assert.equal(res.body.includes('not-a-uuid'),false);
+  });
+});
+
+test('POST fails closed when successful member add RPC returns malformed shape',async()=>{
+  await withEnvFetch(async()=>({
+    ok:true,
+    async json(){return {user_id:USER,role:'superadmin'};}
+  }),async()=>{
+    const res=makeRes();
+    await handler(req('POST',{user_id:USER,role:'viewer'}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
+    assert.equal(res.body.includes('superadmin'),false);
+  });
+});
+
+test('DELETE fails closed when successful member delete RPC returns non-UUID',async()=>{
+  await withEnvFetch(async()=>({
+    ok:true,
+    async json(){return 'deleted-but-malformed';}
+  }),async()=>{
+    const res=makeRes();
+    await handler(req('DELETE',{user_id:USER}),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
+  });
+});
