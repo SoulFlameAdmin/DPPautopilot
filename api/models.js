@@ -46,6 +46,7 @@ function validModel(value) {
     validTimestamp(value.created_at) && validTimestamp(value.updated_at);
 }
 
+// Fail closed when PostgREST returns HTTP success with a body that drifts from the committed DB RPC contract.
 function validateRpcShape(name, data) {
   if (name === 'dpp_api_models_list') return Array.isArray(data) && data.every(validModel);
   if (name === 'dpp_api_models_create' || name === 'dpp_api_models_update_checked') return validModel(data);
