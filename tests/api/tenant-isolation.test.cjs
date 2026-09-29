@@ -74,7 +74,7 @@ test('items API ignores client organization_id tenant injection',async()=>{
 test('passport API ignores client organization_id tenant injection',async()=>{
   const restore=env(),original=global.fetch;
   let seen;
-  global.fetch=async(url,options)=>{seen={url,options};return {ok:true,async json(){return {passport_id:'3',status:'draft'};}};};
+  global.fetch=async(url,options)=>{seen={url,options};return {ok:true,async json(){return {passport_id:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',battery_item_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'draft',public_payload:{item:{unique_identifier:'urn:dpp:r04:item'}},private_payload:{},created_at:'2026-09-19T00:00:00Z',updated_at:'2026-09-19T00:00:00Z'};}};};
   try{
     const res=makeRes();
     await passport(req('POST',{
@@ -165,6 +165,7 @@ test('public passport response strips private and tenant metadata on upstream dr
     async json(){
       return {
         passport_id:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        battery_item_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         unique_identifier:'urn:dpp:r04:public',
         status:'active',
         public_payload:{item:{unique_identifier:'urn:dpp:r04:public'}},
