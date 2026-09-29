@@ -37,6 +37,8 @@ function validTenantContext(value){
   if(value.active_organization_id!==null&&!validUuid(value.active_organization_id)) return false;
   if(!value.memberships.every(member=>member&&typeof member==='object'&&!Array.isArray(member)&&
     validUuid(member.organization_id)&&TENANT_ROLES.has(member.role)&&typeof member.active==='boolean')) return false;
+  const ids=value.memberships.map(member=>member.organization_id);
+  if(new Set(ids).size!==ids.length) return false;
   const active=value.memberships.filter(member=>member.active);
   if(value.active_organization_id===null) return active.length===0;
   return active.length===1&&active[0].organization_id===value.active_organization_id;

@@ -202,3 +202,23 @@ test('GET rejects inconsistent tenant context shape',async()=>{
     assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
   });
 });
+
+
+test('GET rejects duplicate organization ids in tenant membership context',async()=>{
+  const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  await withEnvFetch(async()=>({
+    ok:true,
+    async json(){return {
+      active_organization_id:id,
+      memberships:[
+        {organization_id:id,role:'owner',active:true},
+        {organization_id:id,role:'viewer',active:false}
+      ]
+    };}
+  }),async()=>{
+    const res=makeRes();
+    await handler(makeReq('GET'),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
+  });
+});

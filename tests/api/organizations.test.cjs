@@ -304,3 +304,36 @@ test('POST fails closed when organization create RPC omits required tenant field
     assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
   });
 });
+
+
+test('GET rejects duplicate organization ids in successful discovery payload',async()=>{
+  const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  await withEnvFetch(async()=>({
+    ok:true,
+    async json(){return [
+      {organization_id:id,name:'Pilot A',slug:'pilot-a',role:'owner',active:true},
+      {organization_id:id,name:'Pilot A Duplicate',slug:'pilot-a-dup',role:'viewer',active:false}
+    ];}
+  }),async()=>{
+    const res=makeRes();
+    await handler(req('GET',null),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
+    assert.equal(res.body.includes('Duplicate'),false);
+  });
+});
+
+test('GET rejects multiple active organizations in successful discovery payload',async()=>{
+  await withEnvFetch(async()=>({
+    ok:true,
+    async json(){return [
+      {organization_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',name:'Pilot A',slug:'pilot-a',role:'owner',active:true},
+      {organization_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',name:'Pilot B',slug:'pilot-b',role:'viewer',active:true}
+    ];}
+  }),async()=>{
+    const res=makeRes();
+    await handler(req('GET',null),res);
+    assert.equal(res.statusCode,502);
+    assert.equal(JSON.parse(res.body).error.code,'UPSTREAM_ERROR');
+  });
+});
