@@ -113,10 +113,12 @@ function backend(){
       if(!state.item||body.p_battery_item_id!==IDS.item) return fail('DP405');
       state.passport={
         passport_id:IDS.passport,
+        battery_item_id:IDS.item,
         unique_identifier:state.item.unique_identifier,
         status:'draft',
         public_payload:body.p_public_payload,
         private_payload:body.p_private_payload,
+        created_at:'2026-09-19T06:44:00Z',
         updated_at:'2026-09-19T06:45:00Z'
       };
       return ok(state.passport);
@@ -125,6 +127,7 @@ function backend(){
       if(!state.passport||body.p_unique_identifier!==state.passport.unique_identifier) return fail('DP402');
       return ok({
         passport_id:IDS.passport,
+        battery_item_id:IDS.item,
         unique_identifier:state.passport.unique_identifier,
         status:state.passport.status,
         public_payload:state.passport.public_payload,
