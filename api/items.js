@@ -35,6 +35,22 @@ function validateCanonicalData(value) {
   return value == null || (!Array.isArray(value) && typeof value === 'object');
 }
 
+function validItem(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) &&
+    validUuid(value.id) && validUuid(value.model_id) &&
+    typeof value.unique_identifier === 'string' && value.unique_identifier.trim().length >= 1 && value.unique_identifier.trim().length <= 300 &&
+    LIFECYCLE.has(value.lifecycle_status) &&
+    value.canonical_data && typeof value.canonical_data === 'object' && !Array.isArray(value.canonical_data) &&
+    validTimestamp(value.created_at) && validTimestamp(value.updated_at);
+}
+
+function validateRpcShape(name, data) {
+  if (name === 'dpp_api_items_list') return Array.isArray(data) && data.every(validItem);
+  if (name === 'dpp_api_items_create' || name === 'dpp_api_items_update_checked') return validItem(data);
+  if (name === 'dpp_api_items_delete_checked') return validUuid(data);
+  return true;
+}
+
 function validateCreate(body) {
   if (!validUuid(body.model_id)) return 'a valid model_id UUID is required';
   if (typeof body.unique_identifier !== 'string' || body.unique_identifier.trim().length < 1 || body.unique_identifier.trim().length > 300) {
@@ -118,6 +134,7 @@ async function rpc(name, payload, authorization, env = process.env, fetchImpl = 
     error.publicMessage = publicMessage;
     throw error;
   }
+  if (!validateRpcShape(name, data)) throw upstreamInvalidJsonError();
   return data;
 }
 
@@ -216,4 +233,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validateCreate, validateCanonicalData, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validItem, validateRpcShape, validateCreate, validateCanonicalData, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };

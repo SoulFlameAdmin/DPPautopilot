@@ -16,6 +16,19 @@ function makeRes() {
 function makeReq(method, body, query, auth='Bearer test-token') {
   return { method, body, query: query || {}, headers: auth ? { authorization: auth } : {} };
 }
+function itemFixture(overrides={}) {
+  return {
+    id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    model_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    unique_identifier:'urn:dpp:item:1',
+    lifecycle_status:'original',
+    canonical_data:{},
+    created_at:'2026-09-19T03:00:00.000Z',
+    updated_at:'2026-09-19T04:00:00.000Z',
+    ...overrides
+  };
+}
+
 function withEnv() {
   const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
@@ -44,7 +57,7 @@ test('GET forwards caller token to tenant-scoped list RPC', async () => {
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return [{id:'1',unique_identifier:'urn:dpp:item:1'}];}};
+    return {ok:true,async json(){return [itemFixture()];}};
   };
   try {
     const res=makeRes();
@@ -61,7 +74,7 @@ test('POST validates and forwards item payload', async () => {
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',unique_identifier:'urn:dpp:item:1'};}};
+    return {ok:true,async json(){return itemFixture();}};
   };
   try {
     const res=makeRes();
@@ -188,7 +201,7 @@ test('PATCH forwards optimistic concurrency token to checked item RPC', async ()
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',lifecycle_status:'repurposed'};}};
+    return {ok:true,async json(){return itemFixture({lifecycle_status:'repurposed'});}};
   };
   try {
     const res=makeRes();
@@ -323,6 +336,24 @@ test('M18 item RPC rejects malformed successful upstream JSON', async () => {
       assert.equal(error.publicCode,'UPSTREAM_ERROR');
       assert.equal(error.publicMessage,'Database request failed.');
       assert.equal(String(error).includes('malformed upstream json'),false);
+      return true;
+    }
+  );
+});
+
+
+test('M18 item RPC rejects syntactically valid but malformed success shape', async () => {
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:true,
+    async json(){return [{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',model_id:'not-a-uuid'}];}
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_items_list',{},'Bearer test-token',env,fetchImpl,50),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'UPSTREAM_ERROR');
+      assert.equal(error.publicMessage,'Database request failed.');
       return true;
     }
   );
