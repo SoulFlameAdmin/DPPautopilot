@@ -22,6 +22,64 @@ function validUuid(value){
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+const IMPORT_STATUSES=new Set(['staged','validated','invalid','committed']);
+
+function validTimestamp(value){
+  return typeof value==='string'&&value.trim().length>0&&Number.isFinite(Date.parse(value));
+}
+
+function validNullableTimestamp(value){
+  return value===null||validTimestamp(value);
+}
+
+function validNonNegativeInteger(value){
+  return Number.isInteger(value)&&value>=0;
+}
+
+function validImportCreate(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    validUuid(value.import_id)&&value.status==='staged'&&
+    Number.isInteger(value.staged_rows)&&value.staged_rows>=1&&value.staged_rows<=1000;
+}
+
+function validImportGet(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    validUuid(value.import_id)&&
+    (value.mapping_id===null||validUuid(value.mapping_id))&&
+    IMPORT_STATUSES.has(value.status)&&
+    validNonNegativeInteger(value.row_count)&&
+    validNonNegativeInteger(value.error_count)&&
+    validNullableTimestamp(value.validated_at)&&
+    validNullableTimestamp(value.committed_at)&&
+    validTimestamp(value.created_at)&&
+    validTimestamp(value.updated_at);
+}
+
+function validImportValidate(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    validUuid(value.import_id)&&
+    (value.status==='validated'||value.status==='invalid')&&
+    Number.isInteger(value.row_count)&&value.row_count>=1&&
+    validNonNegativeInteger(value.error_count)&&
+    ((value.status==='validated'&&value.error_count===0)||
+     (value.status==='invalid'&&value.error_count>0));
+}
+
+function validImportCommit(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    validUuid(value.import_id)&&value.status==='committed'&&
+    Number.isInteger(value.committed_rows)&&value.committed_rows>=1&&
+    typeof value.already_committed==='boolean';
+}
+
+function validateRpcShape(name,data){
+  if(name==='dpp_api_import_create') return validImportCreate(data);
+  if(name==='dpp_api_import_get') return validImportGet(data);
+  if(name==='dpp_api_import_validate') return validImportValidate(data);
+  if(name==='dpp_api_import_commit') return validImportCommit(data);
+  return true;
+}
+
 function validRows(rows){
   if(!Array.isArray(rows)||rows.length<1||rows.length>1000) return false;
   return rows.every(row=>
@@ -101,6 +159,7 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
     error.publicMessage=publicMessage;
     throw error;
   }
+  if(!validateRpcShape(name,data)) throw upstreamInvalidJsonError();
   return data;
 }
 
@@ -178,4 +237,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validUuid,validRows,mapDatabaseError,rpc,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,validUuid,validTimestamp,validNullableTimestamp,validNonNegativeInteger,validImportCreate,validImportGet,validImportValidate,validImportCommit,validateRpcShape,validRows,mapDatabaseError,rpc,IMPORT_STATUSES,DEFAULT_RPC_TIMEOUT_MS};
