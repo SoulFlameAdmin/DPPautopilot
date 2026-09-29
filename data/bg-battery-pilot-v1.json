@@ -32,7 +32,8 @@
     {
       "id": "BG01",
       "title": "Intake contract validates against canonical field catalog",
-      "status": "red"
+      "status": "green",
+      "evidence": "Canonical public-only intake header contract validated against data/dpp-field-catalog.json by scripts/validate_bg_battery_pilot.py; exact-head GitHub Actions CI run 36643169500 on c84d3e51b922f11edeee363a1231a62caa0ad669 completed SUCCESS before PR #236 merged as aee742d0e908cc75d61b3f54a4e96d6eec8991ef."
     },
     {
       "id": "BG02",
