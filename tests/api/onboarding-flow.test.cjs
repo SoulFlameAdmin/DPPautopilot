@@ -113,11 +113,25 @@ function backend(){
       if(!state.item||body.p_battery_item_id!==IDS.item) return fail('DP405');
       state.passport={
         passport_id:IDS.passport,
+        battery_item_id:IDS.item,
         unique_identifier:state.item.unique_identifier,
         status:'draft',
         public_payload:body.p_public_payload,
         private_payload:body.p_private_payload,
+        created_at:'2026-09-19T06:44:00Z',
         updated_at:'2026-09-19T06:45:00Z'
+      };
+      return ok(state.passport);
+    }
+    if(rpc==='dpp_api_passport_update_checked'){
+      if(!state.passport||body.p_id!==IDS.passport) return fail('DP403');
+      if(body.p_expected_updated_at!==state.passport.updated_at) return fail('DP411');
+      state.passport={
+        ...state.passport,
+        status:body.p_status??state.passport.status,
+        public_payload:body.p_public_payload??state.passport.public_payload,
+        private_payload:body.p_private_payload??state.passport.private_payload,
+        updated_at:'2026-09-19T06:46:00Z'
       };
       return ok(state.passport);
     }
@@ -125,6 +139,7 @@ function backend(){
       if(!state.passport||body.p_unique_identifier!==state.passport.unique_identifier) return fail('DP402');
       return ok({
         passport_id:IDS.passport,
+        battery_item_id:IDS.item,
         unique_identifier:state.passport.unique_identifier,
         status:state.passport.status,
         public_payload:state.passport.public_payload,
@@ -212,6 +227,16 @@ test('new org -> member -> model/item -> import validate/commit -> public passpo
     }),res);
     assert.equal(res.statusCode,201);
     assert.equal(json(res).data.passport_id,IDS.passport);
+    assert.equal(json(res).data.status,'draft');
+
+    res=makeRes();
+    await passport(req('PATCH',{
+      id:IDS.passport,
+      status:'active',
+      expected_updated_at:'2026-09-19T06:45:00Z'
+    }),res);
+    assert.equal(res.statusCode,200);
+    assert.equal(json(res).data.status,'active');
 
     res=makeRes();
     await passport(req('GET',null,{identifier:'urn:dpp:m24:pilot:0001'},null),res);

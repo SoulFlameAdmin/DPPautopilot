@@ -16,6 +16,31 @@ function makeRes() {
 function makeReq(method, body, query, auth='Bearer test-token') {
   return { method, body, query: query || {}, headers: auth ? { authorization: auth } : {} };
 }
+function publicPassportFixture(overrides={}) {
+  return {
+    passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    unique_identifier:'urn:dpp:1',
+    status:'active',
+    public_payload:{},
+    updated_at:'2026-09-19T04:00:00.000Z',
+    ...overrides
+  };
+}
+
+function privatePassportFixture(overrides={}) {
+  return {
+    passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    status:'draft',
+    public_payload:{},
+    private_payload:{},
+    created_at:'2026-09-19T03:00:00.000Z',
+    updated_at:'2026-09-19T04:00:00.000Z',
+    ...overrides
+  };
+}
+
 function withEnv() {
   const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
@@ -31,7 +56,7 @@ test('public GET uses anon RPC without bearer', async () => {
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {status:'active',public_payload:{item:{unique_identifier:'urn:dpp:1'}}};}};
+    return {ok:true,async json(){return publicPassportFixture({unique_identifier:'urn:dpp:1',public_payload:{item:{unique_identifier:'urn:dpp:1'}}});}};
   };
   try {
     const res=makeRes();
@@ -62,7 +87,7 @@ test('private GET forwards caller bearer', async () => {
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',private_payload:{secret:true}};}};
+    return {ok:true,async json(){return privatePassportFixture({private_payload:{secret:true}});}};
   };
   try {
     const res=makeRes();
@@ -80,13 +105,18 @@ test('private GET strips authority-only fields while preserving legitimate-inter
     async json(){
       return {
         passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        status:'draft',
+        public_payload:{},
         private_payload:{
           model:{
             restricted_composition:{cathode:'NMC-811'},
             compliance_test_reports:['AUTHORITY-ONLY-REPORT']
           },
           item:{state_of_health:{percent:97}}
-        }
+        },
+        created_at:'2026-09-19T03:00:00.000Z',
+        updated_at:'2026-09-19T04:00:00.000Z'
       };
     }
   });
@@ -125,7 +155,7 @@ test('POST forwards controlled write to passport RPC', async () => {
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {passport_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',status:'draft'};}};
+    return {ok:true,async json(){return privatePassportFixture({passport_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',status:'draft'});}};
   };
   try {
     const res=makeRes();
@@ -154,7 +184,7 @@ test('PATCH validates status and forwards update', async () => {
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'active'};}};
+    return {ok:true,async json(){return privatePassportFixture({status:'active'});}};
   };
   try {
     res=makeRes();
@@ -253,6 +283,7 @@ test('public GET strips catalog-restricted nested fields even if upstream regres
     async json(){
       return {
         passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         unique_identifier:'urn:dpp:public-safe',
         status:'active',
         public_payload:{
@@ -270,7 +301,8 @@ test('public GET strips catalog-restricted nested fields even if upstream regres
           }
         },
         private_payload:{secret_marker:'TOP-LEVEL-SECRET'},
-        organization_id:'tenant-secret'
+        organization_id:'tenant-secret',
+        updated_at:'2026-09-19T04:00:00.000Z'
       };
     }
   });
@@ -371,7 +403,7 @@ test('POST allows legitimate-interest private fields through to upstream', async
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {passport_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',status:'draft'};}};
+    return {ok:true,async json(){return privatePassportFixture({passport_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',status:'draft'});}};
   };
   try {
     const res=makeRes();
@@ -393,7 +425,7 @@ test('POST allows catalog-public fields through to upstream', async () => {
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {passport_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',status:'draft'};}};
+    return {ok:true,async json(){return privatePassportFixture({passport_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',status:'draft'});}};
   };
   try {
     const res=makeRes();
@@ -478,6 +510,24 @@ test('M19 passport RPC rejects malformed successful upstream JSON', async () => 
       assert.equal(error.publicCode,'UPSTREAM_ERROR');
       assert.equal(error.publicMessage,'Database request failed.');
       assert.equal(String(error).includes('malformed upstream json'),false);
+      return true;
+    }
+  );
+});
+
+
+test('M19 passport RPC rejects syntactically valid but malformed success shape', async () => {
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:true,
+    async json(){return {passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'active',public_payload:{}};}
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_passport_public',{p_unique_identifier:'urn:dpp:bad'},null,env,fetchImpl,50),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'UPSTREAM_ERROR');
+      assert.equal(error.publicMessage,'Database request failed.');
       return true;
     }
   );
