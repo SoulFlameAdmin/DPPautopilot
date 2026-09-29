@@ -23,6 +23,27 @@ function validUuid(value){
   return typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+function upstreamShapeError(){
+  const error=new Error('UPSTREAM_ERROR');
+  error.status=502;
+  error.publicCode='UPSTREAM_ERROR';
+  error.publicMessage='Database request failed.';
+  return error;
+}
+
+function validMember(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    validUuid(value.user_id)&&typeof value.role==='string'&&
+    ['owner','admin','editor','viewer'].includes(value.role);
+}
+
+function validateRpcShape(name,data){
+  if(name==='dpp_api_members_list') return Array.isArray(data)&&data.every(validMember);
+  if(name==='dpp_api_members_add'||name==='dpp_api_members_update') return validMember(data);
+  if(name==='dpp_api_members_delete') return validUuid(data);
+  return true;
+}
+
 function validateWrite(body,requireRole){
   if(!validUuid(body.user_id)) return 'user_id must be a valid UUID';
   if(requireRole&&!MEMBER_ROLES.has(body.role)) return 'role must be admin, editor or viewer';
@@ -93,6 +114,7 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
     error.publicMessage=publicMessage;
     throw error;
   }
+  if(!validateRpcShape(name,data)) throw upstreamShapeError();
   return data;
 }
 
@@ -152,4 +174,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validUuid,validateWrite,mapDatabaseError,rpc,MEMBER_ROLES,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,validUuid,validMember,validateRpcShape,validateWrite,mapDatabaseError,rpc,MEMBER_ROLES,DEFAULT_RPC_TIMEOUT_MS};
