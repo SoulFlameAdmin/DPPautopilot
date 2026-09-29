@@ -14,6 +14,21 @@ function makeRes(){
 function makeReq(method,body,query,auth='Bearer test-token'){
   return {method,body,query:query||{},headers:auth?{authorization:auth}:{}};
 }
+function importGetFixture(overrides={}){
+  return {
+    import_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    mapping_id:null,
+    status:'staged',
+    row_count:0,
+    error_count:0,
+    validated_at:null,
+    committed_at:null,
+    created_at:'2026-09-19T00:00:00.000Z',
+    updated_at:'2026-09-19T00:00:00.000Z',
+    ...overrides
+  };
+}
+
 function withEnv(){
   const oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
@@ -99,7 +114,7 @@ test('GET requires a valid import UUID and forwards secure status read',async()=
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {import_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'validated'};}};
+    return {ok:true,async json(){return importGetFixture({status:'validated',row_count:1,error_count:0,validated_at:'2026-09-19T00:01:00.000Z',updated_at:'2026-09-19T00:01:00.000Z'});}};
   };
   try{
     res=makeRes();
@@ -116,7 +131,7 @@ for(const action of ['validate','commit']){
     let seen;
     global.fetch=async(url,options)=>{
       seen={url,options};
-      return {ok:true,async json(){return {import_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:action==='validate'?'validated':'committed'};}};
+      return {ok:true,async json(){return action==='validate'?{import_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'validated',row_count:1,error_count:0}:{import_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'committed',committed_rows:1,already_committed:false};}};
     };
     try{
       const res=makeRes();
@@ -255,4 +270,37 @@ test('M20 import RPC rejects malformed successful upstream JSON', async () => {
       return true;
     }
   );
+});
+
+
+test('M20 import RPC rejects syntactically valid but malformed success shape',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:true,
+    async json(){return {import_id:'not-a-uuid',status:'staged',staged_rows:1};}
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_import_create',{p_rows:[{}]},'Bearer test-token',env,fetchImpl,50),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'UPSTREAM_ERROR');
+      assert.equal(error.publicMessage,'Database request failed.');
+      return true;
+    }
+  );
+});
+
+test('M20 import validate shape enforces status/error consistency',()=>{
+  assert.equal(handler._test.validImportValidate({
+    import_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    status:'validated',row_count:1,error_count:0
+  }),true);
+  assert.equal(handler._test.validImportValidate({
+    import_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    status:'validated',row_count:1,error_count:2
+  }),false);
+  assert.equal(handler._test.validImportValidate({
+    import_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    status:'invalid',row_count:1,error_count:2
+  }),true);
 });
