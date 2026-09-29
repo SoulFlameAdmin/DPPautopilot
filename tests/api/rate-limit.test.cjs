@@ -138,6 +138,7 @@ test('31st anonymous public passport read is blocked before upstream',async()=>{
       async json(){
         return {
           passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+          battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
           unique_identifier:'urn:dpp:r05:public',
           status:'active',
           public_payload:{},
