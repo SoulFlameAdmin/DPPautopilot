@@ -177,11 +177,16 @@ function makeBackend(){
     if(rpc==='dpp_api_import_create'){
       const record={
         import_id:IDS.import,
+        mapping_id:body.p_mapping_id??null,
         status:'staged',
         staged_rows:body.p_rows.length,
         rows:body.p_rows,
         row_count:0,
         error_count:0,
+        validated_at:null,
+        committed_at:null,
+        created_at:'2026-09-19T00:10:00Z',
+        updated_at:'2026-09-19T00:10:00Z',
         already_committed:false
       };
       state.imports.set(IDS.import,record);
@@ -193,7 +198,19 @@ function makeBackend(){
       record.row_count=record.rows.length;
       record.error_count=record.rows.reduce((n,r)=>n+(r.validation_errors||[]).length,0);
       record.status=record.error_count?'invalid':'validated';
-      return ok({import_id:record.import_id,status:record.status,row_count:record.row_count,error_count:record.error_count});
+      record.validated_at='2026-09-19T00:11:00Z';
+      record.updated_at='2026-09-19T00:11:00Z';
+      return ok({
+        import_id:record.import_id,
+        mapping_id:record.mapping_id,
+        status:record.status,
+        row_count:record.row_count,
+        error_count:record.error_count,
+        validated_at:record.validated_at,
+        committed_at:record.committed_at,
+        created_at:record.created_at,
+        updated_at:record.updated_at
+      });
     }
     if(rpc==='dpp_api_import_commit'){
       const record=state.imports.get(body.p_import_id);
@@ -204,6 +221,8 @@ function makeBackend(){
       if(record.status!=='validated'||record.error_count) return fail('DP003','invalid commit internal');
       record.status='committed';
       record.already_committed=false;
+      record.committed_at='2026-09-19T00:12:00Z';
+      record.updated_at='2026-09-19T00:12:00Z';
       return ok({import_id:record.import_id,status:'committed',committed_rows:record.row_count,already_committed:false});
     }
     if(rpc==='dpp_api_import_get'){
