@@ -34,7 +34,7 @@ function errorFetch(code,message='sensitive tenant detail'){
 test('models API ignores client organization_id tenant injection',async()=>{
   const restore=env(),original=global.fetch;
   let seen;
-  global.fetch=async(url,options)=>{seen={url,options};return {ok:true,async json(){return {id:'1'};}};};
+  global.fetch=async(url,options)=>{seen={url,options};return {ok:true,async json(){return {id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',model_identifier:'SAFE',manufacturer_name:'Maker',category:'portable',canonical_data:{},created_at:'2026-09-19T00:00:00Z',updated_at:'2026-09-19T00:00:00Z'};}};};
   try{
     const res=makeRes();
     await models(req('POST',{
@@ -54,7 +54,7 @@ test('models API ignores client organization_id tenant injection',async()=>{
 test('items API ignores client organization_id tenant injection',async()=>{
   const restore=env(),original=global.fetch;
   let seen;
-  global.fetch=async(url,options)=>{seen={url,options};return {ok:true,async json(){return {id:'2'};}};};
+  global.fetch=async(url,options)=>{seen={url,options};return {ok:true,async json(){return {id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',model_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',unique_identifier:'urn:dpp:r04:item',lifecycle_status:'original',canonical_data:{},created_at:'2026-09-19T00:00:00Z',updated_at:'2026-09-19T00:00:00Z'};}};};
   try{
     const res=makeRes();
     await items(req('POST',{
