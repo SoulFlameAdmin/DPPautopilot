@@ -642,6 +642,8 @@ jobs:
         run: python scripts/validate_auth_contract.py
       - name: Validate M01 recovery completion contract
         run: python scripts/validate_auth_recovery_contract.py
+      - name: Test M01 runtime recovery evidence verifier
+        run: python -m unittest tests.unit.test_m01_recovery_runtime_evidence -v
       - name: Validate R06 auth security review
         run: python scripts/validate_auth_security_review.py
       - name: Validate R07 privacy data inventory
