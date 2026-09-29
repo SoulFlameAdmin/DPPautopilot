@@ -1,0 +1,83 @@
+{
+  "version": "2026-09-30",
+  "market": "BG",
+  "mode": "managed_pilot",
+  "firstVertical": "industrial_energy_storage_over_2_kwh",
+  "regulation": {
+    "instrument": "Regulation (EU) 2023/1542",
+    "batteryPassportStart": "2027-02-18",
+    "article": "77",
+    "annex": "XIII"
+  },
+  "acceptance": {
+    "customerOrganizations": 1,
+    "modelsMinimum": 1,
+    "itemsMinimum": 10,
+    "publicRestrictedLeakMaximum": 0,
+    "identifierUniquenessRate": 1,
+    "qrResolutionRate": 1
+  },
+  "dataPolicy": {
+    "defaultAccessClasses": [
+      "public",
+      "public_identifier"
+    ],
+    "excludedByDefault": [
+      "legitimate_interest",
+      "authority_only"
+    ],
+    "realCustomerDataAllowedOnlyAfter": "explicit customer pilot agreement and approved transfer channel"
+  },
+  "gates": [
+    {
+      "id": "BG01",
+      "title": "Intake contract validates against canonical field catalog",
+      "status": "red"
+    },
+    {
+      "id": "BG02",
+      "title": "Real customer dataset imports without silent row loss",
+      "status": "blocked"
+    },
+    {
+      "id": "BG03",
+      "title": "Public projection has zero restricted-field leakage",
+      "status": "red"
+    },
+    {
+      "id": "BG04",
+      "title": "Pilot identifiers are unique",
+      "status": "red"
+    },
+    {
+      "id": "BG05",
+      "title": "Pilot QR resolves to intended passport URLs",
+      "status": "red"
+    },
+    {
+      "id": "BG06",
+      "title": "Completeness and missing-data report generated",
+      "status": "red"
+    },
+    {
+      "id": "BG07",
+      "title": "Export/evidence package generated",
+      "status": "red"
+    },
+    {
+      "id": "BG08",
+      "title": "UAT deployment READY and smoke-tested",
+      "status": "red"
+    },
+    {
+      "id": "BG09",
+      "title": "Customer UAT recorded",
+      "status": "blocked"
+    },
+    {
+      "id": "BG10",
+      "title": "Commercial offer scope and exclusions approved",
+      "status": "red"
+    }
+  ]
+}
