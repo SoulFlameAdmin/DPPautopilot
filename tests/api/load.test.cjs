@@ -88,7 +88,7 @@ test('synthetic multi-surface concurrency, import volume and overload budgets pa
         data={passport_id:UUID,battery_item_id:UUID,status:'active',public_payload:{},private_payload:{},created_at:'2026-09-19T00:00:00Z',updated_at:'2026-09-19T00:00:00Z'};
         break;
       case 'dpp_api_import_get':
-        data={import_id:UUID,status:'validated',row_count:1,error_count:0};
+        data={import_id:UUID,mapping_id:null,status:'validated',row_count:1,error_count:0,validated_at:'2026-09-19T00:01:00Z',committed_at:null,created_at:'2026-09-19T00:00:00Z',updated_at:'2026-09-19T00:01:00Z'};
         break;
       case 'dpp_api_export_bundle':
         data={schema_version:1,organization_id:UUID,counts:{battery_models:0,battery_items:0,passports:0}};
