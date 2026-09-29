@@ -36,6 +36,24 @@ function validTimestamp(value) {
   return typeof value === 'string' && value.trim().length > 0 && Number.isFinite(Date.parse(value));
 }
 
+function validModel(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) &&
+    validUuid(value.id) &&
+    typeof value.model_identifier === 'string' && value.model_identifier.trim().length >= 1 && value.model_identifier.trim().length <= 128 &&
+    typeof value.manufacturer_name === 'string' && value.manufacturer_name.trim().length >= 1 && value.manufacturer_name.trim().length <= 250 &&
+    CATEGORIES.has(value.category) &&
+    value.canonical_data && typeof value.canonical_data === 'object' && !Array.isArray(value.canonical_data) &&
+    validTimestamp(value.created_at) && validTimestamp(value.updated_at);
+}
+
+// Fail closed when PostgREST returns HTTP success with a body that drifts from the committed DB RPC contract.
+function validateRpcShape(name, data) {
+  if (name === 'dpp_api_models_list') return Array.isArray(data) && data.every(validModel);
+  if (name === 'dpp_api_models_create' || name === 'dpp_api_models_update_checked') return validModel(data);
+  if (name === 'dpp_api_models_delete_checked') return validUuid(data);
+  return true;
+}
+
 function validateCreate(body) {
   if (typeof body.model_identifier !== 'string' || body.model_identifier.trim().length < 1 || body.model_identifier.trim().length > 128) {
     return 'model_identifier must contain 1..128 characters';
@@ -121,6 +139,7 @@ async function rpc(name, payload, authorization, env = process.env, fetchImpl = 
     error.publicMessage = publicMessage;
     throw error;
   }
+  if (!validateRpcShape(name, data)) throw upstreamInvalidJsonError();
   return data;
 }
 
@@ -219,4 +238,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validateCreate, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validModel, validateRpcShape, validateCreate, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
