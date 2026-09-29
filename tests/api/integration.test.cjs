@@ -139,6 +139,7 @@ function makeBackend(){
         status:'draft',
         public_payload:body.p_public_payload,
         private_payload:body.p_private_payload,
+        created_at:'2026-09-19T00:00:00Z',
         updated_at:'2026-09-19T00:00:00Z'
       };
       state.passportCreateWrites+=1;
@@ -163,6 +164,7 @@ function makeBackend(){
       if(!state.passport||body.p_unique_identifier!==state.passport.unique_identifier) return fail('DP402');
       return ok({
         passport_id:state.passport.passport_id,
+        battery_item_id:state.passport.battery_item_id,
         unique_identifier:state.passport.unique_identifier,
         status:state.passport.status,
         public_payload:state.passport.public_payload,
