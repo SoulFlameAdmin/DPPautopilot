@@ -27,6 +27,63 @@ function bearer(req){
   return typeof value==='string'&&/^Bearer\s+\S+$/i.test(value)?value:null;
 }
 
+function validUuid(value){
+  return typeof value==='string'&&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function validTimestamp(value){
+  return typeof value==='string'&&value.trim().length>0&&Number.isFinite(Date.parse(value));
+}
+
+function plainObject(value){
+  return !!value&&typeof value==='object'&&!Array.isArray(value);
+}
+
+function validEvidenceManifestItem(value){
+  return plainObject(value)&&
+    validUuid(value.id)&&
+    typeof value.storage_path==='string'&&value.storage_path.trim().length>0&&
+    typeof value.original_filename==='string'&&value.original_filename.trim().length>0&&
+    typeof value.content_type==='string'&&value.content_type.trim().length>0&&
+    Number.isInteger(value.byte_size)&&value.byte_size>=0&&
+    typeof value.sha256_hex==='string'&&/^[0-9a-f]{64}$/i.test(value.sha256_hex);
+}
+
+function validExportBundle(value){
+  if(!plainObject(value)) return false;
+  if(value.schema_version!==1) return false;
+  if(!validUuid(value.organization_id)) return false;
+  if(!Array.isArray(value.evidence_manifest)||!value.evidence_manifest.every(validEvidenceManifestItem)) return false;
+
+  if(value.generated_at!==undefined&&!validTimestamp(value.generated_at)) return false;
+  if(value.organization!==undefined){
+    if(!plainObject(value.organization)) return false;
+    if(value.organization.id!==undefined&&value.organization.id!==value.organization_id) return false;
+  }
+  if(value.records!==undefined){
+    if(!plainObject(value.records)) return false;
+    for(const key of ['battery_models','battery_items','passports','passport_versions','audit_log']){
+      if(!Array.isArray(value.records[key])) return false;
+    }
+  }
+  if(value.counts!==undefined){
+    if(!plainObject(value.counts)) return false;
+    for(const key of ['battery_models','battery_items','passports','passport_versions','audit_log','evidence_manifest']){
+      if(!Number.isInteger(value.counts[key])||value.counts[key]<0) return false;
+    }
+    if(value.records){
+      if(value.counts.battery_models!==value.records.battery_models.length) return false;
+      if(value.counts.battery_items!==value.records.battery_items.length) return false;
+      if(value.counts.passports!==value.records.passports.length) return false;
+      if(value.counts.passport_versions!==value.records.passport_versions.length) return false;
+      if(value.counts.audit_log!==value.records.audit_log.length) return false;
+    }
+    if(value.counts.evidence_manifest!==value.evidence_manifest.length) return false;
+  }
+  return true;
+}
+
 function mapDatabaseError(data){
   const mapped=mapSharedDatabaseError('export',data);
   return [mapped.status,mapped.code,mapped.message];
@@ -127,6 +184,7 @@ async function rpc(authorization,env=process.env,fetchImpl=fetch,timeoutMs=DEFAU
     error.publicMessage=publicMessage;
     throw error;
   }
+  if(!validExportBundle(data)) throw upstreamInvalidJsonError();
   return data;
 }
 
@@ -758,4 +816,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,fetchEvidenceObject,evidenceObjectTimeoutError,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,canonicalEvidenceManifest,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,responseBodyChunks,writeBase64VerifiedSpool,sendNdjsonSpoolPackage,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION,DEFAULT_RPC_TIMEOUT_MS,DEFAULT_EVIDENCE_OBJECT_TIMEOUT_MS};
+module.exports._test={bearer,validUuid,validTimestamp,plainObject,validEvidenceManifestItem,validExportBundle,mapDatabaseError,rpc,fetchEvidenceObject,evidenceObjectTimeoutError,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,canonicalEvidenceManifest,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,responseBodyChunks,writeBase64VerifiedSpool,sendNdjsonSpoolPackage,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION,DEFAULT_RPC_TIMEOUT_MS,DEFAULT_EVIDENCE_OBJECT_TIMEOUT_MS};
