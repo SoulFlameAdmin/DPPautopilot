@@ -22,6 +22,18 @@ function makeReq(method, body, query, auth='Bearer test-token') {
     headers: auth ? { authorization: auth } : {}
   };
 }
+function modelFixture(overrides={}) {
+  return {
+    id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    model_identifier:'MODEL-1',
+    manufacturer_name:'Maker',
+    category:'electric_vehicle',
+    canonical_data:{},
+    created_at:'2026-09-19T03:00:00.000Z',
+    updated_at:'2026-09-19T04:00:00.000Z',
+    ...overrides
+  };
+}
 
 test('rejects missing bearer auth before any upstream call', async () => {
   const original = global.fetch;
@@ -47,7 +59,7 @@ test('GET forwards user bearer token to tenant-scoped list RPC', async () => {
   let seen;
   global.fetch = async (url, options) => {
     seen = { url, options };
-    return { ok: true, async json() { return [{ id: '1', model_identifier: 'A' }]; } };
+    return { ok: true, async json() { return [modelFixture({model_identifier:'A'})]; } };
   };
   try {
     const res = makeRes();
@@ -77,7 +89,7 @@ test('POST validates and forwards canonical model payload', async () => {
     return {
       ok: true,
       async json() {
-        return { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', model_identifier: 'MODEL-1' };
+        return modelFixture();
       }
     };
   };
@@ -197,7 +209,7 @@ test('PATCH forwards optimistic concurrency token to checked model RPC', async (
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
-    return {ok:true,async json(){return {id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',model_identifier:'MODEL-2'};}};
+    return {ok:true,async json(){return modelFixture({model_identifier:'MODEL-2'});}};
   };
   try {
     const res=makeRes();
@@ -357,6 +369,24 @@ test('M17 model RPC rejects malformed successful upstream JSON', async () => {
       assert.equal(error.publicCode,'UPSTREAM_ERROR');
       assert.equal(error.publicMessage,'Database request failed.');
       assert.equal(String(error).includes('malformed upstream json'),false);
+      return true;
+    }
+  );
+});
+
+
+test('M17 model RPC rejects syntactically valid but malformed success shape', async () => {
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:true,
+    async json(){return [{id:'not-a-uuid',model_identifier:'A'}];}
+  });
+  await assert.rejects(
+    ()=>handler._test.rpc('dpp_api_models_list',{},'Bearer test-token',env,fetchImpl,50),
+    error=>{
+      assert.equal(error.status,502);
+      assert.equal(error.publicCode,'UPSTREAM_ERROR');
+      assert.equal(error.publicMessage,'Database request failed.');
       return true;
     }
   );
