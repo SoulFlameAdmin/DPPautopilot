@@ -32,6 +32,43 @@ function validObject(value) {
   return value == null || (!Array.isArray(value) && typeof value === 'object');
 }
 
+const PASSPORT_STATUSES = new Set(['draft','active','suspended','retired']);
+
+function plainObject(value) {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function validPublicPassport(value) {
+  return plainObject(value) &&
+    validUuid(value.passport_id) &&
+    validUuid(value.battery_item_id) &&
+    typeof value.unique_identifier === 'string' &&
+    value.unique_identifier.trim().length >= 1 &&
+    value.unique_identifier.trim().length <= 300 &&
+    value.status === 'active' &&
+    plainObject(value.public_payload) &&
+    validTimestamp(value.updated_at);
+}
+
+function validPrivatePassport(value) {
+  return plainObject(value) &&
+    validUuid(value.passport_id) &&
+    validUuid(value.battery_item_id) &&
+    PASSPORT_STATUSES.has(value.status) &&
+    plainObject(value.public_payload) &&
+    plainObject(value.private_payload) &&
+    validTimestamp(value.created_at) &&
+    validTimestamp(value.updated_at);
+}
+
+function validateRpcShape(name, data) {
+  if (name === 'dpp_api_passport_public') return validPublicPassport(data);
+  if (name === 'dpp_api_passport_private' ||
+      name === 'dpp_api_passport_create' ||
+      name === 'dpp_api_passport_update_checked') return validPrivatePassport(data);
+  return true;
+}
+
 function validatePublicPayloadAccess(value) {
   const restricted = findRestrictedPublicPaths(value);
   if (restricted.length === 0) return null;
@@ -136,6 +173,7 @@ async function rpc(name, payload, authorization, env = process.env, fetchImpl = 
     error.publicMessage = publicMessage;
     throw error;
   }
+  if (!validateRpcShape(name, data)) throw upstreamInvalidJsonError();
   return data;
 }
 
@@ -227,7 +265,7 @@ async function handler(req, res) {
     if (!validTimestamp(body.expected_updated_at)) {
       return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
     }
-    if (body.status != null && !['draft','active','suspended','retired'].includes(body.status)) {
+    if (body.status != null && !PASSPORT_STATUSES.has(body.status)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
     }
     if (!validObject(body.public_payload)) {
@@ -266,4 +304,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPrivatePassport, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, DEFAULT_RPC_TIMEOUT_MS };
