@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-30",
+  "version": "2026-09-30-nonclient-ready",
   "market": "BG",
   "mode": "managed_pilot",
   "firstVertical": "industrial_energy_storage_over_2_kwh",
@@ -43,27 +43,32 @@
     {
       "id": "BG03",
       "title": "Public projection has zero restricted-field leakage",
-      "status": "red"
+      "status": "green",
+      "evidence": "Exact-head CI run 36745103931 on 423a06660d7a301cf8711eabdc9e3325fb8a59f9 completed SUCCESS. Node suite tests/api/bg-battery-pilot.test.cjs exercised the real api/_access_policy.js sanitizer across 10 synthetic pilot items and found zero restricted/authority/item-private leakage."
     },
     {
       "id": "BG04",
       "title": "Pilot identifiers are unique",
-      "status": "red"
+      "status": "green",
+      "evidence": "Exact-head CI run 36745103931 completed SUCCESS. scripts/generate_bg_battery_pilot_evidence.py generated and verified 10/10 unique synthetic pilot identifiers for SFBG-ESS-100-DEMO."
     },
     {
       "id": "BG05",
       "title": "Pilot QR resolves to intended passport URLs",
-      "status": "red"
+      "status": "green",
+      "evidence": "Exact-head CI run 36745103931 completed SUCCESS. The BG evidence generator created 10 QR PNG carriers and zbar decoded all 10 byte-for-byte to their intended synthetic BG pilot passport URLs."
     },
     {
       "id": "BG06",
       "title": "Completeness and missing-data report generated",
-      "status": "red"
+      "status": "green",
+      "evidence": "Exact-head CI run 36745103931 completed SUCCESS. The BG evidence generator produced per-item public completeness reports for all 10 synthetic acceptance items with zero missing required public fields."
     },
     {
       "id": "BG07",
       "title": "Export/evidence package generated",
-      "status": "red"
+      "status": "green",
+      "evidence": "Exact-head CI run 36745103931 completed SUCCESS and uploaded artifact bg-battery-pilot-nonclient-evidence, including manifest, synthetic dataset, public projections, completeness report, QR route index and bg-battery-pilot-evidence.zip."
     },
     {
       "id": "BG08",
@@ -78,7 +83,8 @@
     {
       "id": "BG10",
       "title": "Commercial offer scope and exclusions approved",
-      "status": "red"
+      "status": "green",
+      "evidence": "docs/BG_BATTERY_PILOT_COMMERCIAL_OFFER.md is versioned and validated by exact-head CI run 36745103931. It defines managed-pilot scope, deliverables, customer responsibilities, exclusions, acceptance boundaries and commercial handoff; it explicitly avoids legal-certification and pre-UAT production claims."
     }
   ]
 }
