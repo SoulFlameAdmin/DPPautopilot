@@ -44,6 +44,16 @@ jobs:
         run: python scripts/validate_field_catalog.py
       - name: Validate BG Battery Pilot contract
         run: python scripts/validate_bg_battery_pilot.py
+      - name: Generate BG Battery Pilot non-client acceptance evidence
+        run: python scripts/generate_bg_battery_pilot_evidence.py --out artifacts/bg-battery-pilot --require-qr-decode
+      - name: Run BG03 public projection leak suite
+        run: node --test tests/api/bg-battery-pilot.test.cjs
+      - name: Upload BG Battery Pilot non-client evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bg-battery-pilot-nonclient-evidence
+          path: artifacts/bg-battery-pilot/
+          if-no-files-found: error
       - name: Validate M09 schema traceability
         run: python scripts/validate_schema_traceability.py
       - name: Validate M10 access-class policy
