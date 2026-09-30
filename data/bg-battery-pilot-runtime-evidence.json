@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "observedAt": "2026-09-30",
+  "gate": "BG08",
+  "result": "PASS",
+  "target": "production",
+  "repository": "SoulFlameAdmin/DPPautopilot",
+  "commit": "07d20896b8342380954e5e93e7ddb4062964c050",
+  "vercel": {
+    "projectId": "prj_G5l5aZmy3TY7wVRZsl4zCG7zG3yr",
+    "deploymentId": "dpl_FqUQgVYN8MY2EDYsMUAhfuHZkn4U",
+    "state": "READY",
+    "readyState": "READY",
+    "productionAlias": "https://dpp-autopilot.vercel.app"
+  },
+  "smoke": [
+    {
+      "path": "/demo/bg-battery-passport.html?id=urn%3Adpp%3Apilot%3Abg%3Abattery%3ASFBG-ESS-100-DEMO%3A000001",
+      "status": 200
+    },
+    {
+      "path": "/assets/csp/bg-battery-passport.js",
+      "status": 200
+    },
+    {
+      "path": "/data/dpp-field-catalog.json",
+      "status": 200
+    },
+    {
+      "path": "/data/sample-battery.json",
+      "status": 200
+    },
+    {
+      "path": "/data/bg-battery-pilot-v1.json",
+      "status": 200
+    }
+  ],
+  "notes": [
+    "Production deployment metadata was read through the authorized Vercel connection.",
+    "HTTP smoke was performed against the production alias after the exact merge commit reached READY.",
+    "This evidence closes deployment readiness only; BG02 and BG09 still require a real customer dataset and real customer UAT."
+  ]
+}
