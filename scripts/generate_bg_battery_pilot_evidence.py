@@ -196,14 +196,10 @@ def main():
                 raise AssertionError(f"BG05 QR decode mismatch for item {index}: {decoded!r} != {url!r}")
         routes.append({"item": index, "unique_identifier": uid, "url": url, "qr": png.relative_to(ROOT).as_posix(), "decoded": decoded})
 
-    (out / "synthetic-dataset.json").write_text(json.dumps(fixture, indent=2, ensure_ascii=False) + "
-", encoding="utf-8")
-    (out / "public-passports.json").write_text(json.dumps(projections, indent=2, ensure_ascii=False) + "
-", encoding="utf-8")
-    (out / "completeness-report.json").write_text(json.dumps(completeness, indent=2, ensure_ascii=False) + "
-", encoding="utf-8")
-    (out / "qr-routes.json").write_text(json.dumps(routes, indent=2, ensure_ascii=False) + "
-", encoding="utf-8")
+    (out / "synthetic-dataset.json").write_text(json.dumps(fixture, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (out / "public-passports.json").write_text(json.dumps(projections, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (out / "completeness-report.json").write_text(json.dumps(completeness, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (out / "qr-routes.json").write_text(json.dumps(routes, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     csv_buf = io.StringIO()
     writer = csv.writer(csv_buf)
@@ -229,8 +225,7 @@ def main():
             "BG09": "Requires recorded UAT by a real pilot customer.",
         },
     }
-    (out / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "
-", encoding="utf-8")
+    (out / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     zip_path = out / "bg-battery-pilot-evidence.zip"
     with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
