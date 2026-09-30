@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-30-nonclient-ready",
+  "version": "2026-09-30-client-gates-only",
   "market": "BG",
   "mode": "managed_pilot",
   "firstVertical": "industrial_energy_storage_over_2_kwh",
@@ -73,7 +73,8 @@
     {
       "id": "BG08",
       "title": "UAT deployment READY and smoke-tested",
-      "status": "red"
+      "status": "green",
+      "evidence": "Vercel production deployment dpl_FqUQgVYN8MY2EDYsMUAhfuHZkn4U for exact main merge commit 07d20896b8342380954e5e93e7ddb4062964c050 reached READY. Authorized production smoke against https://dpp-autopilot.vercel.app returned HTTP 200 for the BG pilot passport route, its JS, field catalog, synthetic battery fixture and pilot tracker. Durable observation is recorded in data/bg-battery-pilot-runtime-evidence.json."
     },
     {
       "id": "BG09",
