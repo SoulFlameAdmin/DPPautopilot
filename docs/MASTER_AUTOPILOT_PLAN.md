@@ -773,3 +773,7 @@ Detailed execution source: docs/DPP_CRYPTO_INTEGRATION_PLAN.md (CR01-CR25). It a
 | BAT48 | Manufacturer dashboard | BAT14,BAT24,BAT30 | Manufacturer can view models, batteries, completeness, errors, imports, QR/NFC state and verification | Authenticated E2E tests | YELLOW |
 | BAT49 | DPP integration API | M17-M23,BAT37,BAT42 | Versioned API supports model/item/passport CRUD, imports, verification, BMS ingestion and permissions | API/security suite | YELLOW |
 | BAT50 | Battery Platform production acceptance | BAT01-BAT49,C15 | Security, backups, monitoring, tests, docs and at least one real manufacturer pilot satisfy final acceptance | Full production evidence pack + pilot UAT | RED |
+
+## DPP SESSION BRIDGE
+
+Cross-session coordination source: `docs/DPP_SESSION_BRIDGE.md`, GitHub issue #241. GitHub issue comments are the shared message transport between Mitko/DPP and Borko/DPP CRYPTO; Gmail is fallback only.
