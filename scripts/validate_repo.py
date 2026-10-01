@@ -87,7 +87,7 @@ def main():
         if len(cells) < 6:
             continue
         tid = cells[0]
-        if not re.fullmatch(r"[A-Z]{1,4}\\d{2}", tid):
+        if not re.fullmatch(r"[A-Z]{1,4}\\d{2,3}", tid):
             continue
         canonical_tasks[tid] = {
             "title": cells[1],
