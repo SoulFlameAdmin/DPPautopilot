@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DPP CRYPTO · Live Progress</title>
+  <meta name="description" content="Видим прогрес на Secure NFC криптографския слой на DPP Battery Autopilot.">
+  <link rel="stylesheet" href="/assets/csp/dpp-crypto-progress.css">
+</head>
+<body>
+  <main class="crypto-shell">
+    <header class="crypto-head">
+      <div><div class="eyebrow">DPP Battery Trust OS</div><h1>DPP CRYPTO · Live Progress</h1><p>GREEN се брои само при implementation + PASS test + concrete evidence.</p></div>
+      <a class="back" href="/">← DPP Dashboard</a>
+    </header>
+    <section class="summary" aria-label="Crypto progress summary">
+      <article><strong id="pct">0%</strong><span>Доказано GREEN</span></article>
+      <article><strong id="green">0</strong><span>GREEN</span></article>
+      <article><strong id="yellow">0</strong><span>YELLOW</span></article>
+      <article><strong id="red">0</strong><span>RED</span></article>
+      <article><strong id="blocked">0</strong><span>BLOCKED</span></article>
+    </section>
+    <section class="status-card">
+      <div><span>Текуща</span><strong id="current">—</strong></div>
+      <div><span>Последно завършена</span><strong id="last">—</strong></div>
+      <div><span>Следваща</span><strong id="next">—</strong></div>
+      <div><span>Blocker</span><strong id="blocker">Няма</strong></div>
+      <div><span>Branch</span><code id="branch">—</code></div>
+      <div><span>PR</span><a id="pr" href="#" rel="noreferrer">—</a></div>
+      <div><span>Tracked commit</span><code id="commit">—</code></div>
+      <div><span>CI / tests</span><strong id="ci">—</strong></div>
+      <div><span>Обновено</span><strong id="updated">—</strong></div>
+    </section>
+    <section><div class="section-head"><h2>CR01–CR25</h2><span id="total">25 точки</span></div><div id="points" class="points" aria-live="polite">Зареждане…</div></section>
+  </main>
+  <script src="/assets/csp/dpp-crypto-progress.js"></script>
+</body>
+</html>
