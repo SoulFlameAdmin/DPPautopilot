@@ -786,11 +786,11 @@ These tasks extend Battery Platform V3 into the full Battery Trust OS. Borko own
 | ID | Task | Depends on | Acceptance criteria | Evidence | Status |
 |---|---|---|---|---|---|
 | BAT51 | Supplier registry | BAT01 | Tenant-scoped supplier records exist with stable external reference, legal name and lifecycle status | Migration replay + DB subset | YELLOW |
-| BAT52 | Supplier portal invitation model | BAT51,M03 | Manufacturer can invite a supplier with least-privilege scoped access | Auth/API/E2E tests | RED |
+| BAT52 | Supplier portal invitation model | BAT51,M03 | Manufacturer can invite a supplier with least-privilege scoped access | Auth/API/E2E tests | YELLOW |
 | BAT53 | Supplier data packages | BAT51,BAT01 | Supplier data can be submitted as versioned packages scoped to model/item/component/material | Migration replay + DB subset | YELLOW |
 | BAT54 | Component and material scoping | BAT53 | Supplier packages can target exact model/item/component/material references without ambiguity | DB/API tests | YELLOW |
 | BAT55 | Supplier package history | BAT53,BAT08 | Supplier package versions are append-only and supersession is auditable | Mutation-negative DB tests | YELLOW |
-| BAT56 | Supplier signature envelope hook | BAT53 | Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration | Contract tests | RED |
+| BAT56 | Supplier signature envelope hook | BAT53 | Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration | Contract tests | YELLOW |
 | BAT57 | Supplier verification workflow | BAT53 | Packages move through unverified/validated/verified/rejected states with evidence | API/DB tests | YELLOW |
 | BAT58 | Supplier missing-data queue | BAT14,BAT53 | Missing required supplier fields are grouped by supplier and affected product | Integration tests | YELLOW |
 | BAT59 | Supplier reminder workflow | BAT58 | Authorized users can trigger auditable reminders without exposing unrelated tenant data | API/security tests | YELLOW |
