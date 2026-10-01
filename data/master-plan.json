@@ -1,8 +1,8 @@
 {
   "project": "DPP Autopilot",
-  "version": "MASTER PLAN v2.6",
+  "version": "MASTER PLAN v2.7",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T01:12:00+03:00",
+  "updatedAt": "2026-10-02T02:15:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1093,9 +1093,9 @@
     },
     {
       "id": "BATTERY_PLATFORM",
-      "label": "BATTERY PLATFORM V3",
-      "purpose": "Schema-driven Battery Passport data engine, rapid import, immutable physical identity, Secure NFC authenticity, BMS ingestion and manufacturer operations.",
-      "exitCriteria": "BAT01-BAT50 satisfy evidence-backed production acceptance including real pilot UAT.",
+      "label": "BATTERY TRUST OS",
+      "purpose": "Battery passport automation, physical identity, suppliers, BMS, factory provisioning, lifecycle, security and manufacturer operations.",
+      "exitCriteria": "BAT01-BAT100 satisfy evidence-backed acceptance, including real manufacturer UAT.",
       "tasks": [
         {
           "id": "BAT01",
@@ -1546,6 +1546,456 @@
           "evidenceRequired": "Full production evidence pack + pilot UAT",
           "status": "red",
           "evidence": "Depends on remaining Battery Platform tasks, C12 legal sign-off and C13 real pilot UAT."
+        },
+        {
+          "id": "BAT51",
+          "title": "Supplier registry",
+          "dependsOn": "BAT01",
+          "acceptanceCriteria": "Tenant-scoped supplier records exist with stable external reference, legal name and lifecycle status",
+          "evidenceRequired": "Migration replay + DB subset",
+          "status": "yellow",
+          "evidence": "Schema implementation added; awaiting CI replay/evidence."
+        },
+        {
+          "id": "BAT52",
+          "title": "Supplier portal invitation model",
+          "dependsOn": "BAT51,M03",
+          "acceptanceCriteria": "Manufacturer can invite a supplier with least-privilege scoped access",
+          "evidenceRequired": "Auth/API/E2E tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT53",
+          "title": "Supplier data packages",
+          "dependsOn": "BAT51,BAT01",
+          "acceptanceCriteria": "Supplier data can be submitted as versioned packages scoped to model/item/component/material",
+          "evidenceRequired": "Migration replay + DB subset",
+          "status": "yellow",
+          "evidence": "Append-only supplier data package implementation added; awaiting CI evidence."
+        },
+        {
+          "id": "BAT54",
+          "title": "Component and material scoping",
+          "dependsOn": "BAT53",
+          "acceptanceCriteria": "Supplier packages can target exact model/item/component/material references without ambiguity",
+          "evidenceRequired": "DB/API tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT55",
+          "title": "Supplier package history",
+          "dependsOn": "BAT53,BAT08",
+          "acceptanceCriteria": "Supplier package versions are append-only and supersession is auditable",
+          "evidenceRequired": "Mutation-negative DB tests",
+          "status": "yellow",
+          "evidence": "Append-only history guard added; awaiting CI evidence."
+        },
+        {
+          "id": "BAT56",
+          "title": "Supplier signature envelope hook",
+          "dependsOn": "BAT53",
+          "acceptanceCriteria": "Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration",
+          "evidenceRequired": "Contract tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT57",
+          "title": "Supplier verification workflow",
+          "dependsOn": "BAT53",
+          "acceptanceCriteria": "Packages move through unverified/validated/verified/rejected states with evidence",
+          "evidenceRequired": "API/DB tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT58",
+          "title": "Supplier missing-data queue",
+          "dependsOn": "BAT14,BAT53",
+          "acceptanceCriteria": "Missing required supplier fields are grouped by supplier and affected product",
+          "evidenceRequired": "Integration tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT59",
+          "title": "Supplier reminder workflow",
+          "dependsOn": "BAT58",
+          "acceptanceCriteria": "Authorized users can trigger auditable reminders without exposing unrelated tenant data",
+          "evidenceRequired": "API/security tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT60",
+          "title": "Supplier network dashboard",
+          "dependsOn": "BAT51-BAT59",
+          "acceptanceCriteria": "Manufacturer sees supplier completeness, blockers and package status",
+          "evidenceRequired": "Authenticated E2E tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT61",
+          "title": "Factory provisioning job model",
+          "dependsOn": "BAT26,BAT29",
+          "acceptanceCriteria": "A factory job can batch Battery IDs, QR and identity provisioning work",
+          "evidenceRequired": "DB/API tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT62",
+          "title": "Batch provisioning",
+          "dependsOn": "BAT61",
+          "acceptanceCriteria": "Provisioning supports deterministic bulk processing with idempotent retry",
+          "evidenceRequired": "Load/idempotency tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT63",
+          "title": "QR label print job",
+          "dependsOn": "BAT61,BAT29",
+          "acceptanceCriteria": "Provisioning emits exact printable QR/label jobs bound to Battery IDs",
+          "evidenceRequired": "Artifact/decode tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT64",
+          "title": "NFC provisioning handoff contract",
+          "dependsOn": "BAT61,BAT31",
+          "acceptanceCriteria": "Factory flow exchanges a minimal typed contract with Borko CRYPTO provisioning without exposing secrets",
+          "evidenceRequired": "Contract/integration tests",
+          "status": "red",
+          "evidence": "Depends on CRYPTO interface."
+        },
+        {
+          "id": "BAT65",
+          "title": "NFC bind result intake",
+          "dependsOn": "BAT64",
+          "acceptanceCriteria": "Backend records success/failure identity binding result against exact Battery ID",
+          "evidenceRequired": "API/DB tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT66",
+          "title": "Ready-for-market gate",
+          "dependsOn": "BAT63,BAT65,BAT15",
+          "acceptanceCriteria": "Battery can become READY only after required DPP, QR and identity checks pass",
+          "evidenceRequired": "Business-rule tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT67",
+          "title": "Factory quarantine gate",
+          "dependsOn": "BAT66",
+          "acceptanceCriteria": "Failed provisioning or compliance checks quarantine the battery with auditable reason",
+          "evidenceRequired": "Negative tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT68",
+          "title": "Reprovision and replacement workflow",
+          "dependsOn": "BAT65",
+          "acceptanceCriteria": "Authorized NFC/label replacement preserves Battery ID and historical identity chain",
+          "evidenceRequired": "Integration tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT69",
+          "title": "Provisioning audit trail",
+          "dependsOn": "BAT61-BAT68",
+          "acceptanceCriteria": "Every factory provisioning action is timestamped and attributable",
+          "evidenceRequired": "DB/audit tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT70",
+          "title": "Factory throughput benchmark",
+          "dependsOn": "BAT62-BAT69",
+          "acceptanceCriteria": "Representative batch meets documented throughput target without identity collisions",
+          "evidenceRequired": "Benchmark evidence",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT71",
+          "title": "Lifecycle event ledger",
+          "dependsOn": "BAT26,BAT08",
+          "acceptanceCriteria": "Battery lifecycle changes are represented as append-only typed events",
+          "evidenceRequired": "DB/API tests",
+          "status": "red",
+          "evidence": "Existing lifecycle status guard is a precursor only."
+        },
+        {
+          "id": "BAT72",
+          "title": "Service actor roles",
+          "dependsOn": "BAT71,M12",
+          "acceptanceCriteria": "Service/manufacturer/recycler actions use explicit least-privilege roles",
+          "evidenceRequired": "RBAC tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT73",
+          "title": "Repair events",
+          "dependsOn": "BAT71,BAT72",
+          "acceptanceCriteria": "Repair event records who/when/what changed with evidence references",
+          "evidenceRequired": "Integration tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT74",
+          "title": "Module component replacement",
+          "dependsOn": "BAT73",
+          "acceptanceCriteria": "Component replacement preserves old/new component identity and reason",
+          "evidenceRequired": "Integration tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT75",
+          "title": "Service evidence attachments",
+          "dependsOn": "BAT73,M13",
+          "acceptanceCriteria": "Service events can reference controlled evidence objects",
+          "evidenceRequired": "Storage/API tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT76",
+          "title": "Second-life transition package",
+          "dependsOn": "BAT71",
+          "acceptanceCriteria": "Second-life transition captures required state/evidence without erasing first-life history",
+          "evidenceRequired": "Lifecycle tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT77",
+          "title": "Repurpose remanufacture workflow",
+          "dependsOn": "BAT71",
+          "acceptanceCriteria": "Repurpose/remanufacture transitions are typed, authorized and auditable",
+          "evidenceRequired": "Lifecycle/RBAC tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT78",
+          "title": "Recycler end-of-life workflow",
+          "dependsOn": "BAT71",
+          "acceptanceCriteria": "Recycler/end-of-life event closes active lifecycle while preserving history",
+          "evidenceRequired": "Lifecycle tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT79",
+          "title": "Lifecycle access projection",
+          "dependsOn": "BAT71,BAT10",
+          "acceptanceCriteria": "Public/legitimate-interest/authority lifecycle views obey field access policy",
+          "evidenceRequired": "Access tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT80",
+          "title": "Lifecycle timeline UI",
+          "dependsOn": "BAT71-BAT79",
+          "acceptanceCriteria": "Authorized users can inspect chronological battery history with evidence",
+          "evidenceRequired": "E2E tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT81",
+          "title": "Anti-swap policy integration",
+          "dependsOn": "BAT31,BAT71",
+          "acceptanceCriteria": "Physical identity replacement/movement creates detectable policy state",
+          "evidenceRequired": "Security integration tests",
+          "status": "red",
+          "evidence": "Depends on CRYPTO."
+        },
+        {
+          "id": "BAT82",
+          "title": "Tamper event ingestion",
+          "dependsOn": "BAT31,BAT71",
+          "acceptanceCriteria": "Tamper signal can be ingested as an auditable lifecycle/security event",
+          "evidenceRequired": "Integration tests",
+          "status": "red",
+          "evidence": "Depends on CRYPTO/hardware."
+        },
+        {
+          "id": "BAT83",
+          "title": "Counterfeit incident case",
+          "dependsOn": "BAT39,BAT71",
+          "acceptanceCriteria": "Suspicious verification can open a tenant-scoped incident record",
+          "evidenceRequired": "API/security tests",
+          "status": "red",
+          "evidence": "Depends on CRYPTO."
+        },
+        {
+          "id": "BAT84",
+          "title": "Identity anomaly rules",
+          "dependsOn": "BAT40,BAT83",
+          "acceptanceCriteria": "Rules flag impossible/repeated/geographically or temporally suspicious verification patterns without auto-claiming fraud",
+          "evidenceRequired": "Rule tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT85",
+          "title": "Cross-tenant identity attack suite",
+          "dependsOn": "BAT37,R04",
+          "acceptanceCriteria": "Identity endpoints prove tenant isolation under negative attack cases",
+          "evidenceRequired": "Security tests",
+          "status": "red",
+          "evidence": "Depends on CRYPTO endpoints."
+        },
+        {
+          "id": "BAT86",
+          "title": "Cloned QR attack test",
+          "dependsOn": "BAT30,BAT38",
+          "acceptanceCriteria": "Copied QR cannot produce cryptographic Authentic result without genuine NFC proof",
+          "evidenceRequired": "Attack evidence",
+          "status": "red",
+          "evidence": "Depends on CRYPTO hardware."
+        },
+        {
+          "id": "BAT87",
+          "title": "Replay wrong-tag revoked-tag test",
+          "dependsOn": "BAT37-BAT39",
+          "acceptanceCriteria": "Replay, wrong tag and revoked identity fail closed",
+          "evidenceRequired": "Attack evidence",
+          "status": "red",
+          "evidence": "Depends on CRYPTO."
+        },
+        {
+          "id": "BAT88",
+          "title": "Attack evidence pack",
+          "dependsOn": "BAT81-BAT87",
+          "acceptanceCriteria": "Security demo package captures attack inputs, results, logs and no-secret-leak proof",
+          "evidenceRequired": "Evidence artifact",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT89",
+          "title": "Manufacturer fleet summary",
+          "dependsOn": "BAT48,BAT71",
+          "acceptanceCriteria": "Dashboard aggregates models/items/readiness/lifecycle without leaking tenant data",
+          "evidenceRequired": "Authenticated E2E tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT90",
+          "title": "Compliance operations queue",
+          "dependsOn": "BAT14,BAT48",
+          "acceptanceCriteria": "Dashboard prioritizes missing/invalid/blocked compliance work",
+          "evidenceRequired": "E2E tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT91",
+          "title": "Identity and NFC operations view",
+          "dependsOn": "BAT40,BAT48",
+          "acceptanceCriteria": "Manufacturer can inspect identity state, revocation and verification history",
+          "evidenceRequired": "E2E tests",
+          "status": "red",
+          "evidence": "Depends on CRYPTO."
+        },
+        {
+          "id": "BAT92",
+          "title": "Supplier operations view",
+          "dependsOn": "BAT60,BAT48",
+          "acceptanceCriteria": "Manufacturer can inspect supplier completeness and blockers",
+          "evidenceRequired": "E2E tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT93",
+          "title": "Lifecycle and BMS analytics",
+          "dependsOn": "BAT47,BAT80",
+          "acceptanceCriteria": "Dashboard combines lifecycle history and normalized BMS observations",
+          "evidenceRequired": "E2E/data tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT94",
+          "title": "Battery Trust API v1",
+          "dependsOn": "BAT49,BAT53,BAT71",
+          "acceptanceCriteria": "Versioned API exposes suppliers, lifecycle, BMS and identity contracts with RBAC",
+          "evidenceRequired": "API/security suite",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT95",
+          "title": "AI missing-data copilot",
+          "dependsOn": "BAT14,BAT58",
+          "acceptanceCriteria": "AI can explain missing data and propose next actions without silently inventing values",
+          "evidenceRequired": "Evaluation tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT96",
+          "title": "AI supplier follow-up assistant",
+          "dependsOn": "BAT58,BAT59",
+          "acceptanceCriteria": "AI drafts targeted supplier follow-ups from real missing-data state",
+          "evidenceRequired": "Evaluation + approval tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT97",
+          "title": "AI incident triage",
+          "dependsOn": "BAT83,BAT84",
+          "acceptanceCriteria": "AI summarizes security/lifecycle incidents with evidence links and human approval boundaries",
+          "evidenceRequired": "Evaluation tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT98",
+          "title": "Battery Trust observability and SLA",
+          "dependsOn": "BAT94,R09,R10",
+          "acceptanceCriteria": "Core identity/import/supplier/BMS/lifecycle paths have metrics, alerts and defined SLO/SLA targets",
+          "evidenceRequired": "Ops evidence",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT99",
+          "title": "Battery Trust migration rollback drill",
+          "dependsOn": "BAT51-BAT98,C04,C05",
+          "acceptanceCriteria": "Production migration and rollback are rehearsed with no silent identity/history loss",
+          "evidenceRequired": "Drill evidence",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT100",
+          "title": "Battery Trust OS real manufacturer acceptance",
+          "dependsOn": "BAT01-BAT99,C15",
+          "acceptanceCriteria": "A real manufacturer pilot proves raw data → passport → QR/NFC identity → lifecycle/BMS/service flows with signed UAT",
+          "evidenceRequired": "Full acceptance pack + real pilot UAT",
+          "status": "red",
+          "evidence": "Not implemented."
         }
       ]
     }
