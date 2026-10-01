@@ -792,7 +792,7 @@ These tasks extend Battery Platform V3 into the full Battery Trust OS. Borko own
 | BAT55 | Supplier package history | BAT53,BAT08 | Supplier package versions are append-only and supersession is auditable | Mutation-negative DB tests | YELLOW |
 | BAT56 | Supplier signature envelope hook | BAT53 | Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration | Contract tests | RED |
 | BAT57 | Supplier verification workflow | BAT53 | Packages move through unverified/validated/verified/rejected states with evidence | API/DB tests | YELLOW |
-| BAT58 | Supplier missing-data queue | BAT14,BAT53 | Missing required supplier fields are grouped by supplier and affected product | Integration tests | RED |
+| BAT58 | Supplier missing-data queue | BAT14,BAT53 | Missing required supplier fields are grouped by supplier and affected product | Integration tests | YELLOW |
 | BAT59 | Supplier reminder workflow | BAT58 | Authorized users can trigger auditable reminders without exposing unrelated tenant data | API/security tests | RED |
 | BAT60 | Supplier network dashboard | BAT51-BAT59 | Manufacturer sees supplier completeness, blockers and package status | Authenticated E2E tests | RED |
 | BAT61 | Factory provisioning job model | BAT26,BAT29 | A factory job can batch Battery IDs, QR and identity provisioning work | DB/API tests | RED |
