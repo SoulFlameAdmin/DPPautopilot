@@ -1,8 +1,8 @@
 {
   "project": "DPP Autopilot",
-  "version": "MASTER PLAN v2.5",
+  "version": "MASTER PLAN v2.6",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-09-23T18:10:06+03:00",
+  "updatedAt": "2026-10-02T01:12:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1088,6 +1088,464 @@
           "evidenceRequired": "DR/availability report",
           "status": "red",
           "evidence": "Unfinished in canonical source-of-truth; dependencies: C15."
+        }
+      ]
+    },
+    {
+      "id": "BATTERY_PLATFORM",
+      "label": "BATTERY PLATFORM V3",
+      "purpose": "Schema-driven Battery Passport data engine, rapid import, immutable physical identity, Secure NFC authenticity, BMS ingestion and manufacturer operations.",
+      "exitCriteria": "BAT01-BAT50 satisfy evidence-backed production acceptance including real pilot UAT.",
+      "tasks": [
+        {
+          "id": "BAT01",
+          "title": "DPP Data Engine canonical field engine",
+          "dependsOn": "F11,M04",
+          "acceptanceCriteria": "All Battery Passport fields are schema-driven from the canonical catalog; no product values are embedded in engine code",
+          "evidenceRequired": "Engine module + contract tests + DB event-store precursor",
+          "status": "yellow",
+          "evidence": "Canonical field catalog already exists; this branch adds the first catalog-driven field-event engine precursor and append-only DB event store. Live end-to-end integration is still pending."
+        },
+        {
+          "id": "BAT02",
+          "title": "Per-field value storage",
+          "dependsOn": "BAT01",
+          "acceptanceCriteria": "Every ingested field value is represented independently with field path and typed JSON value",
+          "evidenceRequired": "DB migration + integration tests",
+          "status": "yellow",
+          "evidence": "Current JSONB canonical records exist; this branch adds `dpp_field_events.value` for per-field event values. Runtime write path is not yet wired."
+        },
+        {
+          "id": "BAT03",
+          "title": "Per-field source provenance",
+          "dependsOn": "BAT01",
+          "acceptanceCriteria": "Every field event records source kind and concrete source reference",
+          "evidenceRequired": "DB constraints + unit tests",
+          "status": "yellow",
+          "evidence": "This branch adds required `source_kind` and `source_ref` metadata; production ingestion wiring remains pending."
+        },
+        {
+          "id": "BAT04",
+          "title": "Per-field source date",
+          "dependsOn": "BAT03",
+          "acceptanceCriteria": "Every field event records source/effective date separately from ingestion time",
+          "evidenceRequired": "DB constraints + unit tests",
+          "status": "yellow",
+          "evidence": "This branch adds required `source_date`; production ingestion wiring remains pending."
+        },
+        {
+          "id": "BAT05",
+          "title": "Per-field access level",
+          "dependsOn": "BAT01,F11",
+          "acceptanceCriteria": "Each field event carries a valid access class consistent with the canonical field catalog",
+          "evidenceRequired": "Catalog-driven validator + security tests",
+          "status": "yellow",
+          "evidence": "Catalog access classes already exist; this branch validates event access against the catalog. API/RLS enforcement for the new event store is not yet accepted."
+        },
+        {
+          "id": "BAT06",
+          "title": "Per-field verification status",
+          "dependsOn": "BAT01",
+          "acceptanceCriteria": "Each field event has explicit verification status with controlled values",
+          "evidenceRequired": "DB constraints + unit tests",
+          "status": "yellow",
+          "evidence": "This branch introduces unverified/validated/verified/rejected event states; operational verification workflow remains pending."
+        },
+        {
+          "id": "BAT07",
+          "title": "No hardcoded passport values",
+          "dependsOn": "BAT01",
+          "acceptanceCriteria": "Production passport values originate from stored/imported/integrated data, not application constants",
+          "evidenceRequired": "Static/contract tests + review",
+          "status": "yellow",
+          "evidence": "Existing production contracts are data-driven, but the new field-event engine is not yet wired through every passport write path."
+        },
+        {
+          "id": "BAT08",
+          "title": "Append-only field history",
+          "dependsOn": "BAT02-BAT06,M11",
+          "acceptanceCriteria": "Material field changes append new events; prior values cannot be updated or deleted",
+          "evidenceRequired": "DB mutation-negative tests",
+          "status": "yellow",
+          "evidence": "Existing passport version history is GREEN; this branch adds a mutation-reject trigger for the new per-field event history. Bound DB evidence remains pending."
+        },
+        {
+          "id": "BAT09",
+          "title": "Field change audit attribution",
+          "dependsOn": "BAT08,M12",
+          "acceptanceCriteria": "Field history records actor, target, time, provenance and supersession linkage",
+          "evidenceRequired": "DB/API integration tests",
+          "status": "yellow",
+          "evidence": "The new event schema carries actor/time/supersedes metadata, but full M12 authenticated audit acceptance remains unresolved."
+        },
+        {
+          "id": "BAT10",
+          "title": "Extensible field schema",
+          "dependsOn": "BAT01",
+          "acceptanceCriteria": "New requirement fields can be added through the versioned catalog without redesigning core tables",
+          "evidenceRequired": "Catalog validator + schema traceability",
+          "status": "green",
+          "evidence": "`data/dpp-field-catalog.json` + JSONB canonical storage and F11/M09 validators already support versioned field extension without adding a column per requirement."
+        },
+        {
+          "id": "BAT11",
+          "title": "EU requirements registry",
+          "dependsOn": "F11",
+          "acceptanceCriteria": "Current Battery Passport requirement set is represented in a versioned registry with authoritative sources",
+          "evidenceRequired": "Traceability document + catalog validator",
+          "status": "green",
+          "evidence": "F11 is GREEN: `docs/REQUIREMENTS_TRACEABILITY.md` and `data/dpp-field-catalog.json` provide the versioned EU requirement registry."
+        },
+        {
+          "id": "BAT12",
+          "title": "Requirement-to-field mapping",
+          "dependsOn": "BAT11",
+          "acceptanceCriteria": "Each requirement maps to one or more canonical DPP field paths",
+          "evidenceRequired": "Coverage validator",
+          "status": "green",
+          "evidence": "F11 catalog maps requirement IDs to canonical field paths and DB/API/UI targets; CI validator enforces coverage."
+        },
+        {
+          "id": "BAT13",
+          "title": "Mandatory conditional optional rules",
+          "dependsOn": "BAT11",
+          "acceptanceCriteria": "Requiredness and conditional applicability are explicit and machine-readable",
+          "evidenceRequired": "Rule catalog + tests",
+          "status": "yellow",
+          "evidence": "Required flags exist; full conditional-applicability rules for every guidance data point are not yet encoded."
+        },
+        {
+          "id": "BAT14",
+          "title": "Missing-data detection",
+          "dependsOn": "BAT12,BAT13",
+          "acceptanceCriteria": "System identifies missing required/applicable fields and reports exact field paths",
+          "evidenceRequired": "Unit/UI tests",
+          "status": "green",
+          "evidence": "D10 is GREEN with catalog-driven exact missing-field warnings and actionable source/target information."
+        },
+        {
+          "id": "BAT15",
+          "title": "Compliance completeness score",
+          "dependsOn": "BAT14",
+          "acceptanceCriteria": "Completeness is computed from canonical requirement rules rather than hardcoded percentages",
+          "evidenceRequired": "Unit/UI tests",
+          "status": "green",
+          "evidence": "D09 is GREEN with catalog-driven completeness tests including deterministic missing-field score reduction."
+        },
+        {
+          "id": "BAT16",
+          "title": "Excel import wizard",
+          "dependsOn": "M07",
+          "acceptanceCriteria": "Customer can upload XLSX and preview sheets/headers before mapping",
+          "evidenceRequired": "Integration/E2E tests",
+          "status": "red",
+          "evidence": "XLSX ingestion is not implemented yet."
+        },
+        {
+          "id": "BAT17",
+          "title": "CSV import wizard",
+          "dependsOn": "M07,M08",
+          "acceptanceCriteria": "Customer can upload CSV and preview/map data safely",
+          "evidenceRequired": "Integration/E2E tests",
+          "status": "green",
+          "evidence": "D03, M07 and M08 provide tested CSV preview, mapping persistence and validation."
+        },
+        {
+          "id": "BAT18",
+          "title": "Automatic column recognition",
+          "dependsOn": "BAT17,BAT12",
+          "acceptanceCriteria": "System proposes canonical DPP fields for incoming column headers",
+          "evidenceRequired": "Evaluation set + mapping tests",
+          "status": "yellow",
+          "evidence": "A deterministic mapping assistant exists, but automatic recognition coverage is not yet accepted for the expanded Battery Platform V3 scope."
+        },
+        {
+          "id": "BAT19",
+          "title": "AI-assisted mapping",
+          "dependsOn": "BAT18",
+          "acceptanceCriteria": "Low-confidence/ambiguous mappings are proposed with confidence and require review before commit",
+          "evidenceRequired": "Evaluation + UI acceptance",
+          "status": "yellow",
+          "evidence": "Mapping-assistant precursor exists; production AI confidence/review workflow is not yet complete."
+        },
+        {
+          "id": "BAT20",
+          "title": "Manual mapping correction",
+          "dependsOn": "BAT17",
+          "acceptanceCriteria": "User can override proposed mappings before import commit",
+          "evidenceRequired": "E2E mapping test",
+          "status": "green",
+          "evidence": "M07 is GREEN with saved customer-column to canonical-field mappings and tested UI."
+        },
+        {
+          "id": "BAT21",
+          "title": "Format and unit validation",
+          "dependsOn": "BAT17,BAT12",
+          "acceptanceCriteria": "Invalid types, formats and supported unit rules are detected before commit",
+          "evidenceRequired": "Negative validation tests",
+          "status": "yellow",
+          "evidence": "M08 rejects invalid rows, but complete unit-normalization coverage for all Battery Passport fields is not yet implemented."
+        },
+        {
+          "id": "BAT22",
+          "title": "Import preview before commit",
+          "dependsOn": "BAT17",
+          "acceptanceCriteria": "Mapped normalized records and errors are visible before irreversible commit",
+          "evidenceRequired": "E2E test",
+          "status": "green",
+          "evidence": "D03/M08 provide preview and validation stages before transactional commit."
+        },
+        {
+          "id": "BAT23",
+          "title": "Missing-data report after import",
+          "dependsOn": "BAT14,BAT22",
+          "acceptanceCriteria": "Import produces actionable missing-field output grouped by model/item",
+          "evidenceRequired": "Integration/UI tests",
+          "status": "green",
+          "evidence": "Existing catalog-driven missing-field and import-error contracts provide actionable missing data/error output."
+        },
+        {
+          "id": "BAT24",
+          "title": "Reusable manufacturer mapping templates",
+          "dependsOn": "BAT20",
+          "acceptanceCriteria": "Mappings are persisted per tenant and can be reused for later imports",
+          "evidenceRequired": "DB + integration tests",
+          "status": "green",
+          "evidence": "M07 is GREEN with persisted tenant-scoped import mappings and revision tests."
+        },
+        {
+          "id": "BAT25",
+          "title": "Under-60-minute raw-data-to-passport benchmark",
+          "dependsOn": "BAT16-BAT24,BAT30",
+          "acceptanceCriteria": "A representative customer dataset goes from raw source file to working passport in under 60 minutes",
+          "evidenceRequired": "Timestamped pilot benchmark",
+          "status": "red",
+          "evidence": "Requires representative customer/pilot data and full XLSX/CSV production flow."
+        },
+        {
+          "id": "BAT26",
+          "title": "Unique physical Battery ID",
+          "dependsOn": "M14,D07",
+          "acceptanceCriteria": "Every individual battery receives a unique stable identifier",
+          "evidenceRequired": "Collision/lifecycle tests",
+          "status": "green",
+          "evidence": "D07 and M14 are GREEN for deterministic unique identifiers and lifecycle rules."
+        },
+        {
+          "id": "BAT27",
+          "title": "Immutable Battery ID",
+          "dependsOn": "BAT26",
+          "acceptanceCriteria": "Issued physical battery identifier cannot be silently replaced; any correction is separately auditable",
+          "evidenceRequired": "DB/API mutation-negative tests",
+          "status": "yellow",
+          "evidence": "Identifier uniqueness/lifecycle rules exist, but explicit immutable-ID mutation acceptance is not yet isolated as its own test."
+        },
+        {
+          "id": "BAT28",
+          "title": "Permanent DPP URL per battery",
+          "dependsOn": "BAT26,D06",
+          "acceptanceCriteria": "Each Battery ID resolves through a stable passport route",
+          "evidenceRequired": "E2E route test",
+          "status": "green",
+          "evidence": "D06/D08 prove stable public passport routing tied to the exact battery identifier."
+        },
+        {
+          "id": "BAT29",
+          "title": "Unique QR generation",
+          "dependsOn": "BAT28",
+          "acceptanceCriteria": "System generates a scannable QR for the exact passport URL",
+          "evidenceRequired": "Decode test + artifact",
+          "status": "green",
+          "evidence": "D08 is GREEN with generated QR, `zbarimg` decode and exact URL comparison."
+        },
+        {
+          "id": "BAT30",
+          "title": "QR-to-exact-passport verification",
+          "dependsOn": "BAT29",
+          "acceptanceCriteria": "Decoded QR resolves to the intended individual battery passport with HTTP acceptance",
+          "evidenceRequired": "E2E scan/route evidence",
+          "status": "green",
+          "evidence": "D08 is GREEN with exact URL equality and HTTP 200 route evidence."
+        },
+        {
+          "id": "BAT31",
+          "title": "Secure NFC identity layer",
+          "dependsOn": "BAT26",
+          "acceptanceCriteria": "System supports cryptographic NFC identity independent of passport data storage",
+          "evidenceRequired": "NFC architecture + hardware integration test",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT32",
+          "title": "Unique cryptographic NFC identity",
+          "dependsOn": "BAT31",
+          "acceptanceCriteria": "Each secure NFC element is bound one-to-one to a Battery ID",
+          "evidenceRequired": "Provisioning test",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT33",
+          "title": "No passport data stored in NFC",
+          "dependsOn": "BAT31",
+          "acceptanceCriteria": "NFC stores only identity/cryptographic material required for authentication, not DPP payloads",
+          "evidenceRequired": "Tag inspection + architecture test",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT34",
+          "title": "Non-exportable NFC secret/private key",
+          "dependsOn": "BAT31",
+          "acceptanceCriteria": "Chosen secure element prevents normal extraction of signing secret/private key",
+          "evidenceRequired": "Vendor capability evidence + hardware test",
+          "status": "red",
+          "evidence": "Hardware/vendor choice not yet made."
+        },
+        {
+          "id": "BAT35",
+          "title": "NFC challenge generation",
+          "dependsOn": "BAT31",
+          "acceptanceCriteria": "Verifier creates fresh unpredictable challenge with expiry/replay protection",
+          "evidenceRequired": "Security unit/integration tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT36",
+          "title": "NFC challenge signing",
+          "dependsOn": "BAT34,BAT35",
+          "acceptanceCriteria": "Secure element signs/authenticates the challenge without exposing its secret",
+          "evidenceRequired": "Hardware integration test",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT37",
+          "title": "Server-side NFC signature validation",
+          "dependsOn": "BAT36",
+          "acceptanceCriteria": "Backend validates proof against registered battery/NFC identity",
+          "evidenceRequired": "API/security tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT38",
+          "title": "Authentic-battery result",
+          "dependsOn": "BAT37",
+          "acceptanceCriteria": "Successful verification returns a clear authenticated battery result bound to Battery ID",
+          "evidenceRequired": "E2E phone/NFC test",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT39",
+          "title": "Counterfeit/suspicious verification result",
+          "dependsOn": "BAT37",
+          "acceptanceCriteria": "Invalid/replayed/unregistered NFC proofs fail closed and produce a clear warning",
+          "evidenceRequired": "Negative/replay tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT40",
+          "title": "NFC verification history",
+          "dependsOn": "BAT37,BAT09",
+          "acceptanceCriteria": "Verification events are timestamped and auditable without exposing cryptographic secrets",
+          "evidenceRequired": "DB/API integration tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT41",
+          "title": "BMS integration layer",
+          "dependsOn": "M18,BAT01",
+          "acceptanceCriteria": "Vendor-neutral ingestion boundary exists for BMS lifecycle/telemetry data",
+          "evidenceRequired": "Connector contract + tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT42",
+          "title": "Standard BMS connector interface",
+          "dependsOn": "BAT41",
+          "acceptanceCriteria": "Connectors normalize vendor data into canonical DPP/BMS events",
+          "evidenceRequired": "Contract tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT43",
+          "title": "API CAN Modbus adapters",
+          "dependsOn": "BAT42",
+          "acceptanceCriteria": "Architecture supports HTTP/API, CAN and Modbus adapters without coupling passport core to vendor protocols",
+          "evidenceRequired": "Adapter tests/evidence",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT44",
+          "title": "State-of-charge ingestion",
+          "dependsOn": "BAT42",
+          "acceptanceCriteria": "Timestamped SoC readings can be ingested with source provenance",
+          "evidenceRequired": "Integration tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT45",
+          "title": "State-of-health ingestion",
+          "dependsOn": "BAT42",
+          "acceptanceCriteria": "Timestamped SoH readings can be ingested with source provenance",
+          "evidenceRequired": "Integration tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT46",
+          "title": "Cycles temperature voltage alarms ingestion",
+          "dependsOn": "BAT42",
+          "acceptanceCriteria": "Supported lifecycle metrics are normalized and validated with timestamps/source",
+          "evidenceRequired": "Integration tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT47",
+          "title": "BMS history without overwrite",
+          "dependsOn": "BAT44-BAT46,BAT08",
+          "acceptanceCriteria": "Telemetry/lifecycle updates append history and never erase prior observations",
+          "evidenceRequired": "History/replay tests",
+          "status": "red",
+          "evidence": "Not implemented."
+        },
+        {
+          "id": "BAT48",
+          "title": "Manufacturer dashboard",
+          "dependsOn": "BAT14,BAT24,BAT30",
+          "acceptanceCriteria": "Manufacturer can view models, batteries, completeness, errors, imports, QR/NFC state and verification",
+          "evidenceRequired": "Authenticated E2E tests",
+          "status": "yellow",
+          "evidence": "Dashboard/demo surfaces exist, but the complete authenticated manufacturer operations dashboard is not yet accepted."
+        },
+        {
+          "id": "BAT49",
+          "title": "DPP integration API",
+          "dependsOn": "M17-M23,BAT37,BAT42",
+          "acceptanceCriteria": "Versioned API supports model/item/passport CRUD, imports, verification, BMS ingestion and permissions",
+          "evidenceRequired": "API/security suite",
+          "status": "yellow",
+          "evidence": "Models/items/passports/import API precursors exist; NFC verification and BMS endpoints are not implemented and authenticated MVP acceptance is incomplete."
+        },
+        {
+          "id": "BAT50",
+          "title": "Battery Platform production acceptance",
+          "dependsOn": "BAT01-BAT49,C15",
+          "acceptanceCriteria": "Security, backups, monitoring, tests, docs and at least one real manufacturer pilot satisfy final acceptance",
+          "evidenceRequired": "Full production evidence pack + pilot UAT",
+          "status": "red",
+          "evidence": "Depends on remaining Battery Platform tasks, C12 legal sign-off and C13 real pilot UAT."
         }
       ]
     }
