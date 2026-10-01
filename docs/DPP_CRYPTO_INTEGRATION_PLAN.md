@@ -35,7 +35,7 @@ Final chip selection must be evidence-based: security properties, unit price at 
 
 ---
 
-# CRYPTO EXECUTION — 24 points
+# CRYPTO EXECUTION — 25 points
 
 | ID | Task | Acceptance |
 |---|---|---|
@@ -63,6 +63,7 @@ Final chip selection must be evidence-based: security properties, unit price at 
 | CR22 | Privacy | Do not expose stable sensitive identifiers unnecessarily in public URLs; use safe public token/alias and server-side mapping where appropriate. |
 | CR23 | Security test matrix | Test valid proof, cloned URL, replay, modified Battery ID, wrong certificate/key, revoked tag, expired challenge, counter rollback, tamper and cross-tenant substitution. |
 | CR24 | Integration evidence | Demo on real NFC hardware: tap → crypto verification → exact DPP Battery ID/passport → logged verification event, with test report and no secret leakage. |
+| CR25 | Visible progress tracker | Create a live visible DPP CRYPTO progress surface showing CR01-CR25 status, GREEN/YELLOW/RED/BLOCKED counts, current task, last completed task, blocker, branch/PR, latest commit and CI state. It must update whenever task evidence/status changes and be reachable from the DPP dashboard or a dedicated deployed progress page. |
 
 ---
 
@@ -141,7 +142,7 @@ Architecture rules:
 - every verification must resolve to the exact DPP Battery ID and create safe audit evidence.
 
 Execution:
-Work CR01 → CR24 in order, skipping only when a dependency is genuinely blocked. For each point:
+Work CR01 → CR25 in order, skipping only when a dependency is genuinely blocked. For each point:
 1. inspect existing code first;
 2. implement the smallest production-compatible slice;
 3. add tests;
@@ -156,7 +157,7 @@ When I write **Продължи DPP CRYPTO**, inspect the real repository state,
 
 ## Mandatory completion handoff
 
-When CR01-CR24 are complete, or when a meaningful integration-ready milestone is complete, Borko must send Mitko a final handoff link before considering the work delivered.
+When CR01-CR25 are complete, or when a meaningful integration-ready milestone is complete, Borko must send Mitko a final handoff link before considering the work delivered.
 
 The handoff must include:
 - GitHub PR link containing all implementation commits;
@@ -169,3 +170,27 @@ The handoff must include:
 - no secrets, private keys, seed material or credentials in the handoff.
 
 The work is not considered handed off until Mitko has a concrete GitHub link and can integrate it into the DPP system.
+
+## Visible progress contract
+
+CR25 is mandatory. Mitko must be able to open one page and immediately see where DPP CRYPTO is.
+
+Minimum machine-readable status: `data/dpp-crypto-status.json`.
+Minimum visible surface: either a dedicated `demo/dpp-crypto-progress.html` page or an integrated DPP dashboard card/page.
+
+The visible tracker must show:
+- total CR points: 25;
+- GREEN / YELLOW / RED / BLOCKED counts;
+- percentage based only on evidence-backed GREEN points;
+- current CR point;
+- last completed CR point;
+- next dependency-safe point;
+- active blocker and whether it is hardware/human/external;
+- working branch;
+- PR number/link;
+- latest commit SHA;
+- latest CI/test state;
+- last update timestamp;
+- direct links to evidence when available.
+
+Every time Borko's GPT changes a CR status or finishes a meaningful implementation slice, it must update the machine-readable status and visible tracker in the same branch/PR. The tracker must never mark a point GREEN merely because code was written.
