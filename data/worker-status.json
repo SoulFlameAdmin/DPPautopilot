@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "BAT51/BAT53/BAT54/BAT55/BAT57/BAT58 — Supplier Network foundation + missing-data queue",
+  "currentTask": "BAT51/BAT53/BAT54/BAT55/BAT57/BAT58/BAT59 — Supplier Network",
   "currentGate": "BATTERY TRUST OS",
   "lastCompletedTask": "M02 tenant-recovery HTTP precursor — PR #176 / CI 35684651596 PASS 139/139",
-  "nextTask": "Prove current Supplier Network migrations/tests in CI, promote only evidenced tasks, then implement BAT59 auditable supplier reminders.",
-  "message": "Supplier Network DB layer now covers registry, versioned packages, exact scope, verification history and grouped missing-data queue. No promotion to GREEN until current CI passes.",
+  "nextTask": "Get clean CI PASS for Supplier Network; promote only evidenced DB/API tasks, then build BAT60 supplier operations dashboard.",
+  "message": "Supplier Network now covers registry, package history, exact scope, verification ledger, missing-data queue and RBAC/auditable reminder API. Current status remains YELLOW pending clean CI.",
   "deferredBlockers": [
     "R02 — Vercel `api-deployments-free-per-day`; explicit retry window begins 2026-09-23T02:19:01Z. Do not deploy earlier.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; no auth/login/MFA bypass allowed.",
     "M13 — technical Edge metadata ACL mismatch is fixed and Edge v5 is deployed; final authenticated upload→download→delete byte roundtrip still requires a real user runtime path and M03."
   ],
-  "updatedAt": "2026-10-02T02:36:00+03:00"
+  "updatedAt": "2026-10-02T02:46:00+03:00"
 }
