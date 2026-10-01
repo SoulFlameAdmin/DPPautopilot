@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DPP Supplier Network · Operations</title>
+  <meta name="description" content="Manufacturer Supplier Network operations view for Battery Trust OS.">
+  <link rel="stylesheet" href="/assets/csp/suppliers.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="head">
+      <div>
+        <div class="eyebrow">Battery Trust OS · Manufacturer Operations</div>
+        <h1>Supplier Network</h1>
+        <p>Доставчици, data packages, missing data и verification readiness.</p>
+      </div>
+      <a class="back" href="/">← DPP Dashboard</a>
+    </header>
+
+    <section class="notice" id="modeNotice">Зареждане…</section>
+
+    <section class="stats" aria-label="Supplier summary">
+      <article><strong id="supplierCount">0</strong><span>Suppliers</span></article>
+      <article><strong id="packageCount">0</strong><span>Packages</span></article>
+      <article><strong id="missingCount">0</strong><span>Missing fields</span></article>
+      <article><strong id="readyCount">0</strong><span>Ready suppliers</span></article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Supplier operations queue</h2><p>Приоритетът е доставчикът с най-много липсващи данни.</p></div>
+        <button id="refresh" type="button">Refresh</button>
+      </div>
+      <div id="supplierRows" class="rows" aria-live="polite">Зареждане…</div>
+    </section>
+
+    <footer>BAT60 precursor · sample mode is synthetic; production mode requires authenticated API session.</footer>
+  </main>
+  <script src="/assets/csp/suppliers-inline-1.js"></script>
+</body>
+</html>
