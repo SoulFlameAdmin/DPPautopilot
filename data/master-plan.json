@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.7",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T02:55:00+03:00",
+  "updatedAt": "2026-10-02T03:05:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1554,7 +1554,7 @@
           "acceptanceCriteria": "Tenant-scoped supplier records exist with stable external reference, legal name and lifecycle status",
           "evidenceRequired": "Migration replay + DB subset",
           "status": "yellow",
-          "evidence": "Schema implementation added; awaiting CI replay/evidence."
+          "evidence": "Tenant supplier registry is deployed to bound Supabase and now has authenticated manufacturer create/list RPC+HTTP API; CI acceptance pending."
         },
         {
           "id": "BAT52",
@@ -1572,7 +1572,7 @@
           "acceptanceCriteria": "Supplier data can be submitted as versioned packages scoped to model/item/component/material",
           "evidenceRequired": "Migration replay + DB subset",
           "status": "yellow",
-          "evidence": "Append-only supplier data package implementation added; awaiting CI evidence."
+          "evidence": "Versioned append-only supplier packages are deployed and now have authenticated package-create API; CI acceptance pending."
         },
         {
           "id": "BAT54",
@@ -1581,7 +1581,7 @@
           "acceptanceCriteria": "Supplier packages can target exact model/item/component/material references without ambiguity",
           "evidenceRequired": "DB/API tests",
           "status": "yellow",
-          "evidence": "Exact model/item/component/material DB scoping and negative ambiguity checks implemented; awaiting CI/API evidence."
+          "evidence": "Exact model/item/component/material scoping is enforced in DB and HTTP package validation; CI/API acceptance pending."
         },
         {
           "id": "BAT55",
@@ -1608,7 +1608,7 @@
           "acceptanceCriteria": "Packages move through unverified/validated/verified/rejected states with evidence",
           "evidenceRequired": "API/DB tests",
           "status": "yellow",
-          "evidence": "Append-only supplier package verification event ledger implemented with evidence references; awaiting CI/API evidence."
+          "evidence": "Append-only verification ledger plus authenticated verification API implemented; CI acceptance pending."
         },
         {
           "id": "BAT58",
@@ -1634,8 +1634,8 @@
           "dependsOn": "BAT51-BAT59",
           "acceptanceCriteria": "Manufacturer sees supplier completeness, blockers and package status",
           "evidenceRequired": "Authenticated E2E tests",
-          "status": "red",
-          "evidence": "Not implemented."
+          "status": "yellow",
+          "evidence": "Manufacturer Supplier Network summary API plus responsive synthetic operations dashboard precursor implemented; authenticated browser E2E acceptance remains."
         },
         {
           "id": "BAT61",
