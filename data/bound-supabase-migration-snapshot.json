@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-09-21",
+  "observed_at": "2026-10-02",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -158,6 +158,10 @@
       "name": "dpp_items_delete_checked"
     },
     {
+      "version": "20260920010139",
+      "name": "dpp_items_delete_checked"
+    },
+    {
       "version": "20260920021507",
       "name": "dpp_passport_create_idempotency"
     },
@@ -188,7 +192,27 @@
     {
       "version": "20260920232617",
       "name": "dpp_evidence_object_metadata_rpc"
+    },
+    {
+      "version": "20261001234408",
+      "name": "dpp_field_events"
+    },
+    {
+      "version": "20261001234410",
+      "name": "dpp_supplier_network"
+    },
+    {
+      "version": "20261001234412",
+      "name": "dpp_supplier_scope_verification"
+    },
+    {
+      "version": "20261001234414",
+      "name": "dpp_supplier_missing_data"
+    },
+    {
+      "version": "20261001234417",
+      "name": "dpp_supplier_reminders"
     }
   ],
-  "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
+  "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents. Snapshot refreshed after Battery Trust OS additive migrations were dry-run and applied through the bound Supabase connector."
 }
