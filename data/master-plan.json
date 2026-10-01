@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.7",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T02:36:00+03:00",
+  "updatedAt": "2026-10-02T02:46:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1625,8 +1625,8 @@
           "dependsOn": "BAT58",
           "acceptanceCriteria": "Authorized users can trigger auditable reminders without exposing unrelated tenant data",
           "evidenceRequired": "API/security tests",
-          "status": "red",
-          "evidence": "Not implemented."
+          "status": "yellow",
+          "evidence": "Tenant/RBAC-scoped reminder RPC/API, append-only audit table and negative cross-tenant tests implemented; awaiting full CI evidence."
         },
         {
           "id": "BAT60",
