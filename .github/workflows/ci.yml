@@ -293,6 +293,10 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_field_events_subset.sql
+      - name: Run BAT51 BAT53 BAT55 supplier network subset
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_supplier_network_subset.sql
       - name: Run T02 green database subset integration suite
         env:
           PGPASSWORD: postgres
