@@ -712,3 +712,12 @@ Append evidence here only after verification.
 - Live canonical HTTPS checks on `/`, `/data/master-plan.json`, and `/api/models` returned respectively 200, 200 and the expected unauthenticated 401 `AUTH_REQUIRED`. All three expose the committed CSP/HSTS/nosniff/frame/referrer/permissions headers; CSP contains neither `'unsafe-inline'` nor `'unsafe-eval'`; the data route is `no-store, max-age=0`; the protected API exposes a request correlation ID.
 - HTTPS production fetch through the TLS-validating Vercel connector completed without certificate/hostname error. Concrete deployment/route/header/TLS evidence is recorded in `data/security-headers-policy.json` and is now enforced by `scripts/validate_security_headers.py` whenever R02 is GREEN.
 - R02 acceptance criteria are satisfied. Status: GREEN.
+
+### 2026-09-27 — 10-point dependency refresh (M01/M02/M03/M05/M10/M12/M13/M17/M18/M19)
+
+- Fresh bound-Supabase rollback execution returned `M02_M03_TENANT_API_SUBSET_PASS`, `M05_ACTIVE_TENANT_API_ISOLATION_PASS`, `M10_PUBLIC_PRIVATE_RUNTIME_PASS`, `M12_TENANT_CONTEXT_AUDIT_PASS`, `M13_EVIDENCE_METADATA_SUBSET_PASS`, `M17_MODELS_RPC_SUBSET_PASS`, `M18_ITEMS_RPC_SUBSET_PASS`, and `M19_PASSPORT_API_SUBSET_PASS`.
+- Current canonical main CI run `36321661829` on `f5ac547b1be77905c1f23721d2d90ef6a862d403` completed SUCCESS. Targeted steps for M01 auth/recovery contracts, M02/M03 tenant/RBAC, M05 RLS/isolation, M10 public/private, M12 audit, M13 evidence metadata/storage RLS, and M17/M18/M19 HTTP+RPC matrices all completed successfully.
+- Bound private Storage bucket `dpp-evidence` is configured with 10 MiB limit and PDF/PNG/JPEG/CSV/JSON allowlist; live RLS policies remain tenant/RBAC-scoped. Bound Edge Function `dpp-evidence-object` is ACTIVE v8 with `verify_jwt=true`.
+- Repository source for `dpp-evidence-object` was synchronized to deployed v8 in this evidence branch, removing source/deployment drift while preserving caller-JWT/RLS enforcement.
+- Statuses are intentionally not promoted around the dependency gate: M01 still requires a real recovery-session password-update completion through the normal Auth boundary. M13 still requires a real authenticated upload→download/content-integrity→delete byte lifecycle. M02/M03/M05/M10/M12/M17/M18/M19 remain dependency-gated until M01/M03 can be accepted without bypassing Auth.
+
