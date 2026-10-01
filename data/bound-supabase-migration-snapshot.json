@@ -216,6 +216,10 @@
     {
       "version": "20261001234836",
       "name": "dpp_supplier_portal_signature"
+    },
+    {
+      "version": "20261001235520",
+      "name": "dpp_suppliers_api"
     }
   ],
   "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents. Snapshot refreshed after Battery Trust OS additive migrations were dry-run and applied through the bound Supabase connector."
