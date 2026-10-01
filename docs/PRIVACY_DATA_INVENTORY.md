@@ -67,3 +67,10 @@ The live Supabase project contains unrelated non-DPP application tables. DPP mig
 - This affects only the audit copy; source business/regulatory rows are not modified.
 - The helper is not executable by `anon` or `authenticated`.
 - This does **not** define the final audit retention period or broader personal/confidential-field minimization policy.
+
+
+## Battery Trust supplier data
+
+Supplier Network adds tenant-scoped supplier business records, versioned product/component/material packages, verification evidence, missing-data/reminder history, supplier-portal memberships/invitations and detached signature envelopes. Supplier invitation email addresses and portal user IDs are contact/identity data and must be used only for supplier-access and compliance collaboration purposes.
+
+Raw invitation tokens are not persisted; only a SHA-256 digest is stored. Supplier package, verification, reminder and signature evidence is append-oriented. Detached signature envelopes contain public/key references and signature evidence only — never private signing keys or secrets. Production retention/deletion periods for these records remain part of the R07/R08 acceptance work.
