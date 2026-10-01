@@ -12,8 +12,13 @@ declare
   verification_mutation_rejected boolean := false;
   ambiguous_scope_rejected boolean := false;
   cross_tenant_rejected boolean := false;
+  signature_mutation_rejected boolean := false;
+  portal_cross_tenant_rejected boolean := false;
+  v_user uuid := '45000000-0000-4000-8000-000000000001';
   v_missing integer;
 begin
+  insert into auth.users(id) values(v_user);
+
   insert into public.dpp_organizations(id,name,slug) values
     (v_org,'BAT Supplier Test','bat-supplier-test'),
     (v_other_org,'BAT Supplier Other','bat-supplier-other');
@@ -109,6 +114,49 @@ begin
     raise exception 'ambiguous supplier package scope was not rejected';
   end if;
 
+
+
+  insert into public.dpp_supplier_invitations(
+    organization_id,supplier_id,invitee_email,requested_role,token_sha256,
+    expires_at,created_by
+  ) values(
+    v_org,v_supplier,'supplier@example.com','supplier_editor',
+    repeat('a',64),'2026-10-09T00:00:00Z',v_user
+  );
+
+  begin
+    insert into public.dpp_supplier_portal_members(
+      organization_id,supplier_id,user_id,role,created_by
+    ) values(
+      v_other_org,v_supplier,v_user,'supplier_viewer',v_user
+    );
+  exception when foreign_key_violation then
+    portal_cross_tenant_rejected := true;
+  end;
+
+  if not portal_cross_tenant_rejected then
+    raise exception 'cross-tenant supplier portal membership was not rejected';
+  end if;
+
+  insert into public.dpp_supplier_package_signatures(
+    organization_id,package_id,scheme,key_ref,algorithm,payload_sha256,
+    signature_base64,signed_at
+  ) values(
+    v_org,v_second,'jws','supplier-key:2026-01','ES256',
+    repeat('b',64),'ZXhhbXBsZS1zaWduYXR1cmU=','2026-10-02T11:15:00Z'
+  );
+
+  begin
+    update public.dpp_supplier_package_signatures
+    set algorithm='RS256'
+    where organization_id=v_org and package_id=v_second;
+  exception when sqlstate '55000' then
+    signature_mutation_rejected := true;
+  end;
+
+  if not signature_mutation_rejected then
+    raise exception 'supplier signature envelope mutation was not rejected';
+  end if;
 
   insert into public.dpp_supplier_field_requirements(
     organization_id,supplier_id,subject_kind,subject_ref,field_path,due_at
