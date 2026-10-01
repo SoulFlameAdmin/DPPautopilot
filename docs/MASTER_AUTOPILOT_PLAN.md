@@ -759,6 +759,10 @@ Append evidence here only after verification.
 | BAT38 | Authentic-battery result | BAT37 | Successful verification returns a clear authenticated battery result bound to Battery ID | E2E phone/NFC test | RED |
 | BAT39 | Counterfeit/suspicious verification result | BAT37 | Invalid/replayed/unregistered NFC proofs fail closed and produce a clear warning | Negative/replay tests | RED |
 | BAT40 | NFC verification history | BAT37,BAT09 | Verification events are timestamped and auditable without exposing cryptographic secrets | DB/API integration tests | RED |
+
+## BAT31-BAT40 Crypto execution contract
+
+Detailed execution source: docs/DPP_CRYPTO_INTEGRATION_PLAN.md (CR01-CR24). It adds the missing threat model, secure-element selection, PKI/KMS boundary, manufacturing provisioning, dynamic tap verification, strong challenge mode, anti-replay, revocation/rotation, anti-swap/tamper, BMS binding hook, privacy and real-hardware acceptance. BAT31-BAT40 remain evidence-gated; no mock-only implementation can make them GREEN.
 | BAT41 | BMS integration layer | M18,BAT01 | Vendor-neutral ingestion boundary exists for BMS lifecycle/telemetry data | Connector contract + tests | RED |
 | BAT42 | Standard BMS connector interface | BAT41 | Connectors normalize vendor data into canonical DPP/BMS events | Contract tests | RED |
 | BAT43 | API CAN Modbus adapters | BAT42 | Architecture supports HTTP/API, CAN and Modbus adapters without coupling passport core to vendor protocols | Adapter tests/evidence | RED |
