@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "issue": 241,
+  "issueUrl": "https://github.com/SoulFlameAdmin/DPPautopilot/issues/241",
+  "protocol": "docs/DPP_SESSION_BRIDGE.md",
+  "transport": "github_issue_comments",
+  "fallback": "gmail_alerts",
+  "participants": {
+    "mitko_dpp": {
+      "owns": [
+        "DPP Data Engine",
+        "Import Autopilot",
+        "Supplier Network",
+        "BMS/lifecycle",
+        "dashboard/API",
+        "Battery Trust OS integration"
+      ]
+    },
+    "borko_crypto": {
+      "owns": [
+        "DPP CRYPTO CR01-CR25",
+        "Secure NFC cryptographic implementation"
+      ]
+    }
+  },
+  "readBeforeWork": true,
+  "greenLaw": "implementation + applicable PASS test + concrete evidence",
+  "security": "No production secrets or cryptographic private material in bridge messages.",
+  "lastBridgeEvent": {
+    "direction": "MITKO_TO_BORKO",
+    "tag": "DECISION",
+    "summary": "Bridge activated; read issue #241 before every DPP CRYPTO continuation.",
+    "commit": null
+  }
+}
