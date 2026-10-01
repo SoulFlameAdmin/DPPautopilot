@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.7",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T02:15:00+03:00",
+  "updatedAt": "2026-10-02T02:31:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1580,8 +1580,8 @@
           "dependsOn": "BAT53",
           "acceptanceCriteria": "Supplier packages can target exact model/item/component/material references without ambiguity",
           "evidenceRequired": "DB/API tests",
-          "status": "red",
-          "evidence": "Not implemented."
+          "status": "yellow",
+          "evidence": "Exact model/item/component/material DB scoping and negative ambiguity checks implemented; awaiting CI/API evidence."
         },
         {
           "id": "BAT55",
@@ -1607,8 +1607,8 @@
           "dependsOn": "BAT53",
           "acceptanceCriteria": "Packages move through unverified/validated/verified/rejected states with evidence",
           "evidenceRequired": "API/DB tests",
-          "status": "red",
-          "evidence": "Not implemented."
+          "status": "yellow",
+          "evidence": "Append-only supplier package verification event ledger implemented with evidence references; awaiting CI/API evidence."
         },
         {
           "id": "BAT58",
