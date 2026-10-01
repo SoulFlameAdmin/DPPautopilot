@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "task": "R03",
   "status": "partial",
   "max_body_bytes": 1048576,
@@ -102,6 +102,16 @@
     {
       "id": "invalid_supplier_reminder_fields",
       "surface": "/api/supplier-reminders",
+      "expected": "400/422 validation error before upstream"
+    },
+    {
+      "id": "oversize_parsed_suppliers_body",
+      "surface": "/api/suppliers",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "invalid_supplier_fields",
+      "surface": "/api/suppliers",
       "expected": "400/422 validation error before upstream"
     }
   ],
