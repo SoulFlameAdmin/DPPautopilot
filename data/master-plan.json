@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.7",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T02:46:00+03:00",
+  "updatedAt": "2026-10-02T02:55:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1562,8 +1562,8 @@
           "dependsOn": "BAT51,M03",
           "acceptanceCriteria": "Manufacturer can invite a supplier with least-privilege scoped access",
           "evidenceRequired": "Auth/API/E2E tests",
-          "status": "red",
-          "evidence": "Not implemented."
+          "status": "yellow",
+          "evidence": "Supplier portal membership + invitation schema implemented with tenant-scoped supplier FK, least-privilege roles and hashed invite-token storage; API/E2E acceptance remains."
         },
         {
           "id": "BAT53",
@@ -1598,8 +1598,8 @@
           "dependsOn": "BAT53",
           "acceptanceCriteria": "Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration",
           "evidenceRequired": "Contract tests",
-          "status": "red",
-          "evidence": "Not implemented."
+          "status": "yellow",
+          "evidence": "Append-only detached supplier signature envelope implemented for JWS/COSE/X.509 references with payload digest and no private-key storage; CI contract evidence pending."
         },
         {
           "id": "BAT57",
