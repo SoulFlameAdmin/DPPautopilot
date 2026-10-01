@@ -153,3 +153,19 @@ Work CR01 → CR24 in order, skipping only when a dependency is genuinely blocke
 Hardware-dependent tasks may remain BLOCKED until a physical NFC dev kit/tag exists. Continue all independent backend/schema/API/test work instead.
 
 When I write **Продължи DPP CRYPTO**, inspect the real repository state, resume from the first incomplete dependency-safe CR point, implement/test it and continue as far as the available tools safely allow. Do not merely explain what to do.
+
+## Mandatory completion handoff
+
+When CR01-CR24 are complete, or when a meaningful integration-ready milestone is complete, Borko must send Mitko a final handoff link before considering the work delivered.
+
+The handoff must include:
+- GitHub PR link containing all implementation commits;
+- exact branch name and final commit SHA;
+- list of completed CR points and any remaining BLOCKED points;
+- PASS test / CI evidence links;
+- exact files and migrations added or changed;
+- integration instructions for merging into the main DPP Battery Platform;
+- hardware/provisioning notes needed for real NFC testing;
+- no secrets, private keys, seed material or credentials in the handoff.
+
+The work is not considered handed off until Mitko has a concrete GitHub link and can integrate it into the DPP system.
