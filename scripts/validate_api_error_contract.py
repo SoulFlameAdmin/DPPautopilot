@@ -54,7 +54,18 @@ for sqlstate,entry in contract.get("common_sqlstate",{}).items():
     assert isinstance(entry["message"],str) and entry["message"].strip()
     seen_surface_entries+=1
 
-expected_surfaces={"models","items","passport","export","imports","tenant","organizations","members"}
+api_surfaces={
+    "models":"models",
+    "items":"items",
+    "passport":"passport",
+    "export":"export",
+    "imports":"imports",
+    "tenant":"tenant",
+    "organizations":"organizations",
+    "members":"members",
+    "supplier_reminders":"supplier-reminders",
+}
+expected_surfaces=set(api_surfaces)
 assert set(contract.get("surfaces",{}))==expected_surfaces, (
     f"M22 API surface drift: {sorted(contract.get('surfaces',{}))}"
 )
@@ -68,7 +79,7 @@ for surface,mapping in contract.get("surfaces",{}).items():
 
 assert seen_surface_entries>=20, "M22 API error catalog unexpectedly small"
 
-api_names=["models","items","passport","export","imports","tenant","organizations","members"]
+api_names=list(api_surfaces)
 declared_codes={
     entry["code"]
     for entry in contract.get("common_sqlstate",{}).values()
@@ -83,7 +94,8 @@ direct_error_pair_re=re.compile(
     r"""code\s*:\s*['"]([A-Z][A-Z0-9_]+)['"]\s*,\s*message\s*:\s*['"]([^'"]*)['"]"""
 )
 for name in api_names:
-    text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
+    filename=api_surfaces[name]
+    text=(ROOT/f"api/{filename}.js").read_text(encoding="utf-8")
     literal_codes=set(literal_code_re.findall(text))
     undeclared=sorted(literal_codes-declared_codes)
     assert not undeclared, f"{name} API emits undeclared public error codes: {undeclared}"
@@ -105,7 +117,8 @@ for token in ["api-error-contract.json","mapDatabaseError","localError","errorBo
     assert token in helper, f"shared error helper missing {token}"
 
 for name in api_names:
-    text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
+    filename=api_surfaces[name]
+    text=(ROOT/f"api/{filename}.js").read_text(encoding="utf-8")
     assert "require('./_errors.js')" in text, f"{name} API does not import shared M22 error helper"
     assert f"mapSharedDatabaseError('{name}'" in text, f"{name} API does not declare its shared error surface"
     assert "error.publicMessage" in text, f"{name} API does not preserve canonical public message"
