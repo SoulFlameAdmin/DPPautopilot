@@ -10,6 +10,7 @@ const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
 const imports=require('../../api/imports.js');
+const supplierReminders=require('../../api/supplier-reminders.js');
 const request=require('../../api/_request.js');
 
 function makeRes(){
@@ -55,7 +56,7 @@ test('shared parser rejects malformed JSON and unserializable objects',()=>{
   );
 });
 
-for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['imports',imports]]){
+for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['imports',imports],['supplier-reminders',supplierReminders]]){
   test(`${name} rejects >1 MiB parsed object before upstream DB access`,async()=>{
     const original=global.fetch;
     let called=false;
@@ -256,4 +257,36 @@ test('passport rejects invalid identifiers, ids, status and payload shapes local
     expected_updated_at:'2026-09-19T04:00:00.000Z'
   }),res);
   assertError(res,422,'VALIDATION_ERROR');
+});
+
+
+test('supplier reminders reject malformed/invalid fields locally before upstream',async()=>{
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('upstream must not be called');};
+  try{
+    let res=makeRes();
+    await supplierReminders(req('POST','{"bad":'),res);
+    assertError(res,400,'INVALID_JSON');
+
+    res=makeRes();
+    await supplierReminders(req('POST',{
+      supplier_id:'not-a-uuid',
+      subject_kind:'component',
+      subject_ref:'component:CELL-1',
+      channel:'email'
+    }),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    res=makeRes();
+    await supplierReminders(req('POST',{
+      supplier_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      subject_kind:'invalid',
+      subject_ref:'component:CELL-1',
+      channel:'email'
+    }),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
 });
