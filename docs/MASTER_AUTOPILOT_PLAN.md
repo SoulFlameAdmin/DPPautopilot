@@ -777,3 +777,61 @@ Detailed execution source: docs/DPP_CRYPTO_INTEGRATION_PLAN.md (CR01-CR25). It a
 ## DPP SESSION BRIDGE
 
 Cross-session coordination source: `docs/DPP_SESSION_BRIDGE.md`, GitHub issue #241. GitHub issue comments are the shared message transport between Mitko/DPP and Borko/DPP CRYPTO; Gmail is fallback only.
+
+
+## Battery Trust OS expansion — BAT51-BAT100
+
+These tasks extend Battery Platform V3 into the full Battery Trust OS. Borko owns CRYPTO implementation; Mitko/DPP owns the remaining platform layers and integration.
+
+| ID | Task | Depends on | Acceptance criteria | Evidence | Status |
+|---|---|---|---|---|---|
+| BAT51 | Supplier registry | BAT01 | Tenant-scoped supplier records exist with stable external reference, legal name and lifecycle status | Migration replay + DB subset | YELLOW |
+| BAT52 | Supplier portal invitation model | BAT51,M03 | Manufacturer can invite a supplier with least-privilege scoped access | Auth/API/E2E tests | RED |
+| BAT53 | Supplier data packages | BAT51,BAT01 | Supplier data can be submitted as versioned packages scoped to model/item/component/material | Migration replay + DB subset | YELLOW |
+| BAT54 | Component and material scoping | BAT53 | Supplier packages can target exact model/item/component/material references without ambiguity | DB/API tests | RED |
+| BAT55 | Supplier package history | BAT53,BAT08 | Supplier package versions are append-only and supersession is auditable | Mutation-negative DB tests | YELLOW |
+| BAT56 | Supplier signature envelope hook | BAT53 | Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration | Contract tests | RED |
+| BAT57 | Supplier verification workflow | BAT53 | Packages move through unverified/validated/verified/rejected states with evidence | API/DB tests | RED |
+| BAT58 | Supplier missing-data queue | BAT14,BAT53 | Missing required supplier fields are grouped by supplier and affected product | Integration tests | RED |
+| BAT59 | Supplier reminder workflow | BAT58 | Authorized users can trigger auditable reminders without exposing unrelated tenant data | API/security tests | RED |
+| BAT60 | Supplier network dashboard | BAT51-BAT59 | Manufacturer sees supplier completeness, blockers and package status | Authenticated E2E tests | RED |
+| BAT61 | Factory provisioning job model | BAT26,BAT29 | A factory job can batch Battery IDs, QR and identity provisioning work | DB/API tests | RED |
+| BAT62 | Batch provisioning | BAT61 | Provisioning supports deterministic bulk processing with idempotent retry | Load/idempotency tests | RED |
+| BAT63 | QR label print job | BAT61,BAT29 | Provisioning emits exact printable QR/label jobs bound to Battery IDs | Artifact/decode tests | RED |
+| BAT64 | NFC provisioning handoff contract | BAT61,BAT31 | Factory flow exchanges a minimal typed contract with Borko CRYPTO provisioning without exposing secrets | Contract/integration tests | RED |
+| BAT65 | NFC bind result intake | BAT64 | Backend records success/failure identity binding result against exact Battery ID | API/DB tests | RED |
+| BAT66 | Ready-for-market gate | BAT63,BAT65,BAT15 | Battery can become READY only after required DPP, QR and identity checks pass | Business-rule tests | RED |
+| BAT67 | Factory quarantine gate | BAT66 | Failed provisioning or compliance checks quarantine the battery with auditable reason | Negative tests | RED |
+| BAT68 | Reprovision and replacement workflow | BAT65 | Authorized NFC/label replacement preserves Battery ID and historical identity chain | Integration tests | RED |
+| BAT69 | Provisioning audit trail | BAT61-BAT68 | Every factory provisioning action is timestamped and attributable | DB/audit tests | RED |
+| BAT70 | Factory throughput benchmark | BAT62-BAT69 | Representative batch meets documented throughput target without identity collisions | Benchmark evidence | RED |
+| BAT71 | Lifecycle event ledger | BAT26,BAT08 | Battery lifecycle changes are represented as append-only typed events | DB/API tests | RED |
+| BAT72 | Service actor roles | BAT71,M12 | Service/manufacturer/recycler actions use explicit least-privilege roles | RBAC tests | RED |
+| BAT73 | Repair events | BAT71,BAT72 | Repair event records who/when/what changed with evidence references | Integration tests | RED |
+| BAT74 | Module component replacement | BAT73 | Component replacement preserves old/new component identity and reason | Integration tests | RED |
+| BAT75 | Service evidence attachments | BAT73,M13 | Service events can reference controlled evidence objects | Storage/API tests | RED |
+| BAT76 | Second-life transition package | BAT71 | Second-life transition captures required state/evidence without erasing first-life history | Lifecycle tests | RED |
+| BAT77 | Repurpose remanufacture workflow | BAT71 | Repurpose/remanufacture transitions are typed, authorized and auditable | Lifecycle/RBAC tests | RED |
+| BAT78 | Recycler end-of-life workflow | BAT71 | Recycler/end-of-life event closes active lifecycle while preserving history | Lifecycle tests | RED |
+| BAT79 | Lifecycle access projection | BAT71,BAT10 | Public/legitimate-interest/authority lifecycle views obey field access policy | Access tests | RED |
+| BAT80 | Lifecycle timeline UI | BAT71-BAT79 | Authorized users can inspect chronological battery history with evidence | E2E tests | RED |
+| BAT81 | Anti-swap policy integration | BAT31,BAT71 | Physical identity replacement/movement creates detectable policy state | Security integration tests | RED |
+| BAT82 | Tamper event ingestion | BAT31,BAT71 | Tamper signal can be ingested as an auditable lifecycle/security event | Integration tests | RED |
+| BAT83 | Counterfeit incident case | BAT39,BAT71 | Suspicious verification can open a tenant-scoped incident record | API/security tests | RED |
+| BAT84 | Identity anomaly rules | BAT40,BAT83 | Rules flag impossible/repeated/geographically or temporally suspicious verification patterns without auto-claiming fraud | Rule tests | RED |
+| BAT85 | Cross-tenant identity attack suite | BAT37,R04 | Identity endpoints prove tenant isolation under negative attack cases | Security tests | RED |
+| BAT86 | Cloned QR attack test | BAT30,BAT38 | Copied QR cannot produce cryptographic Authentic result without genuine NFC proof | Attack evidence | RED |
+| BAT87 | Replay wrong-tag revoked-tag test | BAT37-BAT39 | Replay, wrong tag and revoked identity fail closed | Attack evidence | RED |
+| BAT88 | Attack evidence pack | BAT81-BAT87 | Security demo package captures attack inputs, results, logs and no-secret-leak proof | Evidence artifact | RED |
+| BAT89 | Manufacturer fleet summary | BAT48,BAT71 | Dashboard aggregates models/items/readiness/lifecycle without leaking tenant data | Authenticated E2E tests | RED |
+| BAT90 | Compliance operations queue | BAT14,BAT48 | Dashboard prioritizes missing/invalid/blocked compliance work | E2E tests | RED |
+| BAT91 | Identity and NFC operations view | BAT40,BAT48 | Manufacturer can inspect identity state, revocation and verification history | E2E tests | RED |
+| BAT92 | Supplier operations view | BAT60,BAT48 | Manufacturer can inspect supplier completeness and blockers | E2E tests | RED |
+| BAT93 | Lifecycle and BMS analytics | BAT47,BAT80 | Dashboard combines lifecycle history and normalized BMS observations | E2E/data tests | RED |
+| BAT94 | Battery Trust API v1 | BAT49,BAT53,BAT71 | Versioned API exposes suppliers, lifecycle, BMS and identity contracts with RBAC | API/security suite | RED |
+| BAT95 | AI missing-data copilot | BAT14,BAT58 | AI can explain missing data and propose next actions without silently inventing values | Evaluation tests | RED |
+| BAT96 | AI supplier follow-up assistant | BAT58,BAT59 | AI drafts targeted supplier follow-ups from real missing-data state | Evaluation + approval tests | RED |
+| BAT97 | AI incident triage | BAT83,BAT84 | AI summarizes security/lifecycle incidents with evidence links and human approval boundaries | Evaluation tests | RED |
+| BAT98 | Battery Trust observability and SLA | BAT94,R09,R10 | Core identity/import/supplier/BMS/lifecycle paths have metrics, alerts and defined SLO/SLA targets | Ops evidence | RED |
+| BAT99 | Battery Trust migration rollback drill | BAT51-BAT98,C04,C05 | Production migration and rollback are rehearsed with no silent identity/history loss | Drill evidence | RED |
+| BAT100 | Battery Trust OS real manufacturer acceptance | BAT01-BAT99,C15 | A real manufacturer pilot proves raw data → passport → QR/NFC identity → lifecycle/BMS/service flows with signed UAT | Full acceptance pack + real pilot UAT | RED |
