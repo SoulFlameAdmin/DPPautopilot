@@ -1,7 +1,7 @@
 # DPP Autopilot — MASTER AUTOPILOT PLAN
 
 **Source of truth:** this file.  
-**Plan version:** 2.5  
+**Plan version:** 2.6  
 **Frozen:** 2026-09-17  
 **Target:** evidence-backed production readiness, not percentage-by-assumption.
 
@@ -712,3 +712,60 @@ Append evidence here only after verification.
 - Live canonical HTTPS checks on `/`, `/data/master-plan.json`, and `/api/models` returned respectively 200, 200 and the expected unauthenticated 401 `AUTH_REQUIRED`. All three expose the committed CSP/HSTS/nosniff/frame/referrer/permissions headers; CSP contains neither `'unsafe-inline'` nor `'unsafe-eval'`; the data route is `no-store, max-age=0`; the protected API exposes a request correlation ID.
 - HTTPS production fetch through the TLS-validating Vercel connector completed without certificate/hostname error. Concrete deployment/route/header/TLS evidence is recorded in `data/security-headers-policy.json` and is now enforced by `scripts/validate_security_headers.py` whenever R02 is GREEN.
 - R02 acceptance criteria are satisfied. Status: GREEN.
+
+# BATTERY PLATFORM V3 — DATA ENGINE / IMPORT / IDENTITY / NFC / BMS
+
+**Commercial target:** representative manufacturer raw data -> working individual Battery Passport in under 60 minutes, with QR as the required data carrier and Secure NFC as an additional cryptographic authenticity layer.
+
+| ID | Task | Depends on | Acceptance criteria | Evidence required | Status |
+|---|---|---|---|---|---|
+| BAT01 | DPP Data Engine canonical field engine | F11,M04 | All Battery Passport fields are schema-driven from the canonical catalog; no product values are embedded in engine code | Engine module + contract tests + DB event-store precursor | YELLOW |
+| BAT02 | Per-field value storage | BAT01 | Every ingested field value is represented independently with field path and typed JSON value | DB migration + integration tests | YELLOW |
+| BAT03 | Per-field source provenance | BAT01 | Every field event records source kind and concrete source reference | DB constraints + unit tests | YELLOW |
+| BAT04 | Per-field source date | BAT03 | Every field event records source/effective date separately from ingestion time | DB constraints + unit tests | YELLOW |
+| BAT05 | Per-field access level | BAT01,F11 | Each field event carries a valid access class consistent with the canonical field catalog | Catalog-driven validator + security tests | YELLOW |
+| BAT06 | Per-field verification status | BAT01 | Each field event has explicit verification status with controlled values | DB constraints + unit tests | YELLOW |
+| BAT07 | No hardcoded passport values | BAT01 | Production passport values originate from stored/imported/integrated data, not application constants | Static/contract tests + review | YELLOW |
+| BAT08 | Append-only field history | BAT02-BAT06,M11 | Material field changes append new events; prior values cannot be updated or deleted | DB mutation-negative tests | YELLOW |
+| BAT09 | Field change audit attribution | BAT08,M12 | Field history records actor, target, time, provenance and supersession linkage | DB/API integration tests | YELLOW |
+| BAT10 | Extensible field schema | BAT01 | New requirement fields can be added through the versioned catalog without redesigning core tables | Catalog validator + schema traceability | GREEN |
+| BAT11 | EU requirements registry | F11 | Current Battery Passport requirement set is represented in a versioned registry with authoritative sources | Traceability document + catalog validator | GREEN |
+| BAT12 | Requirement-to-field mapping | BAT11 | Each requirement maps to one or more canonical DPP field paths | Coverage validator | GREEN |
+| BAT13 | Mandatory conditional optional rules | BAT11 | Requiredness and conditional applicability are explicit and machine-readable | Rule catalog + tests | YELLOW |
+| BAT14 | Missing-data detection | BAT12,BAT13 | System identifies missing required/applicable fields and reports exact field paths | Unit/UI tests | GREEN |
+| BAT15 | Compliance completeness score | BAT14 | Completeness is computed from canonical requirement rules rather than hardcoded percentages | Unit/UI tests | GREEN |
+| BAT16 | Excel import wizard | M07 | Customer can upload XLSX and preview sheets/headers before mapping | Integration/E2E tests | RED |
+| BAT17 | CSV import wizard | M07,M08 | Customer can upload CSV and preview/map data safely | Integration/E2E tests | GREEN |
+| BAT18 | Automatic column recognition | BAT17,BAT12 | System proposes canonical DPP fields for incoming column headers | Evaluation set + mapping tests | YELLOW |
+| BAT19 | AI-assisted mapping | BAT18 | Low-confidence/ambiguous mappings are proposed with confidence and require review before commit | Evaluation + UI acceptance | YELLOW |
+| BAT20 | Manual mapping correction | BAT17 | User can override proposed mappings before import commit | E2E mapping test | GREEN |
+| BAT21 | Format and unit validation | BAT17,BAT12 | Invalid types, formats and supported unit rules are detected before commit | Negative validation tests | YELLOW |
+| BAT22 | Import preview before commit | BAT17 | Mapped normalized records and errors are visible before irreversible commit | E2E test | GREEN |
+| BAT23 | Missing-data report after import | BAT14,BAT22 | Import produces actionable missing-field output grouped by model/item | Integration/UI tests | GREEN |
+| BAT24 | Reusable manufacturer mapping templates | BAT20 | Mappings are persisted per tenant and can be reused for later imports | DB + integration tests | GREEN |
+| BAT25 | Under-60-minute raw-data-to-passport benchmark | BAT16-BAT24,BAT30 | A representative customer dataset goes from raw source file to working passport in under 60 minutes | Timestamped pilot benchmark | RED |
+| BAT26 | Unique physical Battery ID | M14,D07 | Every individual battery receives a unique stable identifier | Collision/lifecycle tests | GREEN |
+| BAT27 | Immutable Battery ID | BAT26 | Issued physical battery identifier cannot be silently replaced; any correction is separately auditable | DB/API mutation-negative tests | YELLOW |
+| BAT28 | Permanent DPP URL per battery | BAT26,D06 | Each Battery ID resolves through a stable passport route | E2E route test | GREEN |
+| BAT29 | Unique QR generation | BAT28 | System generates a scannable QR for the exact passport URL | Decode test + artifact | GREEN |
+| BAT30 | QR-to-exact-passport verification | BAT29 | Decoded QR resolves to the intended individual battery passport with HTTP acceptance | E2E scan/route evidence | GREEN |
+| BAT31 | Secure NFC identity layer | BAT26 | System supports cryptographic NFC identity independent of passport data storage | NFC architecture + hardware integration test | RED |
+| BAT32 | Unique cryptographic NFC identity | BAT31 | Each secure NFC element is bound one-to-one to a Battery ID | Provisioning test | RED |
+| BAT33 | No passport data stored in NFC | BAT31 | NFC stores only identity/cryptographic material required for authentication, not DPP payloads | Tag inspection + architecture test | RED |
+| BAT34 | Non-exportable NFC secret/private key | BAT31 | Chosen secure element prevents normal extraction of signing secret/private key | Vendor capability evidence + hardware test | RED |
+| BAT35 | NFC challenge generation | BAT31 | Verifier creates fresh unpredictable challenge with expiry/replay protection | Security unit/integration tests | RED |
+| BAT36 | NFC challenge signing | BAT34,BAT35 | Secure element signs/authenticates the challenge without exposing its secret | Hardware integration test | RED |
+| BAT37 | Server-side NFC signature validation | BAT36 | Backend validates proof against registered battery/NFC identity | API/security tests | RED |
+| BAT38 | Authentic-battery result | BAT37 | Successful verification returns a clear authenticated battery result bound to Battery ID | E2E phone/NFC test | RED |
+| BAT39 | Counterfeit/suspicious verification result | BAT37 | Invalid/replayed/unregistered NFC proofs fail closed and produce a clear warning | Negative/replay tests | RED |
+| BAT40 | NFC verification history | BAT37,BAT09 | Verification events are timestamped and auditable without exposing cryptographic secrets | DB/API integration tests | RED |
+| BAT41 | BMS integration layer | M18,BAT01 | Vendor-neutral ingestion boundary exists for BMS lifecycle/telemetry data | Connector contract + tests | RED |
+| BAT42 | Standard BMS connector interface | BAT41 | Connectors normalize vendor data into canonical DPP/BMS events | Contract tests | RED |
+| BAT43 | API CAN Modbus adapters | BAT42 | Architecture supports HTTP/API, CAN and Modbus adapters without coupling passport core to vendor protocols | Adapter tests/evidence | RED |
+| BAT44 | State-of-charge ingestion | BAT42 | Timestamped SoC readings can be ingested with source provenance | Integration tests | RED |
+| BAT45 | State-of-health ingestion | BAT42 | Timestamped SoH readings can be ingested with source provenance | Integration tests | RED |
+| BAT46 | Cycles temperature voltage alarms ingestion | BAT42 | Supported lifecycle metrics are normalized and validated with timestamps/source | Integration tests | RED |
+| BAT47 | BMS history without overwrite | BAT44-BAT46,BAT08 | Telemetry/lifecycle updates append history and never erase prior observations | History/replay tests | RED |
+| BAT48 | Manufacturer dashboard | BAT14,BAT24,BAT30 | Manufacturer can view models, batteries, completeness, errors, imports, QR/NFC state and verification | Authenticated E2E tests | YELLOW |
+| BAT49 | DPP integration API | M17-M23,BAT37,BAT42 | Versioned API supports model/item/passport CRUD, imports, verification, BMS ingestion and permissions | API/security suite | YELLOW |
+| BAT50 | Battery Platform production acceptance | BAT01-BAT49,C15 | Security, backups, monitoring, tests, docs and at least one real manufacturer pilot satisfy final acceptance | Full production evidence pack + pilot UAT | RED |
