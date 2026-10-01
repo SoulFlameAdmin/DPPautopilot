@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.7",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T02:31:00+03:00",
+  "updatedAt": "2026-10-02T02:36:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1616,8 +1616,8 @@
           "dependsOn": "BAT14,BAT53",
           "acceptanceCriteria": "Missing required supplier fields are grouped by supplier and affected product",
           "evidenceRequired": "Integration tests",
-          "status": "red",
-          "evidence": "Not implemented."
+          "status": "yellow",
+          "evidence": "Supplier/product grouped missing-data requirements, queue and summary views implemented with DB acceptance assertions; awaiting CI evidence."
         },
         {
           "id": "BAT59",
