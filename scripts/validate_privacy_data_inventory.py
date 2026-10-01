@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 inventory=json.loads((ROOT/"data/privacy-data-inventory.json").read_text(encoding="utf-8"))
 doc=(ROOT/"docs/PRIVACY_DATA_INVENTORY.md").read_text(encoding="utf-8")
 
-assert inventory.get("version")==4
+assert inventory.get("version")==5
 assert inventory.get("task")=="R07"
 assert inventory.get("status")=="partial"
 assert "DPP Autopilot only" in inventory.get("scope","")
@@ -69,6 +69,12 @@ registry_store=next(s for s in stores if s["id"]=="registry_submission")
 assert any("credential-key guard" in x for x in registry_store["controls"])
 assert any("not client-executable" in x for x in registry_store["controls"])
 assert "must not persist obvious credential-bearing keys" in registry_store.get("minimization_note","")
+
+supplier_store=next(s for s in stores if s["id"]=="supplier_network")
+assert "dpp_supplier_invitations" in supplier_store["tables"]
+assert "invitee business email" in supplier_store["fields"]
+assert any("SHA-256 digest" in x for x in supplier_store["controls"])
+assert any("no private signing keys" in x for x in supplier_store["controls"])
 
 processors=inventory.get("processors_and_recipients",[])
 names={p["name"] for p in processors}
