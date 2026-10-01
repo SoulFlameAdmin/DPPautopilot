@@ -1,0 +1,32 @@
+{
+  "synthetic": true,
+  "suppliers": [
+    {
+      "id": "demo-sup-1",
+      "external_ref": "CELLS-DE",
+      "legal_name": "Synthetic Cells GmbH",
+      "status": "active",
+      "package_count": 4,
+      "missing_count": 1,
+      "last_package_at": "2026-10-01T10:00:00Z"
+    },
+    {
+      "id": "demo-sup-2",
+      "external_ref": "CATHODE-EU",
+      "legal_name": "Synthetic Cathode SA",
+      "status": "active",
+      "package_count": 2,
+      "missing_count": 3,
+      "last_package_at": "2026-09-30T08:30:00Z"
+    },
+    {
+      "id": "demo-sup-3",
+      "external_ref": "RECYCLE-01",
+      "legal_name": "Synthetic Recycle AD",
+      "status": "active",
+      "package_count": 1,
+      "missing_count": 0,
+      "last_package_at": "2026-09-29T12:00:00Z"
+    }
+  ]
+}
