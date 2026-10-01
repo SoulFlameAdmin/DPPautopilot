@@ -12,6 +12,7 @@ declare
   verification_mutation_rejected boolean := false;
   ambiguous_scope_rejected boolean := false;
   cross_tenant_rejected boolean := false;
+  v_missing integer;
 begin
   insert into public.dpp_organizations(id,name,slug) values
     (v_org,'BAT Supplier Test','bat-supplier-test'),
@@ -106,6 +107,34 @@ begin
 
   if not ambiguous_scope_rejected then
     raise exception 'ambiguous supplier package scope was not rejected';
+  end if;
+
+
+  insert into public.dpp_supplier_field_requirements(
+    organization_id,supplier_id,subject_kind,subject_ref,field_path,due_at
+  ) values
+    (v_org,v_supplier,'component','cell:NMC-21700','chemistry','2026-10-10T00:00:00Z'),
+    (v_org,v_supplier,'component','cell:NMC-21700','country_of_origin','2026-10-09T00:00:00Z');
+
+  select missing_count into v_missing
+  from public.dpp_supplier_missing_data_summary
+  where organization_id=v_org
+    and supplier_id=v_supplier
+    and subject_kind='component'
+    and subject_ref='cell:NMC-21700';
+
+  if v_missing <> 1 then
+    raise exception 'supplier missing-data queue expected 1 missing field, got %', v_missing;
+  end if;
+
+  if exists (
+    select 1
+    from public.dpp_supplier_missing_data_queue
+    where organization_id=v_org
+      and supplier_id=v_supplier
+      and field_path='chemistry'
+  ) then
+    raise exception 'supplier missing-data queue incorrectly flagged present chemistry';
   end if;
 
   begin
