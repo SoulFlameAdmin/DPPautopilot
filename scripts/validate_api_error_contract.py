@@ -64,6 +64,7 @@ api_surfaces={
     "organizations":"organizations",
     "members":"members",
     "supplier_reminders":"supplier-reminders",
+    "suppliers":"suppliers",
 }
 expected_surfaces=set(api_surfaces)
 assert set(contract.get("surfaces",{}))==expected_surfaces, (
