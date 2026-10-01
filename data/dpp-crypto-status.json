@@ -20,12 +20,12 @@
     "number": 240,
     "url": "https://github.com/SoulFlameAdmin/DPPautopilot/pull/240"
   },
-  "trackedCommitSha": "4e994656bbdb9ddc1c108dececb4e9dfc9f96207",
+  "trackedCommitSha": "ec5e0b9ec7d09da6fd36be582277385e9843a683",
   "ci": {
-    "state": "pending",
-    "detail": "Tracker implementation commit has not yet completed CI."
+    "state": "queued",
+    "detail": "CI, M25 acceptance audit, Cross-browser and U07 visual regression are queued for the tracker implementation."
   },
-  "updatedAt": "2026-10-02T01:55:00+03:00",
+  "updatedAt": "2026-10-02T02:02:00+03:00",
   "points": [
     {
       "id": "CR01",
