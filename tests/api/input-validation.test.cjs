@@ -11,6 +11,7 @@ const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
 const imports=require('../../api/imports.js');
 const supplierReminders=require('../../api/supplier-reminders.js');
+const suppliers=require('../../api/suppliers.js');
 const request=require('../../api/_request.js');
 
 function makeRes(){
@@ -56,7 +57,7 @@ test('shared parser rejects malformed JSON and unserializable objects',()=>{
   );
 });
 
-for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['imports',imports],['supplier-reminders',supplierReminders]]){
+for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['imports',imports],['supplier-reminders',supplierReminders],['suppliers',suppliers]]){
   test(`${name} rejects >1 MiB parsed object before upstream DB access`,async()=>{
     const original=global.fetch;
     let called=false;
@@ -284,6 +285,36 @@ test('supplier reminders reject malformed/invalid fields locally before upstream
       subject_kind:'invalid',
       subject_ref:'component:CELL-1',
       channel:'email'
+    }),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
+});
+
+
+test('suppliers reject malformed/invalid fields locally before upstream',async()=>{
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('upstream must not be called');};
+  try{
+    let res=makeRes();
+    await suppliers(req('POST','{"bad":'),res);
+    assertError(res,400,'INVALID_JSON');
+
+    res=makeRes();
+    await suppliers(req('POST',{action:'create_supplier',external_ref:'',legal_name:'Cells GmbH'}),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    res=makeRes();
+    await suppliers(req('POST',{
+      action:'create_package',
+      supplier_id:'not-a-uuid',
+      subject_kind:'component',
+      subject_ref:'cell:1',
+      component_ref:'CELL-1',
+      payload:{},
+      source_date:'2026-10-02T00:00:00Z'
     }),res);
     assertError(res,422,'VALIDATION_ERROR');
 
