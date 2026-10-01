@@ -6,31 +6,37 @@ declare
   v_supplier uuid := '42000000-0000-4000-8000-000000000001';
   v_first uuid := '43000000-0000-4000-8000-000000000001';
   v_second uuid := '43000000-0000-4000-8000-000000000002';
+  v_model uuid := '44000000-0000-4000-8000-000000000001';
   v_count integer;
   mutation_rejected boolean := false;
+  verification_mutation_rejected boolean := false;
+  ambiguous_scope_rejected boolean := false;
   cross_tenant_rejected boolean := false;
 begin
   insert into public.dpp_organizations(id,name,slug) values
     (v_org,'BAT Supplier Test','bat-supplier-test'),
     (v_other_org,'BAT Supplier Other','bat-supplier-other');
 
+  insert into public.dpp_battery_models(id,organization_id,model_identifier,manufacturer_name,category)
+  values(v_model,v_org,'MODEL-SUP-1','Battery Trust Test','industrial');
+
   insert into public.dpp_suppliers(id,organization_id,external_ref,legal_name)
   values(v_supplier,v_org,'SUP-001','Example Cells GmbH');
 
   insert into public.dpp_supplier_data_packages(
-    id,organization_id,supplier_id,subject_kind,subject_ref,payload,
+    id,organization_id,supplier_id,subject_kind,subject_ref,model_id,component_ref,payload,
     source_date,verification_status,created_at
   ) values(
-    v_first,v_org,v_supplier,'component','cell:NMC-21700',
+    v_first,v_org,v_supplier,'component','cell:NMC-21700',v_model,'CELL-01',
     '{"chemistry":"NMC","mass_g":68}'::jsonb,
     '2026-10-01T10:00:00Z','validated','2026-10-02T01:00:00Z'
   );
 
   insert into public.dpp_supplier_data_packages(
-    id,organization_id,supplier_id,subject_kind,subject_ref,payload,
+    id,organization_id,supplier_id,subject_kind,subject_ref,model_id,component_ref,payload,
     source_date,verification_status,supersedes_id,created_at
   ) values(
-    v_second,v_org,v_supplier,'component','cell:NMC-21700',
+    v_second,v_org,v_supplier,'component','cell:NMC-21700',v_model,'CELL-01',
     '{"chemistry":"NMC","mass_g":67.8}'::jsonb,
     '2026-10-02T10:00:00Z','verified',v_first,'2026-10-02T11:00:00Z'
   );
@@ -55,11 +61,58 @@ begin
     raise exception 'supplier package append-only update was not rejected';
   end if;
 
+
+  insert into public.dpp_supplier_package_verification_events(
+    organization_id,package_id,status,evidence_ref,note,recorded_at
+  ) values(
+    v_org,v_second,'validated','validation:ruleset:v1','Schema and unit checks passed','2026-10-02T11:05:00Z'
+  );
+
+  insert into public.dpp_supplier_package_verification_events(
+    organization_id,package_id,status,evidence_ref,note,recorded_at
+  ) values(
+    v_org,v_second,'verified','supplier-evidence:sha256:example','Reviewed supplier evidence','2026-10-02T11:10:00Z'
+  );
+
+  select count(*) into v_count
+  from public.dpp_supplier_package_verification_events
+  where organization_id=v_org and package_id=v_second;
+
+  if v_count <> 2 then
+    raise exception 'supplier verification history expected 2 rows, got %', v_count;
+  end if;
+
+  begin
+    update public.dpp_supplier_package_verification_events
+    set status='rejected'
+    where organization_id=v_org and package_id=v_second;
+  exception when sqlstate '55000' then
+    verification_mutation_rejected := true;
+  end;
+
+  if not verification_mutation_rejected then
+    raise exception 'supplier verification event update was not rejected';
+  end if;
+
   begin
     insert into public.dpp_supplier_data_packages(
       organization_id,supplier_id,subject_kind,subject_ref,payload,source_date
     ) values(
-      v_other_org,v_supplier,'component','cell:cross-tenant','{}'::jsonb,'2026-10-02T12:00:00Z'
+      v_org,v_supplier,'component','component:ambiguous','{}'::jsonb,'2026-10-02T11:30:00Z'
+    );
+  exception when check_violation then
+    ambiguous_scope_rejected := true;
+  end;
+
+  if not ambiguous_scope_rejected then
+    raise exception 'ambiguous supplier package scope was not rejected';
+  end if;
+
+  begin
+    insert into public.dpp_supplier_data_packages(
+      organization_id,supplier_id,subject_kind,subject_ref,model_id,component_ref,payload,source_date
+    ) values(
+      v_other_org,v_supplier,'component','cell:cross-tenant',v_model,'CELL-X','{}'::jsonb,'2026-10-02T12:00:00Z'
     );
   exception when foreign_key_violation then
     cross_tenant_rejected := true;
