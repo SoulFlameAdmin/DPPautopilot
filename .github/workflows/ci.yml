@@ -299,10 +299,16 @@ jobs:
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_supplier_network_subset.sql
       - name: Run BAT59 supplier reminder API unit suite
         run: node --test tests/api/supplier-reminders.test.cjs
+      - name: Run BAT51 BAT53 BAT54 BAT57 Supplier Network API suite
+        run: node --test tests/api/suppliers.test.cjs
       - name: Run BAT59 supplier reminder RBAC subset
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_supplier_reminders_subset.sql
+      - name: Run BAT51 BAT53 BAT54 BAT57 Supplier Network RPC subset
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_suppliers_api_subset.sql
       - name: Run T02 green database subset integration suite
         env:
           PGPASSWORD: postgres
