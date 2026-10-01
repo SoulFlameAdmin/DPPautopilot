@@ -194,3 +194,7 @@ The visible tracker must show:
 - direct links to evidence when available.
 
 Every time Borko's GPT changes a CR status or finishes a meaningful implementation slice, it must update the machine-readable status and visible tracker in the same branch/PR. The tracker must never mark a point GREEN merely because code was written.
+
+## Cross-session coordination
+
+Before every `ПРОДЪЛЖИ DPP CRYPTO`, read `docs/DPP_SESSION_BRIDGE.md` and the latest comments in GitHub issue #241. Post status/handoff back to issue #241 after every meaningful implementation slice.
