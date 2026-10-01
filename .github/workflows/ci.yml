@@ -40,6 +40,8 @@ jobs:
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
       - name: Validate repository contracts
         run: python scripts/validate_repo.py
+      - name: Validate DPP CRYPTO visible progress
+        run: python scripts/validate_dpp_crypto_progress.py
       - name: Validate DPP field traceability catalog
         run: python scripts/validate_field_catalog.py
       - name: Validate BG Battery Pilot contract
