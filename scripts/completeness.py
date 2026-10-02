@@ -31,14 +31,53 @@ def is_present(value: Any) -> bool:
     return True
 
 
-def required_fields(catalog: dict) -> list[dict]:
-    return [field for field in catalog.get("fields", []) if field.get("required") is True]
+def _condition_value(fixture: dict, item: dict, path: str) -> Any:
+    if path.startswith("model."):
+        return get_path(fixture, path)
+    if path.startswith("item."):
+        return get_path(item, path.removeprefix("item."))
+    return get_path(fixture, path)
+
+
+def field_is_applicable(field: dict, fixture: dict, item: dict) -> bool:
+    applicability = field.get("applicability")
+    if not isinstance(applicability, dict):
+        return field.get("required") is True
+    mode = applicability.get("mode")
+    if mode == "always":
+        return True
+    if mode == "optional":
+        return False
+    if mode != "when":
+        raise ValueError(f"invalid applicability mode for {field.get('path')}: {mode}")
+
+    for condition in applicability.get("all") or []:
+        actual = _condition_value(fixture, item, condition["path"])
+        operator = condition["operator"]
+        if operator == "equals":
+            if actual != condition.get("value"):
+                return False
+        elif operator == "in":
+            if actual not in condition.get("values", []):
+                return False
+        else:
+            raise ValueError(f"unsupported applicability operator: {operator}")
+    return True
+
+
+def required_fields(catalog: dict, fixture: dict | None = None, item: dict | None = None) -> list[dict]:
+    if fixture is None:
+        return [field for field in catalog.get("fields", []) if field.get("required") is True]
+    return [
+        field for field in catalog.get("fields", [])
+        if field_is_applicable(field, fixture, item or {})
+    ]
 
 
 def score_fixture(catalog: dict, fixture: dict, item_index: int = 0) -> dict:
-    required = required_fields(catalog)
     items = fixture.get("items") or []
     item = items[item_index] if len(items) > item_index else {}
+    required = required_fields(catalog, fixture, item)
     missing: list[MissingField] = []
     present = 0
 
