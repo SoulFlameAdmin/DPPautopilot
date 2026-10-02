@@ -64,11 +64,11 @@ begin
       'manual','manual:test','2026-10-02T01:00:00Z',
       'invalid_access','unverified'
     );
-  exception when check_violation then
+  exception when sqlstate 'DP706' then
     invalid_access_rejected := true;
   end;
   if not invalid_access_rejected then
-    raise exception 'BAT invalid access level was not rejected';
+    raise exception 'BAT invalid access level was not rejected with canonical DP706';
   end if;
 
   insert into public.dpp_field_events(
