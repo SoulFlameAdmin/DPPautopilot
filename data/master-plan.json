@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.8",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T04:14:00+03:00",
+  "updatedAt": "2026-10-02T05:17:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1103,8 +1103,8 @@
           "dependsOn": "F11,M04",
           "acceptanceCriteria": "All Battery Passport fields are schema-driven from the canonical catalog; no product values are embedded in engine code",
           "evidenceRequired": "Engine module + contract tests + DB event-store precursor",
-          "status": "yellow",
-          "evidence": "Canonical field catalog already exists; this branch adds the first catalog-driven field-event engine precursor and append-only DB event store. Live end-to-end integration is still pending."
+          "status": "green",
+          "evidence": "Catalog-driven field engine validates the canonical field catalog and accepts synthetic future fields without engine code changes; canonical access classes now include public_identifier in DB; live bound Supabase migration dpp_field_events_public_identifier applied and rollback insert verified; clean PostgreSQL migration replay, T01 unit suite, BAT01-BAT08 DB subset, C04 migration gate and security-definer guard all PASS in GitHub Actions run 36953669495 on implementation SHA 6e8fb5962c485b71b51da097ab760395674d3772."
         },
         {
           "id": "BAT02",
