@@ -113,6 +113,14 @@ class DppDataEngineTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_field_event(bad, self.catalog)
 
+    def test_source_date_is_independent_from_recorded_at(self):
+        event = self.event(recorded_at="2026-10-02T05:00:00+00:00")
+        event["source_date"] = "2026-09-15T12:30:00+00:00"
+        validated = validate_field_event(event, self.catalog)
+        self.assertEqual(validated["source_date"], "2026-09-15T12:30:00+00:00")
+        self.assertEqual(validated["recorded_at"], "2026-10-02T05:00:00+00:00")
+        self.assertNotEqual(validated["source_date"], validated["recorded_at"])
+
     def test_rejects_invalid_source_kind_and_blank_reference(self):
         bad = self.event()
         bad["source_kind"] = "unknown"
