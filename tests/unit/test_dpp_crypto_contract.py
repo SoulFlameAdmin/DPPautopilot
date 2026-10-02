@@ -229,5 +229,13 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertEqual(payload["result"], "PENDING")
 
 
+    def test_cr25_progress_page_has_no_stale_hardcoded_counts(self):
+        text = read("demo/dpp-crypto-progress.html")
+        self.assertIn("fetch('../data/dpp-crypto-status.json')", text)
+        self.assertIn('id="pct">Loading evidence', text)
+        self.assertNotIn('id="pct">4% GREEN', text)
+        self.assertNotIn('id="green">1</div>', text)
+
+
 if __name__ == "__main__":
     unittest.main()
