@@ -237,5 +237,13 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertNotIn('id="green">1</div>', text)
 
 
+    def test_cr25_requires_real_reachability_before_green(self):
+        text = read("docs/DPP_CRYPTO_CR25_DEPLOYMENT_GATE.md").lower()
+        self.assertIn("deployed/reachable url", text)
+        self.assertIn("fetching that url returns", text)
+        self.assertIn("must not confuse repository ci with a reachable deployed surface", text)
+        self.assertIn("cr25 remains yellow", text)
+
+
 if __name__ == "__main__":
     unittest.main()
