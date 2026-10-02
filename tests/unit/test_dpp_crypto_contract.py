@@ -104,5 +104,28 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertNotIn("on public.dpp_nfc_provisioning_receipts for delete to authenticated", text)
 
 
+    def test_cr15_atomic_consume_is_row_locked_and_fail_closed(self):
+        text = read("supabase/migrations/20261002153500_dpp_nfc_challenge_consume.sql").lower()
+        self.assertIn("for update", text)
+        self.assertIn("if v_challenge.consumed_at is not null", text)
+        self.assertIn("select 'replay'::text", text)
+        self.assertIn("v_challenge.expires_at <= now()", text)
+        self.assertIn("select 'expired'::text", text)
+        self.assertIn("context_hash is distinct from p_expected_context_hash", text)
+        self.assertIn("set consumed_at=now()", text)
+
+    def test_cr15_consume_rpc_is_not_directly_executable_by_clients(self):
+        text = read("supabase/migrations/20261002153500_dpp_nfc_challenge_consume.sql").lower()
+        self.assertIn(
+            "revoke all on function public.dpp_nfc_consume_challenge(uuid,uuid,text,text)",
+            text,
+        )
+        self.assertIn("from public,anon,authenticated", text)
+        self.assertNotIn(
+            "grant execute on function public.dpp_nfc_consume_challenge",
+            text,
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
