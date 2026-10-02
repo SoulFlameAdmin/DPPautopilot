@@ -203,5 +203,22 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertIn("from public,anon,authenticated", text)
 
 
+    def test_cr21_bms_hook_never_weakens_nfc_trust(self):
+        text = read("docs/DPP_CRYPTO_CR21_BMS_BINDING.md").lower()
+        self.assertIn("bms can never", text.replace("proofs are verified independently", "proofs are verified independently"))
+        self.assertIn("revoked nfc identity cannot be rescued", text)
+        self.assertIn("tampered nfc result remains failed/tampered", text)
+        self.assertIn("raw bms private/symmetric keys are not stored", text)
+        self.assertIn("bat51+ contracts are not changed", text)
+
+    def test_hardware_gate_requires_attack_evidence_not_only_happy_path(self):
+        text = read("docs/DPP_CRYPTO_HARDWARE_PRODUCTION_GATE.md").lower()
+        for phrase in ("replay same proof", "expired challenge", "wrong nfc identity/key",
+                       "cross-battery swap attempt", "cross-tenant substitution attempt",
+                       "backend/kms unavailable fail-closed"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+
 if __name__ == "__main__":
     unittest.main()
