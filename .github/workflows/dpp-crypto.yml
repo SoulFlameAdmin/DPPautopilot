@@ -1,0 +1,36 @@
+name: DPP CRYPTO
+
+on:
+  pull_request:
+    paths:
+      - 'docs/DPP_CRYPTO_**'
+      - 'data/dpp-crypto-status.json'
+      - 'demo/dpp-crypto-progress.html'
+      - 'tests/unit/test_dpp_crypto_contract.py'
+      - '.github/workflows/dpp-crypto.yml'
+  push:
+    branches:
+      - borko/dpp-security-lab
+    paths:
+      - 'docs/DPP_CRYPTO_**'
+      - 'data/dpp-crypto-status.json'
+      - 'demo/dpp-crypto-progress.html'
+      - 'tests/unit/test_dpp_crypto_contract.py'
+      - '.github/workflows/dpp-crypto.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  crypto-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Run DPP CRYPTO contract tests
+        run: python -m unittest tests.unit.test_dpp_crypto_contract -v
