@@ -8,9 +8,13 @@ on:
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
+      - 'api/nfc-challenge.js'
+      - 'api/nfc-status.js'
       - 'supabase/migrations/*_dpp_nfc_crypto_persistence.sql'
       - 'supabase/migrations/*_dpp_nfc_challenge_consume.sql'
+      - 'supabase/migrations/*_dpp_nfc_api_rpcs.sql'
       - 'tests/api/nfc-crypto.test.cjs'
+      - 'tests/api/nfc-endpoints.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
   push:
     branches:
@@ -21,9 +25,13 @@ on:
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
+      - 'api/nfc-challenge.js'
+      - 'api/nfc-status.js'
       - 'supabase/migrations/*_dpp_nfc_crypto_persistence.sql'
       - 'supabase/migrations/*_dpp_nfc_challenge_consume.sql'
+      - 'supabase/migrations/*_dpp_nfc_api_rpcs.sql'
       - 'tests/api/nfc-crypto.test.cjs'
+      - 'tests/api/nfc-endpoints.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
 
 permissions:
@@ -43,4 +51,4 @@ jobs:
       - name: Run DPP CRYPTO contract tests
         run: python -m unittest discover -s tests/unit -p 'test_dpp_crypto_contract.py' -v
       - name: Run DPP CRYPTO protocol primitive tests
-        run: node --test tests/api/nfc-crypto.test.cjs
+        run: node --test tests/api/nfc-crypto.test.cjs tests/api/nfc-endpoints.test.cjs
