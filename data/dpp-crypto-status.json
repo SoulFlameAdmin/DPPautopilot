@@ -2,154 +2,154 @@
   "schema": "dpp.crypto.status.v1",
   "total": 25,
   "counts": {
-    "green": 1,
-    "yellow": 23,
+    "green": 20,
+    "yellow": 4,
     "red": 0,
     "blocked": 1
   },
-  "percent_green": 4,
-  "current": "CR03-CR23 implementation evidence",
+  "percent_green": 80,
+  "current": "Software security subsystem evidence-backed; physical authenticity gate remains.",
   "last_completed": "CR01",
-  "next_dependency_safe": "Add automated contract/security tests, then coordinate shared Battery ID reference before crypto schema/API migrations.",
+  "next_dependency_safe": "Select/procure exact Secure NFC SKU, implement vendor-specific hardware adapter/configuration, and execute CR24 real-hardware evidence matrix.",
   "blocker": {
-    "type": "hardware/shared-contract",
-    "summary": "CR24 requires real NFC hardware. Crypto schema needs a coordinated reference to the shared Battery ID before adding foreign-key integration."
+    "type": "hardware",
+    "summary": "Real end-to-end physical authenticity requires exact secure NFC hardware/provider provisioning and CR24 tap/replay/revocation/tamper evidence."
   },
   "branch": "borko/dpp-security-lab",
   "pull_request": {
     "number": 242,
     "url": "https://github.com/SoulFlameAdmin/DPPautopilot/pull/242"
   },
-  "latest_commit": "b6aacd3285ea4dc36d619354a3d65d792b4eca56",
+  "latest_commit": "5304c38b85c5fdd09c59b89708eaa28c10f42789",
   "ci": {
-    "state": "pending",
-    "note": "Awaiting CI for latest protocol-contract slice."
+    "state": "pass",
+    "note": "DPP CRYPTO run 37031471416 exact-head SUCCESS; Python contract/security and Node crypto/provider/API tests PASS."
   },
   "points": [
     {
       "id": "CR01",
       "status": "GREEN",
-      "note": "Threat model committed and exact-SHA CI passed."
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR02",
       "status": "YELLOW",
-      "note": "Hardware architecture selected; exact SKU and physical evidence pending."
+      "note": "Hardware architecture selected; exact production SKU/procurement evidence remains pending."
     },
     {
       "id": "CR03",
-      "status": "YELLOW",
-      "note": "Architecture/contract defined; implementation evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR04",
-      "status": "YELLOW",
-      "note": "Architecture/contract defined; implementation evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR05",
-      "status": "YELLOW",
-      "note": "Architecture/contract defined; implementation evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR06",
-      "status": "YELLOW",
-      "note": "Architecture/contract defined; implementation evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR07",
-      "status": "YELLOW",
-      "note": "Architecture/contract defined; implementation evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR08",
-      "status": "YELLOW",
-      "note": "Architecture/contract defined; implementation evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR09",
-      "status": "YELLOW",
-      "note": "Architecture/contract defined; implementation evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR10",
-      "status": "YELLOW",
-      "note": "Architecture/contract defined; implementation evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR11",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR12",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR13",
       "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "note": "Standard P-256 verifier and protected AES/KMS adapter boundary implemented/tested; real tag/provider proof still requires CR24 hardware evidence."
     },
     {
       "id": "CR14",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR15",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR16",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR17",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR18",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR19",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR20",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR21",
       "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "note": "BMS binding hook remains reserved; shared BAT51+ integration is outside CRYPTO ownership."
     },
     {
       "id": "CR22",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR23",
-      "status": "YELLOW",
-      "note": "Protocol contract defined; implementation/test evidence pending."
+      "status": "GREEN",
+      "note": "Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."
     },
     {
       "id": "CR24",
       "status": "BLOCKED",
-      "note": "Requires real NFC hardware tap/provisioning evidence."
+      "note": "Requires real secure NFC hardware provisioning/tap/replay/tamper evidence."
     },
     {
       "id": "CR25",
       "status": "YELLOW",
-      "note": "Tracker files exist; reachable deployment/CI evidence pending."
+      "note": "Tracker files exist; deployment/reachability evidence still required."
     }
   ],
   "last_update": "2026-10-02"
