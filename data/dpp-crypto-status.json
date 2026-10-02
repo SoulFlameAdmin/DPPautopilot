@@ -8,9 +8,9 @@
     "blocked": 1
   },
   "percent_green": 84,
-  "current": "21/25 CR points evidence-backed GREEN. Physical QR + NTAG215 NDEF -> same public DPP flow is PASS, but production Secure NFC cryptographic hardware gates remain separate.",
-  "last_completed": "Physical QR/NFC convenience E2E evidence",
-  "next_dependency_safe": "Procure/obtain NTAG-X-DNA-EVAL; confirm exact orderable production SKU; execute CR13/CR24 real-hardware crypto matrix. Separately provide deployment visibility to close CR25 reachability.",
+  "current": "21/25 CR points evidence-backed GREEN. Physical QR + NTAG215 NDEF E2E is PASS. Exact NTAG X DNA production candidate and vendor-specific verifier are defined, but real Secure NFC hardware evidence remains required.",
+  "last_completed": "NTAG X DNA production-SKU decision + unilateral-auth verifier software slice",
+  "next_dependency_safe": "First independently verify the observed NTAG215 originality Signature: Invalid result. Then obtain NTAG-X-DNA-EVAL and execute CR13 real unilateral-auth/replay/wrong-key/static-copy tests before the CR24 matrix.",
   "blocker": {
     "type": "hardware",
     "summary": "Production authenticity still requires exact secure NFC hardware/provider provisioning and CR24 challenge/replay/revocation/tamper evidence. NTAG215 NDEF URL PASS does not satisfy this gate."
@@ -20,10 +20,10 @@
     "number": 242,
     "url": "https://github.com/SoulFlameAdmin/DPPautopilot/pull/242"
   },
-  "latest_commit": "0e4c12831a05d02540c7f3e90e79208e23d97a4c",
+  "latest_commit": "f3ced6e9bc28aeb11ee4f2088ba026c9fd4712a6",
   "ci": {
     "state": "pass",
-    "note": "DPP CRYPTO run 37052338806 exact-head SUCCESS after expanding the workflow to the complete Node security/evidence suite."
+    "note": "DPP CRYPTO run 37061345593 exact-head SUCCESS for NTAG21x originality gate, CR02 production SKU decision, CR13 NTAG X DNA verifier helper, provisioning contract and hardware decision tests."
   },
   "physical_e2e": {
     "evidence_file": "data/dpp-qr-nfc-e2e-evidence.json",
@@ -47,7 +47,7 @@
     {
       "id": "CR02",
       "status": "YELLOW",
-      "note": "YELLOW: NTAG X DNA PKI family selected; NTAG-X-DNA-EVAL selected for lab validation. Exact currently orderable production SKU/package + procurement evidence still required. NTAG215 NDEF E2E is not qualifying production hardware evidence."
+      "note": "YELLOW: exact primary production candidate pinned as NXP NT4PLDJHN2/2003LXJ (HVQFN20); NTAG-X-DNA-EVAL is the lab target; WLCSP NT4PLDJUK/20038YZ is secondary; NT4PMDJU32 FFC is rejected for new production design. Physical sample, target-phone and provisioning/config-lock evidence still required."
     },
     {
       "id": "CR03",
@@ -102,7 +102,7 @@
     {
       "id": "CR13",
       "status": "YELLOW",
-      "note": "Standard P-256 verifier and protected AES/KMS adapter boundary implemented/tested; real selected Secure NFC tag/provider cryptographic proof remains required. NTAG215 NDEF URL transport is explicitly non-qualifying."
+      "note": "YELLOW: dedicated NTAG X DNA P-256 unilateral-auth verifier helper and real-hardware plan are implemented/tested. It is intentionally not wired as production authentic until a real NTAG-X-DNA-EVAL certificate/proof/replay/wrong-key/static-copy test passes."
     },
     {
       "id": "CR14",
@@ -157,7 +157,7 @@
     {
       "id": "CR24",
       "status": "BLOCKED",
-      "note": "NTAG215 QR/NDEF write/read/tap E2E is physically PASS and recorded separately, but CR24 requires cryptographic Secure NFC provisioning/challenge/replay/revocation/tamper evidence on approved production-grade hardware."
+      "note": "BLOCKED: NTAG215 convenience E2E is PASS and originality anomaly is tracked, but CR24 requires approved Secure NFC hardware and the full cryptographic provisioning/challenge/replay/revocation/tamper matrix."
     },
     {
       "id": "CR25",
@@ -165,5 +165,21 @@
       "note": "Evidence-driven tracker/UI and exact-head CI PASS exist; independent deployed tracker reachability remains unverified while Vercel preview deployment is build-rate-limited."
     }
   ],
-  "last_update": "2026-10-02"
+  "last_update": "2026-10-02",
+  "originality_investigation": {
+    "carrier": "NTAG215",
+    "observed_signature_result": "Invalid",
+    "classification": "INCONCLUSIVE_REJECT",
+    "production_eligible": false,
+    "next_physical_action": "Read the same tag with NXP TagInfo or another NXP-supported originality verifier and capture the manufacturer/originality result."
+  },
+  "cr02_hardware": {
+    "primary_production_candidate": "NT4PLDJHN2/2003LXJ",
+    "package": "HVQFN20",
+    "lab_target": "NTAG-X-DNA-EVAL",
+    "secondary_candidate": "NT4PLDJUK/20038YZ",
+    "rejected_new_design_family": "NT4PMDJU32",
+    "status": "YELLOW",
+    "remaining_gate": "Physical eval hardware + target-phone/provisioning/configuration evidence."
+  }
 }
