@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "data" / "dpp-field-catalog.json"
 MIGRATION = ROOT / "supabase" / "migrations" / "20261002039100_dpp_field_catalog_access.sql"
+VERSION_SYNC = ROOT / "supabase" / "migrations" / "20261002123000_dpp_field_catalog_version.sql"
 
 MAP = re.compile(
     r"-- BAT05_RUNTIME_ACCESS_MAP_BEGIN.*?\$catalog\$\s*(\[.*?\])\s*\$catalog\$::jsonb.*?-- BAT05_RUNTIME_ACCESS_MAP_END",
@@ -46,10 +47,11 @@ def main() -> None:
         )
 
     version = str(catalog["catalogVersion"])
-    expected_sql = f"select x.path,x.access,'{version}'"
-    if expected_sql not in sql:
+    version_sql = VERSION_SYNC.read_text(encoding="utf-8")
+    expected_update = f"set catalog_version='{version}'"
+    if expected_update not in version_sql:
         raise AssertionError(
-            f"BAT05 catalog version drift: expected migration version {version}"
+            f"BAT05 catalog version drift: expected runtime sync version {version}"
         )
 
     print(
