@@ -9,6 +9,7 @@ on:
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
       - 'supabase/migrations/*_dpp_nfc_crypto_persistence.sql'
+      - 'supabase/migrations/*_dpp_nfc_challenge_consume.sql'
       - 'tests/api/nfc-crypto.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
   push:
@@ -21,6 +22,7 @@ on:
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
       - 'supabase/migrations/*_dpp_nfc_crypto_persistence.sql'
+      - 'supabase/migrations/*_dpp_nfc_challenge_consume.sql'
       - 'tests/api/nfc-crypto.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
 
