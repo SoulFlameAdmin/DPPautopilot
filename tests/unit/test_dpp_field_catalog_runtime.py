@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "data" / "dpp-field-catalog.json"
-MIGRATION = ROOT / "supabase" / "migrations" / "20261002039000_dpp_field_catalog_access.sql"
+MIGRATION = ROOT / "supabase" / "migrations" / "20261002039100_dpp_field_catalog_access.sql"
 
 
 class DppRuntimeAccessCatalogTests(unittest.TestCase):
