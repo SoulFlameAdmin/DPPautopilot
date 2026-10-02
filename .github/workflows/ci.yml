@@ -46,6 +46,8 @@ jobs:
         run: python scripts/validate_supplier_dashboard.py
       - name: Validate DPP field traceability catalog
         run: python scripts/validate_field_catalog.py
+      - name: Validate BAT07 no-hardcoded passport values
+        run: python scripts/validate_no_hardcoded_passport_values.py
       - name: Validate BAT05 DB/catalog access parity
         run: python scripts/validate_field_access_catalog.py
       - name: Validate BG Battery Pilot contract
