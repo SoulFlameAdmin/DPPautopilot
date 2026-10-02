@@ -166,7 +166,7 @@ begin
         'source_ref','bat02:test:number',
         'source_date','2026-10-02T02:10:01Z',
         'access_level','public',
-        'verification_status','validated'
+        'verification_status','verified'
       ),
       jsonb_build_object(
         'field_path','model.carbon_footprint',
@@ -184,7 +184,7 @@ begin
         'source_ref','bat02:test:array',
         'source_date','2026-10-02T02:10:03Z',
         'access_level','public',
-        'verification_status','validated'
+        'verification_status','rejected'
       )
     )
   );
@@ -236,6 +236,37 @@ begin
     where organization_id=v_org and subject_kind='model' and subject_id=v_model
   ) then
     raise exception 'BAT04 source date independence failed';
+  end if;
+
+
+  if (
+    select array_agg(distinct verification_status order by verification_status)
+    from public.dpp_field_events
+    where organization_id=v_org and subject_kind='model' and subject_id=v_model
+  ) <> array['rejected','unverified','validated','verified']::text[] then
+    raise exception 'BAT06 verification status coverage failed';
+  end if;
+
+  denied:=false;
+  begin
+    perform public.dpp_api_field_events_append(
+      'model',
+      v_model,
+      jsonb_build_array(jsonb_build_object(
+        'field_path','model.identification.manufacturer.name',
+        'value','BAD-STATUS',
+        'source_kind','api',
+        'source_ref','bat06:bad-status',
+        'source_date','2026-10-02T02:10:04Z',
+        'access_level','public',
+        'verification_status','trusted'
+      ))
+    );
+  exception when sqlstate 'DP704' then
+    denied:=true;
+  end;
+  if not denied then
+    raise exception 'BAT06 invalid verification status was not rejected';
   end if;
 
   denied:=false;
