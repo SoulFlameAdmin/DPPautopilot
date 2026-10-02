@@ -8,6 +8,7 @@ on:
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
+      - 'supabase/migrations/*_dpp_nfc_crypto_persistence.sql'
       - 'tests/api/nfc-crypto.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
   push:
@@ -19,6 +20,7 @@ on:
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
+      - 'supabase/migrations/*_dpp_nfc_crypto_persistence.sql'
       - 'tests/api/nfc-crypto.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
 
