@@ -203,6 +203,14 @@ begin
     raise exception 'BAT03 provenance persistence failed';
   end if;
 
+  if (
+    select bool_and(source_date < recorded_at) is not true
+    from public.dpp_field_events
+    where organization_id=v_org and subject_kind='model' and subject_id=v_model
+  ) then
+    raise exception 'BAT04 source date independence failed';
+  end if;
+
   denied:=false;
   begin
     perform public.dpp_api_field_events_append(
