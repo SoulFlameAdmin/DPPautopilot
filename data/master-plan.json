@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.8",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T12:44:30+03:00",
+  "updatedAt": "2026-10-02T13:12:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1175,8 +1175,8 @@
           "dependsOn": "BAT08,M12",
           "acceptanceCriteria": "Field history records actor, target, time, provenance and supersession linkage",
           "evidenceRequired": "DB/API integration tests",
-          "status": "yellow",
-          "evidence": "The new event schema carries actor/time/supersedes metadata, but full M12 authenticated audit acceptance remains unresolved."
+          "status": "green",
+          "evidence": "Field-event audit attribution is proven end-to-end: authenticated append records actor (recorded_by), tenant/subject/field target, recorded_at, source_kind/source_ref/source_date and supersedes_id in one immutable row. A bound-Supabase BEGIN/ROLLBACK live test returned BAT09_LIVE_AUDIT_ATTRIBUTION_PASS. Exact-head CI run 36993488147 on SHA 325ff550e943acb660b291b9a755cee7206ce963 passed the field-event DB subset, clean migration replay and security-definer guard."
         },
         {
           "id": "BAT10",
@@ -1211,8 +1211,8 @@
           "dependsOn": "BAT11",
           "acceptanceCriteria": "Requiredness and conditional applicability are explicit and machine-readable",
           "evidenceRequired": "Rule catalog + tests",
-          "status": "yellow",
-          "evidence": "Required flags exist; full conditional-applicability rules for every guidance data point are not yet encoded."
+          "status": "green",
+          "evidence": "All 42 canonical fields now carry machine-readable applicability objects. Always/optional/conditional modes and equals/in conditions are catalog-validated; model.exhaustion_capacity_threshold is encoded as conditional on model.identification.category=electric_vehicle. Completeness now evaluates applicability, with tests proving EV inclusion and industrial exclusion. Catalog version 2026-09-18-applicability-v1 is synchronized to the bound DB through dpp_field_catalog_version. Exact-head CI 36993488147 SUCCESS."
         },
         {
           "id": "BAT14",
@@ -1238,8 +1238,8 @@
           "dependsOn": "M07",
           "acceptanceCriteria": "Customer can upload XLSX and preview sheets/headers before mapping",
           "evidenceRequired": "Integration/E2E tests",
-          "status": "red",
-          "evidence": "XLSX ingestion is not implemented yet."
+          "status": "green",
+          "evidence": "Implemented safe XLSX preview ingestion with a stdlib ZIP/XML parser (10 MiB input, archive expansion/entry/column/row limits), a POST /api/xlsx-preview endpoint, multi-sheet/header/row unit tests, and CSV/XLSX import-wizard UI with worksheet selection before mapping. Browser CI renders the synthetic two-sheet XLSX preview and validates sheet names, headers and rows. Exact-head CI 36993488147 SUCCESS and Cross-browser run 36993488089 SUCCESS."
         },
         {
           "id": "BAT17",
@@ -1256,8 +1256,8 @@
           "dependsOn": "BAT17,BAT12",
           "acceptanceCriteria": "System proposes canonical DPP fields for incoming column headers",
           "evidenceRequired": "Evaluation set + mapping tests",
-          "status": "yellow",
-          "evidence": "A deterministic mapping assistant exists, but automatic recognition coverage is not yet accepted for the expanded Battery Platform V3 scope."
+          "status": "green",
+          "evidence": "Automatic column recognition now derives aliases from the full canonical 42-field catalog (path/API/UI targets) plus explicit alias overlays, instead of an 8-field hardcoded list. Evaluation proves 42/42 canonical self-recognition, 35 curated positive headers, 4 unknowns left untouched, 0 false positives and review-before-Apply UI behavior. Exact-head CI 36993488147 SUCCESS and Cross-browser run 36993488089 SUCCESS."
         },
         {
           "id": "BAT19",
