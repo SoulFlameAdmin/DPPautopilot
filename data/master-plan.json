@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.8",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T05:17:00+03:00",
+  "updatedAt": "2026-10-02T05:35:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1112,8 +1112,8 @@
           "dependsOn": "BAT01",
           "acceptanceCriteria": "Every ingested field value is represented independently with field path and typed JSON value",
           "evidenceRequired": "DB migration + integration tests",
-          "status": "yellow",
-          "evidence": "Current JSONB canonical records exist; this branch adds `dpp_field_events.value` for per-field event values. Runtime write path is not yet wired."
+          "status": "green",
+          "evidence": "Atomic tenant/RBAC-scoped dpp_api_field_events_append runtime path stores one supplied field value per immutable dpp_field_events row with JSON type preserved. Bound Supabase migration dpp_field_event_ingest applied; live transactional test inserted 2 values as exactly 2 rows with string/number JSON types and rolled back. CI run 36956129793 on SHA 579e8a4c294bcb75d4b8c7b96570144c3bbace9b passed C04 migration gate, T01 unit suite, clean PostgreSQL 17 replay, BAT01-BAT08 field-event DB subset, security-definer RPC guard and full CI."
         },
         {
           "id": "BAT03",
