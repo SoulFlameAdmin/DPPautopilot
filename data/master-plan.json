@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.8",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T12:35:00+03:00",
+  "updatedAt": "2026-10-02T12:44:30+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1166,8 +1166,8 @@
           "dependsOn": "BAT02-BAT06,M11",
           "acceptanceCriteria": "Material field changes append new events; prior values cannot be updated or deleted",
           "evidenceRequired": "DB mutation-negative tests",
-          "status": "yellow",
-          "evidence": "Existing passport version history is GREEN; this branch adds a mutation-reject trigger for the new per-field event history. Bound DB evidence remains pending."
+          "status": "green",
+          "evidence": "Append-only field history is enforced at DB and RPC layers. Bound-Supabase rollback acceptance created V1 then appended V2 with supersedes_id=V1; V1 remained unchanged, V2 preserved the supersession link, UPDATE and DELETE of V1 were both rejected with SQLSTATE 55000, and cross-field supersession was rejected with DP705. Clean PostgreSQL replay DB subset carries the same negative mutation and supersession-chain assertions. Exact-head CI run 36991178025 on SHA 1f74009f097fc4ef9a2d6ac1ff8d5a264f2d2c7b completed SUCCESS, including C04, T01, clean migration replay, BAT01-BAT08 field-history subset, security-definer guard and browser smoke."
         },
         {
           "id": "BAT09",
