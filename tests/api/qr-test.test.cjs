@@ -2,29 +2,29 @@
 
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const handler=require('../../api/qr-test.js');
+const handler=require('../../api/carriers.js');
 
 function makeRes(){
   return {statusCode:0,headers:{},body:null,setHeader(k,v){this.headers[String(k).toLowerCase()]=v;},end(v){this.body=v;}};
 }
 
 test('QR proxy allows same-origin HTTPS target',()=>{
-  assert.equal(handler._test.allowedTarget(
+  assert.equal(handler._test.allowedQrTarget(
     'https://dpp.example/demo/carrier-passport.html?id=BAT-1',
     'https://dpp.example'
   ),true);
 });
 
 test('QR proxy rejects arbitrary external target',()=>{
-  assert.equal(handler._test.allowedTarget(
+  assert.equal(handler._test.allowedQrTarget(
     'https://evil.example/collect',
     'https://dpp.example'
   ),false);
 });
 
 test('QR proxy permits localhost only for test HTTP',()=>{
-  assert.equal(handler._test.allowedTarget('http://127.0.0.1:8000/demo/passport.html?id=1','http://127.0.0.1:8000'),true);
-  assert.equal(handler._test.allowedTarget('http://example.com/demo/passport.html?id=1','http://example.com'),false);
+  assert.equal(handler._test.allowedQrTarget('http://127.0.0.1:8000/demo/passport.html?id=1','http://127.0.0.1:8000'),true);
+  assert.equal(handler._test.allowedQrTarget('http://example.com/demo/passport.html?id=1','http://example.com'),false);
 });
 
 test('QR endpoint returns PNG bytes for valid same-origin request',async()=>{
@@ -39,7 +39,7 @@ test('QR endpoint returns PNG bytes for valid same-origin request',async()=>{
     const req={
       method:'GET',
       headers:{'x-forwarded-host':'dpp.example','x-forwarded-proto':'https'},
-      query:{url:'https://dpp.example/demo/carrier-passport.html?id=BAT-1'}
+      query:{mode:'qr',url:'https://dpp.example/demo/carrier-passport.html?id=BAT-1'}
     };
     const res=makeRes();
     await handler(req,res);
@@ -57,7 +57,7 @@ test('QR endpoint rejects cross-origin URL before upstream fetch',async()=>{
     const req={
       method:'GET',
       headers:{'x-forwarded-host':'dpp.example','x-forwarded-proto':'https'},
-      query:{url:'https://evil.example/x'}
+      query:{mode:'qr',url:'https://evil.example/x'}
     };
     const res=makeRes();
     await handler(req,res);
