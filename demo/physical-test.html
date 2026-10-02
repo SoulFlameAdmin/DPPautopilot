@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · Real QR + NFC Test</title>
+  <link rel="stylesheet" href="/assets/csp/physical-test.css">
+</head>
+<body data-auth="anonymous" data-nfc="unknown" data-qr="unknown">
+<main class="shell">
+  <header class="top">
+    <div><div class="badge">DAVID · BORKO REAL TEST</div><h1>QR + NTAG215 provisioning station</h1></div>
+    <a href="/">← Dashboard</a>
+  </header>
+
+  <section class="card">
+    <h2>1. Login</h2>
+    <div class="grid">
+      <label>Email<input id="email" type="email" autocomplete="email"></label>
+      <label>Password<input id="password" type="password" autocomplete="current-password"></label>
+    </div>
+    <div class="actions">
+      <button id="signin" type="button">Sign in</button>
+      <button id="signout" type="button">Sign out</button>
+    </div>
+    <pre id="session">Not signed in.</pre>
+  </section>
+
+  <section class="card">
+    <h2>2. Company / role</h2>
+    <div class="grid">
+      <label>Organization<select id="organization"></select></label>
+      <label>Current role<input id="role" readonly></label>
+    </div>
+    <div class="actions">
+      <button id="activateOrg" type="button">Activate organization</button>
+      <button id="reloadData" type="button">Reload data</button>
+    </div>
+    <p class="muted">For the Mitko worker test use an account added as <strong>viewer</strong>. Admin/owner approves membership.</p>
+  </section>
+
+  <section class="card">
+    <h2>3. Battery</h2>
+    <label>Existing battery<select id="battery"></select></label>
+    <div class="grid">
+      <label>Battery ID<input id="batteryId" readonly></label>
+      <label>Public identifier<input id="publicId" readonly></label>
+    </div>
+    <label>Exact QR/NFC URL<input id="publicUrl" readonly></label>
+  </section>
+
+  <section class="card">
+    <h2>4. Physical carriers</h2>
+    <div class="carrier-grid">
+      <div>
+        <h3>QR</h3>
+        <img id="qrImage" class="qr" alt="QR for selected battery">
+        <button id="bindQr" type="button">Bind QR</button>
+        <button id="printLabel" type="button">Print label</button>
+      </div>
+      <div>
+        <h3>NFC · NTAG215</h3>
+        <p class="muted">The tag stores only the same HTTPS URL. No password, role or private battery data is written to NFC.</p>
+        <button id="writeNfc" type="button">Write NTAG215</button>
+        <button id="verifyNfc" type="button">Verify NFC</button>
+        <button id="bindNfcManual" type="button">I wrote it with NFC Tools → bind</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>5. Worker membership</h2>
+    <label>Worker Supabase user UUID<input id="workerUserId" placeholder="xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx"></label>
+    <button id="addWorker" type="button">Add as WORKER (viewer)</button>
+  </section>
+
+  <section class="card label-card" id="printArea">
+    <div class="badge">BATTERY DIGITAL PRODUCT PASSPORT</div>
+    <img id="printQr" class="print-qr" alt="Printable DPP QR">
+    <strong id="printId">No battery selected</strong>
+    <span id="printUrl"></span>
+    <span class="nfc-mark">NFC</span>
+  </section>
+
+  <section class="card">
+    <h2>Test log</h2>
+    <pre id="result">Ready.</pre>
+  </section>
+</main>
+<script src="/assets/csp/physical-test.js"></script>
+</body>
+</html>
