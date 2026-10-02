@@ -457,6 +457,56 @@ begin
     raise exception 'BAT08 cross-field supersession was not rejected';
   end if;
 
+  -- BAT09: authenticated field history must carry actor + target + time +
+  -- provenance + supersession attribution in the same immutable event row.
+  declare
+    v_bat09_result jsonb;
+    v_bat09_event uuid;
+    v_bat09_previous uuid;
+  begin
+    select id into v_bat09_previous
+    from public.dpp_field_events
+    where organization_id=v_org
+      and subject_kind='model'
+      and subject_id=v_model
+      and field_path='model.identification.manufacturer.name'
+      and source_ref='bat08:test:supersede';
+
+    v_bat09_result:=public.dpp_api_field_events_append(
+      'model',
+      v_model,
+      jsonb_build_array(jsonb_build_object(
+        'field_path','model.identification.manufacturer.name',
+        'value','BAT09 Maker v3',
+        'source_kind','api',
+        'source_ref','bat09:audit-attribution',
+        'source_date','2026-10-02T09:50:00Z',
+        'access_level','public',
+        'verification_status','verified',
+        'supersedes_id',v_bat09_previous
+      ))
+    );
+    v_bat09_event:=((v_bat09_result->'event_ids')->>0)::uuid;
+
+    if not exists (
+      select 1
+      from public.dpp_field_events e
+      where e.id=v_bat09_event
+        and e.organization_id=v_org
+        and e.subject_kind='model'
+        and e.subject_id=v_model
+        and e.field_path='model.identification.manufacturer.name'
+        and e.recorded_by=v_user
+        and e.recorded_at is not null
+        and e.source_kind='api'
+        and e.source_ref='bat09:audit-attribution'
+        and e.source_date='2026-10-02T09:50:00Z'::timestamptz
+        and e.supersedes_id=v_bat09_previous
+    ) then
+      raise exception 'BAT09 audit attribution failed';
+    end if;
+  end;
+
   -- A subject outside the active tenant must fail without inserting anything.
   begin
     perform public.dpp_api_field_events_append(
