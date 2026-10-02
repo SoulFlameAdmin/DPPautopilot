@@ -297,6 +297,16 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_green_database_integrations.sql
+      - name: Run physical QR NFC carrier database subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_physical_carriers_subset.sql
+          rollback;
+          SQL
       - name: Generate T02 database integration report
         run: python scripts/generate_db_integration_report.py
       - name: Generate T08 reliability coverage report
