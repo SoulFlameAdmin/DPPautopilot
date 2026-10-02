@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.8",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T05:35:00+03:00",
+  "updatedAt": "2026-10-02T05:39:30+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1121,8 +1121,8 @@
           "dependsOn": "BAT01",
           "acceptanceCriteria": "Every field event records source kind and concrete source reference",
           "evidenceRequired": "DB constraints + unit tests",
-          "status": "yellow",
-          "evidence": "This branch adds required `source_kind` and `source_ref` metadata; production ingestion wiring remains pending."
+          "status": "green",
+          "evidence": "Every field event requires source_kind and concrete nonblank source_ref at engine and database/RPC layers. Live bound-Supabase transactional test preserved source_kind=api, exact source_ref manufacturer-api:model=BAT03-LIVE and source_date, while invalid provenance was rejected with DP704 and rolled back. Exact-head CI run 36956397300 on SHA 647460afc48e877b8ff12c709d5da9ef7de388f3 passed T01 unit suite, clean migration replay, BAT01-BAT08 field-event DB subset, C04 migration gate, security-definer guard and full CI."
         },
         {
           "id": "BAT04",
