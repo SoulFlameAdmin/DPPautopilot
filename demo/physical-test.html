@@ -47,10 +47,24 @@
 
   <section class="card">
     <h2>3. Battery</h2>
+    <div class="grid">
+      <label>Manufacturer<input id="manufacturer" value="SoulFlame Test Battery"></label>
+      <label>Model<input id="modelIdentifier" value="SFB-TEST-01"></label>
+      <label>SKU<input id="sku" value="SKU-TEST-01"></label>
+      <label>Serial<input id="serial" value="SERIAL-0001"></label>
+      <label>Chemistry<input id="chemistry" value="LFP"></label>
+      <label>Capacity (Ah)<input id="capacity" type="number" step="0.1" value="60"></label>
+      <label>Voltage (V)<input id="voltage" type="number" step="0.1" value="51.2"></label>
+      <label>Production date<input id="productionDate" type="date"></label>
+    </div>
+    <div class="actions">
+      <button id="createBattery" type="button">Create battery + active passport</button>
+    </div>
+    <hr>
     <label>Existing battery<select id="battery"></select></label>
     <div class="grid">
-      <label>Battery ID<input id="batteryId" readonly></label>
-      <label>Public identifier<input id="publicId" readonly></label>
+      <label>Battery UUID<input id="batteryId" readonly></label>
+      <label>Public Battery ID<input id="publicId" readonly></label>
     </div>
     <label>Exact QR/NFC URL<input id="publicUrl" readonly></label>
   </section>
