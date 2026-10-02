@@ -724,7 +724,7 @@ Append evidence here only after verification.
 | BAT03 | Per-field source provenance | BAT01 | Every field event records source kind and concrete source reference | DB constraints + unit tests | GREEN |
 | BAT04 | Per-field source date | BAT03 | Every field event records source/effective date separately from ingestion time | DB constraints + unit tests | GREEN |
 | BAT05 | Per-field access level | BAT01,F11 | Each field event carries a valid access class consistent with the canonical field catalog | Catalog-driven validator + security tests | GREEN |
-| BAT06 | Per-field verification status | BAT01 | Each field event has explicit verification status with controlled values | DB constraints + unit tests | YELLOW |
+| BAT06 | Per-field verification status | BAT01 | Each field event has explicit verification status with controlled values | DB constraints + unit tests | GREEN |
 | BAT07 | No hardcoded passport values | BAT01 | Production passport values originate from stored/imported/integrated data, not application constants | Static/contract tests + review | YELLOW |
 | BAT08 | Append-only field history | BAT02-BAT06,M11 | Material field changes append new events; prior values cannot be updated or deleted | DB mutation-negative tests | YELLOW |
 | BAT09 | Field change audit attribution | BAT08,M12 | Field history records actor, target, time, provenance and supersession linkage | DB/API integration tests | YELLOW |
