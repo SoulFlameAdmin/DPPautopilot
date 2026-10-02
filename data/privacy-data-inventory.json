@@ -136,6 +136,26 @@
       "minimization_note": "canonical_data must remain product/business data; personal data should not be placed in flexible JSON without an approved catalog purpose"
     },
     {
+      "id": "field_access_catalog_runtime",
+      "tables": [
+        "dpp_field_catalog_runtime"
+      ],
+      "classification": "non_personal_configuration",
+      "purpose": "Enforce the canonical DPP field path to access-class mapping at the database boundary",
+      "location": "Supabase Postgres public DPP namespace",
+      "fields": "field_path, access_level, catalog_version, synced_at; no customer field values or personal data",
+      "retention": {
+        "status": "configuration_lifetime",
+        "current_behavior": "Retained while the corresponding canonical DPP field catalog version is supported; updated only through versioned migrations."
+      },
+      "controls": [
+        "RLS enabled",
+        "direct anon/authenticated table privileges revoked",
+        "CI parity check against data/dpp-field-catalog.json",
+        "fail-closed DP706 trigger enforcement on dpp_field_events"
+      ]
+    },
+    {
       "id": "passport_records",
       "classification": "public_and_confidential_business_data",
       "purpose": "Create versioned DPP passport projections with explicit public/private split",
