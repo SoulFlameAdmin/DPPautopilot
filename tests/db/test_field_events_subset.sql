@@ -259,6 +259,56 @@ begin
     raise exception 'BAT03 invalid provenance was not rejected';
   end if;
 
+  if (
+    select access_level
+    from public.dpp_field_catalog_runtime
+    where field_path='model.identification.manufacturer.name'
+  ) <> 'public' then
+    raise exception 'BAT05 runtime catalog access projection mismatch';
+  end if;
+
+  denied:=false;
+  begin
+    perform public.dpp_api_field_events_append(
+      'model',
+      v_model,
+      jsonb_build_array(jsonb_build_object(
+        'field_path','model.identification.manufacturer.name',
+        'value','WRONG-ACCESS',
+        'source_kind','api',
+        'source_ref','bat05:wrong-access',
+        'source_date','2026-10-02T02:12:00Z',
+        'access_level','authority_only'
+      ))
+    );
+  exception when check_violation then
+    denied:=true;
+  end;
+  if not denied then
+    raise exception 'BAT05 wrong canonical access was not rejected';
+  end if;
+
+  denied:=false;
+  begin
+    perform public.dpp_api_field_events_append(
+      'model',
+      v_model,
+      jsonb_build_array(jsonb_build_object(
+        'field_path','model.nonexistent.catalog_field',
+        'value','UNKNOWN',
+        'source_kind','api',
+        'source_ref','bat05:unknown-field',
+        'source_date','2026-10-02T02:12:01Z',
+        'access_level','public'
+      ))
+    );
+  exception when check_violation then
+    denied:=true;
+  end;
+  if not denied then
+    raise exception 'BAT05 unknown canonical field was not rejected';
+  end if;
+
   -- A subject outside the active tenant must fail without inserting anything.
   begin
     perform public.dpp_api_field_events_append(
