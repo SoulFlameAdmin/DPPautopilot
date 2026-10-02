@@ -721,7 +721,7 @@ Append evidence here only after verification.
 |---|---|---|---|---|---|
 | BAT01 | DPP Data Engine canonical field engine | F11,M04 | All Battery Passport fields are schema-driven from the canonical catalog; no product values are embedded in engine code | Engine module + contract tests + DB event-store precursor | GREEN |
 | BAT02 | Per-field value storage | BAT01 | Every ingested field value is represented independently with field path and typed JSON value | DB migration + integration tests | GREEN |
-| BAT03 | Per-field source provenance | BAT01 | Every field event records source kind and concrete source reference | DB constraints + unit tests | YELLOW |
+| BAT03 | Per-field source provenance | BAT01 | Every field event records source kind and concrete source reference | DB constraints + unit tests | GREEN |
 | BAT04 | Per-field source date | BAT03 | Every field event records source/effective date separately from ingestion time | DB constraints + unit tests | YELLOW |
 | BAT05 | Per-field access level | BAT01,F11 | Each field event carries a valid access class consistent with the canonical field catalog | Catalog-driven validator + security tests | YELLOW |
 | BAT06 | Per-field verification status | BAT01 | Each field event has explicit verification status with controlled values | DB constraints + unit tests | YELLOW |
