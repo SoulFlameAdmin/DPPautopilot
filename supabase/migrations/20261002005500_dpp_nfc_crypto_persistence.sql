@@ -89,6 +89,7 @@ create table public.dpp_nfc_challenges (
   terminal_result text null
     check (terminal_result is null or terminal_result in
       ('authentic','invalid','replay','expired','revoked','unregistered','tampered','backend_error')),
+  unique (organization_id,id),
   constraint dpp_nfc_challenge_expiry_check check (expires_at > issued_at),
   constraint dpp_nfc_challenge_battery_fk
     foreign key (organization_id,battery_item_id)
@@ -128,8 +129,8 @@ create table public.dpp_nfc_verification_events (
     references public.dpp_nfc_identities(organization_id,id)
     on delete restrict,
   constraint dpp_nfc_event_challenge_fk
-    foreign key (challenge_id)
-    references public.dpp_nfc_challenges(id)
+    foreign key (organization_id,challenge_id)
+    references public.dpp_nfc_challenges(organization_id,id)
     on delete restrict
 );
 
