@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.8",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T05:43:30+03:00",
+  "updatedAt": "2026-10-02T06:01:30+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1139,8 +1139,8 @@
           "dependsOn": "BAT01,F11",
           "acceptanceCriteria": "Each field event carries a valid access class consistent with the canonical field catalog",
           "evidenceRequired": "Catalog-driven validator + security tests",
-          "status": "yellow",
-          "evidence": "Catalog access classes already exist; this branch validates event access against the catalog. API/RLS enforcement for the new event store is not yet accepted."
+          "status": "green",
+          "evidence": "Canonical field/access mapping is enforced at the DB boundary from a 42-field runtime projection parity-checked against data/dpp-field-catalog.json. Bound Supabase live tests accept the correct catalog class and reject wrong/unknown field access with stable DP706; anon table access is revoked and RLS is enabled. Privacy inventory includes the non-personal runtime catalog. Exact-head CI run 36958018785 on SHA 614219916a7117d30294cb13f8dafd06f1dd91da passed BAT05 parity, C04, T01, migration ordering, clean PostgreSQL 17 replay, BAT01-BAT08 field-event subset, security-definer guard, R07 inventory and full CI."
         },
         {
           "id": "BAT06",
