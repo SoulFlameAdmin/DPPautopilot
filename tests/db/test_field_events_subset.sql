@@ -9,6 +9,7 @@ declare
   mutation_rejected boolean := false;
   invalid_access_rejected boolean := false;
   public_identifier_accepted boolean := false;
+  catalog_access_rejected boolean := false;
 begin
   insert into public.dpp_organizations(id,name,slug)
   values(v_org,'BAT Field Event Test','bat-field-event-test');
@@ -74,7 +75,7 @@ begin
     organization_id,subject_kind,subject_id,field_path,value,
     source_kind,source_ref,source_date,access_level,verification_status
   ) values(
-    v_org,'item',v_subject,'item.identification.unique_identifier',
+    v_org,'item',v_subject,'item.unique_identifier',
     '"BAT-TEST-0001"'::jsonb,
     'api','identifier-service:test','2026-10-02T01:30:00Z',
     'public_identifier','validated'
@@ -83,6 +84,24 @@ begin
 
   if not public_identifier_accepted then
     raise exception 'BAT public_identifier access class was not accepted';
+  end if;
+
+
+  begin
+    insert into public.dpp_field_events(
+      organization_id,subject_kind,subject_id,field_path,value,
+      source_kind,source_ref,source_date,access_level,verification_status
+    ) values(
+      v_org,'model',v_subject,'model.identification.manufacturer.name',
+      '"Wrong Access"'::jsonb,
+      'api','bat05:mismatch','2026-10-02T02:42:00Z',
+      'legitimate_interest','validated'
+    );
+  exception when sqlstate 'DP706' then
+    catalog_access_rejected := true;
+  end;
+  if not catalog_access_rejected then
+    raise exception 'BAT05 catalog access mismatch was not rejected';
   end if;
 end
 $bat_field_events$;
