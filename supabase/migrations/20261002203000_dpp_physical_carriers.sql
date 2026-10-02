@@ -57,7 +57,7 @@ create table public.dpp_carrier_scan_events (
   constraint dpp_carrier_scan_carrier_fk
     foreign key (organization_id,carrier_id)
     references public.dpp_physical_carriers(organization_id,id)
-    on delete set null
+    on delete restrict
 );
 
 create index dpp_carrier_scan_org_time_idx
