@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.8",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T06:01:30+03:00",
+  "updatedAt": "2026-10-02T11:21:30+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1148,8 +1148,8 @@
           "dependsOn": "BAT01",
           "acceptanceCriteria": "Each field event has explicit verification status with controlled values",
           "evidenceRequired": "DB constraints + unit tests",
-          "status": "yellow",
-          "evidence": "This branch introduces unverified/validated/verified/rejected event states; operational verification workflow remains pending."
+          "status": "green",
+          "evidence": "Controlled verification states are enforced at engine, RPC and DB layers: unverified, validated, verified and rejected are accepted; invalid status trusted is rejected with DP704. Live bound-Supabase rollback test stored all four allowed states distinctly and rejected the invalid state. Exact-head CI run 36958372131 on SHA 3cef1cb187e8b0baacc38664df669dd9d7d5fedd completed SUCCESS with the T01 unit suite and BAT01-BAT08 field-event database acceptance coverage."
         },
         {
           "id": "BAT07",
