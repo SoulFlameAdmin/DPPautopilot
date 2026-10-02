@@ -42,13 +42,13 @@ Authenticated carrier management API:
     POST  /api/carriers
     PATCH /api/carriers
 
-Public carrier landing API:
+Public carrier landing API (consolidated into the same Serverless Function):
 
-    GET /api/carrier-open?identifier=<BatteryID>&source=unknown
+    GET /api/carriers?mode=open&identifier=<BatteryID>&source=unknown
 
-Test-only QR image endpoint:
+Test-only QR image mode on the same function:
 
-    GET /api/qr-test?url=<same-origin-public-url>
+    GET /api/carriers?mode=qr&url=<same-origin-public-url>
 
 The QR image endpoint exists to finish the physical pilot quickly. Production should move QR generation in-process or to an owned service so the public Battery ID URL is not sent to a third-party QR image service.
 
@@ -89,3 +89,7 @@ GREEN requires physical evidence, not only unit tests:
 - A live cloud data change appears on the next open without QR regeneration or NFC rewrite.
 - Replace/revoke leaves a coherent audit trail.
 - CI migration replay + API tests are green.
+
+## Vercel Hobby function limit
+
+The physical test intentionally uses one new Serverless Function (`api/carriers.js`). Public landing and QR test-image modes are consolidated into it so the project remains within the current Vercel Hobby 12-function deployment limit.
