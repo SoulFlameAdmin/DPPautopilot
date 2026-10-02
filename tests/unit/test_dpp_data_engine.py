@@ -5,6 +5,7 @@ from scripts.dpp_data_engine import (
     catalog_index,
     latest_projection,
     load_catalog,
+    validate_catalog_contract,
     validate_field_event,
 )
 
@@ -37,6 +38,58 @@ class DppDataEngineTests(unittest.TestCase):
     def test_catalog_drives_access_and_accepts_complete_event(self):
         validated = validate_field_event(self.event(), self.catalog)
         self.assertEqual(validated["access_level"], self.index[self.path]["access"])
+
+    def test_all_catalog_fields_are_indexed_and_contract_valid(self):
+        validated_catalog = validate_catalog_contract(self.catalog)
+        self.assertEqual(len(self.index), len(validated_catalog["fields"]))
+        self.assertEqual(set(self.index), {field["path"] for field in validated_catalog["fields"]})
+
+    def test_engine_accepts_new_catalog_field_without_engine_code_change(self):
+        synthetic = {
+            "catalogVersion": "contract-test",
+            "fields": [{
+                "path": "item.future.dynamic_test_field",
+                "requirementIds": ["FUTURE-001"],
+                "source": "Synthetic contract fixture",
+                "access": "public_identifier",
+                "type": "string",
+                "required": False,
+                "dbTarget": "dpp_battery_items.canonical_data.future.dynamic_test_field",
+                "apiTarget": "BatteryItem.future.dynamicTestField",
+                "uiTarget": "itemForm.futureDynamicTestField",
+            }],
+        }
+        event = self.event()
+        event["subject_kind"] = "item"
+        event["field_path"] = "item.future.dynamic_test_field"
+        event["access_level"] = "public_identifier"
+        event["value"] = "DYNAMIC-VALUE"
+        validated = validate_field_event(event, synthetic)
+        self.assertEqual(validated["field_path"], "item.future.dynamic_test_field")
+        self.assertEqual(validated["value"], "DYNAMIC-VALUE")
+
+    def test_catalog_contract_rejects_duplicate_or_incomplete_fields(self):
+        synthetic = {
+            "fields": [{
+                "path": "model.synthetic",
+                "requirementIds": ["SYN-001"],
+                "source": "Synthetic",
+                "access": "public",
+                "type": "string",
+                "required": True,
+                "dbTarget": "x",
+                "apiTarget": "x",
+                "uiTarget": "x",
+            }]
+        }
+        duplicate = {"fields": synthetic["fields"] + [dict(synthetic["fields"][0])]}
+        with self.assertRaises(ValueError):
+            validate_catalog_contract(duplicate)
+
+        incomplete = {"fields": [dict(synthetic["fields"][0])]}
+        incomplete["fields"][0].pop("apiTarget")
+        with self.assertRaises(ValueError):
+            validate_catalog_contract(incomplete)
 
     def test_rejects_unknown_field_and_access_mismatch(self):
         bad = self.event()
