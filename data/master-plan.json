@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.8",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T11:21:30+03:00",
+  "updatedAt": "2026-10-02T12:35:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1157,8 +1157,8 @@
           "dependsOn": "BAT01",
           "acceptanceCriteria": "Production passport values originate from stored/imported/integrated data, not application constants",
           "evidenceRequired": "Static/contract tests + review",
-          "status": "yellow",
-          "evidence": "Existing production contracts are data-driven, but the new field-event engine is not yet wired through every passport write path."
+          "status": "green",
+          "evidence": "Production passport create/read/update paths are data-driven. CI static gate scripts/validate_no_hardcoded_passport_values.py rejects known demo/product literals and asserts HTTP POST/PATCH forward caller payloads, DB create persists supplied public/private payloads, public reads use stored item/passport values, and checked updates pass supplied payloads through. Live bound-Supabase rollback round-trip created a temporary model/item/passport with unique sentinel manufacturer, capacity, UID and private SoH; create persistence and active public read returned the exact supplied values with no application substitution. Exact-head CI run 36990379058 on SHA b051eb11908c527fed4a4be07610a9eb9e44a3b9 completed SUCCESS, including BAT07 gate, C04, T01, clean PostgreSQL replay, BAT01-BAT08 DB subset, security-definer guard and browser smoke."
         },
         {
           "id": "BAT08",
