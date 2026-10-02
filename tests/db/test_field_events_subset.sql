@@ -8,6 +8,7 @@ declare
   v_count integer;
   mutation_rejected boolean := false;
   invalid_access_rejected boolean := false;
+  public_identifier_accepted boolean := false;
 begin
   insert into public.dpp_organizations(id,name,slug)
   values(v_org,'BAT Field Event Test','bat-field-event-test');
@@ -67,6 +68,21 @@ begin
   end;
   if not invalid_access_rejected then
     raise exception 'BAT invalid access level was not rejected';
+  end if;
+
+  insert into public.dpp_field_events(
+    organization_id,subject_kind,subject_id,field_path,value,
+    source_kind,source_ref,source_date,access_level,verification_status
+  ) values(
+    v_org,'item',v_subject,'item.identification.unique_identifier',
+    '"BAT-TEST-0001"'::jsonb,
+    'api','identifier-service:test','2026-10-02T01:30:00Z',
+    'public_identifier','validated'
+  );
+  public_identifier_accepted := true;
+
+  if not public_identifier_accepted then
+    raise exception 'BAT public_identifier access class was not accepted';
   end if;
 end
 $bat_field_events$;
