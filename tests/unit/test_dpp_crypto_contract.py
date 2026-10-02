@@ -74,5 +74,35 @@ class DppCryptoContractTests(unittest.TestCase):
                 self.assertNotIn("BEGIN EC PRIVATE KEY", body)
 
 
+    def test_crypto_migration_uses_canonical_tenant_safe_battery_binding(self):
+        text = read("supabase/migrations/20261002005500_dpp_nfc_crypto_persistence.sql").lower()
+        self.assertIn("references public.dpp_battery_items(organization_id, id)", text)
+        self.assertIn("foreign key (organization_id,battery_item_id)", text)
+        self.assertNotIn("references public.dpp_battery_items(unique_identifier)", text)
+
+    def test_crypto_migration_is_deny_by_default_and_rls_enabled(self):
+        text = read("supabase/migrations/20261002005500_dpp_nfc_crypto_persistence.sql").lower()
+        for table in ("dpp_nfc_identities", "dpp_nfc_provisioning_receipts",
+                      "dpp_nfc_challenges", "dpp_nfc_verification_events"):
+            with self.subTest(table=table):
+                self.assertIn(f"alter table public.{table} enable row level security", text)
+                self.assertIn(f"revoke all on table public.{table} from anon,authenticated", text)
+
+    def test_crypto_migration_has_no_raw_secret_columns(self):
+        text = read("supabase/migrations/20261002005500_dpp_nfc_crypto_persistence.sql").lower()
+        forbidden = ("private_key ", "symmetric_key ", "master_key ", "raw_proof ", "raw_challenge ")
+        for term in forbidden:
+            with self.subTest(term=term):
+                self.assertNotIn(term, text)
+
+    def test_verification_history_and_receipts_have_no_write_policy(self):
+        text = read("supabase/migrations/20261002005500_dpp_nfc_crypto_persistence.sql").lower()
+        self.assertNotIn("on public.dpp_nfc_verification_events for insert to authenticated", text)
+        self.assertNotIn("on public.dpp_nfc_verification_events for update to authenticated", text)
+        self.assertNotIn("on public.dpp_nfc_verification_events for delete to authenticated", text)
+        self.assertNotIn("on public.dpp_nfc_provisioning_receipts for update to authenticated", text)
+        self.assertNotIn("on public.dpp_nfc_provisioning_receipts for delete to authenticated", text)
+
+
 if __name__ == "__main__":
     unittest.main()
