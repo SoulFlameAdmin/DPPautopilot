@@ -1,11 +1,11 @@
 {
   "version": 1,
   "status": "approved_precursor",
-  "approved_at": "2026-09-19T23:42:00+03:00",
-  "source_run_id": 35468111629,
-  "source_artifact_id": 10592210955,
-  "source_artifact_digest": "sha256:7695ed7d4f44f81a0a25c8b3c474f2762b4e002f587fff68ab7ee0223db6be9c",
-  "source_commit": "2ec2f8886442259f6f0027b622aab9ed8d3007f5",
+  "approved_at": "2026-10-02T13:15:00+03:00",
+  "source_run_id": 36994223567,
+  "source_artifact_id": 11220264870,
+  "source_artifact_digest": "sha256:354165564cec0dfaa332e9e200f0401388c14a177cbfef762ca1ca7e3f90f756",
+  "source_commit": "2b1f75e4e5d12cb63a87cc74a2c27c4d2fe54ff0",
   "browser": "chromium",
   "browser_version": "153.0.8010.12",
   "viewport": {
@@ -31,14 +31,14 @@
   },
   "review": {
     "visual_review": "pass",
-    "deterministic_repeat": "10/10 byte-identical",
-    "notes": "10 core viewport screenshots reviewed from run 35468111629; intentional dashboard-only change adds the persistent BG/EN control with no clipping, overlap, broken cards/forms, empty render or visible layout regression. Other 9 approved surface hashes remain unchanged. Gate hardening on 2026-09-20: PNG encoder bytes can vary with identical pixels; decoded RGBA SHA-256 is now the visual regression identity while PNG SHA-256 remains artifact-integrity evidence."
+    "deterministic_repeat": "10/10 pixel-identical on final candidate run",
+    "notes": "Reviewed final BAT09-BAT18 candidate at 1440x1000. Import surface intentionally changes CSV wording to CSV/XLSX and canonical state-of-health label; the XLSX sheet control is correctly hidden for CSV after BAT16 CSS fix. Dashboard candidate is visually equivalent at the normalized viewport with no clipping, overlap, broken cards/forms or layout regression. The other eight surface pixel digests remain unchanged from the prior approved baseline."
   },
   "surfaces": {
     "dashboard": {
       "route": "/",
-      "sha256": "72b9b8a1ca217cb19b9f4ebc8757d0f4ce897895eb623b797bea49115a55f650",
-      "pixel_sha256": "db4586c5fefcfdd5dc082f3c80c6564674a02409ee9c1400ae455676cfdd5616"
+      "sha256": "e57c6628c157f93ddb9c7318423b8824ea4e41449143644a2f0604433415c260",
+      "pixel_sha256": "2c4943ac00e12291e602d269d89a33226bc8cc6e94b225d9ff6f85c98b1c9f11"
     },
     "model": {
       "route": "/demo/model.html?sample=1",
@@ -52,8 +52,8 @@
     },
     "import": {
       "route": "/demo/import.html?sample=1",
-      "sha256": "63b128bc121d0dcb503d4909439655ee34969a3cab04790d6c61c5d59ce713a4",
-      "pixel_sha256": "1b2719d3d6b0366f2ce5109eb88a3bf25f1973591a176aca9f71fa3edf190942"
+      "sha256": "85fa06ce8bd8acff2a027a4333be4e750ab8321615f8c99cc286aaf08ec5d890",
+      "pixel_sha256": "20c9ac4f0546fbb38e0a651a32e98fa28f3f5fbdb72f4edb5a909ee4e4a9b35e"
     },
     "import-validation": {
       "route": "/demo/import-validation.html",
