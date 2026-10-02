@@ -726,7 +726,7 @@ Append evidence here only after verification.
 | BAT05 | Per-field access level | BAT01,F11 | Each field event carries a valid access class consistent with the canonical field catalog | Catalog-driven validator + security tests | GREEN |
 | BAT06 | Per-field verification status | BAT01 | Each field event has explicit verification status with controlled values | DB constraints + unit tests | GREEN |
 | BAT07 | No hardcoded passport values | BAT01 | Production passport values originate from stored/imported/integrated data, not application constants | Static/contract tests + review | GREEN |
-| BAT08 | Append-only field history | BAT02-BAT06,M11 | Material field changes append new events; prior values cannot be updated or deleted | DB mutation-negative tests | YELLOW |
+| BAT08 | Append-only field history | BAT02-BAT06,M11 | Material field changes append new events; prior values cannot be updated or deleted | DB mutation-negative tests | GREEN |
 | BAT09 | Field change audit attribution | BAT08,M12 | Field history records actor, target, time, provenance and supersession linkage | DB/API integration tests | YELLOW |
 | BAT10 | Extensible field schema | BAT01 | New requirement fields can be added through the versioned catalog without redesigning core tables | Catalog validator + schema traceability | GREEN |
 | BAT11 | EU requirements registry | F11 | Current Battery Passport requirement set is represented in a versioned registry with authoritative sources | Traceability document + catalog validator | GREEN |
