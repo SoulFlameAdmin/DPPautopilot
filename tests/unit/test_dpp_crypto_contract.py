@@ -254,5 +254,11 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertIn("until then: yellow", text)
 
 
+    def test_cr25_crypto_branch_preview_is_explicitly_enabled(self):
+        config = json.loads(read("vercel.json"))
+        enabled = config.get("git", {}).get("deploymentEnabled", {})
+        self.assertIs(enabled.get("borko/dpp-security-lab"), True)
+
+
 if __name__ == "__main__":
     unittest.main()
