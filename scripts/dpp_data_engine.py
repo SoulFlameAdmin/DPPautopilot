@@ -65,8 +65,12 @@ def validate_catalog_contract(catalog: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"{path} has invalid access class")
         if not isinstance(entry["type"], str) or not entry["type"].strip():
             raise ValueError(f"{path} requires type")
-        if not isinstance(entry["required"], bool):
-            raise ValueError(f"{path} required must be boolean")
+        required_rule = entry["required"]
+        if not (
+            isinstance(required_rule, bool)
+            or (isinstance(required_rule, str) and required_rule.strip())
+        ):
+            raise ValueError(f"{path} required rule must be boolean or non-empty conditional rule")
         for target in ("dbTarget", "apiTarget", "uiTarget"):
             if not isinstance(entry[target], str) or not entry[target].strip():
                 raise ValueError(f"{path} requires {target}")
