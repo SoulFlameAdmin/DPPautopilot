@@ -57,7 +57,7 @@ function setAuth(data){
 async function loadPublicPassport(){
   const id=new URLSearchParams(location.search).get('id')||'';
   if(!id)throw new Error('Missing battery identifier.');
-  const data=await api('/api/carrier-open?identifier='+encodeURIComponent(id)+'&source=unknown',{auth:false});
+  const data=await api('/api/carriers?mode=open&identifier='+encodeURIComponent(id)+'&source=unknown',{auth:false});
   passportId=data.passport_id;
   el.identifier.value=data.unique_identifier||id;
   el.status.value=data.status||'';
