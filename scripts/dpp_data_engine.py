@@ -20,7 +20,7 @@ SOURCE_KINDS = {"manual", "csv", "xlsx", "api", "bms", "derived", "migration"}
 VERIFY_STATES = {"unverified", "validated", "verified", "rejected"}
 ACCESS_CLASSES = {"public", "public_identifier", "legitimate_interest", "authority_only"}
 CATALOG_FIELD_KEYS = {
-    "path", "requirementIds", "source", "access", "type", "required",
+    "path", "requirementIds", "source", "access", "type", "required", "applicability",
     "dbTarget", "apiTarget", "uiTarget"
 }
 
@@ -71,6 +71,30 @@ def validate_catalog_contract(catalog: dict[str, Any]) -> dict[str, Any]:
             or (isinstance(required_rule, str) and required_rule.strip())
         ):
             raise ValueError(f"{path} required rule must be boolean or non-empty conditional rule")
+
+        applicability = entry["applicability"]
+        if not isinstance(applicability, dict):
+            raise ValueError(f"{path} applicability must be an object")
+        mode = applicability.get("mode")
+        if mode not in {"always", "optional", "when"}:
+            raise ValueError(f"{path} has invalid applicability mode")
+        if mode == "when":
+            conditions = applicability.get("all")
+            if not isinstance(conditions, list) or not conditions:
+                raise ValueError(f"{path} conditional applicability requires non-empty all[]")
+            for condition in conditions:
+                if not isinstance(condition, dict):
+                    raise ValueError(f"{path} applicability condition must be an object")
+                if not isinstance(condition.get("path"), str) or not condition["path"].strip():
+                    raise ValueError(f"{path} applicability condition requires path")
+                if condition.get("operator") not in {"equals", "in"}:
+                    raise ValueError(f"{path} applicability condition has invalid operator")
+                if condition["operator"] == "equals" and "value" not in condition:
+                    raise ValueError(f"{path} equals condition requires value")
+                if condition["operator"] == "in":
+                    values = condition.get("values")
+                    if not isinstance(values, list) or not values:
+                        raise ValueError(f"{path} in condition requires non-empty values")
         for target in ("dbTarget", "apiTarget", "uiTarget"):
             if not isinstance(entry[target], str) or not entry[target].strip():
                 raise ValueError(f"{path} requires {target}")
