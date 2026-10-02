@@ -1,0 +1,20 @@
+{
+  "schema": "dpp.nfc.originality-investigation.v1",
+  "carrier": "NTAG215",
+  "observed_tool": "NFC Tools",
+  "observed_signature_result": "Invalid",
+  "independent_verification": "PENDING",
+  "known_good_comparison": "PENDING",
+  "raw_read_sig": "PENDING",
+  "classification": "INCONCLUSIVE_REJECT",
+  "production_eligible": false,
+  "qualifies_for_cr13": false,
+  "qualifies_for_cr24": false,
+  "allowed_hypotheses": [
+    "counterfeit_or_clone",
+    "verifier_implementation_or_public_key_mismatch",
+    "wrong_or_emulated_tag_family",
+    "read_transport_or_tag_damage"
+  ],
+  "next_physical_action": "Read the same tag with NXP TagInfo or another NXP-supported originality verifier and capture the originality/manufacturer result."
+}
