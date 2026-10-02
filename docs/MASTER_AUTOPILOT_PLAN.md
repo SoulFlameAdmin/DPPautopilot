@@ -785,15 +785,15 @@ These tasks extend Battery Platform V3 into the full Battery Trust OS. Borko own
 
 | ID | Task | Depends on | Acceptance criteria | Evidence | Status |
 |---|---|---|---|---|---|
-| BAT51 | Supplier registry | BAT01 | Tenant-scoped supplier records exist with stable external reference, legal name and lifecycle status | Migration replay + DB subset | YELLOW |
+| BAT51 | Supplier registry | BAT01 | Tenant-scoped supplier records exist with stable external reference, legal name and lifecycle status | Migration replay + DB subset | GREEN |
 | BAT52 | Supplier portal invitation model | BAT51,M03 | Manufacturer can invite a supplier with least-privilege scoped access | Auth/API/E2E tests | YELLOW |
-| BAT53 | Supplier data packages | BAT51,BAT01 | Supplier data can be submitted as versioned packages scoped to model/item/component/material | Migration replay + DB subset | YELLOW |
-| BAT54 | Component and material scoping | BAT53 | Supplier packages can target exact model/item/component/material references without ambiguity | DB/API tests | YELLOW |
-| BAT55 | Supplier package history | BAT53,BAT08 | Supplier package versions are append-only and supersession is auditable | Mutation-negative DB tests | YELLOW |
-| BAT56 | Supplier signature envelope hook | BAT53 | Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration | Contract tests | YELLOW |
-| BAT57 | Supplier verification workflow | BAT53 | Packages move through unverified/validated/verified/rejected states with evidence | API/DB tests | YELLOW |
-| BAT58 | Supplier missing-data queue | BAT14,BAT53 | Missing required supplier fields are grouped by supplier and affected product | Integration tests | YELLOW |
-| BAT59 | Supplier reminder workflow | BAT58 | Authorized users can trigger auditable reminders without exposing unrelated tenant data | API/security tests | YELLOW |
+| BAT53 | Supplier data packages | BAT51,BAT01 | Supplier data can be submitted as versioned packages scoped to model/item/component/material | Migration replay + DB subset | GREEN |
+| BAT54 | Component and material scoping | BAT53 | Supplier packages can target exact model/item/component/material references without ambiguity | DB/API tests | GREEN |
+| BAT55 | Supplier package history | BAT53,BAT08 | Supplier package versions are append-only and supersession is auditable | Mutation-negative DB tests | GREEN |
+| BAT56 | Supplier signature envelope hook | BAT53 | Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration | Contract tests | GREEN |
+| BAT57 | Supplier verification workflow | BAT53 | Packages move through unverified/validated/verified/rejected states with evidence | API/DB tests | GREEN |
+| BAT58 | Supplier missing-data queue | BAT14,BAT53 | Missing required supplier fields are grouped by supplier and affected product | Integration tests | GREEN |
+| BAT59 | Supplier reminder workflow | BAT58 | Authorized users can trigger auditable reminders without exposing unrelated tenant data | API/security tests | GREEN |
 | BAT60 | Supplier network dashboard | BAT51-BAT59 | Manufacturer sees supplier completeness, blockers and package status | Authenticated E2E tests | YELLOW |
 | BAT61 | Factory provisioning job model | BAT26,BAT29 | A factory job can batch Battery IDs, QR and identity provisioning work | DB/API tests | RED |
 | BAT62 | Batch provisioning | BAT61 | Provisioning supports deterministic bulk processing with idempotent retry | Load/idempotency tests | RED |
