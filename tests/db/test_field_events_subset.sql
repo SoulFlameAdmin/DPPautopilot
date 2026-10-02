@@ -194,6 +194,36 @@ begin
     raise exception 'BAT02 typed JSON preservation failed: %',v_types;
   end if;
 
+  if (
+    select count(distinct source_ref) <> 4
+       or bool_and(source_kind='api' and length(btrim(source_ref))>0) is not true
+    from public.dpp_field_events
+    where organization_id=v_org and subject_kind='model' and subject_id=v_model
+  ) then
+    raise exception 'BAT03 provenance persistence failed';
+  end if;
+
+  denied:=false;
+  begin
+    perform public.dpp_api_field_events_append(
+      'model',
+      v_model,
+      jsonb_build_array(jsonb_build_object(
+        'field_path','model.identification.manufacturer.name',
+        'value','BAD-PROVENANCE',
+        'source_kind','unknown',
+        'source_ref','',
+        'source_date','2026-10-02T02:10:05Z',
+        'access_level','public'
+      ))
+    );
+  exception when sqlstate 'DP704' then
+    denied:=true;
+  end;
+  if not denied then
+    raise exception 'BAT03 invalid provenance was not rejected';
+  end if;
+
   -- A subject outside the active tenant must fail without inserting anything.
   begin
     perform public.dpp_api_field_events_append(
