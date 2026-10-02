@@ -220,5 +220,14 @@ class DppCryptoContractTests(unittest.TestCase):
                 self.assertIn(phrase, text)
 
 
+    def test_cr24_hardware_evidence_template_is_complete_and_pending(self):
+        payload = json.loads(read("data/dpp-crypto-hardware-evidence-template.json"))
+        self.assertEqual(payload["schema"], "dpp.crypto.hardware-evidence.v1")
+        self.assertEqual(len(payload["tests"]), 24)
+        self.assertEqual([x["id"] for x in payload["tests"]], [f"HW{i:02d}" for i in range(1, 25)])
+        self.assertTrue(all(x["status"] == "PENDING" for x in payload["tests"]))
+        self.assertEqual(payload["result"], "PENDING")
+
+
 if __name__ == "__main__":
     unittest.main()
