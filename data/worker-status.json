@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "BAT51–BAT60 — Supplier Network API, privacy, security and dashboard acceptance",
+  "currentTask": "BAT52 + BAT60 — supplier portal invitation/acceptance and authenticated dashboard acceptance",
   "currentGate": "BATTERY TRUST OS",
-  "lastCompletedTask": "M02 tenant-recovery HTTP precursor — PR #176 / CI 35684651596 PASS 139/139",
-  "nextTask": "Obtain clean CI for Supplier Network, promote only evidence-backed tasks, then begin BAT61 factory provisioning job model.",
-  "message": "Supplier Network now has deployed DB foundations, manufacturer RPC/HTTP operations, reminder workflow, privacy inventory, rate/input/error security coverage and a visible operations dashboard precursor. BAT60 remains YELLOW until authenticated browser E2E.",
+  "lastCompletedTask": "BAT51/BAT53/BAT54/BAT55/BAT56/BAT57/BAT58/BAT59 — CI 36943661741 PASS",
+  "nextTask": "Finish supplier invitation token lifecycle and authenticated Supplier Network browser E2E; then start BAT61 factory provisioning job model.",
+  "message": "Supplier Network core is evidence-backed: 8 tasks promoted GREEN after full CI PASS. BAT52 portal invitation flow and BAT60 authenticated dashboard remain YELLOW.",
   "deferredBlockers": [
     "R02 — Vercel `api-deployments-free-per-day`; explicit retry window begins 2026-09-23T02:19:01Z. Do not deploy earlier.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; no auth/login/MFA bypass allowed.",
     "M13 — technical Edge metadata ACL mismatch is fixed and Edge v5 is deployed; final authenticated upload→download→delete byte roundtrip still requires a real user runtime path and M03."
   ],
-  "updatedAt": "2026-10-02T03:05:00+03:00"
+  "updatedAt": "2026-10-02T03:10:00+03:00"
 }
