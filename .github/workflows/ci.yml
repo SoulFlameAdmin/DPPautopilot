@@ -178,6 +178,12 @@ jobs:
         run: node --test tests/api/items.test.cjs
       - name: Run M19 passport HTTP contract unit tests
         run: node --test tests/api/passport.test.cjs
+      - name: Run physical QR NFC carrier HTTP contract tests
+        run: node --test tests/api/physical-carriers.test.cjs
+      - name: Run physical QR image proxy tests
+        run: node --test tests/api/qr-test.test.cjs
+      - name: Syntax-check physical provisioning browser scripts
+        run: node --check assets/csp/physical-test.js && node --check assets/csp/carrier-passport.js
       - name: Run M20 imports HTTP contract unit tests
         run: node --test tests/api/imports.test.cjs
       - name: Run M21 export HTTP contract unit tests
@@ -291,6 +297,16 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_green_database_integrations.sql
+      - name: Run physical QR NFC carrier database subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_physical_carriers_subset.sql
+          rollback;
+          SQL
       - name: Generate T02 database integration report
         run: python scripts/generate_db_integration_report.py
       - name: Generate T08 reliability coverage report

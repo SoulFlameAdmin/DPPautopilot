@@ -230,11 +230,13 @@ class DppCryptoContractTests(unittest.TestCase):
 
 
     def test_cr25_progress_page_has_no_stale_hardcoded_counts(self):
-        text = read("demo/dpp-crypto-progress.html")
-        self.assertIn("fetch('../data/dpp-crypto-status.json')", text)
-        self.assertIn('id="pct">Loading evidence', text)
-        self.assertNotIn('id="pct">4% GREEN', text)
-        self.assertNotIn('id="green">1</div>', text)
+        html = read("demo/dpp-crypto-progress.html")
+        script = read("assets/csp/dpp-crypto-progress.js")
+        self.assertIn('/assets/csp/dpp-crypto-progress.js', html)
+        self.assertIn("fetch('../data/dpp-crypto-status.json'", script)
+        self.assertIn('id="pct">Loading evidence', html)
+        self.assertNotIn('id="pct">4% GREEN', html)
+        self.assertNotIn('id="green">1</div>', html)
 
 
     def test_cr25_requires_real_reachability_before_green(self):
