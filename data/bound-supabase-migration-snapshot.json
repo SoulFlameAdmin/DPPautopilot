@@ -244,7 +244,11 @@
     {
       "version": "20261002025110",
       "name": "dpp_field_catalog_access_error_contract"
+    },
+    {
+      "version": "20261002095636",
+      "name": "dpp_field_catalog_version"
     }
   ],
-  "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents. Snapshot refreshed through BAT05 canonical runtime field-access enforcement and stable DP706 rejection contract."
+  "note": "Snapshot refreshed through BAT13 machine-readable applicability catalog version synchronization; Supabase-applied version IDs may differ from repository filename timestamps when applied through managed tooling."
 }
