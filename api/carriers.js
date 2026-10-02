@@ -1,6 +1,8 @@
 'use strict';
 
 const { parseBody, bodyErrorResponse } = require('./_request.js');
+const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
+const { startRequestObservability } = require('./_observability.js');
 
 const KINDS=new Set(['qr','nfc']);
 const NFC_TECH=new Set(['ntag213','ntag215','ntag216','ntag424_dna','other']);
@@ -74,6 +76,9 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
 }
 
 async function handler(req,res){
+  startRequestObservability(req,res,'carriers');
+  const localRate=enforceRateLimit(req,res,'carriers');
+  if(!localRate.allowed)return send(res,429,rateLimitBody());
   const method=String(req.method||'GET').toUpperCase();
   if(!['GET','POST','PATCH'].includes(method)){
     res.setHeader('Allow','GET, POST, PATCH');
@@ -81,6 +86,9 @@ async function handler(req,res){
   }
   const authorization=bearer(req);
   if(!authorization)return send(res,401,{error:{code:'AUTH_REQUIRED',message:'Bearer authentication is required.'}});
+  const shared=await enforceSharedRateLimit(req,res,'carriers',authorization);
+  if(shared.error)return send(res,503,sharedRateLimitUnavailableBody());
+  if(!shared.allowed)return send(res,429,rateLimitBody());
 
   let body={};
   try{body=parseBody(req);}
