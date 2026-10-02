@@ -7,6 +7,7 @@ declare
   v_second uuid := '33000000-0000-4000-8000-000000000002';
   v_count integer;
   mutation_rejected boolean := false;
+  delete_rejected boolean := false;
   invalid_access_rejected boolean := false;
   public_identifier_accepted boolean := false;
   catalog_access_rejected boolean := false;
@@ -43,6 +44,22 @@ begin
     raise exception 'BAT field history expected 2 events, got %', v_count;
   end if;
 
+  if (
+    select supersedes_id
+    from public.dpp_field_events
+    where id=v_second
+  ) is distinct from v_first then
+    raise exception 'BAT08 supersession link was not preserved';
+  end if;
+
+  if (
+    select value
+    from public.dpp_field_events
+    where id=v_first
+  ) <> '"Example Battery Co."'::jsonb then
+    raise exception 'BAT08 prior value changed after superseding append';
+  end if;
+
   begin
     update public.dpp_field_events
     set verification_status='rejected'
@@ -52,6 +69,16 @@ begin
   end;
   if not mutation_rejected then
     raise exception 'BAT append-only update was not rejected';
+  end if;
+
+  begin
+    delete from public.dpp_field_events
+    where id=v_first;
+  exception when sqlstate '55000' then
+    delete_rejected := true;
+  end;
+  if not delete_rejected then
+    raise exception 'BAT append-only delete was not rejected';
   end if;
 
   begin
@@ -338,6 +365,96 @@ begin
   end;
   if not denied then
     raise exception 'BAT05 unknown canonical field was not rejected';
+  end if;
+
+  declare
+    v_initial_event uuid;
+    v_superseding_result jsonb;
+    v_superseding_event uuid;
+  begin
+    select id
+      into v_initial_event
+    from public.dpp_field_events
+    where organization_id=v_org
+      and subject_kind='model'
+      and subject_id=v_model
+      and field_path='model.identification.manufacturer.name'
+      and source_ref='bat02:test:string';
+
+    v_superseding_result:=public.dpp_api_field_events_append(
+      'model',
+      v_model,
+      jsonb_build_array(jsonb_build_object(
+        'field_path','model.identification.manufacturer.name',
+        'value','BAT08 Maker v2',
+        'source_kind','api',
+        'source_ref','bat08:test:supersede',
+        'source_date','2026-10-02T02:20:00Z',
+        'access_level','public',
+        'verification_status','verified',
+        'supersedes_id',v_initial_event
+      ))
+    );
+
+    v_superseding_event:=((v_superseding_result->'event_ids')->>0)::uuid;
+
+    if (
+      select count(*)
+      from public.dpp_field_events
+      where organization_id=v_org
+        and subject_kind='model'
+        and subject_id=v_model
+        and field_path='model.identification.manufacturer.name'
+    ) <> 2 then
+      raise exception 'BAT08 API supersession did not append a second event';
+    end if;
+
+    if (
+      select value
+      from public.dpp_field_events
+      where id=v_initial_event
+    ) <> '"BAT02 Maker"'::jsonb then
+      raise exception 'BAT08 original API-ingested value was mutated';
+    end if;
+
+    if (
+      select supersedes_id
+      from public.dpp_field_events
+      where id=v_superseding_event
+    ) is distinct from v_initial_event then
+      raise exception 'BAT08 API supersession link mismatch';
+    end if;
+  end;
+
+  denied:=false;
+  begin
+    perform public.dpp_api_field_events_append(
+      'model',
+      v_model,
+      jsonb_build_array(jsonb_build_object(
+        'field_path','model.physical.weight_kg',
+        'value',83.0,
+        'source_kind','api',
+        'source_ref','bat08:test:wrong-field-supersede',
+        'source_date','2026-10-02T02:20:01Z',
+        'access_level','public',
+        'verification_status','verified',
+        'supersedes_id',(
+          select id
+          from public.dpp_field_events
+          where organization_id=v_org
+            and subject_kind='model'
+            and subject_id=v_model
+            and field_path='model.identification.manufacturer.name'
+            and source_ref='bat02:test:string'
+        )
+      ))
+    );
+  exception when sqlstate 'DP705' then
+    denied:=true;
+  end;
+  if not denied then
+    raise exception 'BAT08 cross-field supersession was not rejected';
   end if;
 
   -- A subject outside the active tenant must fail without inserting anything.
