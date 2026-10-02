@@ -90,7 +90,7 @@ Machine-readable result:
 ```
 
 Allowed top-level result values:
-`authentic | invalid | replay | expired | revoked | unregistered | tampered | backend_error`.
+`authentic` | `invalid` | `replay` | `expired` | `revoked` | `unregistered` | `tampered` | `backend_error`.
 
 Public responses do not disclose key references, raw proofs, internal tenant IDs, stack traces or existence-sensitive details beyond policy.
 
