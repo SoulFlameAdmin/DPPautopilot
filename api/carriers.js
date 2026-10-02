@@ -6,7 +6,11 @@ const { startRequestObservability } = require('./_observability.js');
 
 const KINDS=new Set(['qr','nfc']);
 const NFC_TECH=new Set(['ntag213','ntag215','ntag216','ntag424_dna','other']);
+const SOURCES=new Set(['qr','nfc','unknown']);
 const DEFAULT_RPC_TIMEOUT_MS=8000;
+const QR_UPSTREAM='https://api.qrserver.com/v1/create-qr-code/';
+const QR_TIMEOUT_MS=6000;
+const QR_MAX_BYTES=1024*1024;
 
 function send(res,status,body){
   res.statusCode=status;
@@ -29,17 +33,36 @@ function validPublicUrl(value){
       (url.protocol==='http:'&&(url.hostname==='localhost'||url.hostname==='127.0.0.1'));
   }catch{return false;}
 }
+function requestOrigin(req){
+  const host=String((req.headers&&(req.headers['x-forwarded-host']||req.headers.host))||'').split(',')[0].trim();
+  if(!host)return null;
+  const proto=String((req.headers&&req.headers['x-forwarded-proto'])||'https').split(',')[0].trim();
+  return proto+'://'+host;
+}
+function allowedQrTarget(raw,origin){
+  if(typeof raw!=='string'||raw.length<1||raw.length>2048)return false;
+  try{
+    const target=new URL(raw);
+    if(target.protocol!=='https:'&&!(target.protocol==='http:'&&(target.hostname==='localhost'||target.hostname==='127.0.0.1')))return false;
+    if(target.hostname==='localhost'||target.hostname==='127.0.0.1')return true;
+    return !!origin&&target.origin===origin;
+  }catch{return false;}
+}
 function mapDbError(data){
   const code=data&&data.code;
   if(code==='DP104')return [403,'FORBIDDEN','The current role is not authorized.'];
   if(code==='DP706')return [404,'BATTERY_NOT_FOUND','Battery item was not found.'];
   if(code==='DP705')return [404,'CARRIER_NOT_FOUND','Active carrier was not found.'];
+  if(code==='DP402')return [404,'PASSPORT_NOT_FOUND','Active public passport was not found.'];
+  if(code==='DP401')return [400,'INVALID_REQUEST','The carrier request is invalid.'];
   if(['DP701','DP702','DP703','DP704'].includes(code))return [422,'VALIDATION_ERROR','The request failed validation.'];
   return [502,'UPSTREAM_ERROR','Database request failed.'];
 }
 function upstreamError(status,code,message){
   const error=new Error(code);
-  error.status=status;error.publicCode=code;error.publicMessage=message;
+  error.status=status;
+  error.publicCode=code;
+  error.publicMessage=message;
   return error;
 }
 async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,timeoutMs=DEFAULT_RPC_TIMEOUT_MS){
@@ -49,11 +72,13 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),timeoutMs);
   try{
+    const headers={apikey:key,'Content-Type':'application/json',Accept:'application/json'};
+    if(authorization)headers.Authorization=authorization;
     let response;
     try{
       response=await fetchImpl(base.replace(/\/$/,'')+'/rest/v1/rpc/'+name,{
         method:'POST',
-        headers:{apikey:key,Authorization:authorization,'Content-Type':'application/json',Accept:'application/json'},
+        headers,
         body:JSON.stringify(payload||{}),
         signal:controller.signal
       });
@@ -75,15 +100,89 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
   }finally{clearTimeout(timer);}
 }
 
+async function sendQrImage(req,res,fetchImpl=fetch){
+  const raw=req.query&&req.query.url;
+  const origin=requestOrigin(req);
+  if(!allowedQrTarget(raw,origin)){
+    return send(res,400,{error:{code:'INVALID_QR_URL',message:'QR URL must be same-origin HTTPS or local test HTTP.'}});
+  }
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),QR_TIMEOUT_MS);
+  try{
+    const upstream=new URL(QR_UPSTREAM);
+    upstream.searchParams.set('size','512x512');
+    upstream.searchParams.set('format','png');
+    upstream.searchParams.set('margin','12');
+    upstream.searchParams.set('data',raw);
+
+    let response;
+    try{
+      response=await fetchImpl(upstream,{signal:controller.signal,headers:{Accept:'image/png'}});
+    }catch(error){
+      if(controller.signal.aborted||error?.name==='AbortError')return send(res,504,{error:{code:'QR_TIMEOUT',message:'QR generation timed out.'}});
+      return send(res,502,{error:{code:'QR_UPSTREAM_ERROR',message:'QR generation failed.'}});
+    }
+    if(!response.ok)return send(res,502,{error:{code:'QR_UPSTREAM_ERROR',message:'QR generation failed.'}});
+    const contentType=String(response.headers?.get?.('content-type')||'');
+    if(!contentType.toLowerCase().startsWith('image/png')){
+      return send(res,502,{error:{code:'QR_UPSTREAM_ERROR',message:'QR generator returned an unexpected format.'}});
+    }
+    const bytes=Buffer.from(await response.arrayBuffer());
+    if(bytes.length<32||bytes.length>QR_MAX_BYTES){
+      return send(res,502,{error:{code:'QR_UPSTREAM_ERROR',message:'QR generator returned an invalid image.'}});
+    }
+    res.statusCode=200;
+    res.setHeader('Content-Type','image/png');
+    res.setHeader('Cache-Control','no-store');
+    res.setHeader('X-Content-Type-Options','nosniff');
+    res.end(bytes);
+  }finally{clearTimeout(timer);}
+}
+
+async function openPublicCarrier(req,res){
+  const identifier=req.query&&req.query.identifier;
+  const source=(req.query&&req.query.source)||'unknown';
+  if(typeof identifier!=='string'||identifier.trim().length<1||identifier.trim().length>300||!SOURCES.has(source)){
+    return send(res,400,{error:{code:'INVALID_REQUEST',message:'A valid identifier and source are required.'}});
+  }
+  try{
+    const data=await rpc('dpp_api_carrier_open',{
+      p_unique_identifier:identifier.trim(),
+      p_source:source
+    },bearer(req));
+    return send(res,200,{data});
+  }catch(error){
+    const status=Number.isInteger(error.status)?error.status:502;
+    return send(res,status,{error:{
+      code:error.publicCode||'UPSTREAM_ERROR',
+      message:error.publicMessage||'Database request failed.'
+    }});
+  }
+}
+
 async function handler(req,res){
   startRequestObservability(req,res,'carriers');
-  const localRate=enforceRateLimit(req,res,'carriers');
-  if(!localRate.allowed)return send(res,429,rateLimitBody());
   const method=String(req.method||'GET').toUpperCase();
+  const mode=method==='GET'&&req.query&&typeof req.query.mode==='string'?req.query.mode:'';
+  const publicMode=mode==='open'||mode==='qr';
+  const localRate=enforceRateLimit(
+    req,res,'carriers',
+    publicMode?{ruleName:'public_passport_read'}:{}
+  );
+  if(!localRate.allowed)return send(res,429,rateLimitBody());
+
   if(!['GET','POST','PATCH'].includes(method)){
     res.setHeader('Allow','GET, POST, PATCH');
     return send(res,405,{error:{code:'METHOD_NOT_ALLOWED',message:'Unsupported method.'}});
   }
+
+  if(mode){
+    if(method!=='GET')return send(res,400,{error:{code:'INVALID_REQUEST',message:'Carrier mode is GET-only.'}});
+    if(mode==='open')return openPublicCarrier(req,res);
+    if(mode==='qr')return sendQrImage(req,res);
+    return send(res,400,{error:{code:'INVALID_MODE',message:'Unsupported carrier mode.'}});
+  }
+
   const authorization=bearer(req);
   if(!authorization)return send(res,401,{error:{code:'AUTH_REQUIRED',message:'Bearer authentication is required.'}});
   const shared=await enforceSharedRateLimit(req,res,'carriers',authorization);
@@ -140,5 +239,10 @@ async function handler(req,res){
     }});
   }
 }
+
 module.exports=handler;
-module.exports._test={bearer,validUuid,validPublicUrl,mapDbError,rpc,KINDS,NFC_TECH,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={
+  bearer,validUuid,validPublicUrl,requestOrigin,allowedQrTarget,mapDbError,rpc,
+  sendQrImage,openPublicCarrier,KINDS,NFC_TECH,SOURCES,DEFAULT_RPC_TIMEOUT_MS,
+  QR_UPSTREAM,QR_TIMEOUT_MS,QR_MAX_BYTES
+};
