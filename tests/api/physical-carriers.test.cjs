@@ -3,7 +3,6 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const carriers=require('../../api/carriers.js');
-const carrierOpen=require('../../api/carrier-open.js');
 
 function makeRes(){
   return {statusCode:0,headers:{},body:'',setHeader(k,v){this.headers[String(k).toLowerCase()]=v;},end(v){this.body=v||'';}};
@@ -96,7 +95,7 @@ test('public carrier open does not require login',async()=>{
   };
   try{
     const res=makeRes();
-    await carrierOpen(makeReq('GET',{}, {identifier:'BAT-000001',source:'unknown'},null),res);
+    await carriers(makeReq('GET',{}, {mode:'open',identifier:'BAT-000001',source:'unknown'},null),res);
     assert.equal(res.statusCode,200);
     assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_carrier_open');
     assert.equal(Object.prototype.hasOwnProperty.call(seen.options.headers,'Authorization'),false);
@@ -108,7 +107,7 @@ test('public carrier open does not require login',async()=>{
 
 test('public carrier open rejects fake source/device attribution',async()=>{
   const res=makeRes();
-  await carrierOpen(makeReq('GET',{}, {identifier:'BAT-000001',source:'phone-id'},null),res);
+  await carriers(makeReq('GET',{}, {mode:'open',identifier:'BAT-000001',source:'phone-id'},null),res);
   assert.equal(res.statusCode,400);
 });
 
