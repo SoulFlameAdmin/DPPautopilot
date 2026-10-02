@@ -113,6 +113,17 @@ class DppDataEngineTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_field_event(bad, self.catalog)
 
+    def test_rejects_invalid_source_kind_and_blank_reference(self):
+        bad = self.event()
+        bad["source_kind"] = "unknown"
+        with self.assertRaises(ValueError):
+            validate_field_event(bad, self.catalog)
+
+        bad = self.event()
+        bad["source_ref"] = ""
+        with self.assertRaises(ValueError):
+            validate_field_event(bad, self.catalog)
+
     def test_append_preserves_history_and_latest_projection_changes_only_projection(self):
         first = self.event()
         second = self.event(
