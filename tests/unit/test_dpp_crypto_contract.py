@@ -245,5 +245,14 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertIn("cr25 remains yellow", text)
 
 
+    def test_cr02_candidate_does_not_fake_final_sku_approval(self):
+        text = read("docs/DPP_CRYPTO_CR02_CANDIDATE_DECISION.md").lower()
+        self.assertIn("candidate selected for procurement validation", text)
+        self.assertIn("ntag-x-dna-eval", text)
+        self.assertIn("do not treat family name", text)
+        self.assertIn("no longer manufactured", text)
+        self.assertIn("until then: yellow", text)
+
+
 if __name__ == "__main__":
     unittest.main()
