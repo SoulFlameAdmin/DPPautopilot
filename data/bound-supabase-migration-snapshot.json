@@ -228,7 +228,11 @@
     {
       "version": "20261002015658",
       "name": "dpp_supplier_invitation_api"
+    },
+    {
+      "version": "20261002023155",
+      "name": "dpp_field_event_ingest"
     }
   ],
-  "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents. Snapshot refreshed after Battery Trust OS migrations including BAT01 public_identifier parity and the pre-existing supplier invitation API were verified/applied through the bound Supabase connector."
+  "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents. Snapshot refreshed after BAT01 catalog access parity, supplier invitation API, and BAT02 atomic field-event ingestion were verified/applied through the bound Supabase connector."
 }
