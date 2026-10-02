@@ -8,6 +8,7 @@ on:
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
+      - 'api/_nfc_provider.js'
       - 'api/nfc-challenge.js'
       - 'api/nfc-status.js'
       - 'api/nfc-verify.js'
@@ -15,9 +16,12 @@ on:
       - 'supabase/migrations/*_dpp_nfc_challenge_consume.sql'
       - 'supabase/migrations/*_dpp_nfc_api_rpcs.sql'
       - 'supabase/migrations/*_dpp_nfc_finalize_verification.sql'
+      - 'supabase/migrations/*_dpp_nfc_lifecycle_security.sql'
+      - 'supabase/migrations/*_dpp_nfc_provider_material.sql'
       - 'tests/api/nfc-crypto.test.cjs'
       - 'tests/api/nfc-endpoints.test.cjs'
-      - 'tests/api/nfc-verify.test.cjs'
+      - 'tests/api/nfc-verify.test.cjs tests/api/nfc-provider.test.cjs'
+      - 'tests/api/nfc-provider.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
   push:
     branches:
@@ -28,6 +32,7 @@ on:
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
+      - 'api/_nfc_provider.js'
       - 'api/nfc-challenge.js'
       - 'api/nfc-status.js'
       - 'api/nfc-verify.js'
@@ -35,9 +40,12 @@ on:
       - 'supabase/migrations/*_dpp_nfc_challenge_consume.sql'
       - 'supabase/migrations/*_dpp_nfc_api_rpcs.sql'
       - 'supabase/migrations/*_dpp_nfc_finalize_verification.sql'
+      - 'supabase/migrations/*_dpp_nfc_lifecycle_security.sql'
+      - 'supabase/migrations/*_dpp_nfc_provider_material.sql'
       - 'tests/api/nfc-crypto.test.cjs'
       - 'tests/api/nfc-endpoints.test.cjs'
       - 'tests/api/nfc-verify.test.cjs'
+      - 'tests/api/nfc-provider.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
 
 permissions:
