@@ -292,18 +292,33 @@ begin
     raise exception 'active public passport not found' using errcode='DP402';
   end if;
 
-  select c.id
-  into v_carrier
-  from public.dpp_physical_carriers c
-  where c.organization_id=v_org
-    and c.battery_item_id=v_item
-    and c.status='active'
-    and (v_source='unknown' or c.carrier_kind=v_source)
-  order by case when c.carrier_kind=v_source then 0 else 1 end,c.bound_at desc
-  limit 1;
+  if v_source='unknown' then
+    -- QR and NFC intentionally carry the exact same URL in the first physical
+    -- test, so the browser cannot honestly know which carrier opened it.
+    if not exists (
+      select 1
+      from public.dpp_physical_carriers c
+      where c.organization_id=v_org
+        and c.battery_item_id=v_item
+        and c.status='active'
+    ) then
+      raise exception 'active physical carrier not found' using errcode='DP705';
+    end if;
+    v_carrier:=null;
+  else
+    select c.id
+    into v_carrier
+    from public.dpp_physical_carriers c
+    where c.organization_id=v_org
+      and c.battery_item_id=v_item
+      and c.status='active'
+      and c.carrier_kind=v_source
+    order by c.bound_at desc
+    limit 1;
 
-  if v_carrier is null then
-    raise exception 'active physical carrier not found' using errcode='DP705';
+    if v_carrier is null then
+      raise exception 'active physical carrier not found' using errcode='DP705';
+    end if;
   end if;
 
   v_actor:=public.dpp_request_user_id();
