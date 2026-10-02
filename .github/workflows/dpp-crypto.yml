@@ -37,6 +37,6 @@ jobs:
         with:
           python-version: '3.12'
       - name: Run DPP CRYPTO contract tests
-        run: python -m unittest tests.unit.test_dpp_crypto_contract -v
+        run: python -m unittest discover -s tests/unit -p 'test_dpp_crypto_contract.py' -v
       - name: Run DPP CRYPTO protocol primitive tests
         run: node --test tests/api/nfc-crypto.test.cjs
