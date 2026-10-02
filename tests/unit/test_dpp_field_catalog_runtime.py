@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "data" / "dpp-field-catalog.json"
 MIGRATION = ROOT / "supabase" / "migrations" / "20261002039100_dpp_field_catalog_access.sql"
+VERSION_SYNC = ROOT / "supabase" / "migrations" / "20261002123000_dpp_field_catalog_version.sql"
 
 
 class DppRuntimeAccessCatalogTests(unittest.TestCase):
@@ -28,9 +29,10 @@ class DppRuntimeAccessCatalogTests(unittest.TestCase):
 
         self.assertEqual(actual, expected)
         self.assertEqual(len(actual), len(set(path for path, _ in actual)))
+        version_sql = VERSION_SYNC.read_text(encoding="utf-8")
         self.assertIn(
-            f"select x.path,x.access,'{catalog['catalogVersion']}'",
-            sql,
+            f"set catalog_version='{catalog['catalogVersion']}'",
+            version_sql,
         )
 
 
