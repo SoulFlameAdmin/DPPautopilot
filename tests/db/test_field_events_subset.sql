@@ -87,4 +87,134 @@ begin
 end
 $bat_field_events$;
 
+
+-- BAT02 runtime batch-ingest acceptance: one supplied field value -> one immutable row,
+-- preserving JSON value type and tenant/RBAC ownership.
+do $bat02_ingest$
+declare
+  v_user uuid := '34000000-0000-4000-8000-000000000001';
+  v_org uuid := '34000000-0000-4000-8000-000000000002';
+  v_model uuid := '34000000-0000-4000-8000-000000000003';
+  v_result jsonb;
+  v_count integer;
+  v_types text[];
+  denied boolean := false;
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema='auth' and table_name='users' and column_name='created_at'
+  ) then
+    execute format(
+      'insert into auth.users(id,created_at,updated_at,is_sso_user,is_anonymous) values (%L,now(),now(),false,false)',
+      v_user
+    );
+  else
+    insert into auth.users(id) values (v_user);
+  end if;
+
+  insert into public.dpp_organizations(id,name,slug)
+  values(v_org,'BAT02 Field Ingest','bat02-field-ingest');
+
+  insert into public.dpp_organization_members(organization_id,user_id,role)
+  values(v_org,v_user,'editor');
+
+  insert into public.dpp_battery_models(
+    id,organization_id,model_identifier,manufacturer_name,category,canonical_data,created_by
+  ) values(
+    v_model,v_org,'BAT02-MODEL','BAT02 Maker','industrial','{}'::jsonb,v_user
+  );
+
+  perform set_config('request.jwt.claim.sub',v_user::text,true);
+  perform public.dpp_set_active_organization(v_org);
+
+  v_result:=public.dpp_api_field_events_append(
+    'model',
+    v_model,
+    jsonb_build_array(
+      jsonb_build_object(
+        'field_path','model.identification.manufacturer.name',
+        'value','BAT02 Maker',
+        'source_kind','api',
+        'source_ref','bat02:test:string',
+        'source_date','2026-10-02T02:10:00Z',
+        'access_level','public',
+        'verification_status','validated'
+      ),
+      jsonb_build_object(
+        'field_path','model.physical.weight_kg',
+        'value',82.5,
+        'source_kind','api',
+        'source_ref','bat02:test:number',
+        'source_date','2026-10-02T02:10:01Z',
+        'access_level','public',
+        'verification_status','validated'
+      ),
+      jsonb_build_object(
+        'field_path','model.carbon_footprint',
+        'value',jsonb_build_object('total_kg_co2e',3200,'method','PEF'),
+        'source_kind','api',
+        'source_ref','bat02:test:object',
+        'source_date','2026-10-02T02:10:02Z',
+        'access_level','public',
+        'verification_status','unverified'
+      ),
+      jsonb_build_object(
+        'field_path','model.composition.hazardous_substances',
+        'value',jsonb_build_array('lead','nickel'),
+        'source_kind','api',
+        'source_ref','bat02:test:array',
+        'source_date','2026-10-02T02:10:03Z',
+        'access_level','public',
+        'verification_status','validated'
+      )
+    )
+  );
+
+  if (v_result->>'inserted')::int <> 4
+     or jsonb_array_length(v_result->'event_ids') <> 4 then
+    raise exception 'BAT02 expected 4 independent field events, got %',v_result;
+  end if;
+
+  select count(*),
+         array_agg(jsonb_typeof(value) order by field_path)
+    into v_count,v_types
+  from public.dpp_field_events
+  where organization_id=v_org and subject_kind='model' and subject_id=v_model;
+
+  if v_count <> 4 then
+    raise exception 'BAT02 stored row count expected 4, got %',v_count;
+  end if;
+
+  if not (
+    'string'=any(v_types)
+    and 'number'=any(v_types)
+    and 'object'=any(v_types)
+    and 'array'=any(v_types)
+  ) then
+    raise exception 'BAT02 typed JSON preservation failed: %',v_types;
+  end if;
+
+  -- A subject outside the active tenant must fail without inserting anything.
+  begin
+    perform public.dpp_api_field_events_append(
+      'model',
+      'ffffffff-ffff-4fff-8fff-ffffffffffff',
+      jsonb_build_array(jsonb_build_object(
+        'field_path','model.identification.manufacturer.name',
+        'value','NOPE',
+        'source_kind','api',
+        'source_ref','bat02:cross-tenant',
+        'source_date','2026-10-02T02:11:00Z',
+        'access_level','public'
+      ))
+    );
+  exception when sqlstate 'DP702' then
+    denied:=true;
+  end;
+  if not denied then
+    raise exception 'BAT02 cross-tenant/nonexistent subject was not denied';
+  end if;
+end
+$bat02_ingest$;
+
 select 'BAT_FIELD_EVENTS_DB_PASS' as result;
