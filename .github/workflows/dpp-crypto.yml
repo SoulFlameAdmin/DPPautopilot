@@ -20,9 +20,11 @@ on:
       - 'supabase/migrations/*_dpp_nfc_provider_material.sql'
       - 'tests/api/nfc-crypto.test.cjs'
       - 'tests/api/nfc-endpoints.test.cjs'
-      - 'tests/api/nfc-verify.test.cjs tests/api/nfc-provider.test.cjs tests/api/nfc-bms-hook.test.cjs'
+      - 'tests/api/nfc-verify.test.cjs tests/api/nfc-provider.test.cjs tests/api/nfc-bms-hook.test.cjs tests/api/nfc-hardware-evidence.test.cjs'
       - 'tests/api/nfc-provider.test.cjs'
       - 'tests/api/nfc-bms-hook.test.cjs'
+      - 'tests/api/nfc-hardware-evidence.test.cjs'
+      - 'scripts/validate-dpp-crypto-hardware-evidence.cjs'
       - '.github/workflows/dpp-crypto.yml'
   push:
     branches:
@@ -48,6 +50,8 @@ on:
       - 'tests/api/nfc-verify.test.cjs'
       - 'tests/api/nfc-provider.test.cjs'
       - 'tests/api/nfc-bms-hook.test.cjs'
+      - 'tests/api/nfc-hardware-evidence.test.cjs'
+      - 'scripts/validate-dpp-crypto-hardware-evidence.cjs'
       - '.github/workflows/dpp-crypto.yml'
 
 permissions:
