@@ -1,5 +1,8 @@
 'use strict';
 
+const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
+const { startRequestObservability } = require('./_observability.js');
+
 const DEFAULT_RPC_TIMEOUT_MS=8000;
 const SOURCES=new Set(['qr','nfc','unknown']);
 
@@ -57,6 +60,9 @@ async function rpc(payload,authorization,env=process.env,fetchImpl=fetch,timeout
   }finally{clearTimeout(timer);}
 }
 async function handler(req,res){
+  startRequestObservability(req,res,'carrier-open');
+  const localRate=enforceRateLimit(req,res,'carrier-open',{ruleName:'public_passport_read'});
+  if(!localRate.allowed)return send(res,429,rateLimitBody());
   if(String(req.method||'GET').toUpperCase()!=='GET'){
     res.setHeader('Allow','GET');
     return send(res,405,{error:{code:'METHOD_NOT_ALLOWED',message:'Unsupported method.'}});
