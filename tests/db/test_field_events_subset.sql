@@ -204,6 +204,14 @@ begin
   end if;
 
   if (
+    select bool_and(source_date is not null and recorded_at is not null and recorded_at > source_date) is not true
+    from public.dpp_field_events
+    where organization_id=v_org and subject_kind='model' and subject_id=v_model
+  ) then
+    raise exception 'BAT04 source_date/recorded_at separation failed';
+  end if;
+
+  if (
     select bool_and(source_date < recorded_at) is not true
     from public.dpp_field_events
     where organization_id=v_org and subject_kind='model' and subject_id=v_model
