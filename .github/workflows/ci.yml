@@ -46,6 +46,8 @@ jobs:
         run: python scripts/validate_supplier_dashboard.py
       - name: Validate DPP field traceability catalog
         run: python scripts/validate_field_catalog.py
+      - name: Validate BAT05 DB/catalog access parity
+        run: python scripts/validate_field_access_catalog.py
       - name: Validate BG Battery Pilot contract
         run: python scripts/validate_bg_battery_pilot.py
       - name: Generate BG Battery Pilot non-client acceptance evidence
