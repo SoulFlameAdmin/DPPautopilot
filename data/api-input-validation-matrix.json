@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "R03",
   "status": "partial",
   "max_body_bytes": 1048576,
@@ -93,6 +93,21 @@
       "id": "invalid_member_fields",
       "surface": "/api/members",
       "expected": "400/422 validation error before upstream"
+    },
+    {
+      "id": "oversize_parsed_carriers_body",
+      "surface": "/api/carriers",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "oversize_parsed_nfc_challenge_body",
+      "surface": "/api/nfc-challenge",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "oversize_parsed_nfc_verify_body",
+      "surface": "/api/nfc-verify",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
     }
   ],
   "evidence_files": [
