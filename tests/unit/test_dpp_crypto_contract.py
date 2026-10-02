@@ -148,5 +148,17 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertNotIn("organization_id:row", text)
 
 
+    def test_verify_orchestration_cannot_claim_authentic_without_real_boundaries(self):
+        text = read("api/nfc-verify.js").lower()
+        self.assertIn("proof_provider_unconfigured", text)
+        self.assertIn("persistence_boundary_unconfigured", text)
+        self.assertIn("provider.result==='authentic'&&!deps.consumeandrecord", text)
+
+    def test_verify_public_response_does_not_expose_proof_or_authorization(self):
+        text = read("api/nfc-verify.js").lower()
+        self.assertNotIn("proof:body.proof,", text.split("return send(res,200", 1)[1])
+        self.assertNotIn("authorization,", text.split("return send(res,200", 1)[1])
+
+
 if __name__ == "__main__":
     unittest.main()
