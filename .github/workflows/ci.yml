@@ -180,6 +180,10 @@ jobs:
         run: node --test tests/api/passport.test.cjs
       - name: Run physical QR NFC carrier HTTP contract tests
         run: node --test tests/api/physical-carriers.test.cjs
+      - name: Run physical QR image proxy tests
+        run: node --test tests/api/qr-test.test.cjs
+      - name: Syntax-check physical provisioning browser scripts
+        run: node --check assets/csp/physical-test.js && node --check assets/csp/carrier-passport.js
       - name: Run M20 imports HTTP contract unit tests
         run: node --test tests/api/imports.test.cjs
       - name: Run M21 export HTTP contract unit tests
