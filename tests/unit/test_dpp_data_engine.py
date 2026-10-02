@@ -132,6 +132,18 @@ class DppDataEngineTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_field_event(bad, self.catalog)
 
+    def test_verification_status_controlled_values(self):
+        for status in ("unverified", "validated", "verified", "rejected"):
+            event = self.event()
+            event["verification_status"] = status
+            validated = validate_field_event(event, self.catalog)
+            self.assertEqual(validated["verification_status"], status)
+
+        bad = self.event()
+        bad["verification_status"] = "trusted"
+        with self.assertRaises(ValueError):
+            validate_field_event(bad, self.catalog)
+
     def test_append_preserves_history_and_latest_projection_changes_only_projection(self):
         first = self.event()
         second = self.event(
