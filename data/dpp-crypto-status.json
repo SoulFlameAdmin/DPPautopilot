@@ -10,7 +10,7 @@
   "percent_green": 84,
   "current": "21/25 CR points evidence-backed GREEN; physical Secure NFC production gate remains.",
   "last_completed": "CR01",
-  "next_dependency_safe": "Finalize CR25 deployment/reachability evidence and execute CR02/CR13/CR24 on selected real Secure NFC hardware.",
+  "next_dependency_safe": "Procure/obtain NTAG-X-DNA-EVAL; confirm exact orderable production SKU; execute CR13/CR24 real-hardware matrix. Separately provide deployment visibility to close CR25 reachability.",
   "blocker": {
     "type": "hardware",
     "summary": "Real end-to-end physical authenticity requires exact secure NFC hardware/provider provisioning and CR24 tap/replay/revocation/tamper evidence."
@@ -20,10 +20,10 @@
     "number": 242,
     "url": "https://github.com/SoulFlameAdmin/DPPautopilot/pull/242"
   },
-  "latest_commit": "9da1b4b207f30a69095284d32d35c6c0b6660d7f",
+  "latest_commit": "11209f9b9fd8961f5a902b17b1cb4766b910bb0b",
   "ci": {
     "state": "pass",
-    "note": "DPP CRYPTO run 37032044495 exact-head SUCCESS after CR21 assertion fix; dedicated crypto gate PASS."
+    "note": "DPP CRYPTO run 37032224413 exact-head SUCCESS for CR24 evidence template + CR25 evidence-driven UI slice."
   },
   "points": [
     {
@@ -34,7 +34,7 @@
     {
       "id": "CR02",
       "status": "YELLOW",
-      "note": "Hardware architecture selected; exact production SKU/procurement evidence remains pending."
+      "note": "YELLOW: NTAG X DNA PKI family selected; NTAG-X-DNA-EVAL selected for lab validation. Exact currently orderable production SKU/package + procurement evidence still required."
     },
     {
       "id": "CR03",
@@ -149,7 +149,7 @@
     {
       "id": "CR25",
       "status": "YELLOW",
-      "note": "Tracker files exist; deployment/reachability evidence still required."
+      "note": "YELLOW: evidence-driven tracker/UI and exact-head CI PASS exist; independent deployed reachability is unverified because connected Vercel exposes no teams/projects in this session."
     }
   ],
   "last_update": "2026-10-02"
