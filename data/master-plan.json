@@ -2476,19 +2476,19 @@
         },
         {
           "id": "BAT154",
-          "title": "Ownership and custody transfer workflow",
-          "dependsOn": "BAT124",
-          "acceptanceCriteria": "Authorized transfer changes custody/operational responsibility without rewriting historical owner/custody evidence",
-          "evidenceRequired": "Lifecycle/RBAC tests",
+          "title": "Responsibility and custody transfer workflow",
+          "dependsOn": "BAT124,BAT76-BAT78",
+          "acceptanceCriteria": "Re-use/repurpose/remanufacture and waste-status transitions transfer responsible-operator/custody duties explicitly without rewriting prior history",
+          "evidenceRequired": "Lifecycle/RBAC/responsibility-transfer tests",
           "status": "red",
           "evidence": "Planned in Battery Trust OS expansion; implementation/evidence not yet accepted."
         },
         {
           "id": "BAT155",
-          "title": "Residual-value and warranty snapshot",
-          "dependsOn": "BAT45,BAT76,BAT103",
-          "acceptanceCriteria": "Authorized actors can generate timestamped health/use/warranty evidence snapshots for resale, second-life or service decisions",
-          "evidenceRequired": "Snapshot + access tests",
+          "title": "Successor-passport lineage and recycling closure",
+          "dependsOn": "BAT76-BAT78,BAT154",
+          "acceptanceCriteria": "A repurposed/re-used/remanufactured battery receives a new passport linked to original passport lineage; recycled batteries close the active passport according to the regulatory lifecycle while required internal evidence remains controlled",
+          "evidenceRequired": "Passport-lineage + lifecycle-closure tests",
           "status": "red",
           "evidence": "Planned in Battery Trust OS expansion; implementation/evidence not yet accepted."
         },
