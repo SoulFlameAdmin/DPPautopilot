@@ -18,14 +18,64 @@ ROOT = Path(__file__).resolve().parents[1]
 CATALOG_PATH = ROOT / "data" / "dpp-field-catalog.json"
 SOURCE_KINDS = {"manual", "csv", "xlsx", "api", "bms", "derived", "migration"}
 VERIFY_STATES = {"unverified", "validated", "verified", "rejected"}
+ACCESS_CLASSES = {"public", "public_identifier", "legitimate_interest", "authority_only"}
+CATALOG_FIELD_KEYS = {
+    "path", "requirementIds", "source", "access", "type", "required",
+    "dbTarget", "apiTarget", "uiTarget"
+}
 
 
 def load_catalog(path: Path = CATALOG_PATH) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def validate_catalog_contract(catalog: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(catalog, dict):
+        raise ValueError("catalog must be an object")
+    fields = catalog.get("fields")
+    if not isinstance(fields, list) or not fields:
+        raise ValueError("catalog.fields must be a non-empty list")
+
+    seen: set[str] = set()
+    for entry in fields:
+        if not isinstance(entry, dict):
+            raise ValueError("catalog field entries must be objects")
+        missing = sorted(CATALOG_FIELD_KEYS - set(entry))
+        if missing:
+            raise ValueError("catalog field missing keys: " + ", ".join(missing))
+
+        path = entry["path"]
+        if not isinstance(path, str) or not path.strip():
+            raise ValueError("catalog field path is required")
+        if path in seen:
+            raise ValueError(f"duplicate catalog field path: {path}")
+        seen.add(path)
+
+        requirement_ids = entry["requirementIds"]
+        if (
+            not isinstance(requirement_ids, list)
+            or not requirement_ids
+            or not all(isinstance(value, str) and value.strip() for value in requirement_ids)
+        ):
+            raise ValueError(f"{path} requires non-empty requirementIds")
+
+        if not isinstance(entry["source"], str) or not entry["source"].strip():
+            raise ValueError(f"{path} requires source")
+        if entry["access"] not in ACCESS_CLASSES:
+            raise ValueError(f"{path} has invalid access class")
+        if not isinstance(entry["type"], str) or not entry["type"].strip():
+            raise ValueError(f"{path} requires type")
+        if not isinstance(entry["required"], bool):
+            raise ValueError(f"{path} required must be boolean")
+        for target in ("dbTarget", "apiTarget", "uiTarget"):
+            if not isinstance(entry[target], str) or not entry[target].strip():
+                raise ValueError(f"{path} requires {target}")
+
+    return catalog
+
+
 def catalog_index(catalog: dict[str, Any] | None = None) -> dict[str, dict[str, Any]]:
-    catalog = catalog or load_catalog()
+    catalog = validate_catalog_contract(catalog or load_catalog())
     return {entry["path"]: entry for entry in catalog["fields"]}
 
 
