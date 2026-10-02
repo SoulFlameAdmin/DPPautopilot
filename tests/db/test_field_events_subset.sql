@@ -281,7 +281,7 @@ begin
         'access_level','authority_only'
       ))
     );
-  exception when check_violation then
+  exception when sqlstate 'DP706' then
     denied:=true;
   end;
   if not denied then
@@ -302,7 +302,7 @@ begin
         'access_level','public'
       ))
     );
-  exception when check_violation then
+  exception when sqlstate 'DP706' then
     denied:=true;
   end;
   if not denied then
