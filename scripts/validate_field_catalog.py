@@ -35,6 +35,22 @@ def main() -> None:
         require(field.get("access") in allowed_access, f"{path} has invalid access class")
         require(field.get("type"), f"{path} requires type")
         require("required" in field, f"{path} requires required/conditional declaration")
+
+        applicability = field.get("applicability")
+        require(isinstance(applicability, dict), f"{path} requires machine-readable applicability")
+        mode = applicability.get("mode")
+        require(mode in {"always", "optional", "when"}, f"{path} has invalid applicability mode")
+        if mode == "when":
+            conditions = applicability.get("all")
+            require(isinstance(conditions, list) and conditions, f"{path} conditional applicability requires all[]")
+            for condition in conditions:
+                require(isinstance(condition, dict), f"{path} applicability condition must be an object")
+                require(isinstance(condition.get("path"), str) and condition["path"], f"{path} condition requires path")
+                require(condition.get("operator") in {"equals", "in"}, f"{path} has invalid condition operator")
+                if condition.get("operator") == "equals":
+                    require("value" in condition, f"{path} equals condition requires value")
+                else:
+                    require(isinstance(condition.get("values"), list) and condition["values"], f"{path} in condition requires values")
         for target in ("dbTarget", "apiTarget", "uiTarget"):
             require(field.get(target), f"{path} requires {target}")
 
