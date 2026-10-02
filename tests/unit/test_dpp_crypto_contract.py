@@ -205,7 +205,7 @@ class DppCryptoContractTests(unittest.TestCase):
 
     def test_cr21_bms_hook_never_weakens_nfc_trust(self):
         text = read("docs/DPP_CRYPTO_CR21_BMS_BINDING.md").lower()
-        self.assertIn("bms can never", text.replace("proofs are verified independently", "proofs are verified independently"))
+        self.assertIn("nfc and bms proofs are verified independently", text)
         self.assertIn("revoked nfc identity cannot be rescued", text)
         self.assertIn("tampered nfc result remains failed/tampered", text)
         self.assertIn("raw bms private/symmetric keys are not stored", text)
