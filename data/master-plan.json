@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.7",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T03:05:00+03:00",
+  "updatedAt": "2026-10-02T03:10:00+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1553,8 +1553,8 @@
           "dependsOn": "BAT01",
           "acceptanceCriteria": "Tenant-scoped supplier records exist with stable external reference, legal name and lifecycle status",
           "evidenceRequired": "Migration replay + DB subset",
-          "status": "yellow",
-          "evidence": "Tenant supplier registry is deployed to bound Supabase and now has authenticated manufacturer create/list RPC+HTTP API; CI acceptance pending."
+          "status": "green",
+          "evidence": "Tenant supplier registry migration + manufacturer supplier API + tenant/RBAC DB/API tests PASS in CI 36943661741; bound Supabase migration applied."
         },
         {
           "id": "BAT52",
@@ -1571,8 +1571,8 @@
           "dependsOn": "BAT51,BAT01",
           "acceptanceCriteria": "Supplier data can be submitted as versioned packages scoped to model/item/component/material",
           "evidenceRequired": "Migration replay + DB subset",
-          "status": "yellow",
-          "evidence": "Versioned append-only supplier packages are deployed and now have authenticated package-create API; CI acceptance pending."
+          "status": "green",
+          "evidence": "Versioned supplier data packages + authenticated create-package API + DB/API acceptance PASS in CI 36943661741; bound migration applied."
         },
         {
           "id": "BAT54",
@@ -1580,8 +1580,8 @@
           "dependsOn": "BAT53",
           "acceptanceCriteria": "Supplier packages can target exact model/item/component/material references without ambiguity",
           "evidenceRequired": "DB/API tests",
-          "status": "yellow",
-          "evidence": "Exact model/item/component/material scoping is enforced in DB and HTTP package validation; CI/API acceptance pending."
+          "status": "green",
+          "evidence": "Exact model/item/component/material scope constraints + local HTTP validation + DB/API negative coverage PASS in CI 36943661741."
         },
         {
           "id": "BAT55",
@@ -1589,8 +1589,8 @@
           "dependsOn": "BAT53,BAT08",
           "acceptanceCriteria": "Supplier package versions are append-only and supersession is auditable",
           "evidenceRequired": "Mutation-negative DB tests",
-          "status": "yellow",
-          "evidence": "Append-only history guard added; awaiting CI evidence."
+          "status": "green",
+          "evidence": "Supplier package history is append-only; mutation-negative DB acceptance PASS in CI 36943661741."
         },
         {
           "id": "BAT56",
@@ -1598,8 +1598,8 @@
           "dependsOn": "BAT53",
           "acceptanceCriteria": "Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration",
           "evidenceRequired": "Contract tests",
-          "status": "yellow",
-          "evidence": "Append-only detached supplier signature envelope implemented for JWS/COSE/X.509 references with payload digest and no private-key storage; CI contract evidence pending."
+          "status": "green",
+          "evidence": "Detached JWS/COSE/X.509 signature-envelope contract stores payload digest/signature evidence without private keys; append-only contract test PASS in CI 36943661741."
         },
         {
           "id": "BAT57",
@@ -1607,8 +1607,8 @@
           "dependsOn": "BAT53",
           "acceptanceCriteria": "Packages move through unverified/validated/verified/rejected states with evidence",
           "evidenceRequired": "API/DB tests",
-          "status": "yellow",
-          "evidence": "Append-only verification ledger plus authenticated verification API implemented; CI acceptance pending."
+          "status": "green",
+          "evidence": "Append-only supplier verification ledger + authenticated verification API + tenant/RBAC tests PASS in CI 36943661741."
         },
         {
           "id": "BAT58",
@@ -1616,8 +1616,8 @@
           "dependsOn": "BAT14,BAT53",
           "acceptanceCriteria": "Missing required supplier fields are grouped by supplier and affected product",
           "evidenceRequired": "Integration tests",
-          "status": "yellow",
-          "evidence": "Supplier/product grouped missing-data requirements, queue and summary views implemented with DB acceptance assertions; awaiting CI evidence."
+          "status": "green",
+          "evidence": "Supplier/product grouped missing-data requirements/queue/summary DB acceptance PASS in CI 36943661741."
         },
         {
           "id": "BAT59",
@@ -1625,8 +1625,8 @@
           "dependsOn": "BAT58",
           "acceptanceCriteria": "Authorized users can trigger auditable reminders without exposing unrelated tenant data",
           "evidenceRequired": "API/security tests",
-          "status": "yellow",
-          "evidence": "Tenant/RBAC-scoped reminder RPC/API, append-only audit table and negative cross-tenant tests implemented; awaiting full CI evidence."
+          "status": "green",
+          "evidence": "Auditable reminder RPC/HTTP API, owner/admin/editor authorization, viewer denial and cross-tenant isolation PASS in CI 36943661741."
         },
         {
           "id": "BAT60",
