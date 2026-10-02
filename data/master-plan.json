@@ -2,7 +2,7 @@
   "project": "DPP Autopilot",
   "version": "MASTER PLAN v2.8",
   "sourceOfTruth": "docs/MASTER_AUTOPILOT_PLAN.md",
-  "updatedAt": "2026-10-02T05:39:30+03:00",
+  "updatedAt": "2026-10-02T05:43:30+03:00",
   "statusMeaning": {
     "green": "Implemented, tested where applicable, and evidenced",
     "yellow": "In progress / partial / awaiting full verification",
@@ -1130,8 +1130,8 @@
           "dependsOn": "BAT03",
           "acceptanceCriteria": "Every field event records source/effective date separately from ingestion time",
           "evidenceRequired": "DB constraints + unit tests",
-          "status": "yellow",
-          "evidence": "This branch adds required `source_date`; production ingestion wiring remains pending."
+          "status": "green",
+          "evidence": "Field events store source_date independently from recorded_at/ingestion time. Unit test validates distinct source_date and recorded_at; live bound-Supabase rollback test stored source_date 2026-09-01T10:00:00Z while recorded_at was 2026-10-02T02:39:57.907762Z and confirmed independence. Exact-head CI run 36956666948 on SHA b7ed71d357d65c42c198557908129417859e0499 passed T01, clean PostgreSQL 17 replay, BAT01-BAT08 field-event DB subset, C04 gate, security-definer guard and full CI."
         },
         {
           "id": "BAT05",
