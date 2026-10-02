@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Battery Passport</title>
+  <link rel="stylesheet" href="/assets/csp/physical-test.css">
+</head>
+<body data-passport="loading" data-auth="anonymous">
+<main class="shell">
+  <header class="top">
+    <div><div class="badge">BATTERY DIGITAL PRODUCT PASSPORT</div><h1 id="title">Loading battery…</h1></div>
+    <a href="/">DPP Autopilot</a>
+  </header>
+
+  <section class="card">
+    <h2>Public passport</h2>
+    <div class="grid">
+      <label>Battery ID<input id="identifier" readonly></label>
+      <label>Status<input id="status" readonly></label>
+      <label>Updated<input id="updated" readonly></label>
+    </div>
+    <pre id="publicData">Loading…</pre>
+  </section>
+
+  <section class="card">
+    <h2>Employee access</h2>
+    <p class="muted">The QR/NFC identifies the battery. Your account and company role determine additional access.</p>
+    <div class="grid">
+      <label>Email<input id="email" type="email" autocomplete="email"></label>
+      <label>Password<input id="password" type="password" autocomplete="current-password"></label>
+    </div>
+    <div class="actions">
+      <button id="signup" type="button">Create worker account</button>
+      <button id="signin" type="button">Sign in</button>
+      <button id="signout" type="button">Sign out</button>
+    </div>
+    <label>Your Supabase user UUID<input id="userId" readonly></label>
+    <pre id="authResult">Not signed in.</pre>
+  </section>
+
+  <section class="card">
+    <h2>Company role view</h2>
+    <div class="grid">
+      <label>Organization<select id="organization"></select></label>
+      <label>Role<input id="role" readonly></label>
+    </div>
+    <div class="actions">
+      <button id="activateOrg" type="button">Activate organization</button>
+      <button id="loadPrivate" type="button">Load allowed company data</button>
+    </div>
+    <pre id="privateData">Sign in first.</pre>
+  </section>
+</main>
+<script src="/assets/csp/carrier-passport.js"></script>
+</body>
+</html>
