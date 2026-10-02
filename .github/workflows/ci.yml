@@ -768,6 +768,9 @@ jobs:
             --window-size=1440,1000 --screenshot=artifacts/d03-import.png \
             'http://127.0.0.1:8000/demo/import.html?sample=1'
           python scripts/validate_import_demo.py artifacts/d03-import-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
+            --dump-dom 'http://127.0.0.1:8000/demo/import.html?xlsx=1' > artifacts/bat16-xlsx-import-dom.html
+          python scripts/validate_xlsx_import_demo.py artifacts/bat16-xlsx-import-dom.html
 
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
             --dump-dom 'http://127.0.0.1:8000/demo/model.html?sample=1' > artifacts/d04-model-valid-dom.html
