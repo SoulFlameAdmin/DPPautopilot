@@ -115,7 +115,7 @@ function updateBattery(){
   els.batteryId.value=item.id;
   els.publicId.value=item.unique_identifier;
   els.publicUrl.value=url.href;
-  const qrSrc='/api/qr-test?url='+encodeURIComponent(url.href);
+  const qrSrc='/api/carriers?mode=qr&url='+encodeURIComponent(url.href);
   els.qrImage.src=qrSrc;
   els.printQr.src=qrSrc;
   els.printId.textContent=item.unique_identifier;
