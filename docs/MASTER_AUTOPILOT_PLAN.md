@@ -727,16 +727,16 @@ Append evidence here only after verification.
 | BAT06 | Per-field verification status | BAT01 | Each field event has explicit verification status with controlled values | DB constraints + unit tests | GREEN |
 | BAT07 | No hardcoded passport values | BAT01 | Production passport values originate from stored/imported/integrated data, not application constants | Static/contract tests + review | GREEN |
 | BAT08 | Append-only field history | BAT02-BAT06,M11 | Material field changes append new events; prior values cannot be updated or deleted | DB mutation-negative tests | GREEN |
-| BAT09 | Field change audit attribution | BAT08,M12 | Field history records actor, target, time, provenance and supersession linkage | DB/API integration tests | YELLOW |
+| BAT09 | Field change audit attribution | BAT08,M12 | Field history records actor, target, time, provenance and supersession linkage | DB/API integration tests | GREEN |
 | BAT10 | Extensible field schema | BAT01 | New requirement fields can be added through the versioned catalog without redesigning core tables | Catalog validator + schema traceability | GREEN |
 | BAT11 | EU requirements registry | F11 | Current Battery Passport requirement set is represented in a versioned registry with authoritative sources | Traceability document + catalog validator | GREEN |
 | BAT12 | Requirement-to-field mapping | BAT11 | Each requirement maps to one or more canonical DPP field paths | Coverage validator | GREEN |
-| BAT13 | Mandatory conditional optional rules | BAT11 | Requiredness and conditional applicability are explicit and machine-readable | Rule catalog + tests | YELLOW |
+| BAT13 | Mandatory conditional optional rules | BAT11 | Requiredness and conditional applicability are explicit and machine-readable | Rule catalog + tests | GREEN |
 | BAT14 | Missing-data detection | BAT12,BAT13 | System identifies missing required/applicable fields and reports exact field paths | Unit/UI tests | GREEN |
 | BAT15 | Compliance completeness score | BAT14 | Completeness is computed from canonical requirement rules rather than hardcoded percentages | Unit/UI tests | GREEN |
-| BAT16 | Excel import wizard | M07 | Customer can upload XLSX and preview sheets/headers before mapping | Integration/E2E tests | RED |
+| BAT16 | Excel import wizard | M07 | Customer can upload XLSX and preview sheets/headers before mapping | Integration/E2E tests | GREEN |
 | BAT17 | CSV import wizard | M07,M08 | Customer can upload CSV and preview/map data safely | Integration/E2E tests | GREEN |
-| BAT18 | Automatic column recognition | BAT17,BAT12 | System proposes canonical DPP fields for incoming column headers | Evaluation set + mapping tests | YELLOW |
+| BAT18 | Automatic column recognition | BAT17,BAT12 | System proposes canonical DPP fields for incoming column headers | Evaluation set + mapping tests | GREEN |
 | BAT19 | AI-assisted mapping | BAT18 | Low-confidence/ambiguous mappings are proposed with confidence and require review before commit | Evaluation + UI acceptance | YELLOW |
 | BAT20 | Manual mapping correction | BAT17 | User can override proposed mappings before import commit | E2E mapping test | GREEN |
 | BAT21 | Format and unit validation | BAT17,BAT12 | Invalid types, formats and supported unit rules are detected before commit | Negative validation tests | YELLOW |
