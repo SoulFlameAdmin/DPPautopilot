@@ -7,6 +7,8 @@ on:
       - 'data/dpp-crypto-status.json'
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
+      - 'api/_nfc_crypto.js'
+      - 'tests/api/nfc-crypto.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
   push:
     branches:
@@ -16,6 +18,8 @@ on:
       - 'data/dpp-crypto-status.json'
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
+      - 'api/_nfc_crypto.js'
+      - 'tests/api/nfc-crypto.test.cjs'
       - '.github/workflows/dpp-crypto.yml'
 
 permissions:
@@ -34,3 +38,5 @@ jobs:
           python-version: '3.12'
       - name: Run DPP CRYPTO contract tests
         run: python -m unittest tests.unit.test_dpp_crypto_contract -v
+      - name: Run DPP CRYPTO protocol primitive tests
+        run: node --test tests/api/nfc-crypto.test.cjs
