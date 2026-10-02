@@ -58,7 +58,7 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertEqual(status["percent_green"], status["counts"]["green"] * 4)
         points = {p["id"]: p for p in status["points"]}
         self.assertEqual(points["CR24"]["status"], "BLOCKED")
-        self.assertNotEqual(points["CR25"]["status"], "GREEN")
+        self.assertNotEqual(points["CR24"]["status"], "GREEN")
 
     def test_docs_do_not_contain_pem_private_keys(self):
         paths = [
