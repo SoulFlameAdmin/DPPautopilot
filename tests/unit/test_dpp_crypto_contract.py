@@ -160,5 +160,20 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertNotIn("authorization,", text.split("return send(res,200", 1)[1])
 
 
+    def test_finalize_verification_uses_atomic_consume_and_append_only_event(self):
+        text = read("supabase/migrations/20261002161000_dpp_nfc_finalize_verification.sql").lower()
+        self.assertIn("dpp_nfc_consume_challenge(", text)
+        self.assertIn("insert into public.dpp_nfc_verification_events", text)
+        self.assertIn("v_consumed.outcome='replay'", text)
+        self.assertIn("v_final_result:='replay'", text)
+        self.assertIn("v_consumed.outcome='expired'", text)
+        self.assertIn("v_final_result:='expired'", text)
+
+    def test_finalize_verification_is_service_only(self):
+        text = read("supabase/migrations/20261002161000_dpp_nfc_finalize_verification.sql").lower()
+        self.assertIn("from public,anon,authenticated", text)
+        self.assertNotIn("grant execute on function public.dpp_nfc_finalize_verification", text)
+
+
 if __name__ == "__main__":
     unittest.main()
