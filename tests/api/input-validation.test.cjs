@@ -10,6 +10,9 @@ const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
 const imports=require('../../api/imports.js');
+const carriers=require('../../api/carriers.js');
+const nfcChallenge=require('../../api/nfc-challenge.js');
+const nfcVerify=require('../../api/nfc-verify.js');
 const request=require('../../api/_request.js');
 
 function makeRes(){
@@ -55,7 +58,7 @@ test('shared parser rejects malformed JSON and unserializable objects',()=>{
   );
 });
 
-for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['imports',imports]]){
+for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['imports',imports],['carriers',carriers],['nfc-challenge',nfcChallenge],['nfc-verify',nfcVerify]]){
   test(`${name} rejects >1 MiB parsed object before upstream DB access`,async()=>{
     const original=global.fetch;
     let called=false;
