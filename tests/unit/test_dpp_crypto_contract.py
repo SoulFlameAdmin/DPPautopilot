@@ -127,5 +127,26 @@ class DppCryptoContractTests(unittest.TestCase):
         )
 
 
+    def test_nfc_api_rpcs_are_tenant_scoped_and_secret_free(self):
+        text = read("supabase/migrations/20261002155000_dpp_nfc_api_rpcs.sql").lower()
+        self.assertIn("m.user_id=auth.uid()", text)
+        self.assertIn("organization_id=v_org", text)
+        self.assertIn("lifecycle_state='active'", text)
+        self.assertNotIn("protected_key_reference_fingerprint text", text)
+        self.assertNotIn("public_key_or_certificate_fingerprint text", text)
+
+    def test_challenge_api_does_not_persist_raw_challenge(self):
+        text = read("api/nfc-challenge.js").lower()
+        self.assertIn("p_challenge_hash:issued.challenge_hash", text)
+        self.assertNotIn("p_challenge:issued.challenge", text)
+        self.assertIn("challenge:issued.challenge", text)
+
+    def test_nfc_status_projection_does_not_expose_key_references(self):
+        text = read("api/nfc-status.js").lower()
+        self.assertNotIn("protected_key_reference", text)
+        self.assertNotIn("certificate_fingerprint", text)
+        self.assertNotIn("organization_id:row", text)
+
+
 if __name__ == "__main__":
     unittest.main()
