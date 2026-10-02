@@ -175,5 +175,33 @@ class DppCryptoContractTests(unittest.TestCase):
         self.assertNotIn("grant execute on function public.dpp_nfc_finalize_verification", text)
 
 
+    def test_lifecycle_security_requires_evidence_and_preserves_history(self):
+        text = read("supabase/migrations/20261002164500_dpp_nfc_lifecycle_security.sql").lower()
+        self.assertIn("not p_proof_of_possession_verified", text)
+        self.assertIn("not p_configuration_locked", text)
+        self.assertIn("lifecycle_state='revoked'", text)
+        self.assertIn("lifecycle_state='replaced'", text)
+        self.assertIn("replaces_identity_id=p_old_identity_id", text)
+        self.assertIn("version_not_advanced", text)
+        self.assertNotIn("delete from public.dpp_nfc_identities", text)
+
+    def test_lifecycle_mutations_are_service_only(self):
+        text = read("supabase/migrations/20261002164500_dpp_nfc_lifecycle_security.sql").lower()
+        for fn in ("dpp_nfc_activate_identity", "dpp_nfc_revoke_identity",
+                   "dpp_nfc_mark_replaced", "dpp_nfc_set_tamper_state"):
+            with self.subTest(fn=fn):
+                self.assertIn(f"revoke all on function public.{fn}", text)
+        self.assertNotIn("grant execute on function public.dpp_nfc_", text)
+
+    def test_provider_material_never_adds_symmetric_secret_column(self):
+        text = read("supabase/migrations/20261002170500_dpp_nfc_provider_material.sql").lower()
+        self.assertIn("public_key_pem text", text)
+        self.assertIn("protected_key_reference_fingerprint", text)
+        self.assertNotIn("symmetric_key text", text)
+        self.assertNotIn("aes_key text", text)
+        self.assertNotIn("private_key text", text)
+        self.assertIn("from public,anon,authenticated", text)
+
+
 if __name__ == "__main__":
     unittest.main()
