@@ -1,5 +1,6 @@
 {
-  "version": 1,
+  "version": 2,
+  "description": "BAT18 expanded mapping evaluation across model/item Battery Platform V3 fields.",
   "cases": [
     {
       "header": "manufacturer_name",
@@ -10,16 +11,32 @@
       "expected": "model.identification.manufacturer.name"
     },
     {
-      "header": "battery model",
-      "expected": "model.identification.model_id"
+      "header": "postal_address",
+      "expected": "model.identification.manufacturer.postal_address"
     },
     {
-      "header": "MODEL_ID",
+      "header": "manufacturer contact",
+      "expected": "model.identification.manufacturer.contact"
+    },
+    {
+      "header": "battery model",
       "expected": "model.identification.model_id"
     },
     {
       "header": "Battery Category",
       "expected": "model.identification.category"
+    },
+    {
+      "header": "place_of_manufacture",
+      "expected": "model.identification.place_of_manufacture"
+    },
+    {
+      "header": "date_of_manufacture",
+      "expected": "model.identification.date_of_manufacture"
+    },
+    {
+      "header": "weight_kg",
+      "expected": "model.physical.weight_kg"
     },
     {
       "header": "Capacity Ah",
@@ -30,16 +47,100 @@
       "expected": "model.composition.chemistry"
     },
     {
+      "header": "hazardous_substances",
+      "expected": "model.composition.hazardous_substances"
+    },
+    {
+      "header": "critical_raw_materials",
+      "expected": "model.composition.critical_raw_materials"
+    },
+    {
+      "header": "carbon_footprint",
+      "expected": "model.carbon_footprint"
+    },
+    {
+      "header": "responsible_sourcing",
+      "expected": "model.responsible_sourcing"
+    },
+    {
+      "header": "recycled_content",
+      "expected": "model.recycled_content"
+    },
+    {
+      "header": "renewable_content_share",
+      "expected": "model.renewable_content_share"
+    },
+    {
+      "header": "voltage",
+      "expected": "model.voltage"
+    },
+    {
+      "header": "power_capability",
+      "expected": "model.power_capability"
+    },
+    {
+      "header": "expected_lifetime",
+      "expected": "model.expected_lifetime"
+    },
+    {
+      "header": "exhaustion_capacity_threshold",
+      "expected": "model.exhaustion_capacity_threshold"
+    },
+    {
+      "header": "storage_temperature",
+      "expected": "model.storage_temperature"
+    },
+    {
+      "header": "warranty_calendar_life",
+      "expected": "model.warranty_calendar_life"
+    },
+    {
+      "header": "energy_efficiency",
+      "expected": "model.energy_efficiency"
+    },
+    {
+      "header": "internal_resistance",
+      "expected": "model.internal_resistance"
+    },
+    {
+      "header": "c_rate_test",
+      "expected": "model.c_rate_test"
+    },
+    {
+      "header": "eu_declaration_of_conformity",
+      "expected": "model.eu_declaration_of_conformity"
+    },
+    {
       "header": "Serial Number",
       "expected": "item.unique_identifier"
+    },
+    {
+      "header": "performance_history",
+      "expected": "item.performance_history"
+    },
+    {
+      "header": "SOH %",
+      "expected": "item.state_of_health"
     },
     {
       "header": "life_cycle_status",
       "expected": "item.lifecycle_status"
     },
     {
-      "header": "SOH %",
-      "expected": "item.state_of_health"
+      "header": "item usage cycles",
+      "expected": "item.usage.cycles"
+    },
+    {
+      "header": "item usage events",
+      "expected": "item.usage.events"
+    },
+    {
+      "header": "item telemetry environment",
+      "expected": "item.telemetry.environment"
+    },
+    {
+      "header": "state_of_charge",
+      "expected": "item.telemetry.state_of_charge"
     },
     {
       "header": "mystery_custom_column",
@@ -47,6 +148,14 @@
     },
     {
       "header": "free text notes",
+      "expected": null
+    },
+    {
+      "header": "customer discount",
+      "expected": null
+    },
+    {
+      "header": "internal comments",
       "expected": null
     }
   ]

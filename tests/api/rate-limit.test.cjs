@@ -12,6 +12,8 @@ const members=require('../../api/members.js');
 const exportApi=require('../../api/export.js');
 const imports=require('../../api/imports.js');
 const items=require('../../api/items.js');
+const supplierReminders=require('../../api/supplier-reminders.js');
+const suppliers=require('../../api/suppliers.js');
 
 function makeRes(){
   return {
@@ -34,9 +36,13 @@ function json(res){return JSON.parse(res.body);}
 test.beforeEach(()=>limiter._test.resetForTests());
 
 test('versioned policy explicitly covers organization discovery GET',()=>{
-  assert.equal(limiter.policy.version,9);
+  assert.equal(limiter.policy.version,11);
   assert.equal(limiter.policy.surfaces.organizations.GET,'authenticated_read');
   assert.equal(limiter.policy.surfaces.organizations.POST,'authenticated_write');
+  assert.equal(limiter.policy.surfaces['supplier-reminders'].GET,'authenticated_read');
+  assert.equal(limiter.policy.surfaces['supplier-reminders'].POST,'authenticated_write');
+  assert.equal(limiter.policy.surfaces.suppliers.GET,'authenticated_read');
+  assert.equal(limiter.policy.surfaces.suppliers.POST,'authenticated_write');
 });
 
 test('classifies public/authenticated/import/export budgets deterministically',()=>{
@@ -45,6 +51,10 @@ test('classifies public/authenticated/import/export budgets deterministically',(
   assert.equal(limiter.classify('models',req('POST',{})),'authenticated_write');
   assert.equal(limiter.classify('imports',req('PATCH',{})),'import_write');
   assert.equal(limiter.classify('export',req('GET')),'export_read');
+  assert.equal(limiter.classify('supplier-reminders',req('GET')),'authenticated_read');
+  assert.equal(limiter.classify('supplier-reminders',req('POST',{})),'authenticated_write');
+  assert.equal(limiter.classify('suppliers',req('GET')),'authenticated_read');
+  assert.equal(limiter.classify('suppliers',req('POST',{})),'authenticated_write');
 });
 
 test('client identity hashes network and bearer material instead of storing raw values',()=>{
@@ -529,6 +539,8 @@ test('all authenticated API surfaces honor shared limiter 429 before business RP
       ['items',items,req('GET')],
       ['imports',imports,req('GET')],
       ['export',exportApi,req('GET')],
+      ['supplier-reminders',supplierReminders,req('GET')],
+      ['suppliers',suppliers,req('GET')],
       ['passport',passport,req('GET',null,{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'})]
     ];
     for(const [surface,handler,request] of cases){

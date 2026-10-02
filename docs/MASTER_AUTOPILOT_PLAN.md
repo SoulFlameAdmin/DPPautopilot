@@ -1,7 +1,7 @@
 # DPP Autopilot — MASTER AUTOPILOT PLAN
 
 **Source of truth:** this file.  
-**Plan version:** 2.5  
+**Plan version:** 2.6  
 **Frozen:** 2026-09-17  
 **Target:** evidence-backed production readiness, not percentage-by-assumption.
 
@@ -712,3 +712,186 @@ Append evidence here only after verification.
 - Live canonical HTTPS checks on `/`, `/data/master-plan.json`, and `/api/models` returned respectively 200, 200 and the expected unauthenticated 401 `AUTH_REQUIRED`. All three expose the committed CSP/HSTS/nosniff/frame/referrer/permissions headers; CSP contains neither `'unsafe-inline'` nor `'unsafe-eval'`; the data route is `no-store, max-age=0`; the protected API exposes a request correlation ID.
 - HTTPS production fetch through the TLS-validating Vercel connector completed without certificate/hostname error. Concrete deployment/route/header/TLS evidence is recorded in `data/security-headers-policy.json` and is now enforced by `scripts/validate_security_headers.py` whenever R02 is GREEN.
 - R02 acceptance criteria are satisfied. Status: GREEN.
+
+# BATTERY PLATFORM V3 — DATA ENGINE / IMPORT / IDENTITY / NFC / BMS
+
+**Commercial target:** representative manufacturer raw data -> working individual Battery Passport in under 60 minutes, with QR as the required data carrier and Secure NFC as an additional cryptographic authenticity layer.
+
+| ID | Task | Depends on | Acceptance criteria | Evidence required | Status |
+|---|---|---|---|---|---|
+| BAT01 | DPP Data Engine canonical field engine | F11,M04 | All Battery Passport fields are schema-driven from the canonical catalog; no product values are embedded in engine code | Engine module + contract tests + DB event-store precursor | GREEN |
+| BAT02 | Per-field value storage | BAT01 | Every ingested field value is represented independently with field path and typed JSON value | DB migration + integration tests | GREEN |
+| BAT03 | Per-field source provenance | BAT01 | Every field event records source kind and concrete source reference | DB constraints + unit tests | GREEN |
+| BAT04 | Per-field source date | BAT03 | Every field event records source/effective date separately from ingestion time | DB constraints + unit tests | GREEN |
+| BAT05 | Per-field access level | BAT01,F11 | Each field event carries a valid access class consistent with the canonical field catalog | Catalog-driven validator + security tests | GREEN |
+| BAT06 | Per-field verification status | BAT01 | Each field event has explicit verification status with controlled values | DB constraints + unit tests | GREEN |
+| BAT07 | No hardcoded passport values | BAT01 | Production passport values originate from stored/imported/integrated data, not application constants | Static/contract tests + review | GREEN |
+| BAT08 | Append-only field history | BAT02-BAT06,M11 | Material field changes append new events; prior values cannot be updated or deleted | DB mutation-negative tests | GREEN |
+| BAT09 | Field change audit attribution | BAT08,M12 | Field history records actor, target, time, provenance and supersession linkage | DB/API integration tests | GREEN |
+| BAT10 | Extensible field schema | BAT01 | New requirement fields can be added through the versioned catalog without redesigning core tables | Catalog validator + schema traceability | GREEN |
+| BAT11 | EU requirements registry | F11 | Current Battery Passport requirement set is represented in a versioned registry with authoritative sources | Traceability document + catalog validator | GREEN |
+| BAT12 | Requirement-to-field mapping | BAT11 | Each requirement maps to one or more canonical DPP field paths | Coverage validator | GREEN |
+| BAT13 | Mandatory conditional optional rules | BAT11 | Requiredness and conditional applicability are explicit and machine-readable | Rule catalog + tests | GREEN |
+| BAT14 | Missing-data detection | BAT12,BAT13 | System identifies missing required/applicable fields and reports exact field paths | Unit/UI tests | GREEN |
+| BAT15 | Compliance completeness score | BAT14 | Completeness is computed from canonical requirement rules rather than hardcoded percentages | Unit/UI tests | GREEN |
+| BAT16 | Excel import wizard | M07 | Customer can upload XLSX and preview sheets/headers before mapping | Integration/E2E tests | GREEN |
+| BAT17 | CSV import wizard | M07,M08 | Customer can upload CSV and preview/map data safely | Integration/E2E tests | GREEN |
+| BAT18 | Automatic column recognition | BAT17,BAT12 | System proposes canonical DPP fields for incoming column headers | Evaluation set + mapping tests | GREEN |
+| BAT19 | AI-assisted mapping | BAT18 | Low-confidence/ambiguous mappings are proposed with confidence and require review before commit | Evaluation + UI acceptance | YELLOW |
+| BAT20 | Manual mapping correction | BAT17 | User can override proposed mappings before import commit | E2E mapping test | GREEN |
+| BAT21 | Format and unit validation | BAT17,BAT12 | Invalid types, formats and supported unit rules are detected before commit | Negative validation tests | YELLOW |
+| BAT22 | Import preview before commit | BAT17 | Mapped normalized records and errors are visible before irreversible commit | E2E test | GREEN |
+| BAT23 | Missing-data report after import | BAT14,BAT22 | Import produces actionable missing-field output grouped by model/item | Integration/UI tests | GREEN |
+| BAT24 | Reusable manufacturer mapping templates | BAT20 | Mappings are persisted per tenant and can be reused for later imports | DB + integration tests | GREEN |
+| BAT25 | Under-60-minute raw-data-to-passport benchmark | BAT16-BAT24,BAT30 | A representative customer dataset goes from raw source file to working passport in under 60 minutes | Timestamped pilot benchmark | RED |
+| BAT26 | Unique physical Battery ID | M14,D07 | Every individual battery receives a unique stable identifier | Collision/lifecycle tests | GREEN |
+| BAT27 | Immutable Battery ID | BAT26 | Issued physical battery identifier cannot be silently replaced; any correction is separately auditable | DB/API mutation-negative tests | YELLOW |
+| BAT28 | Permanent DPP URL per battery | BAT26,D06 | Each Battery ID resolves through a stable passport route | E2E route test | GREEN |
+| BAT29 | Unique QR generation | BAT28 | System generates a scannable QR for the exact passport URL | Decode test + artifact | GREEN |
+| BAT30 | QR-to-exact-passport verification | BAT29 | Decoded QR resolves to the intended individual battery passport with HTTP acceptance | E2E scan/route evidence | GREEN |
+| BAT31 | Secure NFC identity layer | BAT26 | System supports cryptographic NFC identity independent of passport data storage | NFC architecture + hardware integration test | RED |
+| BAT32 | Unique cryptographic NFC identity | BAT31 | Each secure NFC element is bound one-to-one to a Battery ID | Provisioning test | RED |
+| BAT33 | No passport data stored in NFC | BAT31 | NFC stores only identity/cryptographic material required for authentication, not DPP payloads | Tag inspection + architecture test | RED |
+| BAT34 | Non-exportable NFC secret/private key | BAT31 | Chosen secure element prevents normal extraction of signing secret/private key | Vendor capability evidence + hardware test | RED |
+| BAT35 | NFC challenge generation | BAT31 | Verifier creates fresh unpredictable challenge with expiry/replay protection | Security unit/integration tests | RED |
+| BAT36 | NFC challenge signing | BAT34,BAT35 | Secure element signs/authenticates the challenge without exposing its secret | Hardware integration test | RED |
+| BAT37 | Server-side NFC signature validation | BAT36 | Backend validates proof against registered battery/NFC identity | API/security tests | RED |
+| BAT38 | Authentic-battery result | BAT37 | Successful verification returns a clear authenticated battery result bound to Battery ID | E2E phone/NFC test | RED |
+| BAT39 | Counterfeit/suspicious verification result | BAT37 | Invalid/replayed/unregistered NFC proofs fail closed and produce a clear warning | Negative/replay tests | RED |
+| BAT40 | NFC verification history | BAT37,BAT09 | Verification events are timestamped and auditable without exposing cryptographic secrets | DB/API integration tests | RED |
+
+## BAT31-BAT40 Crypto execution contract
+
+Detailed execution source: docs/DPP_CRYPTO_INTEGRATION_PLAN.md (CR01-CR25). It adds the missing threat model, secure-element selection, PKI/KMS boundary, manufacturing provisioning, dynamic tap verification, strong challenge mode, anti-replay, revocation/rotation, anti-swap/tamper, BMS binding hook, privacy and real-hardware acceptance. BAT31-BAT40 remain evidence-gated; no mock-only implementation can make them GREEN. CR25 requires a live visible progress tracker so Mitko can monitor GREEN/YELLOW/RED/BLOCKED counts, current work, blockers, PR/commit and CI evidence.
+| BAT41 | BMS integration layer | M18,BAT01 | Vendor-neutral ingestion boundary exists for BMS lifecycle/telemetry data | Connector contract + tests | RED |
+| BAT42 | Standard BMS connector interface | BAT41 | Connectors normalize vendor data into canonical DPP/BMS events | Contract tests | RED |
+| BAT43 | API CAN Modbus adapters | BAT42 | Architecture supports HTTP/API, CAN and Modbus adapters without coupling passport core to vendor protocols | Adapter tests/evidence | RED |
+| BAT44 | State-of-charge ingestion | BAT42 | Timestamped SoC readings can be ingested with source provenance | Integration tests | RED |
+| BAT45 | State-of-health ingestion | BAT42 | Timestamped SoH readings can be ingested with source provenance | Integration tests | RED |
+| BAT46 | Cycles temperature voltage alarms ingestion | BAT42 | Supported lifecycle metrics are normalized and validated with timestamps/source | Integration tests | RED |
+| BAT47 | BMS history without overwrite | BAT44-BAT46,BAT08 | Telemetry/lifecycle updates append history and never erase prior observations | History/replay tests | RED |
+| BAT48 | Manufacturer dashboard | BAT14,BAT24,BAT30 | Manufacturer can view models, batteries, completeness, errors, imports, QR/NFC state and verification | Authenticated E2E tests | YELLOW |
+| BAT49 | DPP integration API | M17-M23,BAT37,BAT42 | Versioned API supports model/item/passport CRUD, imports, verification, BMS ingestion and permissions | API/security suite | YELLOW |
+| BAT50 | Battery Platform production acceptance | BAT01-BAT49,C15 | Security, backups, monitoring, tests, docs and at least one real manufacturer pilot satisfy final acceptance | Full production evidence pack + pilot UAT | RED |
+
+## DPP SESSION BRIDGE
+
+Cross-session coordination source: `docs/DPP_SESSION_BRIDGE.md`, GitHub issue #241. GitHub issue comments are the shared message transport between Mitko/DPP and Borko/DPP CRYPTO; Gmail is fallback only.
+
+
+## Battery Trust OS expansion — BAT51-BAT100
+
+These tasks extend Battery Platform V3 into the full Battery Trust OS. Borko owns CRYPTO implementation; Mitko/DPP owns the remaining platform layers and integration.
+
+| ID | Task | Depends on | Acceptance criteria | Evidence | Status |
+|---|---|---|---|---|---|
+| BAT51 | Supplier registry | BAT01 | Tenant-scoped supplier records exist with stable external reference, legal name and lifecycle status | Migration replay + DB subset | GREEN |
+| BAT52 | Supplier portal invitation model | BAT51,M03 | Manufacturer can invite a supplier with least-privilege scoped access | Auth/API/E2E tests | YELLOW |
+| BAT53 | Supplier data packages | BAT51,BAT01 | Supplier data can be submitted as versioned packages scoped to model/item/component/material | Migration replay + DB subset | GREEN |
+| BAT54 | Component and material scoping | BAT53 | Supplier packages can target exact model/item/component/material references without ambiguity | DB/API tests | GREEN |
+| BAT55 | Supplier package history | BAT53,BAT08 | Supplier package versions are append-only and supersession is auditable | Mutation-negative DB tests | GREEN |
+| BAT56 | Supplier signature envelope hook | BAT53 | Supplier packages expose a crypto-agnostic signature envelope contract compatible with CRYPTO integration | Contract tests | GREEN |
+| BAT57 | Supplier verification workflow | BAT53 | Packages move through unverified/validated/verified/rejected states with evidence | API/DB tests | GREEN |
+| BAT58 | Supplier missing-data queue | BAT14,BAT53 | Missing required supplier fields are grouped by supplier and affected product | Integration tests | GREEN |
+| BAT59 | Supplier reminder workflow | BAT58 | Authorized users can trigger auditable reminders without exposing unrelated tenant data | API/security tests | GREEN |
+| BAT60 | Supplier network dashboard | BAT51-BAT59 | Manufacturer sees supplier completeness, blockers and package status | Authenticated E2E tests | YELLOW |
+| BAT61 | Factory provisioning job model | BAT26,BAT29 | A factory job can batch Battery IDs, QR and identity provisioning work | DB/API tests | RED |
+| BAT62 | Batch provisioning | BAT61 | Provisioning supports deterministic bulk processing with idempotent retry | Load/idempotency tests | RED |
+| BAT63 | QR label print job | BAT61,BAT29 | Provisioning emits exact printable QR/label jobs bound to Battery IDs | Artifact/decode tests | RED |
+| BAT64 | NFC provisioning handoff contract | BAT61,BAT31 | Factory flow exchanges a minimal typed contract with Borko CRYPTO provisioning without exposing secrets | Contract/integration tests | RED |
+| BAT65 | NFC bind result intake | BAT64 | Backend records success/failure identity binding result against exact Battery ID | API/DB tests | RED |
+| BAT66 | Ready-for-market gate | BAT63,BAT65,BAT15 | Battery can become READY only after required DPP, QR and identity checks pass | Business-rule tests | RED |
+| BAT67 | Factory quarantine gate | BAT66 | Failed provisioning or compliance checks quarantine the battery with auditable reason | Negative tests | RED |
+| BAT68 | Reprovision and replacement workflow | BAT65 | Authorized NFC/label replacement preserves Battery ID and historical identity chain | Integration tests | RED |
+| BAT69 | Provisioning audit trail | BAT61-BAT68 | Every factory provisioning action is timestamped and attributable | DB/audit tests | RED |
+| BAT70 | Factory throughput benchmark | BAT62-BAT69 | Representative batch meets documented throughput target without identity collisions | Benchmark evidence | RED |
+| BAT71 | Lifecycle event ledger | BAT26,BAT08 | Battery lifecycle changes are represented as append-only typed events | DB/API tests | RED |
+| BAT72 | Service actor roles | BAT71,M12 | Service/manufacturer/recycler actions use explicit least-privilege roles | RBAC tests | RED |
+| BAT73 | Repair events | BAT71,BAT72 | Repair event records who/when/what changed with evidence references | Integration tests | RED |
+| BAT74 | Module component replacement | BAT73 | Component replacement preserves old/new component identity and reason | Integration tests | RED |
+| BAT75 | Service evidence attachments | BAT73,M13 | Service events can reference controlled evidence objects | Storage/API tests | RED |
+| BAT76 | Second-life transition package | BAT71 | Second-life transition captures required state/evidence without erasing first-life history | Lifecycle tests | RED |
+| BAT77 | Repurpose remanufacture workflow | BAT71 | Repurpose/remanufacture transitions are typed, authorized and auditable | Lifecycle/RBAC tests | RED |
+| BAT78 | Recycler end-of-life workflow | BAT71 | Recycler/end-of-life event closes active lifecycle while preserving history | Lifecycle tests | RED |
+| BAT79 | Lifecycle access projection | BAT71,BAT10 | Public/legitimate-interest/authority lifecycle views obey field access policy | Access tests | RED |
+| BAT80 | Lifecycle timeline UI | BAT71-BAT79 | Authorized users can inspect chronological battery history with evidence | E2E tests | RED |
+| BAT81 | Anti-swap policy integration | BAT31,BAT71 | Physical identity replacement/movement creates detectable policy state | Security integration tests | RED |
+| BAT82 | Tamper event ingestion | BAT31,BAT71 | Tamper signal can be ingested as an auditable lifecycle/security event | Integration tests | RED |
+| BAT83 | Counterfeit incident case | BAT39,BAT71 | Suspicious verification can open a tenant-scoped incident record | API/security tests | RED |
+| BAT84 | Identity anomaly rules | BAT40,BAT83 | Rules flag impossible/repeated/geographically or temporally suspicious verification patterns without auto-claiming fraud | Rule tests | RED |
+| BAT85 | Cross-tenant identity attack suite | BAT37,R04 | Identity endpoints prove tenant isolation under negative attack cases | Security tests | RED |
+| BAT86 | Cloned QR attack test | BAT30,BAT38 | Copied QR cannot produce cryptographic Authentic result without genuine NFC proof | Attack evidence | RED |
+| BAT87 | Replay wrong-tag revoked-tag test | BAT37-BAT39 | Replay, wrong tag and revoked identity fail closed | Attack evidence | RED |
+| BAT88 | Attack evidence pack | BAT81-BAT87 | Security demo package captures attack inputs, results, logs and no-secret-leak proof | Evidence artifact | RED |
+| BAT89 | Manufacturer fleet summary | BAT48,BAT71 | Dashboard aggregates models/items/readiness/lifecycle without leaking tenant data | Authenticated E2E tests | RED |
+| BAT90 | Compliance operations queue | BAT14,BAT48 | Dashboard prioritizes missing/invalid/blocked compliance work | E2E tests | RED |
+| BAT91 | Identity and NFC operations view | BAT40,BAT48 | Manufacturer can inspect identity state, revocation and verification history | E2E tests | RED |
+| BAT92 | Supplier operations view | BAT60,BAT48 | Manufacturer can inspect supplier completeness and blockers | E2E tests | RED |
+| BAT93 | Lifecycle and BMS analytics | BAT47,BAT80 | Dashboard combines lifecycle history and normalized BMS observations | E2E/data tests | RED |
+| BAT94 | Battery Trust API v1 | BAT49,BAT53,BAT71 | Versioned API exposes suppliers, lifecycle, BMS and identity contracts with RBAC | API/security suite | RED |
+| BAT95 | AI missing-data copilot | BAT14,BAT58 | AI can explain missing data and propose next actions without silently inventing values | Evaluation tests | RED |
+| BAT96 | AI supplier follow-up assistant | BAT58,BAT59 | AI drafts targeted supplier follow-ups from real missing-data state | Evaluation + approval tests | RED |
+| BAT97 | AI incident triage | BAT83,BAT84 | AI summarizes security/lifecycle incidents with evidence links and human approval boundaries | Evaluation tests | RED |
+| BAT98 | Battery Trust observability and SLA | BAT94,R09,R10 | Core identity/import/supplier/BMS/lifecycle paths have metrics, alerts and defined SLO/SLA targets | Ops evidence | RED |
+| BAT99 | Battery Trust migration rollback drill | BAT51-BAT98,C04,C05 | Production migration and rollback are rehearsed with no silent identity/history loss | Drill evidence | RED |
+| BAT100 | Battery Trust OS real manufacturer acceptance | BAT01-BAT99,C15 | A real manufacturer pilot proves raw data → passport → QR/NFC identity → lifecycle/BMS/service flows with signed UAT | Full acceptance pack + real pilot UAT | RED |
+| BAT101 | Annex XIII public model data coverage | BAT11-BAT15 | All applicable publicly accessible Annex XIII model fields are represented, validated and traceable to authoritative requirements | Coverage matrix + field catalog tests + passport projection tests | RED |
+| BAT102 | Authority-only Annex XIII data coverage | BAT11,M10 | Notified-body, market-surveillance and Commission-only data are represented and never exposed through public or ordinary tenant projections | Access matrix + negative API/security tests | RED |
+| BAT103 | Legitimate-interest battery-specific data coverage | BAT71,BAT79 | Battery-specific performance, durability, SoH, status and use-derived data are available only to authorized legitimate-interest actors | Access/RBAC + lifecycle/BMS integration tests | RED |
+| BAT104 | Carbon-footprint evidence chain | BAT03,BAT53 | Carbon-footprint declarations are linked to plant/model, methodology/version, verifier/evidence and source dates without hardcoded values | Traceability + supplier/evidence integration tests | RED |
+| BAT105 | Recycled and renewable content evidence | BAT03,BAT53 | Recycled-content and renewable-content claims carry source, scope, method, date and verification evidence | Field/evidence validation tests | RED |
+| BAT106 | Responsible-sourcing and due-diligence traceability | BAT51-BAT57 | Due-diligence disclosures and upstream evidence are linked to suppliers/materials with versioned provenance and access control | Supplier-chain traceability tests | RED |
+| BAT107 | Performance and durability parameter coverage | BAT41-BAT47 | Required performance/durability parameters are represented with units, reference tests, source dates and history | Catalog + BMS/lab-data tests | RED |
+| BAT108 | Conformity marking and technical-document bundle | BAT03,M13 | EU declaration of conformity, markings, warnings and applicable technical documents are linked as controlled evidence | Document/evidence + access tests | RED |
+| BAT109 | EU DPP registry unique-ID synchronization | BAT26,BAT28 | The battery unique identifier can be submitted/synchronized with the applicable EU DPP registry contract with idempotent retry and status history | Registry contract + sandbox/official integration evidence | RED |
+| BAT110 | ISO/IEC 15459 identifier conformance | BAT26-BAT30 | Generated battery identifiers and QR linkage conform to the applicable ISO/IEC 15459 family or accepted equivalent | Identifier conformance tests + decode evidence | RED |
+| BAT111 | Open machine-readable passport export | BAT49,BAT94 | Passport data is exportable in documented open machine-readable structured formats without proprietary lock-in | Schema/API/export contract tests | RED |
+| BAT112 | Cross-DPP semantic interoperability | BAT111 | Battery entities, identifiers, access classes and lifecycle events map to a versioned semantic profile interoperable with other EU DPPs | Semantic mapping + interoperability fixture tests | RED |
+| BAT113 | Free public passport access | BAT28,BAT30 | Public passport information remains accessible without account, fee or proprietary application where public access is required | Public HTTP/browser acceptance tests | RED |
+| BAT114 | Authorized processor/operator boundary | M03,R07 | System records which operator is legally responsible and which processors are explicitly authorized to act on its behalf | Role/data-controller registry + audit tests | RED |
+| BAT115 | No unauthorized provider reuse | BAT114,R07 | Hosting/processing controls and contractual evidence prohibit provider reuse/sale of passport data beyond required service processing | Policy evidence + configuration/privacy review | RED |
+| BAT116 | Operator-cessation passport continuity | BAT28,R11,R12 | Passport availability survives customer insolvency/cessation through tested continuity/export/escrow or successor-operation mechanism | Continuity drill + recovery evidence | RED |
+| BAT117 | Fine-grained introduce/modify/update rights | M03,M10,BAT79 | Every actor type has explicit field/action permissions for introducing, modifying and updating passport information | Authorization matrix + negative tests | RED |
+| BAT118 | Regulatory effective-date rules engine | BAT11-BAT13 | Requirement applicability is versioned by effective date, battery category, capacity, market action and other relevant conditions | Rule-engine tests + dated fixtures | RED |
+| BAT119 | Regulatory change impact diff | BAT118 | A rule/catalog update produces an impact report showing affected models, batteries, suppliers and missing evidence | Change-diff integration/UI tests | RED |
+| BAT120 | Authority evidence export pack | BAT102,BAT108 | Authorized users can generate a complete regulator/notified-body evidence package with immutable manifest and access log | Export + integrity + authorization tests | RED |
+| BAT121 | Field-level digest and signature reference | BAT02-BAT09 | Critical field events can carry or reference cryptographic digests/signatures so later verification can prove exact value/provenance integrity | Crypto contract + tamper-negative tests | RED |
+| BAT122 | Evidence-object hashing | M13,BAT75 | Uploaded or linked evidence objects have immutable content digests, size/type metadata and replacement history | Storage/hash + mutation-negative tests | RED |
+| BAT123 | Cryptographic supplier-package verification | BAT56,BAT57 | Supplier signature envelopes are actually verified against trusted keys/certificates, not merely stored | Signature verification + revoked/wrong-key tests | RED |
+| BAT124 | Chain-of-custody event ledger | BAT71 | Custody/location-responsibility transfers are append-only events linked to battery identity and actor evidence | Lifecycle/API/RBAC tests | RED |
+| BAT125 | Multi-tier supplier lineage | BAT51-BAT57 | Tier-N supplier relationships can be represented without flattening provenance or exposing unrelated commercial data | Graph/tenant/access tests | RED |
+| BAT126 | Material batch and lot genealogy | BAT53,BAT54 | Material lots/batches can be traced into components, cells, modules and affected battery models/items | Genealogy DB + query tests | RED |
+| BAT127 | Cell-module-pack genealogy | BAT71,BAT74 | Battery pack identity links to module/cell identities and preserves replacements/splits/merges over lifecycle | Genealogy + lifecycle tests | RED |
+| BAT128 | Component serial traceability | BAT74,BAT126 | Serialised critical components can be traced from supplier/manufacture through service replacement and end-of-life | Integration + service tests | RED |
+| BAT129 | Duplicate identity and collision detection | BAT26,BAT32 | System detects duplicate Battery IDs, NFC identities, component serials and impossible many-to-one bindings before READY state | Uniqueness/security negative tests | RED |
+| BAT130 | Data-quality and provenance confidence score | BAT03-BAT06,BAT95 | System separately scores evidence quality/provenance confidence from legal completeness and explains why | Deterministic scoring + UI tests | RED |
+| BAT131 | BMS device identity binding | BAT32,BAT41 | The specific BMS/controller identity is bound to the exact Battery ID with replace/revoke history | Provisioning + BMS identity tests | RED |
+| BAT132 | Signed BMS telemetry | BAT41-BAT47,BAT131 | Supported BMS observations can be cryptographically authenticated end-to-end before becoming trusted history | Signature/integration tests | RED |
+| BAT133 | BMS anti-replay monotonicity | BAT132 | Counters/nonces/timestamps prevent stale or replayed telemetry from being accepted as new trusted observations | Replay/security tests | RED |
+| BAT134 | Telemetry time-integrity and clock-drift control | BAT47 | Ingestion records source time, receipt time and clock-quality/drift so suspicious timing cannot silently corrupt lifecycle history | Time-integrity tests | RED |
+| BAT135 | BMS firmware inventory history | BAT131 | Firmware/hardware revision and update history are recorded as append-only device lifecycle evidence | BMS/device lifecycle tests | RED |
+| BAT136 | Firmware authenticity and update evidence | BAT135 | Firmware update events can reference vendor signature/hash verification and fail closed when authenticity evidence is invalid | Firmware evidence + negative tests | RED |
+| BAT137 | Hardware attestation hook | BAT131,BAT136 | Architecture can ingest hardware/secure-boot attestation evidence without coupling core DPP to one vendor | Attestation contract tests | RED |
+| BAT138 | Telemetry plausibility validation | BAT44-BAT47 | Physics/range/rate-of-change rules quarantine implausible BMS values instead of silently accepting them | Negative/data-quality tests | RED |
+| BAT139 | SoH method and model lineage | BAT45 | Every SoH value records method/model/version/input scope and uncertainty or confidence where available | Model-lineage + history tests | RED |
+| BAT140 | Telemetry retention and downsampling policy | BAT47,R08 | High-volume telemetry retention/downsampling preserves legally/business-critical history and auditability without unbounded storage | Retention policy + replay/integrity tests | RED |
+| BAT141 | MES production connector | BAT61-BAT70 | Manufacturing Execution System integration can create/update provisioning jobs through a versioned idempotent contract | Connector + retry tests | RED |
+| BAT142 | ERP connector | BAT49,BAT94 | ERP integration can exchange models, orders, suppliers and relevant compliance data through mapped versioned contracts | Connector + mapping tests | RED |
+| BAT143 | PLM/QMS connector | BAT49,BAT108 | PLM/QMS integration can supply controlled revisions, BOM/evidence and quality/conformity records with provenance | Connector + revision tests | RED |
+| BAT144 | Factory scanner/provisioning app | BAT61-BAT69 | A station UI can scan Battery ID/QR/NFC, execute allowed provisioning steps and show deterministic pass/quarantine result | Station E2E tests | RED |
+| BAT145 | Provisioning-station device identity | BAT144 | Each provisioning station is authenticated/authorized and every action is attributable to station + operator | Device identity/RBAC/audit tests | RED |
+| BAT146 | Printer/scanner hardware abstraction | BAT63,BAT144 | QR/label printers and scanners use adapter contracts so hardware can change without changing identity rules | Adapter tests + artifact decode tests | RED |
+| BAT147 | Offline factory queue and safe resync | BAT62,BAT144 | Temporary connectivity loss queues signed/idempotent provisioning work and reconciles without duplicate identities | Offline/reconnect/idempotency tests | RED |
+| BAT148 | High-volume serialization benchmark | BAT62,BAT70 | Bulk creation, printing, binding and status updates meet a documented factory-scale target with zero identity collision | Load/throughput evidence | RED |
+| BAT149 | Battery event webhooks | BAT94 | Trusted lifecycle, supplier, provisioning, BMS and identity events can emit signed retryable idempotent webhooks | Webhook contract/security/retry tests | RED |
+| BAT150 | Enterprise connector SDK and sandbox | BAT141-BAT149 | Partners can implement/test connectors against versioned schemas and sandbox fixtures without production credentials | SDK docs + sandbox contract tests | RED |
+| BAT151 | Mobile Tap & Verify experience | BAT38-BAT40 | Phone flow combines QR context and NFC proof into a simple authenticity/passport experience with no secret exposure | Real-device E2E test | RED |
+| BAT152 | Poor-connectivity verification mode | BAT151 | Verifier degrades safely when network is unavailable, clearly distinguishing cached context from live cryptographic verification | Offline/online transition tests | RED |
+| BAT153 | QR plus NFC dual-trust UX | BAT30,BAT151 | UI explicitly distinguishes identity lookup by QR from cryptographic authenticity by NFC and prevents misleading 'authentic' claims | UX/security acceptance tests | RED |
+| BAT154 | Responsibility and custody transfer workflow | BAT124,BAT76-BAT78 | Re-use/repurpose/remanufacture and waste-status transitions transfer responsible-operator/custody duties explicitly without rewriting prior history | Lifecycle/RBAC/responsibility-transfer tests | RED |
+| BAT155 | Successor-passport lineage and recycling closure | BAT76-BAT78,BAT154 | A repurposed/re-used/remanufactured battery receives a new passport linked to original passport lineage; recycled batteries close the active passport according to the regulatory lifecycle while required internal evidence remains controlled | Passport-lineage + lifecycle-closure tests | RED |
+| BAT156 | Service/recycler partner onboarding | BAT72,BAT78 | External service, remanufacturing and recycling partners receive scoped roles, invitations and auditable access | Partner onboarding/RBAC E2E tests | RED |
+| BAT157 | Provider-independent disaster continuity | BAT111,BAT116 | A documented restore/migration path can reconstruct passports, identifiers, histories and evidence on alternate infrastructure | Independent restore drill | RED |
+| BAT158 | No-vendor-lock migration proof | BAT111,BAT112,BAT157 | Complete tenant export can be re-imported into a clean reference environment while preserving IDs, provenance, access classes and history | Round-trip portability test | RED |
+| BAT159 | Independent penetration and crypto review gate | BAT85-BAT88,BAT123,BAT132 | Release candidate receives independent security/crypto review; critical/high findings block acceptance until resolved or formally handled | External review report + remediation evidence | RED |
+| BAT160 | Battery Trust OS full production-line acceptance | BAT01-BAT159 | A real manufacturer proves regulated passport data + supplier lineage + Battery ID/QR/NFC + signed BMS + factory/MES flow + service/second-life + portability/continuity under production-like conditions | Signed full-line UAT + security/interoperability/continuity evidence pack | RED |

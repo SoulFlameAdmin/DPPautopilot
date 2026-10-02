@@ -2,15 +2,15 @@
   "worker": "DAVID",
   "mode": "BUILD",
   "state": "working",
-  "currentTask": "M02 tenant-recovery precursor merged and evidenced; mandatory GREEN progression is waiting on M01 recovery acceptance and R02 Vercel retry window",
-  "currentGate": "SECURITY / PRIVACY / OPERATIONS",
-  "lastCompletedTask": "M02 tenant-recovery HTTP precursor — PR #176 / CI 35684651596 PASS 139/139",
-  "nextTask": "Continue only dependency-safe non-deploy work; M01 requires a real recovery-session password-update acceptance. R02 may retry only at/after 2026-09-23T02:19:01Z after claiming the DPP_APP2 Vercel lease.",
-  "message": "D01-D14 and F08 are GREEN. M02 has fresh partial PASS evidence but cannot become GREEN before M01. R02 code is proven; production acceptance remains quota-blocked until the explicit retry window.",
+  "currentTask": "BAT52 + BAT60 — supplier portal invitation/acceptance and authenticated dashboard acceptance",
+  "currentGate": "BATTERY TRUST OS",
+  "lastCompletedTask": "BAT51/BAT53/BAT54/BAT55/BAT56/BAT57/BAT58/BAT59 — CI 36943661741 PASS",
+  "nextTask": "Finish supplier invitation token lifecycle and authenticated Supplier Network browser E2E; then start BAT61 factory provisioning job model.",
+  "message": "Supplier Network core is evidence-backed: 8 tasks promoted GREEN after full CI PASS. BAT52 portal invitation flow and BAT60 authenticated dashboard remain YELLOW.",
   "deferredBlockers": [
     "R02 — Vercel `api-deployments-free-per-day`; explicit retry window begins 2026-09-23T02:19:01Z. Do not deploy earlier.",
     "M01 — recovery preview route is HTTP 200, but final recovery-session password-update acceptance remains unproven; no auth/login/MFA bypass allowed.",
     "M13 — technical Edge metadata ACL mismatch is fixed and Edge v5 is deployed; final authenticated upload→download→delete byte roundtrip still requires a real user runtime path and M03."
   ],
-  "updatedAt": "2026-09-22T07:08:00+03:00"
+  "updatedAt": "2026-10-02T03:10:00+03:00"
 }

@@ -12,6 +12,8 @@ const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
 const imports=require('../../api/imports.js');
 const exportApi=require('../../api/export.js');
+const supplierReminders=require('../../api/supplier-reminders.js');
+const suppliers=require('../../api/suppliers.js');
 
 function makeRes(){
   return {
@@ -219,6 +221,8 @@ test('all authenticated API surfaces emit correlated redacted 401 events',async(
       ['items',items,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
       ['imports',imports,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
       ['export',exportApi,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['supplier-reminders',supplierReminders,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['suppliers',suppliers,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
       ['passport',passport,{
         method:'GET',
         headers:{},

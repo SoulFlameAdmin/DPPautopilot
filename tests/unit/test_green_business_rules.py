@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from completeness import get_path, is_present, required_fields, score_fixture
+from completeness import field_is_applicable, get_path, is_present, required_fields, score_fixture
 from dpp_identifiers import is_demo_identifier, make_demo_identifier, parse_demo_identifier
 
 
@@ -87,6 +87,31 @@ class CompletenessBusinessRulesTests(unittest.TestCase):
         self.assertEqual(result_a, result_b)
         self.assertGreaterEqual(result_a["missingCount"], 1)
         self.assertLess(result_a["score"], 100.0)
+
+    def test_conditional_ev_field_is_machine_evaluated(self) -> None:
+        ev_field = next(
+            field for field in self.catalog["fields"]
+            if field["path"] == "model.exhaustion_capacity_threshold"
+        )
+        self.assertEqual(ev_field["applicability"]["mode"], "when")
+        self.assertTrue(field_is_applicable(ev_field, self.fixture, self.fixture["items"][0]))
+
+        industrial = copy.deepcopy(self.fixture)
+        industrial["model"]["identification"]["category"] = "industrial"
+        industrial["model"].pop("exhaustion_capacity_threshold", None)
+        self.assertFalse(field_is_applicable(ev_field, industrial, industrial["items"][0]))
+        result = score_fixture(self.catalog, industrial)
+        self.assertEqual(result["missingCount"], 0)
+        self.assertEqual(result["score"], 100.0)
+
+    def test_missing_conditional_ev_field_is_reported_when_applicable(self) -> None:
+        broken = copy.deepcopy(self.fixture)
+        broken["model"].pop("exhaustion_capacity_threshold", None)
+        result = score_fixture(self.catalog, broken)
+        self.assertIn(
+            "model.exhaustion_capacity_threshold",
+            {entry["path"] for entry in result["missing"]},
+        )
 
     def test_empty_required_field_set_scores_100(self) -> None:
         catalog = {"fields": [{"path": "model.optional", "required": False}]}

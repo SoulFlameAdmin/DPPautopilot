@@ -1,0 +1,54 @@
+{
+  "format": "xlsx",
+  "sheet_count": 2,
+  "sheets": [
+    {
+      "name": "Batteries",
+      "headers": [
+        "manufacturer_name",
+        "model_id",
+        "category",
+        "rated_capacity_ah",
+        "unique_identifier"
+      ],
+      "rows": [
+        [
+          "Northstar XLSX Cells",
+          "XLSX-EV-82",
+          "electric_vehicle",
+          82,
+          "urn:dpp:xlsx:000001"
+        ],
+        [
+          "Northstar XLSX Cells",
+          "XLSX-EV-82",
+          "electric_vehicle",
+          82,
+          "urn:dpp:xlsx:000002"
+        ]
+      ],
+      "row_count_previewed": 2
+    },
+    {
+      "name": "Suppliers",
+      "headers": [
+        "supplier_name",
+        "country",
+        "material"
+      ],
+      "rows": [
+        [
+          "Synthetic Cell Source",
+          "BG",
+          "nickel"
+        ]
+      ],
+      "row_count_previewed": 1
+    }
+  ],
+  "limits": {
+    "max_file_bytes": 10485760,
+    "max_preview_rows": 20,
+    "max_columns": 200
+  }
+}

@@ -3,20 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DPP Autopilot · CSV Import Demo</title>
+  <title>DPP Autopilot · CSV/XLSX Import</title>
   <link rel="stylesheet" href="/assets/csp/import.css">
 </head>
-<body data-import-loaded="false">
+<body data-import-loaded="false" data-xlsx-preview-ready="false" data-source-format="none" data-sheet-count="0">
   <main class="shell">
-    <div class="top"><div><div class="badge">DPP Autopilot · Demo</div><h1>CSV import и mapping</h1></div><a href="/">← Dashboard</a></div>
+    <div class="top"><div><div class="badge">DPP Autopilot · Demo</div><h1>CSV / XLSX import и mapping</h1></div><a href="/">← Dashboard</a></div>
     <div class="synthetic">Тази страница работи само със synthetic demo данни. Няма backend write и не променя production данни.</div>
     <section class="card">
-      <h2>1. Зареди CSV</h2>
-      <div class="actions"><div><label for="fileInput" class="hint">CSV file</label><input id="fileInput" type="file" accept=".csv,text/csv" aria-describedby="loadStatus" /></div><button class="btn primary" id="loadSample" type="button">Зареди synthetic sample</button></div>
+      <h2>1. Зареди CSV или XLSX</h2>
+      <div class="actions"><div><label for="fileInput" class="hint">CSV / XLSX file</label><input id="fileInput" type="file" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-describedby="loadStatus" /></div><button class="btn primary" id="loadSample" type="button">Зареди synthetic sample</button></div>
       <div id="loadStatus" class="status" role="status" aria-live="polite">Няма зареден файл.</div>
+      <div id="xlsxSheetWrap" class="actions" hidden>
+        <div>
+          <label for="xlsxSheet" class="hint">XLSX sheet</label>
+          <select id="xlsxSheet" aria-label="Choose XLSX worksheet"></select>
+        </div>
+      </div>
     </section>
     <section class="card" id="mappingCard" hidden>
-      <h2>2. Map-ни колоните</h2><p class="hint">Всяка CSV колона може да се свърже с canonical DPP field. Нищо не се записва към backend.</p>
+      <h2>2. Map-ни колоните</h2><p class="hint">Всяка входна колона може да се свърже с canonical DPP field. Нищо не се записва към backend.</p>
       <div id="mappings"></div>
     </section>
     <section class="card" id="previewCard" hidden>

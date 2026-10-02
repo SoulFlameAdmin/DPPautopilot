@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-09-21",
+  "observed_at": "2026-10-02",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -158,6 +158,10 @@
       "name": "dpp_items_delete_checked"
     },
     {
+      "version": "20260920010139",
+      "name": "dpp_items_delete_checked"
+    },
+    {
       "version": "20260920021507",
       "name": "dpp_passport_create_idempotency"
     },
@@ -188,7 +192,63 @@
     {
       "version": "20260920232617",
       "name": "dpp_evidence_object_metadata_rpc"
+    },
+    {
+      "version": "20261001234408",
+      "name": "dpp_field_events"
+    },
+    {
+      "version": "20261001234410",
+      "name": "dpp_supplier_network"
+    },
+    {
+      "version": "20261001234412",
+      "name": "dpp_supplier_scope_verification"
+    },
+    {
+      "version": "20261001234414",
+      "name": "dpp_supplier_missing_data"
+    },
+    {
+      "version": "20261001234417",
+      "name": "dpp_supplier_reminders"
+    },
+    {
+      "version": "20261001234836",
+      "name": "dpp_supplier_portal_signature"
+    },
+    {
+      "version": "20261001235520",
+      "name": "dpp_suppliers_api"
+    },
+    {
+      "version": "20261002015538",
+      "name": "dpp_field_events_public_identifier"
+    },
+    {
+      "version": "20261002015658",
+      "name": "dpp_supplier_invitation_api"
+    },
+    {
+      "version": "20261002023155",
+      "name": "dpp_field_event_ingest"
+    },
+    {
+      "version": "20261002024458",
+      "name": "dpp_field_access_catalog"
+    },
+    {
+      "version": "20261002024618",
+      "name": "dpp_field_catalog_access"
+    },
+    {
+      "version": "20261002025110",
+      "name": "dpp_field_catalog_access_error_contract"
+    },
+    {
+      "version": "20261002095636",
+      "name": "dpp_field_catalog_version"
     }
   ],
-  "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
+  "note": "Snapshot refreshed through BAT13 machine-readable applicability catalog version synchronization; Supabase-applied version IDs may differ from repository filename timestamps when applied through managed tooling."
 }

@@ -40,8 +40,16 @@ jobs:
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
       - name: Validate repository contracts
         run: python scripts/validate_repo.py
+      - name: Validate DPP CRYPTO visible progress
+        run: python scripts/validate_dpp_crypto_progress.py
+      - name: Validate BAT60 Supplier Network dashboard precursor
+        run: python scripts/validate_supplier_dashboard.py
       - name: Validate DPP field traceability catalog
         run: python scripts/validate_field_catalog.py
+      - name: Validate BAT07 no-hardcoded passport values
+        run: python scripts/validate_no_hardcoded_passport_values.py
+      - name: Validate BAT05 DB/catalog access parity
+        run: python scripts/validate_field_access_catalog.py
       - name: Validate BG Battery Pilot contract
         run: python scripts/validate_bg_battery_pilot.py
       - name: Generate BG Battery Pilot non-client acceptance evidence
@@ -287,6 +295,26 @@ jobs:
           end $m06$;
           SQL
           echo "M06_MIGRATION_REPLAY_PASS"
+      - name: Run BAT01-BAT08 field provenance database subset
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_field_events_subset.sql
+      - name: Run BAT51 BAT53 BAT55 supplier network subset
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_supplier_network_subset.sql
+      - name: Run BAT59 supplier reminder API unit suite
+        run: node --test tests/api/supplier-reminders.test.cjs
+      - name: Run BAT51 BAT53 BAT54 BAT57 Supplier Network API suite
+        run: node --test tests/api/suppliers.test.cjs
+      - name: Run BAT59 supplier reminder RBAC subset
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_supplier_reminders_subset.sql
+      - name: Run BAT51 BAT53 BAT54 BAT57 Supplier Network RPC subset
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_suppliers_api_subset.sql
       - name: Run T02 green database subset integration suite
         env:
           PGPASSWORD: postgres
@@ -740,6 +768,9 @@ jobs:
             --window-size=1440,1000 --screenshot=artifacts/d03-import.png \
             'http://127.0.0.1:8000/demo/import.html?sample=1'
           python scripts/validate_import_demo.py artifacts/d03-import-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=3500 \
+            --dump-dom 'http://127.0.0.1:8000/demo/import.html?xlsx=1' > artifacts/bat16-xlsx-import-dom.html
+          python scripts/validate_xlsx_import_demo.py artifacts/bat16-xlsx-import-dom.html
 
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4000 \
             --dump-dom 'http://127.0.0.1:8000/demo/model.html?sample=1' > artifacts/d04-model-valid-dom.html

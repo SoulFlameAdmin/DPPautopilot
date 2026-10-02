@@ -1,11 +1,12 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
   "data_subjects": [
     "DPP organization users represented by Supabase Auth user IDs and organization memberships",
-    "Business organizations operating DPP records"
+    "Business organizations operating DPP records",
+    "Supplier portal contacts/users represented by business email addresses, Supabase Auth user IDs and supplier-scoped memberships"
   ],
   "processors_and_recipients": [
     {
@@ -117,9 +118,10 @@
       "processor": "Supabase",
       "tables": [
         "dpp_battery_models",
-        "dpp_battery_items"
+        "dpp_battery_items",
+        "dpp_field_events"
       ],
-      "fields": "model/manufacturer/category, battery unique identifier, lifecycle status, canonical_data JSON, creator user ID, timestamps",
+      "fields": "model/manufacturer/category, battery unique identifier, lifecycle status, canonical_data JSON, creator user ID, timestamps; field-level provenance events including value, source reference/date, access class, verification state, actor ID and timestamp",
       "retention": {
         "status": "pending_policy",
         "current_behavior": "Persists until authorized lifecycle/deletion; no automatic time-based expiry"
@@ -128,9 +130,31 @@
         "tenant scope",
         "field validation",
         "lifecycle rules",
-        "created_by actor linkage"
+        "created_by actor linkage",
+        "append-only field provenance history"
       ],
       "minimization_note": "canonical_data must remain product/business data; personal data should not be placed in flexible JSON without an approved catalog purpose"
+    },
+    {
+      "id": "field_access_catalog_runtime",
+      "tables": [
+        "dpp_field_catalog_runtime"
+      ],
+      "classification": "non_personal_configuration",
+      "purpose": "Enforce the canonical DPP field path to access-class mapping at the database boundary",
+      "location": "Supabase Postgres public DPP namespace",
+      "fields": "field_path, access_level, catalog_version, synced_at; no customer field values or personal data",
+      "retention": {
+        "status": "configuration_lifetime",
+        "current_behavior": "Retained while the corresponding canonical DPP field catalog version is supported; updated only through versioned migrations."
+      },
+      "controls": [
+        "RLS enabled",
+        "direct anon/authenticated table privileges revoked",
+        "CI parity check against data/dpp-field-catalog.json",
+        "fail-closed DP706 trigger enforcement on dpp_field_events"
+      ],
+      "processor": "Supabase"
     },
     {
       "id": "passport_records",
@@ -286,6 +310,37 @@
         "shared consume RPC requires authenticated request-user context and validated pseudonymous key format",
         "canonical 429 behavior remains process-local until shared runtime wiring is accepted"
       ]
+    },
+    {
+      "id": "supplier_network",
+      "classification": "business_supply_chain_with_contact_identifiers",
+      "purpose": "Register suppliers, receive versioned supplier product evidence, track missing data/reminders, scope supplier portal access and store detached signature evidence",
+      "location": "Supabase Postgres public DPP namespace",
+      "processor": "Supabase",
+      "tables": [
+        "dpp_suppliers",
+        "dpp_supplier_data_packages",
+        "dpp_supplier_package_verification_events",
+        "dpp_supplier_field_requirements",
+        "dpp_supplier_reminder_events",
+        "dpp_supplier_portal_members",
+        "dpp_supplier_invitations",
+        "dpp_supplier_package_signatures"
+      ],
+      "fields": "supplier legal name/external reference/status; product/component/material-scoped supplier payloads; source and verification metadata; missing field paths; reminder channel/status; invitee business email; supplier portal auth user IDs/roles; SHA-256 invite-token digest; detached signature/key references, algorithms, payload digest and timestamps",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "Supplier registry/package/history/reminder/invitation/signature records persist while the tenant relationship exists. Package, verification, reminder and signature evidence is append-oriented; accepted production retention/deletion periods are not yet finalized."
+      },
+      "controls": [
+        "tenant-scoped composite foreign keys",
+        "RLS with direct anon/authenticated table grants revoked",
+        "append-only supplier package, verification, reminder and signature evidence",
+        "raw supplier invitation token is not persisted; only SHA-256 digest is stored",
+        "supplier portal roles are supplier_editor/supplier_viewer rather than organization-wide roles",
+        "signature envelopes store no private signing keys or signing secrets"
+      ],
+      "minimization_note": "Invitee email and portal user IDs are personal/business-contact identifiers and must be limited to supplier access purposes. Flexible supplier payloads must not collect unrelated personal data."
     }
   ],
   "out_of_scope_shared_project_data": "All non-dpp_* application tables in the shared Supabase project are owned by other applications and are not part of DPP Autopilot privacy inventory.",

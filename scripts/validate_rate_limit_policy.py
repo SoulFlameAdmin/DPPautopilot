@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==9
+assert policy.get("version")==11
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
 assert policy.get("strategy")=="dual_layer_local_plus_feature_gated_shared_authenticated_runtime"
@@ -41,7 +41,7 @@ for name,(limit,window) in expected_rules.items():
     assert rules[name]["window_seconds"]==window
 
 surfaces=policy.get("surfaces",{})
-assert set(surfaces)=={"tenant","organizations","members","models","items","passport","imports","export"}
+assert set(surfaces)=={"tenant","organizations","members","models","items","passport","imports","export","supplier-reminders","suppliers"}
 api_surface_inventory={
     path.stem for path in (ROOT/"api").glob("*.js")
     if not path.name.startswith("_")
@@ -56,6 +56,8 @@ expected_surface_rules={
     "passport":{"public_GET":"public_passport_read","private_GET":"authenticated_read","POST":"authenticated_write","PATCH":"authenticated_write"},
     "imports":{"GET":"authenticated_read","POST":"import_write","PATCH":"import_write"},
     "export":{"GET":"export_read"},
+    "supplier-reminders":{"GET":"authenticated_read","POST":"authenticated_write"},
+    "suppliers":{"GET":"authenticated_read","POST":"authenticated_write"},
 }
 assert surfaces==expected_surface_rules, "R05 surface/method policy drift"
 
@@ -82,8 +84,9 @@ for token in [
 ]:
     assert token in helper, f"R05 helper missing {token}"
 
-for surface in ["tenant","organizations","members","models","items","passport","imports","export"]:
-    text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
+api_files={"tenant":"tenant","organizations":"organizations","members":"members","models":"models","items":"items","passport":"passport","imports":"imports","export":"export","supplier-reminders":"supplier-reminders","suppliers":"suppliers"}
+for surface,filename in api_files.items():
+    text=(ROOT/f"api/{filename}.js").read_text(encoding="utf-8")
     assert "require('./_rate_limit.js')" in text, f"{surface} does not import R05 limiter"
     call=f"enforceRateLimit(req,res,'{surface}')"
     assert call in text, f"{surface} does not enforce R05 limiter"
@@ -169,8 +172,8 @@ assert "feature-gated shared limiter consumes both pseudonymous buckets" in test
 assert "shared limiter fails closed when its backend is unavailable" in test_text
 assert "all authenticated API surfaces honor shared limiter 429 before business RPC" in test_text
 
-for surface in ["tenant","organizations","members","models","items","passport","imports","export"]:
-    surface_text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
+for surface,filename in api_files.items():
+    surface_text=(ROOT/f"api/{filename}.js").read_text(encoding="utf-8")
     assert "enforceSharedRateLimit" in surface_text, f"{surface} does not import shared R05 limiter"
     assert f"enforceSharedRateLimit(req,res,'{surface}'" in surface_text, f"{surface} does not wire shared R05 limiter"
 
@@ -179,4 +182,4 @@ assert any("production enablement" in x for x in limitations)
 assert any("Anonymous public passport" in x for x in limitations)
 assert any("multi-isolate" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: eight API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")
+print("R05_RATE_LIMIT_POLICY_PASS: ten API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")

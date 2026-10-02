@@ -299,6 +299,55 @@
         "code": "MEMBER_CONFLICT",
         "message": "The membership already exists."
       }
+    },
+    "supplier_reminders": {
+      "DP601": {
+        "http_status": 404,
+        "code": "SUPPLIER_NOT_FOUND",
+        "message": "The supplier was not found."
+      },
+      "DP602": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP603": {
+        "http_status": 409,
+        "code": "NO_MISSING_SUPPLIER_DATA",
+        "message": "No current missing supplier data requires a reminder."
+      }
+    },
+    "suppliers": {
+      "23503": {
+        "http_status": 409,
+        "code": "SUPPLIER_CONFLICT",
+        "message": "The supplier data conflicts with a related record."
+      },
+      "23505": {
+        "http_status": 409,
+        "code": "SUPPLIER_CONFLICT",
+        "message": "The supplier conflicts with an existing record."
+      },
+      "23514": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP601": {
+        "http_status": 404,
+        "code": "SUPPLIER_NOT_FOUND",
+        "message": "The supplier was not found."
+      },
+      "DP602": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP604": {
+        "http_status": 404,
+        "code": "SUPPLIER_PACKAGE_NOT_FOUND",
+        "message": "The supplier data package was not found."
+      }
     }
   },
   "local_codes": {
@@ -405,6 +454,10 @@
     "EVIDENCE_EXPORT_SIGNING_UNAVAILABLE": {
       "http_status": 500,
       "message": "Evidence export signing configuration is unavailable."
+    },
+    "INVALID_SUPPLIER_ID": {
+      "http_status": 400,
+      "message": "A valid supplier UUID is required."
     }
   }
 }

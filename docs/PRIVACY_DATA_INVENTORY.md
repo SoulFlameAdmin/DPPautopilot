@@ -20,7 +20,8 @@ R07 remains **RED/PARTIAL** until M01–M13 are fully accepted and retention/del
 | Auth identity | Login, recovery, account security | Supabase Auth `auth.users` | Email/phone when configured, password hash, auth/security metadata | Account-lifecycle behavior; DPP deletion/retention policy pending |
 | Tenant authorization | Membership, roles, active tenant | `dpp_organization_members`, `dpp_user_tenant_context` | User UUID + organization/role | No time expiry; lifecycle/cascade only; policy pending |
 | Organization metadata | Tenant identity/routing | `dpp_organizations` | Business name/slug | Persists to organization deletion; policy pending |
-| Battery product records | Canonical model/item data | `dpp_battery_models`, `dpp_battery_items` | Product/business data + creator user UUID | No time expiry; policy pending |
+| Battery product records | Canonical model/item data + immutable field provenance | `dpp_battery_models`, `dpp_battery_items`, `dpp_field_events` | Product/business field values, provenance/access metadata + creator/actor UUID | No time expiry; policy pending |
+| Field access catalog | DB enforcement of canonical field access classes | `dpp_field_catalog_runtime` | Non-personal configuration: field path, access class, catalog version, sync timestamp | Configuration lifetime; versioned migration updates only |
 | Passports/history | Public/private DPP projection and history | `dpp_passports`, `dpp_passport_versions` | Regulatory product data, tenant-confidential payload, actor UUID | Version history persists; period pending |
 | Import staging | Mapping/validation/transactional import | `dpp_import_mappings`, `dpp_import_runs`, `dpp_import_rows` | Product/business staging + creator UUID | Owner/admin terminal `invalid`/`committed` purge after minimum 30 days is implemented; final policy acceptance pending |
 | Registry submissions | External registry workflow/retry evidence | `dpp_registry_submissions` | Request/response payload, refs/errors, actor UUID | Operational/legal period pending |
@@ -67,3 +68,10 @@ The live Supabase project contains unrelated non-DPP application tables. DPP mig
 - This affects only the audit copy; source business/regulatory rows are not modified.
 - The helper is not executable by `anon` or `authenticated`.
 - This does **not** define the final audit retention period or broader personal/confidential-field minimization policy.
+
+
+## Battery Trust supplier data
+
+Supplier Network adds tenant-scoped supplier business records, versioned product/component/material packages, verification evidence, missing-data/reminder history, supplier-portal memberships/invitations and detached signature envelopes. Supplier invitation email addresses and portal user IDs are contact/identity data and must be used only for supplier-access and compliance collaboration purposes.
+
+Raw invitation tokens are not persisted; only a SHA-256 digest is stored. Supplier package, verification, reminder and signature evidence is append-oriented. Detached signature envelopes contain public/key references and signature evidence only — never private signing keys or secrets. Production retention/deletion periods for these records remain part of the R07/R08 acceptance work.

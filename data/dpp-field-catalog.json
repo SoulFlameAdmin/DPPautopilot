@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "2026-09-18",
+  "catalogVersion": "2026-09-18-applicability-v1",
   "scope": "Battery DPP engineering contract based on the current consolidated Regulation (EU) 2023/1542 and current Commission DPP guidance. This is not legal advice.",
   "sources": [
     "Regulation (EU) 2023/1542, current consolidated version 2026-08-13",
@@ -23,7 +23,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.manufacturer_name",
       "apiTarget": "BatteryModel.manufacturer.name",
-      "uiTarget": "modelForm.manufacturerName"
+      "uiTarget": "modelForm.manufacturerName",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.identification.manufacturer.postal_address",
@@ -37,7 +40,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.identification.manufacturer.postal_address",
       "apiTarget": "BatteryModel.manufacturer.postalAddress",
-      "uiTarget": "modelForm.manufacturerPostalAddress"
+      "uiTarget": "modelForm.manufacturerPostalAddress",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.identification.manufacturer.contact",
@@ -51,7 +57,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.identification.manufacturer.contact",
       "apiTarget": "BatteryModel.manufacturer.contact",
-      "uiTarget": "modelForm.manufacturerContact"
+      "uiTarget": "modelForm.manufacturerContact",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.identification.category",
@@ -66,7 +75,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.category",
       "apiTarget": "BatteryModel.category",
-      "uiTarget": "modelForm.category"
+      "uiTarget": "modelForm.category",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.identification.model_id",
@@ -80,7 +92,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.model_identifier",
       "apiTarget": "BatteryModel.modelId",
-      "uiTarget": "modelForm.modelId"
+      "uiTarget": "modelForm.modelId",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.identification.place_of_manufacture",
@@ -94,7 +109,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.identification.place_of_manufacture",
       "apiTarget": "BatteryModel.placeOfManufacture",
-      "uiTarget": "modelForm.placeOfManufacture"
+      "uiTarget": "modelForm.placeOfManufacture",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.identification.date_of_manufacture",
@@ -108,7 +126,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.identification.date_of_manufacture",
       "apiTarget": "BatteryModel.dateOfManufacture",
-      "uiTarget": "modelForm.dateOfManufacture"
+      "uiTarget": "modelForm.dateOfManufacture",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.physical.weight_kg",
@@ -122,7 +143,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.physical.weight_kg",
       "apiTarget": "BatteryModel.weightKg",
-      "uiTarget": "modelForm.weightKg"
+      "uiTarget": "modelForm.weightKg",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.rated_capacity_ah",
@@ -137,7 +161,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.rated_capacity_ah",
       "apiTarget": "BatteryModel.ratedCapacityAh",
-      "uiTarget": "modelForm.ratedCapacityAh"
+      "uiTarget": "modelForm.ratedCapacityAh",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.composition.chemistry",
@@ -152,7 +179,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.composition.chemistry",
       "apiTarget": "BatteryModel.composition.chemistry",
-      "uiTarget": "modelForm.chemistry"
+      "uiTarget": "modelForm.chemistry",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.composition.hazardous_substances",
@@ -167,7 +197,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.composition.hazardous_substances",
       "apiTarget": "BatteryModel.composition.hazardousSubstances",
-      "uiTarget": "modelForm.hazardousSubstances"
+      "uiTarget": "modelForm.hazardousSubstances",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.safety.usable_extinguishing_agent",
@@ -181,7 +214,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.safety.usable_extinguishing_agent",
       "apiTarget": "BatteryModel.safety.usableExtinguishingAgent",
-      "uiTarget": "modelForm.extinguishingAgent"
+      "uiTarget": "modelForm.extinguishingAgent",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.composition.critical_raw_materials",
@@ -196,7 +232,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.composition.critical_raw_materials",
       "apiTarget": "BatteryModel.composition.criticalRawMaterials",
-      "uiTarget": "modelForm.criticalRawMaterials"
+      "uiTarget": "modelForm.criticalRawMaterials",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.carbon_footprint",
@@ -209,7 +248,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.carbon_footprint",
       "apiTarget": "BatteryModel.carbonFootprint",
-      "uiTarget": "modelForm.carbonFootprint"
+      "uiTarget": "modelForm.carbonFootprint",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.responsible_sourcing",
@@ -222,7 +264,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.responsible_sourcing",
       "apiTarget": "BatteryModel.responsibleSourcing",
-      "uiTarget": "modelForm.responsibleSourcing"
+      "uiTarget": "modelForm.responsibleSourcing",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.recycled_content",
@@ -235,7 +280,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.recycled_content",
       "apiTarget": "BatteryModel.recycledContent",
-      "uiTarget": "modelForm.recycledContent"
+      "uiTarget": "modelForm.recycledContent",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.renewable_content_share",
@@ -248,7 +296,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.renewable_content_share",
       "apiTarget": "BatteryModel.renewableContentShare",
-      "uiTarget": "modelForm.renewableContentShare"
+      "uiTarget": "modelForm.renewableContentShare",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.voltage",
@@ -261,7 +312,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.voltage",
       "apiTarget": "BatteryModel.voltage",
-      "uiTarget": "modelForm.voltage"
+      "uiTarget": "modelForm.voltage",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.power_capability",
@@ -274,7 +328,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.power_capability",
       "apiTarget": "BatteryModel.powerCapability",
-      "uiTarget": "modelForm.powerCapability"
+      "uiTarget": "modelForm.powerCapability",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.expected_lifetime",
@@ -287,7 +344,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.expected_lifetime",
       "apiTarget": "BatteryModel.expectedLifetime",
-      "uiTarget": "modelForm.expectedLifetime"
+      "uiTarget": "modelForm.expectedLifetime",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.exhaustion_capacity_threshold",
@@ -300,7 +360,17 @@
       "required": "conditional_ev",
       "dbTarget": "dpp_battery_models.canonical_data.exhaustion_capacity_threshold",
       "apiTarget": "BatteryModel.exhaustionCapacityThreshold",
-      "uiTarget": "modelForm.exhaustionCapacityThreshold"
+      "uiTarget": "modelForm.exhaustionCapacityThreshold",
+      "applicability": {
+        "mode": "when",
+        "all": [
+          {
+            "path": "model.identification.category",
+            "operator": "equals",
+            "value": "electric_vehicle"
+          }
+        ]
+      }
     },
     {
       "path": "model.storage_temperature",
@@ -313,7 +383,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.storage_temperature",
       "apiTarget": "BatteryModel.storageTemperature",
-      "uiTarget": "modelForm.storageTemperature"
+      "uiTarget": "modelForm.storageTemperature",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.warranty_calendar_life",
@@ -326,7 +399,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.warranty_calendar_life",
       "apiTarget": "BatteryModel.warrantyCalendarLife",
-      "uiTarget": "modelForm.warrantyCalendarLife"
+      "uiTarget": "modelForm.warrantyCalendarLife",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.energy_efficiency",
@@ -339,7 +415,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.energy_efficiency",
       "apiTarget": "BatteryModel.energyEfficiency",
-      "uiTarget": "modelForm.energyEfficiency"
+      "uiTarget": "modelForm.energyEfficiency",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.internal_resistance",
@@ -352,7 +431,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.internal_resistance",
       "apiTarget": "BatteryModel.internalResistance",
-      "uiTarget": "modelForm.internalResistance"
+      "uiTarget": "modelForm.internalResistance",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.c_rate_test",
@@ -365,7 +447,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.c_rate_test",
       "apiTarget": "BatteryModel.cRateTest",
-      "uiTarget": "modelForm.cRateTest"
+      "uiTarget": "modelForm.cRateTest",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.markings",
@@ -378,7 +463,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.markings",
       "apiTarget": "BatteryModel.markings",
-      "uiTarget": "modelForm.markings"
+      "uiTarget": "modelForm.markings",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.eu_declaration_of_conformity",
@@ -391,7 +479,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.eu_declaration_of_conformity",
       "apiTarget": "BatteryModel.euDeclarationOfConformity",
-      "uiTarget": "modelForm.euDeclaration"
+      "uiTarget": "modelForm.euDeclaration",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.waste_information",
@@ -404,7 +495,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.waste_information",
       "apiTarget": "BatteryModel.wasteInformation",
-      "uiTarget": "modelForm.wasteInformation"
+      "uiTarget": "modelForm.wasteInformation",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.restricted_composition",
@@ -417,7 +511,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.restricted_composition",
       "apiTarget": "RestrictedBatteryModel.composition",
-      "uiTarget": "restrictedModel.composition"
+      "uiTarget": "restrictedModel.composition",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.spares",
@@ -430,7 +527,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.spares",
       "apiTarget": "RestrictedBatteryModel.spares",
-      "uiTarget": "restrictedModel.spares"
+      "uiTarget": "restrictedModel.spares",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.disassembly",
@@ -448,7 +548,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.disassembly",
       "apiTarget": "RestrictedBatteryModel.disassembly",
-      "uiTarget": "restrictedModel.disassembly"
+      "uiTarget": "restrictedModel.disassembly",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.safety_measures",
@@ -461,7 +564,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.safety_measures",
       "apiTarget": "RestrictedBatteryModel.safetyMeasures",
-      "uiTarget": "restrictedModel.safetyMeasures"
+      "uiTarget": "restrictedModel.safetyMeasures",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "model.compliance_test_reports",
@@ -474,7 +580,10 @@
       "required": true,
       "dbTarget": "dpp_battery_models.canonical_data.compliance_test_reports",
       "apiTarget": "AuthorityBatteryModel.complianceTestReports",
-      "uiTarget": "authorityModel.testReports"
+      "uiTarget": "authorityModel.testReports",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "item.unique_identifier",
@@ -488,7 +597,10 @@
       "required": true,
       "dbTarget": "dpp_battery_items.unique_identifier",
       "apiTarget": "BatteryItem.uniqueIdentifier",
-      "uiTarget": "itemForm.uniqueIdentifier"
+      "uiTarget": "itemForm.uniqueIdentifier",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "item.performance_history",
@@ -501,7 +613,10 @@
       "required": true,
       "dbTarget": "dpp_battery_items.canonical_data.performance_history",
       "apiTarget": "BatteryItem.performanceHistory",
-      "uiTarget": "itemForm.performanceHistory"
+      "uiTarget": "itemForm.performanceHistory",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "item.state_of_health",
@@ -514,7 +629,10 @@
       "required": true,
       "dbTarget": "dpp_battery_items.canonical_data.state_of_health",
       "apiTarget": "BatteryItem.stateOfHealth",
-      "uiTarget": "itemForm.stateOfHealth"
+      "uiTarget": "itemForm.stateOfHealth",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "item.lifecycle_status",
@@ -527,7 +645,10 @@
       "required": true,
       "dbTarget": "dpp_battery_items.lifecycle_status",
       "apiTarget": "BatteryItem.lifecycleStatus",
-      "uiTarget": "itemForm.lifecycleStatus"
+      "uiTarget": "itemForm.lifecycleStatus",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "item.usage.cycles",
@@ -540,7 +661,10 @@
       "required": true,
       "dbTarget": "dpp_battery_items.canonical_data.usage.cycles",
       "apiTarget": "BatteryItem.usage.cycles",
-      "uiTarget": "itemForm.cycleCount"
+      "uiTarget": "itemForm.cycleCount",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "item.usage.events",
@@ -553,7 +677,10 @@
       "required": true,
       "dbTarget": "dpp_battery_items.canonical_data.usage.events",
       "apiTarget": "BatteryItem.usage.events",
-      "uiTarget": "itemForm.events"
+      "uiTarget": "itemForm.events",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "item.telemetry.environment",
@@ -566,7 +693,10 @@
       "required": true,
       "dbTarget": "dpp_battery_items.canonical_data.telemetry.environment",
       "apiTarget": "BatteryItem.telemetry.environment",
-      "uiTarget": "itemForm.environmentHistory"
+      "uiTarget": "itemForm.environmentHistory",
+      "applicability": {
+        "mode": "always"
+      }
     },
     {
       "path": "item.telemetry.state_of_charge",
@@ -579,7 +709,10 @@
       "required": true,
       "dbTarget": "dpp_battery_items.canonical_data.telemetry.state_of_charge",
       "apiTarget": "BatteryItem.telemetry.stateOfCharge",
-      "uiTarget": "itemForm.stateOfChargeHistory"
+      "uiTarget": "itemForm.stateOfChargeHistory",
+      "applicability": {
+        "mode": "always"
+      }
     }
   ],
   "storageModel": "M04 schema: selected identity/status fields are typed columns; all remaining canonical battery model/item requirement fields are stored under tenant-scoped JSONB canonical_data paths and remain individually traceable through dbTarget."

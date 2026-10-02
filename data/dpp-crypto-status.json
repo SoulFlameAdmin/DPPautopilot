@@ -1,0 +1,156 @@
+{
+  "project": "DPP CRYPTO",
+  "version": "1.0",
+  "sourceOfTruth": "docs/DPP_CRYPTO_INTEGRATION_PLAN.md",
+  "totalPoints": 25,
+  "counts": {
+    "green": 0,
+    "yellow": 1,
+    "red": 24,
+    "blocked": 0
+  },
+  "greenPercent": 0,
+  "currentTask": "CR25 — Visible progress tracker",
+  "lastCompletedTask": null,
+  "nextTask": "CR01 — Threat model",
+  "blocker": null,
+  "blockerType": null,
+  "branch": "feature/battery-platform-v3-data-engine-20261002",
+  "pullRequest": {
+    "number": 240,
+    "url": "https://github.com/SoulFlameAdmin/DPPautopilot/pull/240"
+  },
+  "trackedCommitSha": "ec5e0b9ec7d09da6fd36be582277385e9843a683",
+  "ci": {
+    "state": "queued",
+    "detail": "CI, M25 acceptance audit, Cross-browser and U07 visual regression are queued for the tracker implementation."
+  },
+  "updatedAt": "2026-10-02T02:02:00+03:00",
+  "points": [
+    {
+      "id": "CR01",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR02",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR03",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR04",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR05",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR06",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR07",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR08",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR09",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR10",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR11",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR12",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR13",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR14",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR15",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR16",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR17",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR18",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR19",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR20",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR21",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR22",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR23",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR24",
+      "status": "red",
+      "evidence": "Not yet evidence-backed."
+    },
+    {
+      "id": "CR25",
+      "status": "yellow",
+      "evidence": "Progress tracker implementation is being added in PR #240; GREEN requires CI/evidence."
+    }
+  ]
+}
