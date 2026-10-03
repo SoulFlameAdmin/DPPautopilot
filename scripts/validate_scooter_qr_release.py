@@ -46,8 +46,8 @@ def main() -> None:
 
     vercel = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
     rewrites = vercel.get("rewrites", [])
-    passport_index = next((i for i,r in enumerate(rewrites) if r.get("source") == "/passport" and r.get("destination") == "/live/passport.html"), None)
-    qr_index = next((i for i,r in enumerate(rewrites) if r.get("source") == "/qr" and r.get("destination") == "/live/qr.html"), None)
+    passport_index = next((i for i,r in enumerate(rewrites) if r.get("source") == "/passport" and r.get("destination") == "/live/passport"), None)
+    qr_index = next((i for i,r in enumerate(rewrites) if r.get("source") == "/qr" and r.get("destination") == "/live/qr"), None)
     catchall_index = next((i for i,r in enumerate(rewrites) if r.get("source") == "/((?!data/|api/).*)"), None)
     require(passport_index is not None, "live /passport rewrite missing")
     require(qr_index is not None, "live /qr rewrite missing")
