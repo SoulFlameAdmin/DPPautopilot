@@ -46,8 +46,12 @@ function setState(kind, message) {
 
   const target = passportUrl(identifier);
   $('encodedUrl').textContent = target;
-  $('openPassport').href = target;\n  const topLink=$('openPassportTop'); if(topLink) topLink.href=target;
+  $('openPassport').href = target;
+  const topLink=$('openPassportTop');
+  if(topLink) topLink.href=target;
   $('downloadQr').href = qrUrl(identifier,true);
+  const printButton=$('printLabel');
+  if(printButton) printButton.disabled=true;
 
   try {
     setState('checking','Проверка на активния публичен паспорт…');
@@ -65,6 +69,7 @@ function setState(kind, message) {
     document.body.dataset.qrReady = 'true';
     document.body.dataset.qrKind = 'production-public-passport-url';
     document.body.dataset.qrIdentifier = identifier;
+    if(printButton) printButton.disabled=false;
     $('passportMeta').innerHTML =
       '<strong>ACTIVE</strong> · passport ' + esc(passport.passport_id) +
       ' · updated ' + esc(passport.updated_at);
@@ -76,4 +81,7 @@ function setState(kind, message) {
   }
 })();
 
-$('printLabel').addEventListener('click',()=>window.print());
+$('printLabel').addEventListener('click',()=>{
+  if(document.body.dataset.qrReady!=='true') return;
+  window.print();
+});
