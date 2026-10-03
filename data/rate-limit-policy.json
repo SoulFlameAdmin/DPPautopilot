@@ -66,6 +66,9 @@
       "POST": "authenticated_write",
       "PATCH": "authenticated_write",
       "DELETE": "authenticated_write"
+    },
+    "qr": {
+      "GET": "public_passport_read"
     }
   },
   "response": {
