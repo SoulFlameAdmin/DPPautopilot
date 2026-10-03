@@ -4,3 +4,31 @@
     .badge{font-size:11px;color:var(--blue);font-weight:800;letter-spacing:.14em;text-transform:uppercase}.qr{display:grid;place-items:center;background:white;border-radius:14px;padding:18px;width:min(360px,100%);margin:22px auto}
     .qr img{width:100%;height:auto}.url{font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#b9c8da;word-break:break-all;padding:12px;border:1px solid var(--line);border-radius:10px}
     .ok{color:var(--green);font-weight:750}.note{color:var(--muted);font-size:12px;margin-top:10px}a{color:#cbd7e5}
+
+.top-row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px}
+.action-link{color:#cbd7e5;text-decoration:none}
+.label-card{position:relative}
+.identifier-block{margin-top:18px}
+.mini-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.identifier{font:700 15px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
+.status{margin:14px 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.status.ok{color:var(--green);border-color:#245d43}
+.status.error{color:#ff6b7a;border-color:#66303a}
+.status.checking{color:#c4d1df}
+.qr-live img{display:block;width:100%;height:auto}
+.qr-loading,.qr-error{color:#55606c;text-align:center;padding:40px 14px}
+.passport-meta{font-size:12px;color:var(--muted);margin:10px 0 16px;overflow-wrap:anywhere}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.button{appearance:none;border:1px solid var(--line);background:#101722;color:var(--text);padding:10px 14px;border-radius:10px;text-decoration:none;font:700 13px/1 system-ui,sans-serif;cursor:pointer}
+.button.primary{background:#e8f1ff;color:#08111e;border-color:#e8f1ff}
+@media(max-width:620px){.top-row{align-items:flex-start}.actions{flex-direction:column}.button{text-align:center}}
+@media print{
+  body{background:#fff;color:#000}
+  .shell{max-width:95mm;padding:0}
+  .top-row,.actions,.note{display:none!important}
+  .card{border:0;background:#fff;padding:0}
+  .badge,.status,.passport-meta,.mini-label,.identifier,.url{color:#000}
+  .qr{width:42mm;margin:4mm auto;padding:2mm;border:1px solid #000}
+}
+
+.button:disabled{opacity:.45;cursor:not-allowed}

@@ -45,6 +45,7 @@
     "models",
     "items",
     "passport",
+    "qr",
     "imports",
     "export"
   ],
