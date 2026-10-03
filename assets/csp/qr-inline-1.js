@@ -46,7 +46,7 @@ function setState(kind, message) {
 
   const target = passportUrl(identifier);
   $('encodedUrl').textContent = target;
-  $('openPassport').href = target;
+  $('openPassport').href = target;\n  const topLink=$('openPassportTop'); if(topLink) topLink.href=target;
   $('downloadQr').href = qrUrl(identifier,true);
 
   try {
