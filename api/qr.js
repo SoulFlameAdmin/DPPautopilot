@@ -2,6 +2,7 @@
 
 const QRCode = require('qrcode');
 const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
+const { startRequestObservability } = require('./_observability.js');
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -47,6 +48,7 @@ function passportUrl(identifier, baseUrl) {
 }
 
 async function handler(req, res) {
+  startRequestObservability(req,res,'qr');
   const rateLimit = enforceRateLimit(req,res,'qr');
   if (!rateLimit.allowed) return json(res, 429, rateLimitBody());
 
