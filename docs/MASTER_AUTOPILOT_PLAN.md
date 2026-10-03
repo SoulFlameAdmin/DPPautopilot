@@ -712,3 +712,7 @@ Append evidence here only after verification.
 - Live canonical HTTPS checks on `/`, `/data/master-plan.json`, and `/api/models` returned respectively 200, 200 and the expected unauthenticated 401 `AUTH_REQUIRED`. All three expose the committed CSP/HSTS/nosniff/frame/referrer/permissions headers; CSP contains neither `'unsafe-inline'` nor `'unsafe-eval'`; the data route is `no-store, max-age=0`; the protected API exposes a request correlation ID.
 - HTTPS production fetch through the TLS-validating Vercel connector completed without certificate/hostname error. Concrete deployment/route/header/TLS evidence is recorded in `data/security-headers-policy.json` and is now enforced by `scripts/validate_security_headers.py` whenever R02 is GREEN.
 - R02 acceptance criteria are satisfied. Status: GREEN.
+
+## Current main productization execution queue
+
+The verified backend/core is now followed by the customer-productization queue in [NEXT_MAIN_PRODUCTIZATION_PLAN.md](./NEXT_MAIN_PRODUCTIZATION_PLAN.md). The active item is **STEP 01 — SF Partners DPP official tab / entry**. This queue is operational prioritization and does not silently mark existing gated MASTER tasks GREEN.
