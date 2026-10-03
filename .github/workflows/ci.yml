@@ -178,6 +178,8 @@ jobs:
         run: node --test tests/api/items.test.cjs
       - name: Run M19 passport HTTP contract unit tests
         run: node --test tests/api/passport.test.cjs
+      - name: Run QR Normal Version HTTP contract unit tests
+        run: node --test tests/api/qr.test.cjs
       - name: Run M20 imports HTTP contract unit tests
         run: node --test tests/api/imports.test.cjs
       - name: Run M21 export HTTP contract unit tests
