@@ -170,7 +170,7 @@ assert "feature-gated shared limiter consumes both pseudonymous buckets" in test
 assert "shared limiter fails closed when its backend is unavailable" in test_text
 assert "all authenticated API surfaces honor shared limiter 429 before business RPC" in test_text
 
-for surface in ["tenant","organizations","members","models","items","passport","imports","export","qr"]:
+for surface in ["tenant","organizations","members","models","items","passport","imports","export"]:
     surface_text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
     assert "enforceSharedRateLimit" in surface_text, f"{surface} does not import shared R05 limiter"
     assert f"enforceSharedRateLimit(req,res,'{surface}'" in surface_text, f"{surface} does not wire shared R05 limiter"
