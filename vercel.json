@@ -2,6 +2,14 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/passport",
+      "destination": "/live/passport.html"
+    },
+    {
+      "source": "/qr",
+      "destination": "/live/qr.html"
+    },
+    {
       "source": "/((?!data/|api/).*)",
       "destination": "/index.html"
     }
