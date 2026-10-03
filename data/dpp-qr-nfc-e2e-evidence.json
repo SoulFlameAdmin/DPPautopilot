@@ -1,0 +1,50 @@
+{
+  "schema": "dpp.qr-nfc.e2e.v1",
+  "test_id": "BORKO-NTAG215-2026-10-02",
+  "captured_date": "2026-10-02",
+  "source_of_truth": "GitHub Issue #241 [STATUS] [BORKO PHYSICAL E2E PASS]",
+  "battery": {
+    "public_identifier": "BAT-SF-NFC-0001",
+    "carrier": "NTAG215",
+    "status": "active"
+  },
+  "canonical_url": "https://frhletkiuupgksmgxoxc.supabase.co/functions/v1/sf-dpp-passport?identifier=BAT-SF-NFC-0001",
+  "renderer": {
+    "type": "redirected_human_renderer",
+    "host": "dpp-renderer-production.up.railway.app",
+    "canonical_url_changed": false
+  },
+  "results": {
+    "public_url": "PASS",
+    "correct_battery_data": "PASS",
+    "human_page_render": "PASS",
+    "qr_scan": "PASS",
+    "nfc_write": "PASS",
+    "nfc_read_back": "PASS",
+    "nfc_tap_open": "PASS",
+    "same_passport": "PASS"
+  },
+  "tag_observations": {
+    "writable": true,
+    "locked_read_only": false,
+    "nfc_tools_signature": "Invalid"
+  },
+  "security_boundary": {
+    "classification": "NDEF_URL_CARRIER_E2E_ONLY",
+    "proves": [
+      "QR and NFC can carry the same canonical public DPP URL",
+      "phone can resolve the canonical URL to the same live public passport",
+      "NDEF write and read-back work on the tested NTAG215"
+    ],
+    "does_not_prove": [
+      "cryptographic tag authenticity",
+      "non-exportable device key custody",
+      "challenge-response proof",
+      "anti-clone resistance",
+      "production Secure NFC hardware acceptance"
+    ],
+    "eligible_secure_nfc_cr_gates": [],
+    "not_evidence_for": ["CR02", "CR13", "CR24"]
+  },
+  "overall_result": "PASS"
+}

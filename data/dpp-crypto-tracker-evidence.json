@@ -1,0 +1,27 @@
+{
+  "schema": "dpp.crypto.tracker.evidence.v1",
+  "result": "PENDING",
+  "public_url": "https://dpp-autopilot.vercel.app/demo/dpp-crypto-progress.html",
+  "http_status": null,
+  "status_json_match": false,
+  "observed_at": null,
+  "observer": null,
+  "last_attempt": {
+    "date": "2026-10-04",
+    "head": "8178efc3329f2dfb9cd6f51cbc50e24b5ed167d4",
+    "dpp_crypto_run": 37158485257,
+    "dpp_crypto_result": "SUCCESS",
+    "deployment_result": "FAIL",
+    "deployment_provider": "Vercel",
+    "deployment_reason": "Deployment rate limited — retry in 24 hours.",
+    "independent_http_probe": "INCONCLUSIVE_DNS_UNAVAILABLE_FROM_CHECKER",
+    "note": "CR25 contract/consistency validation is PASS, but deployed reachability is not proven. Vercel rejected the new deployment due to build-rate-limit. Do not promote CR25 until an independent HTTPS 200 probe validates both the tracker page and matching deployed status JSON."
+  },
+  "green_gate": {
+    "requires_https": true,
+    "requires_http_200": true,
+    "requires_status_json_match": true,
+    "requires_timestamp": true,
+    "requires_independent_observer": true
+  }
+}
