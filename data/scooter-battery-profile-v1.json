@@ -15,7 +15,7 @@
     "accessClasses": [
       "public",
       "legitimate_interest",
-      "authority"
+      "authority_only"
     ]
   },
   "manufacturerInputs": [
