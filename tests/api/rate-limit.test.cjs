@@ -34,13 +34,14 @@ function json(res){return JSON.parse(res.body);}
 test.beforeEach(()=>limiter._test.resetForTests());
 
 test('versioned policy explicitly covers organization discovery GET',()=>{
-  assert.equal(limiter.policy.version,9);
+  assert.equal(limiter.policy.version,10);
   assert.equal(limiter.policy.surfaces.organizations.GET,'authenticated_read');
   assert.equal(limiter.policy.surfaces.organizations.POST,'authenticated_write');
 });
 
 test('classifies public/authenticated/import/export budgets deterministically',()=>{
   assert.equal(limiter.classify('passport',req('GET',null,{identifier:'urn:dpp:x'},null)),'public_passport_read');
+  assert.equal(limiter.classify('qr',req('GET',null,{identifier:'urn:dpp:x'},null)),'public_passport_read');
   assert.equal(limiter.classify('models',req('GET')),'authenticated_read');
   assert.equal(limiter.classify('models',req('POST',{})),'authenticated_write');
   assert.equal(limiter.classify('imports',req('PATCH',{})),'import_write');
