@@ -1,0 +1,58 @@
+{
+  "schema": "dpp.crypto.cr02.procurement.v1",
+  "observed_date": "2026-10-04",
+  "status": "ORDERABLE_NOT_RECEIVED",
+  "lab_target": {
+    "manufacturer": "NXP",
+    "part_number": "NTAG-X-DNA-EVAL",
+    "kit_contents": "3 evaluation boards",
+    "manufacturer_listing": {
+      "status": "Active",
+      "stock": 41,
+      "price_usd": 30.00,
+      "shipping_note": "Normally ships 1-2 business days",
+      "source": "https://www.nxp.com/design/design-center/development-boards-and-designs/NTAG-X-DNA-EVAL"
+    },
+    "authorized_distributor_snapshots": [
+      {
+        "distributor": "Mouser",
+        "stock": 34,
+        "unit_price_usd": 44.92,
+        "source": "https://www.mouser.com/en/ProductDetail/NXP-Semiconductors/NTAG-X-DNA-EVAL"
+      },
+      {
+        "distributor": "DigiKey",
+        "stock": 4,
+        "unit_price_usd": 42.00,
+        "source": "https://www.digikey.com/en/products/detail/nxp-usa-inc/NTAG-X-DNA-EVAL/26742166"
+      }
+    ]
+  },
+  "production_candidate": {
+    "manufacturer": "NXP",
+    "part_number": "NT4PLDJHN2/2003LXJ",
+    "package": "HVQFN-EP-20",
+    "authorized_distributor_snapshots": [
+      {
+        "distributor": "Mouser",
+        "stock": 5766,
+        "source": "https://www.mouser.com/en/ProductDetail/NXP-Semiconductors/NT4PLDJHN2-2003LXJ"
+      },
+      {
+        "distributor": "Farnell Germany",
+        "stock": 5640,
+        "unit_price_eur_1plus": 1.61,
+        "source": "https://de.farnell.com/en-DE/nxp/nt4pldjhn2-2003lxj/secure-authentication-i2c-hvqfn/dp/4728894"
+      }
+    ]
+  },
+  "sourcing_rule": "Use NXP or an NXP-authorized distributor. Do not use gray-market Secure NFC parts for CR02/CR13/CR24 evidence.",
+  "green_gate": {
+    "order_or_possession_evidence_required": true,
+    "exact_received_part_required": true,
+    "target_phone_test_required": true,
+    "provisioning_evidence_required": true,
+    "configuration_lock_evidence_required": true
+  },
+  "qualifies_cr02_green_now": false
+}
