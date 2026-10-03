@@ -1,0 +1,21 @@
+{
+  "schema": "dpp.crypto.tracker.evidence.v1",
+  "result": "PENDING",
+  "public_url": "https://dpp-autopilot.vercel.app/demo/dpp-crypto-progress.html",
+  "http_status": null,
+  "status_json_match": false,
+  "observed_at": null,
+  "observer": null,
+  "last_attempt": {
+    "date": "2026-10-04",
+    "result": "INCONCLUSIVE",
+    "note": "Independent checker could not resolve/reach the Vercel host from the current environment. Previous GitHub/Vercel evidence showed build-rate-limit failure. Do not promote CR25 until a real external HTTP 200 probe validates the tracker page and matching deployed status JSON."
+  },
+  "green_gate": {
+    "requires_https": true,
+    "requires_http_200": true,
+    "requires_status_json_match": true,
+    "requires_timestamp": true,
+    "requires_independent_observer": true
+  }
+}
