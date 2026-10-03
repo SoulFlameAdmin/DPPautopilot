@@ -5,23 +5,23 @@
 
 ## Main next steps
 
-1. **SF Partners DPP official tab / entry** — make DPP a first-class SoulFlame Partners product entry, immediately after Restaurant OS, linking to the DPP Autopilot product surface. **Status: IN PROGRESS**
-2. **Demo company login** — one-click isolated demo company session with resettable synthetic data.
+1. **SF Partners DPP official tab / entry** — make DPP a first-class SoulFlame Partners product entry, immediately after Restaurant OS, linking to the DPP Autopilot product surface. **Status: MERGED / LIVE DEPLOY BLOCKED BY VERCEL RATE LIMIT** — SoulFlame commit `8b3df39b5321e8e70f7da16032043923298c6d3a`; Deployment Safety PASS.
+2. **Demo company login** — one-click isolated demo company session with resettable synthetic data. **Status: IMPLEMENTED / LIVE DEPLOY BLOCKED BY VERCEL RATE LIMIT** — SoulFlame commit `4c8d228f498fd87c48fb883a73b94f65c1772e63`; one-click demo tenant + reset + explicit no-production-write boundary; Deployment Safety PASS.
 3. **Production company registration** — email verification, company profile, DPP product selection, plan and onboarding request.
 4. **Merge Early Partner handoff into the company workspace** — partner code/status/unlock/install flow visible from one customer journey.
-5. **Unified Company Dashboard** — models, batteries, passports, QR/print, imports, integrations, printers, team, support and billing.
-6. **Produce X units workflow** — select model + quantity -> create unique battery items, identifiers, passports and QR carriers atomically.
-7. **Production QR binding flow** — generate -> bind carrier -> print -> scan -> exact public passport.
-8. **DPP Print Center** — single/batch labels, templates, readable ID, preview, reprint controls and queue state.
-9. **SF DPP Connector desktop/local agent** — authenticated local bridge for printer, ERP/MES/BMS and diagnostics.
-10. **Printer discovery and test print** — discover local/network printers, choose default, test, retry and job status.
+5. **Unified Company Dashboard** — models, batteries, passports, QR/print, imports, integrations, printers, team, support and billing. **Status: DEMO SURFACE PARTIAL** — Models, Production, QR/Print, Integrations, Connector and Registration are present; production auth/team/import/support/billing wiring remains.
+6. **Produce X units workflow** — select model + quantity -> create unique battery items, identifiers, passports and QR carriers atomically. **Status: DEMO IMPLEMENTED / PRODUCTION NOT CLAIMED** — browser-local generation works; transactional DPP API/Supabase provisioning remains.
+7. **Production QR binding flow** — generate -> bind carrier -> print -> scan -> exact public passport. **Status: DEMO IMPLEMENTED / PHYSICAL PRODUCTION BINDING PENDING** — unique demo passport URL + scannable QR path exists; live `dpp_physical_carriers` acceptance remains.
+8. **DPP Print Center** — single/batch labels, templates, readable ID, preview, reprint controls and queue state. **Status: DEMO PARTIAL** — single and batch browser print + label preview work; production printer queue/templates/retry remain.
+9. **SF DPP Connector desktop/local agent** — authenticated local bridge for printer, ERP/MES/BMS and diagnostics. **Status: DEMO SIMULATION ONLY** — UI/contract concept exists; signed local agent not yet built.
+10. **Printer discovery and test print** — discover local/network printers, choose default, test, retry and job status. **Status: DEMO SIMULATION ONLY** — browser demo simulates discovery and test print; real enumeration requires the local Connector.
 11. **Customer-grade CSV import acceptance** — upload, map, validate, fix errors and commit into live tenant data.
 12. **Excel (.xlsx) first-class import** — workbook intake, sheet/column mapping and saved reusable mappings.
 13. **Customer integration API layer** — tenant credentials/OAuth/API keys, docs, webhooks, limits and examples.
 14. **ERP/MES connector framework** — reusable adapters instead of one-off product forks.
 15. **BMS/machine connector framework** — approved Modbus/OPC UA/MQTT/CAN-gateway adapters where customer infrastructure supports them.
 16. **Cloud Connector Wizard** — endpoint/credential setup, field mapping, sync preview, health and error handling.
-17. **Pre-payment Integration Assessment** — capture ERP/MES/BMS/API/printer/volume/sample-file requirements before provisioning.
+17. **Pre-payment Integration Assessment** — capture ERP/MES/BMS/API/printer/volume/sample-file requirements before provisioning. **Status: DEMO FORM IMPLEMENTED** — ERP/MES, BMS, API/cloud, printer, volume and format are captured in the demo; production persistence/handoff remains.
 18. **Supplier Portal UI** — supplier invitation, scoped missing fields, evidence and package submission without tenant-wide access.
 19. **Final Public Passport UX** — stable public route, mobile-first BG/EN presentation, access boundaries, lifecycle/revoked/replaced state.
 20. **EU Registry test integration acceptance** — real approved test credentials/specification, submission, status, retry and evidence; no unsupported compliance claim before proof.
@@ -43,3 +43,10 @@
 **STEP 01 -> STEP 02 -> STEP 05 -> STEP 06 -> STEP 07 -> STEP 08 -> STEP 09/10 -> STEP 11/12 -> STEP 17 -> STEP 29**
 
 This chain creates the fastest path from the current backend to a real customer-operable DPP product.
+
+## 2026-10-03 execution evidence
+
+- `SoulFlameAdmin/soulflame-twins` PR #159 merged STEP 01 into main.
+- `SoulFlameAdmin/soulflame-twins` PR #160 merged the full demo company workspace into main after Deployment Safety SUCCESS.
+- Vercel deployment statuses for both main commits are rate-limited (`retry in 24 hours`), so no live deployment claim is made yet.
+- Demo company workspace routes are `/dpp-autopilot/company` and `/dpp-autopilot/company/passport` once the SoulFlame deployment is available.
