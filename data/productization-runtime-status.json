@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "observedAt": "2026-10-04",
+  "productization": {
+    "soulflameTwins": {
+      "commit": "06efc222450f4127fee5dd3d2e653d3e164bf2d2",
+      "deployment": "dpl_GYJZ3angfLyrV42QsJRscZNwccqM",
+      "state": "READY",
+      "target": "production",
+      "canonicalAlias": "https://soulflame-twins.vercel.app"
+    },
+    "companyWorkspace": {
+      "route": "/dpp-autopilot/company",
+      "passportRoute": "/dpp-autopilot/company/passport",
+      "mode": "demo",
+      "productionProvisioning": false
+    }
+  },
+  "notes": [
+    "Vercel build-rate limit cleared for the SoulFlame Twins project.",
+    "This runtime status file is evidence only and does not change DPP compliance claims."
+  ]
+}
