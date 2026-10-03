@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DPP Autopilot · Production QR Carrier</title>
+  <meta name="description" content="Verified QR data carrier for an active public battery digital product passport.">
+  <link rel="stylesheet" href="/assets/csp/qr.css">
+</head>
+<body data-qr-ready="false" data-qr-kind="production-public-passport-url" data-qr-state="loading">
+<main class="shell">
+  <div class="top-row">
+    <a href="/">← Dashboard</a>
+    <a id="openPassportTop" class="action-link" href="/passport">Отвори паспорта</a>
+  </div>
+  <section class="card label-card">
+    <div class="badge">DPP AUTOPILOT · VERIFIED QR CARRIER</div>
+    <h1>Battery Digital Product Passport</h1>
+    <div id="status" class="status checking" role="status" aria-live="polite">Подготовка…</div>
+
+    <div class="identifier-block">
+      <div class="mini-label">Battery / DPP identifier</div>
+      <div id="identifier" class="identifier">—</div>
+    </div>
+
+    <div id="qrHost" class="qr qr-live" aria-live="polite">
+      <div class="qr-loading">Проверка на public passport…</div>
+    </div>
+
+    <div id="passportMeta" class="passport-meta"></div>
+    <div class="mini-label">Encoded public URL</div>
+    <div class="url" id="encodedUrl">—</div>
+
+    <div class="actions">
+      <button id="printLabel" class="button primary" type="button">Печат на етикет</button>
+      <a id="downloadQr" class="button" href="#" download>SVG QR</a>
+      <a id="openPassport" class="button" href="/passport">Провери паспорта</a>
+    </div>
+
+    <p class="note">QR се показва само след успешно потвърждение, че identifier-ът има активен публичен паспорт. QR носителят съдържа единствено canonical HTTPS URL към публичния DPP.</p>
+  </section>
+</main>
+<script src="/assets/csp/qr-inline-1.js"></script>
+</body>
+</html>
