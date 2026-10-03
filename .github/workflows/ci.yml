@@ -42,6 +42,8 @@ jobs:
         run: python scripts/validate_repo.py
       - name: Validate DPP field traceability catalog
         run: python scripts/validate_field_catalog.py
+      - name: Validate Scooter Battery DPP profile
+        run: python scripts/validate_scooter_battery_profile.py
       - name: Validate BG Battery Pilot contract
         run: python scripts/validate_bg_battery_pilot.py
       - name: Generate BG Battery Pilot non-client acceptance evidence
