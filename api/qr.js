@@ -47,7 +47,7 @@ function passportUrl(identifier, baseUrl) {
 }
 
 async function handler(req, res) {
-  const rateLimit = enforceRateLimit(req, res, 'qr');
+  const rateLimit = enforceRateLimit(req,res,'qr');
   if (!rateLimit.allowed) return json(res, 429, rateLimitBody());
 
   const method = String(req.method || 'GET').toUpperCase();
