@@ -1,0 +1,98 @@
+{
+  "profileVersion": "1.1.0",
+  "profileId": "scooter-battery-dpp-v1",
+  "displayName": "Scooter Battery DPP",
+  "batteryCategory": "light_means_of_transport",
+  "scope": "Dedicated DPP product profile for LMT batteries used in electric scooters. Reuses the canonical battery field catalog and does not claim legal certification.",
+  "fieldCatalog": "data/dpp-field-catalog.json",
+  "fieldRules": {
+    "includeRequiredPublic": true,
+    "includeRequiredLegitimateInterest": true,
+    "includeRequiredAuthority": true,
+    "excludedRequirementModes": [
+      "conditional_ev"
+    ],
+    "accessClasses": [
+      "public",
+      "legitimate_interest",
+      "authority_only"
+    ]
+  },
+  "manufacturerInputs": [
+    {
+      "mode": "manual",
+      "surface": "manufacturer_dashboard",
+      "status": "planned"
+    },
+    {
+      "mode": "csv",
+      "surface": "api/imports.js",
+      "status": "implemented_core"
+    },
+    {
+      "mode": "api",
+      "surface": "api/models.js + api/items.js + api/passport.js",
+      "status": "implemented_core_pending_acceptance"
+    }
+  ],
+  "provisioning": {
+    "targetFlow": [
+      "validate_model",
+      "create_or_select_model",
+      "create_battery_item",
+      "assign_unique_identifier",
+      "create_passport",
+      "activate_passport",
+      "build_public_url",
+      "generate_qr_label",
+      "verify_qr_resolves"
+    ],
+    "publicPassportRoute": "/passport?identifier={url_encoded_unique_identifier}",
+    "publicPassportApi": "/api/passport?identifier={url_encoded_unique_identifier}",
+    "qrLabelRoute": "/qr?identifier={url_encoded_unique_identifier}",
+    "qrApi": "/api/qr?identifier={url_encoded_unique_identifier}",
+    "identifierContract": "unique per individual battery item; production identifier format must be supplied/validated by the responsible economic operator and registry rules",
+    "status": "partial"
+  },
+  "qr": {
+    "payload": "canonical_https_public_passport_url",
+    "oneCarrierPerIndividualBattery": true,
+    "sharedModelQrAllowed": false,
+    "formatsImplemented": [
+      "svg"
+    ],
+    "printLabelImplemented": true,
+    "physicalPrinterAcceptanceRequired": true,
+    "status": "software_flow_implemented_pending_physical_printer_acceptance"
+  },
+  "access": {
+    "public": "unauthenticated public passport projection only",
+    "legitimateInterest": "authenticated policy path required before acceptance",
+    "authority": "authority-only path required before acceptance",
+    "tenantIsolation": "organization membership + RLS/RBAC",
+    "status": "partial"
+  },
+  "acceptance": {
+    "required": [
+      "stable_https_public_passport",
+      "unique_item_qr",
+      "profile_validation",
+      "single_item_provisioning",
+      "manufacturer_dashboard",
+      "batch_import",
+      "access_classes",
+      "rbac_rls_runtime_proof",
+      "lifecycle_and_audit",
+      "batch_qr_labels",
+      "api_and_export",
+      "deployed_e2e_monitoring_backup_restore"
+    ],
+    "physicalFinalCheck": [
+      "open_verified_qr_label",
+      "print_real_label",
+      "scan_printed_qr",
+      "confirm_same_active_passport"
+    ],
+    "rule": "No production-ready or compliant claim until every acceptance requirement has deployed evidence and the physical carrier test is passed."
+  }
+}
