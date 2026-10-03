@@ -9,6 +9,7 @@ on:
       - 'data/dpp-qr-nfc-e2e-evidence.json'
       - 'data/dpp-ntag215-originality-investigation.json'
       - 'data/dpp-crypto-tracker-evidence.json'
+      - 'data/dpp-crypto-cr02-procurement-evidence.json'
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
@@ -32,6 +33,7 @@ on:
       - 'tests/api/nfc-convenience-e2e-boundary.test.cjs'
       - 'tests/api/nfc-ntag-x-dna.test.cjs'
       - 'tests/api/nfc-production-hardware-decisions.test.cjs'
+      - 'tests/api/nfc-cr02-procurement.test.cjs'
       - 'scripts/validate-dpp-crypto-hardware-evidence.cjs'
       - 'scripts/validate-dpp-crypto-tracker.cjs'
       - '.github/workflows/dpp-crypto.yml'
@@ -45,6 +47,7 @@ on:
       - 'data/dpp-qr-nfc-e2e-evidence.json'
       - 'data/dpp-ntag215-originality-investigation.json'
       - 'data/dpp-crypto-tracker-evidence.json'
+      - 'data/dpp-crypto-cr02-procurement-evidence.json'
       - 'demo/dpp-crypto-progress.html'
       - 'tests/unit/test_dpp_crypto_contract.py'
       - 'api/_nfc_crypto.js'
@@ -68,6 +71,7 @@ on:
       - 'tests/api/nfc-convenience-e2e-boundary.test.cjs'
       - 'tests/api/nfc-ntag-x-dna.test.cjs'
       - 'tests/api/nfc-production-hardware-decisions.test.cjs'
+      - 'tests/api/nfc-cr02-procurement.test.cjs'
       - 'scripts/validate-dpp-crypto-hardware-evidence.cjs'
       - 'scripts/validate-dpp-crypto-tracker.cjs'
       - '.github/workflows/dpp-crypto.yml'
@@ -102,3 +106,4 @@ jobs:
           tests/api/nfc-convenience-e2e-boundary.test.cjs
           tests/api/nfc-ntag-x-dna.test.cjs
           tests/api/nfc-production-hardware-decisions.test.cjs
+          tests/api/nfc-cr02-procurement.test.cjs
