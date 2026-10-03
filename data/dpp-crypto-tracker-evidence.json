@@ -8,8 +8,14 @@
   "observer": null,
   "last_attempt": {
     "date": "2026-10-04",
-    "result": "INCONCLUSIVE",
-    "note": "Independent checker could not resolve/reach the Vercel host from the current environment. Previous GitHub/Vercel evidence showed build-rate-limit failure. Do not promote CR25 until a real external HTTP 200 probe validates the tracker page and matching deployed status JSON."
+    "head": "8178efc3329f2dfb9cd6f51cbc50e24b5ed167d4",
+    "dpp_crypto_run": 37158485257,
+    "dpp_crypto_result": "SUCCESS",
+    "deployment_result": "FAIL",
+    "deployment_provider": "Vercel",
+    "deployment_reason": "Deployment rate limited — retry in 24 hours.",
+    "independent_http_probe": "INCONCLUSIVE_DNS_UNAVAILABLE_FROM_CHECKER",
+    "note": "CR25 contract/consistency validation is PASS, but deployed reachability is not proven. Vercel rejected the new deployment due to build-rate-limit. Do not promote CR25 until an independent HTTPS 200 probe validates both the tracker page and matching deployed status JSON."
   },
   "green_gate": {
     "requires_https": true,
