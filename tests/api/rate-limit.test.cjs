@@ -37,6 +37,7 @@ test('versioned policy explicitly covers organization discovery GET',()=>{
   assert.equal(limiter.policy.version,10);
   assert.equal(limiter.policy.surfaces.organizations.GET,'authenticated_read');
   assert.equal(limiter.policy.surfaces.organizations.POST,'authenticated_write');
+  assert.equal(limiter.policy.surfaces.qr.GET,'public_passport_read');
 });
 
 test('classifies public/authenticated/import/export budgets deterministically',()=>{
