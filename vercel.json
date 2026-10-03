@@ -3,11 +3,11 @@
   "rewrites": [
     {
       "source": "/passport",
-      "destination": "/live/passport.html"
+      "destination": "/live/passport"
     },
     {
       "source": "/qr",
-      "destination": "/live/qr.html"
+      "destination": "/live/qr"
     },
     {
       "source": "/((?!data/|api/).*)",
