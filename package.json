@@ -1,0 +1,12 @@
+{
+  "name": "dpp-autopilot",
+  "private": true,
+  "version": "0.1.0",
+  "description": "SoulFlame DPP Autopilot",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "qrcode": "1.5.4"
+  }
+}

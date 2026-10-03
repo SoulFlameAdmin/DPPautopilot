@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "task": "R05",
   "status": "partial",
   "strategy": "dual_layer_local_plus_feature_gated_shared_authenticated_runtime",
@@ -66,6 +66,9 @@
       "POST": "authenticated_write",
       "PATCH": "authenticated_write",
       "DELETE": "authenticated_write"
+    },
+    "qr": {
+      "GET": "public_passport_read"
     }
   },
   "response": {
@@ -81,7 +84,7 @@
   },
   "limitations": [
     "Shared authenticated runtime enforcement is implemented behind DPP_SHARED_RATE_LIMIT_ENABLED=true; production enablement/deployed verification is not yet proven.",
-    "Anonymous public passport traffic remains process-local until a safe distributed identity path is available without exposing a directly abusable anonymous consume RPC.",
+    "Anonymous public passport and QR-generation traffic remain process-local until a safe distributed identity path is available without exposing a directly abusable anonymous consume RPC.",
     "Production acceptance still requires deployed multi-isolate/real-network abuse and load evidence."
   ],
   "memory_safety": {

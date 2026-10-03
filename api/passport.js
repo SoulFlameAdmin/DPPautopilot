@@ -5,6 +5,7 @@ const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
 const { sanitizePublicPayload, sanitizeOrganizationPrivatePayload, findRestrictedPublicPaths, findAuthorityOnlyPaths } = require('./_access_policy.js');
+const PUBLIC_AUTH_CONFIG = require('../data/auth-config.json');
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -124,8 +125,8 @@ function upstreamInvalidJsonError() {
 }
 
 async function rpc(name, payload, authorization, env = process.env, fetchImpl = fetch, timeoutMs = DEFAULT_RPC_TIMEOUT_MS) {
-  const base = env.DPP_SUPABASE_URL || env.SUPABASE_URL;
-  const key = env.DPP_SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY;
+  const base = env.DPP_SUPABASE_URL || env.SUPABASE_URL || PUBLIC_AUTH_CONFIG.supabaseUrl;
+  const key = env.DPP_SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY || PUBLIC_AUTH_CONFIG.publishableKey;
   if (!base || !key) {
     const error = new Error('SERVER_CONFIGURATION_MISSING');
     error.status = 500;

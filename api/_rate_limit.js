@@ -55,6 +55,7 @@ function classify(surface,req){
   if(surface==='passport'&&method==='GET'&&req&&req.query&&req.query.identifier){
     return 'public_passport_read';
   }
+  if(surface==='qr'&&method==='GET') return 'public_passport_read';
   if(surface==='export') return 'export_read';
   if(surface==='imports'&&method!=='GET') return 'import_write';
   return method==='GET'?'authenticated_read':'authenticated_write';
