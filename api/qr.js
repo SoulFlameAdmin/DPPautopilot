@@ -1,6 +1,7 @@
 'use strict';
 
 const QRCode = require('qrcode');
+const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -46,6 +47,9 @@ function passportUrl(identifier, baseUrl) {
 }
 
 async function handler(req, res) {
+  const rateLimit = enforceRateLimit(req, res, 'qr');
+  if (!rateLimit.allowed) return json(res, 429, rateLimitBody());
+
   const method = String(req.method || 'GET').toUpperCase();
   if (method !== 'GET') {
     res.setHeader('Allow', 'GET');
