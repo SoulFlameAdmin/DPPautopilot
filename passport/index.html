@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07090d">
+  <title>Battery Digital Product Passport · DPP Autopilot</title>
+  <meta name="description" content="Public battery Digital Product Passport view.">
+  <link rel="stylesheet" href="/assets/csp/public-passport.css">
+</head>
+<body data-public-passport="loading">
+  <main class="shell">
+    <header class="topbar">
+      <a href="/" class="brand">DPP AUTOPILOT</a>
+      <span class="badge">PUBLIC PASSPORT</span>
+    </header>
+    <section class="hero">
+      <p class="eyebrow">BATTERY DIGITAL PRODUCT PASSPORT</p>
+      <h1 id="passportTitle">Зареждане…</h1>
+      <p id="passportState" class="state" role="status" aria-live="polite">Проверяваме публичния паспорт.</p>
+      <div class="idbox"><span>Unique identifier</span><code id="passportIdentifier">—</code></div>
+    </section>
+    <section id="passportContent" class="content" hidden>
+      <div class="section-head"><div><p class="eyebrow">PUBLIC DATA</p><h2>Публични данни</h2></div><span id="passportUpdated" class="muted"></span></div>
+      <div id="publicPayload" class="payload"></div>
+    </section>
+    <section id="passportError" class="error" hidden>
+      <strong>Паспортът не може да бъде показан.</strong>
+      <p id="passportErrorMessage"></p>
+    </section>
+    <footer>Public projection only · restricted and authority-only data are not rendered by this page.</footer>
+  </main>
+  <script src="/assets/csp/public-passport.js" defer></script>
+</body>
+</html>
