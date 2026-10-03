@@ -30,3 +30,5 @@
   .badge,.status,.passport-meta,.mini-label,.identifier,.url{color:#000}
   .qr{width:42mm;margin:4mm auto;padding:2mm;border:1px solid #000}
 }
+
+.button:disabled{opacity:.45;cursor:not-allowed}
