@@ -41,7 +41,7 @@ for name,(limit,window) in expected_rules.items():
     assert rules[name]["window_seconds"]==window
 
 surfaces=policy.get("surfaces",{})
-assert set(surfaces)=={"tenant","organizations","members","models","items","passport","imports","export"}
+assert set(surfaces)=={"tenant","organizations","members","models","items","passport","imports","export","qr"}
 api_surface_inventory={
     path.stem for path in (ROOT/"api").glob("*.js")
     if not path.name.startswith("_")
@@ -56,6 +56,7 @@ expected_surface_rules={
     "passport":{"public_GET":"public_passport_read","private_GET":"authenticated_read","POST":"authenticated_write","PATCH":"authenticated_write"},
     "imports":{"GET":"authenticated_read","POST":"import_write","PATCH":"import_write"},
     "export":{"GET":"export_read"},
+    "qr":{"GET":"public_passport_read"},
 }
 assert surfaces==expected_surface_rules, "R05 surface/method policy drift"
 
@@ -82,7 +83,7 @@ for token in [
 ]:
     assert token in helper, f"R05 helper missing {token}"
 
-for surface in ["tenant","organizations","members","models","items","passport","imports","export"]:
+for surface in ["tenant","organizations","members","models","items","passport","imports","export","qr"]:
     text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
     assert "require('./_rate_limit.js')" in text, f"{surface} does not import R05 limiter"
     call=f"enforceRateLimit(req,res,'{surface}')"
@@ -179,4 +180,4 @@ assert any("production enablement" in x for x in limitations)
 assert any("Anonymous public passport" in x for x in limitations)
 assert any("multi-isolate" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: eight API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")
+print("R05_RATE_LIMIT_POLICY_PASS: nine API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")
