@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DPP QR · SoulFlame</title>
+  <meta name="description" content="Generate the public QR data carrier for a Battery Digital Product Passport">
+  <link rel="stylesheet" href="/assets/csp/business-qr.css">
+</head>
+<body data-business-qr-ready="false">
+<main class="shell">
+  <header class="top">
+    <div>
+      <div class="badge">SoulFlame DPP · Normal Version</div>
+      <h1>Battery Passport QR</h1>
+      <p>QR кодът сочи директно към публичния паспорт на конкретната батерия.</p>
+    </div>
+    <a href="/">Dashboard</a>
+  </header>
+
+  <section class="card">
+    <form id="qrForm" action="/qr" method="get">
+      <label for="identifier">Unique Battery ID</label>
+      <div class="form-row">
+        <input id="identifier" name="identifier" maxlength="300" autocomplete="off" placeholder="напр. urn:dpp:..." required>
+        <button type="submit">Генерирай QR</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card qr-card" id="qrResult" hidden>
+    <div class="qr-frame"><img id="qrImage" alt="QR code for the public Battery Digital Product Passport"></div>
+    <div>
+      <div class="label">Public passport URL</div>
+      <a class="target" id="passportLink" href="#"></a>
+      <div class="actions">
+        <a class="button" id="downloadLink" href="#">Отвори QR SVG</a>
+        <button class="button secondary" id="printButton" type="button">Печат</button>
+      </div>
+      <p class="note">Normal Version: QR + Unique Battery ID + public DPP. NFC остава отделен Secure слой.</p>
+    </div>
+  </section>
+
+  <section class="card error" id="qrError" hidden></section>
+</main>
+<script src="/assets/csp/business-qr.js"></script>
+</body>
+</html>
