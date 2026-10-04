@@ -1,0 +1,109 @@
+name: DPP CRYPTO
+
+on:
+  pull_request:
+    paths:
+      - 'docs/DPP_CRYPTO_**'
+      - 'data/dpp-crypto-status.json'
+      - 'data/dpp-crypto-hardware-evidence-template.json'
+      - 'data/dpp-qr-nfc-e2e-evidence.json'
+      - 'data/dpp-ntag215-originality-investigation.json'
+      - 'data/dpp-crypto-tracker-evidence.json'
+      - 'data/dpp-crypto-cr02-procurement-evidence.json'
+      - 'demo/dpp-crypto-progress.html'
+      - 'tests/unit/test_dpp_crypto_contract.py'
+      - 'api/_nfc_crypto.js'
+      - 'api/_nfc_provider.js'
+      - 'api/_nfc_ntag_x_dna.js'
+      - 'api/nfc-challenge.js'
+      - 'api/nfc-status.js'
+      - 'api/nfc-verify.js'
+      - 'supabase/migrations/*_dpp_nfc_crypto_persistence.sql'
+      - 'supabase/migrations/*_dpp_nfc_challenge_consume.sql'
+      - 'supabase/migrations/*_dpp_nfc_api_rpcs.sql'
+      - 'supabase/migrations/*_dpp_nfc_finalize_verification.sql'
+      - 'supabase/migrations/*_dpp_nfc_lifecycle_security.sql'
+      - 'supabase/migrations/*_dpp_nfc_provider_material.sql'
+      - 'tests/api/nfc-crypto.test.cjs'
+      - 'tests/api/nfc-endpoints.test.cjs'
+      - 'tests/api/nfc-verify.test.cjs'
+      - 'tests/api/nfc-provider.test.cjs'
+      - 'tests/api/nfc-bms-hook.test.cjs'
+      - 'tests/api/nfc-hardware-evidence.test.cjs'
+      - 'tests/api/nfc-convenience-e2e-boundary.test.cjs'
+      - 'tests/api/nfc-ntag-x-dna.test.cjs'
+      - 'tests/api/nfc-production-hardware-decisions.test.cjs'
+      - 'tests/api/nfc-cr02-procurement.test.cjs'
+      - 'scripts/validate-dpp-crypto-hardware-evidence.cjs'
+      - 'scripts/validate-dpp-crypto-tracker.cjs'
+      - '.github/workflows/dpp-crypto.yml'
+  push:
+    branches:
+      - borko/dpp-security-lab
+    paths:
+      - 'docs/DPP_CRYPTO_**'
+      - 'data/dpp-crypto-status.json'
+      - 'data/dpp-crypto-hardware-evidence-template.json'
+      - 'data/dpp-qr-nfc-e2e-evidence.json'
+      - 'data/dpp-ntag215-originality-investigation.json'
+      - 'data/dpp-crypto-tracker-evidence.json'
+      - 'data/dpp-crypto-cr02-procurement-evidence.json'
+      - 'demo/dpp-crypto-progress.html'
+      - 'tests/unit/test_dpp_crypto_contract.py'
+      - 'api/_nfc_crypto.js'
+      - 'api/_nfc_provider.js'
+      - 'api/_nfc_ntag_x_dna.js'
+      - 'api/nfc-challenge.js'
+      - 'api/nfc-status.js'
+      - 'api/nfc-verify.js'
+      - 'supabase/migrations/*_dpp_nfc_crypto_persistence.sql'
+      - 'supabase/migrations/*_dpp_nfc_challenge_consume.sql'
+      - 'supabase/migrations/*_dpp_nfc_api_rpcs.sql'
+      - 'supabase/migrations/*_dpp_nfc_finalize_verification.sql'
+      - 'supabase/migrations/*_dpp_nfc_lifecycle_security.sql'
+      - 'supabase/migrations/*_dpp_nfc_provider_material.sql'
+      - 'tests/api/nfc-crypto.test.cjs'
+      - 'tests/api/nfc-endpoints.test.cjs'
+      - 'tests/api/nfc-verify.test.cjs'
+      - 'tests/api/nfc-provider.test.cjs'
+      - 'tests/api/nfc-bms-hook.test.cjs'
+      - 'tests/api/nfc-hardware-evidence.test.cjs'
+      - 'tests/api/nfc-convenience-e2e-boundary.test.cjs'
+      - 'tests/api/nfc-ntag-x-dna.test.cjs'
+      - 'tests/api/nfc-production-hardware-decisions.test.cjs'
+      - 'tests/api/nfc-cr02-procurement.test.cjs'
+      - 'scripts/validate-dpp-crypto-hardware-evidence.cjs'
+      - 'scripts/validate-dpp-crypto-tracker.cjs'
+      - '.github/workflows/dpp-crypto.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  crypto-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Validate CR25 tracker contract
+        run: node scripts/validate-dpp-crypto-tracker.cjs
+      - name: Run DPP CRYPTO contract tests
+        run: python -m unittest discover -s tests/unit -p 'test_dpp_crypto_contract.py' -v
+      - name: Run DPP CRYPTO Node security tests
+        run: >
+          node --test
+          tests/api/nfc-crypto.test.cjs
+          tests/api/nfc-endpoints.test.cjs
+          tests/api/nfc-verify.test.cjs
+          tests/api/nfc-provider.test.cjs
+          tests/api/nfc-bms-hook.test.cjs
+          tests/api/nfc-hardware-evidence.test.cjs
+          tests/api/nfc-convenience-e2e-boundary.test.cjs
+          tests/api/nfc-ntag-x-dna.test.cjs
+          tests/api/nfc-production-hardware-decisions.test.cjs
+          tests/api/nfc-cr02-procurement.test.cjs

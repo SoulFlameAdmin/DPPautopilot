@@ -1,0 +1,50 @@
+{
+  "schema": "dpp.crypto.hardware-evidence.v1",
+  "evidence_id": "REPLACE_ME",
+  "captured_at": null,
+  "tester": null,
+  "commit_sha": null,
+  "hardware": {
+    "manufacturer": null,
+    "exact_sku": null,
+    "silicon_revision": null,
+    "crypto_mode": null,
+    "algorithm_profile": null,
+    "datasheet_revision": null,
+    "configuration_revision": null,
+    "phone_model": null
+  },
+  "binding": {
+    "battery_reference": null,
+    "nfc_identity_version": null,
+    "provisioning_receipt_id": null
+  },
+  "tests": [
+    {"id":"HW01","name":"provision new identity","status":"PENDING","evidence":[]},
+    {"id":"HW02","name":"proof of possession","status":"PENDING","evidence":[]},
+    {"id":"HW03","name":"configuration lock","status":"PENDING","evidence":[]},
+    {"id":"HW04","name":"normal phone tap","status":"PENDING","evidence":[]},
+    {"id":"HW05","name":"valid strong challenge","status":"PENDING","evidence":[]},
+    {"id":"HW06","name":"copied static URL does not authenticate NFC","status":"PENDING","evidence":[]},
+    {"id":"HW07","name":"replay same proof","status":"PENDING","evidence":[]},
+    {"id":"HW08","name":"replay consumed challenge","status":"PENDING","evidence":[]},
+    {"id":"HW09","name":"expired challenge","status":"PENDING","evidence":[]},
+    {"id":"HW10","name":"modified challenge","status":"PENDING","evidence":[]},
+    {"id":"HW11","name":"modified alias or context","status":"PENDING","evidence":[]},
+    {"id":"HW12","name":"wrong NFC identity or key","status":"PENDING","evidence":[]},
+    {"id":"HW13","name":"revoked old tag","status":"PENDING","evidence":[]},
+    {"id":"HW14","name":"replacement tag","status":"PENDING","evidence":[]},
+    {"id":"HW15","name":"identity rotation","status":"PENDING","evidence":[]},
+    {"id":"HW16","name":"counter rollback","status":"PENDING","evidence":[]},
+    {"id":"HW17","name":"tamper assertion","status":"PENDING","evidence":[]},
+    {"id":"HW18","name":"cross-battery swap","status":"PENDING","evidence":[]},
+    {"id":"HW19","name":"cross-tenant substitution","status":"PENDING","evidence":[]},
+    {"id":"HW20","name":"backend or KMS outage fail closed","status":"PENDING","evidence":[]},
+    {"id":"HW21","name":"malformed or oversized proof","status":"PENDING","evidence":[]},
+    {"id":"HW22","name":"rapid repeated taps preserve one-time challenge","status":"PENDING","evidence":[]},
+    {"id":"HW23","name":"audit contains no raw proof or key","status":"PENDING","evidence":[]},
+    {"id":"HW24","name":"public response contains no secret or tenant internals","status":"PENDING","evidence":[]}
+  ],
+  "result": "PENDING",
+  "notes": []
+}

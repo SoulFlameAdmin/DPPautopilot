@@ -1,0 +1,93 @@
+{
+  "schema": "dpp.crypto.status.v1",
+  "total": 25,
+  "counts": {
+    "green": 21,
+    "yellow": 3,
+    "red": 0,
+    "blocked": 1
+  },
+  "percent_green": 84,
+  "current": "21/25 CR points evidence-backed GREEN. QR + NTAG215 convenience E2E is PASS. CR25 tracker integrity/reachability gating and CR02 live procurement evidence are now machine-validated; real Secure NFC hardware remains the decisive blocker.",
+  "last_completed": "CR25 fail-closed tracker validator + CR02 live authorized-supplier procurement evidence",
+  "next_dependency_safe": "Obtain NTAG-X-DNA-EVAL from NXP or an authorized distributor. In parallel independently verify the current NTAG215 originality result. On receipt, execute target-phone, provisioning/config-lock and CR13 unilateral-auth/replay/wrong-key/static-copy tests before the CR24 matrix.",
+  "blocker": {
+    "type": "hardware",
+    "summary": "Production authenticity still requires physical NTAG X DNA evaluation hardware, real provisioning/proof evidence and the CR24 hardware security matrix. Vercel build-rate-limit also prevents CR25 deployed-reachability proof."
+  },
+  "branch": "borko/dpp-security-lab",
+  "pull_request": {
+    "number": 242,
+    "url": "https://github.com/SoulFlameAdmin/DPPautopilot/pull/242"
+  },
+  "latest_commit": "93ab74339f15d5d8bdb15d2733a72f451c3f3143",
+  "ci": {
+    "state": "pass",
+    "note": "DPP CRYPTO run 37158625318 exact-head SUCCESS with CR25 tracker validator and CR02 procurement gate tests included."
+  },
+  "physical_e2e": {
+    "evidence_file": "data/dpp-qr-nfc-e2e-evidence.json",
+    "battery_identifier": "BAT-SF-NFC-0001",
+    "carrier": "NTAG215",
+    "result": "PASS",
+    "qr_scan": "PASS",
+    "nfc_write": "PASS",
+    "nfc_read_back": "PASS",
+    "nfc_tap_open": "PASS",
+    "same_passport": "PASS",
+    "security_classification": "NDEF_URL_CARRIER_E2E_ONLY",
+    "counts_toward_cr02_cr13_cr24": false
+  },
+  "points": [
+    {"id":"CR01","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR02","status":"YELLOW","note":"YELLOW: exact production candidate NT4PLDJHN2/2003LXJ and lab target NTAG-X-DNA-EVAL are pinned. Live 2026-10-04 manufacturer/authorized-distributor stock evidence is recorded and CI-validated, but physical possession, target-phone, provisioning and configuration-lock evidence are still required."},
+    {"id":"CR03","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR04","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR05","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR06","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR07","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR08","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR09","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR10","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR11","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR12","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR13","status":"YELLOW","note":"YELLOW: dedicated NTAG X DNA P-256 unilateral-auth verifier helper and real-hardware plan are implemented/tested. It remains intentionally outside production authentic until a real NTAG-X-DNA-EVAL certificate/proof/replay/wrong-key/static-copy test passes."},
+    {"id":"CR14","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR15","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR16","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR17","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR18","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR19","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR20","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR21","status":"GREEN","note":"CRYPTO-owned BMS binding/trust-composition hook is implemented and exact-head DPP CRYPTO evidence passed; live BAT51+ BMS integration remains separate ownership."},
+    {"id":"CR22","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR23","status":"GREEN","note":"Software implementation/contract has dedicated exact-head PASS evidence; hardware-dependent assertions excluded."},
+    {"id":"CR24","status":"BLOCKED","note":"BLOCKED: NTAG215 convenience E2E is PASS and originality anomaly is tracked, but CR24 requires approved Secure NFC hardware and the full cryptographic provisioning/challenge/replay/revocation/tamper matrix."},
+    {"id":"CR25","status":"YELLOW","note":"YELLOW: tracker/UI, consistency validator and exact-head CI are PASS; CR25 cannot become GREEN without machine evidence of public HTTPS 200 plus matching deployed status JSON. Latest Vercel deployment retry is still blocked by build-rate-limit."}
+  ],
+  "last_update": "2026-10-04",
+  "originality_investigation": {
+    "carrier": "NTAG215",
+    "observed_signature_result": "Invalid",
+    "classification": "INCONCLUSIVE_REJECT",
+    "production_eligible": false,
+    "next_physical_action": "Read the same tag with NXP TagInfo or another NXP-supported originality verifier and capture the manufacturer/originality result."
+  },
+  "cr02_hardware": {
+    "primary_production_candidate": "NT4PLDJHN2/2003LXJ",
+    "package": "HVQFN20",
+    "lab_target": "NTAG-X-DNA-EVAL",
+    "secondary_candidate": "NT4PLDJUK/20038YZ",
+    "rejected_new_design_family": "NT4PMDJU32",
+    "procurement_evidence_file": "data/dpp-crypto-cr02-procurement-evidence.json",
+    "public_orderability_observed": true,
+    "status": "YELLOW",
+    "remaining_gate": "Physical eval hardware + target-phone/provisioning/configuration evidence."
+  },
+  "cr25_tracker": {
+    "validator": "scripts/validate-dpp-crypto-tracker.cjs",
+    "evidence_file": "data/dpp-crypto-tracker-evidence.json",
+    "status": "YELLOW",
+    "remaining_gate": "Independent deployed HTTPS 200 + deployed status JSON match."
+  }
+}
