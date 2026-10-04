@@ -39,3 +39,16 @@ Stage 1 is accepted only after a READY production deployment from the current `m
 
 Production evidence must be collected after the deployment is READY; code/config validation alone does not complete Stage 1.
 
+## Stage 2 acceptance — unique Battery ID + unique QR per battery
+
+Stage 2 is accepted when all of the following are true:
+
+- `dpp_battery_items.unique_identifier` is globally UNIQUE and NOT NULL.
+- The production database has no duplicate `unique_identifier` groups.
+- QR generation is based on the exact individual battery identifier, never only on the battery model.
+- Two different battery identifiers produce two different canonical passport URLs and two different QR SVG carriers.
+- The QR response exposes `X-DPP-Identifier` and `X-DPP-Target` so production smoke can prove the identifier-to-carrier mapping.
+- Shared model QR remains forbidden for the Scooter Battery profile.
+
+Physical printer acceptance is intentionally Stage 10; Stage 2 proves identity and carrier uniqueness in the data/API layer.
+
