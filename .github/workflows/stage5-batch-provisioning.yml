@@ -1,0 +1,61 @@
+name: Stage 5 Batch Provisioning
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  stage5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dpp_stage5
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dpp_stage5"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Validate Stage 5 contract
+        run: python scripts/validate_stage5_batch_provisioning.py
+
+      - name: Run Stage 5 API tests
+        run: node --test tests/api/batch-provision.test.cjs
+
+      - name: Replay migrations and run Stage 5 DB acceptance
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSQL=(psql -h 127.0.0.1 -U postgres -d dpp_stage5 -v ON_ERROR_STOP=1)
+          "${PSQL[@]}" <<'SQL'
+          create extension if not exists pgcrypto;
+          create role anon nologin;
+          create role authenticated nologin;
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          SQL
+          for file in supabase/migrations/*.sql; do
+            echo "Replaying $file"
+            "${PSQL[@]}" -f "$file"
+          done
+          "${PSQL[@]}" <<'SQL'
+          begin;
+          \i tests/db/test_scooter_batch_provisioning_subset.sql
+          rollback;
+          SQL
