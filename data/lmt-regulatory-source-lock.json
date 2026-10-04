@@ -1,0 +1,38 @@
+{
+  "version": "2026-10-04",
+  "scope": "Scooter/LMT battery DPP regulatory source lock",
+  "sources": [
+    {
+      "id": "EU-BAT-2023-1542",
+      "authority": "EUR-Lex",
+      "type": "binding_law",
+      "url": "https://eur-lex.europa.eu/eli/reg/2023/1542/ojn",
+      "checked": "2026-10-04",
+      "notes": "Consolidated text includes Article 77 battery-passport scope and Article 78 technical requirements."
+    },
+    {
+      "id": "EC-BAT-DPP-GUIDANCE-V2",
+      "authority": "European Commission DG GROW",
+      "type": "non_binding_guidance",
+      "url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/batteries_en",
+      "version": "2.0",
+      "dated": "2026-08-15",
+      "published": "2026-08-21",
+      "checked": "2026-10-04",
+      "notes": "Commission states 71 data points and category-specific applicability."
+    },
+    {
+      "id": "EC-DPP-RESOURCES",
+      "authority": "European Commission",
+      "type": "official_resources",
+      "url": "https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/resources-documentation_en",
+      "checked": "2026-10-04",
+      "notes": "Registry user guide V3 listed September 2026; battery guidance V2 listed."
+    }
+  ],
+  "unresolvedRegulatoryItems": [
+    "Monitor any later Commission update to the 71-point guidance.",
+    "Monitor detailed legitimate-interest/access-rights implementing rules and registry technical guidelines.",
+    "Do not represent this engineering mapping as qualified legal sign-off."
+  ]
+}
