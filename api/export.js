@@ -141,6 +141,89 @@ function ndjsonPackageRequested(req){
   return typeof value==='string'&&value.toLowerCase()==='ndjson';
 }
 
+function integrationFormat(req){
+  const value=req&&req.query&&req.query.format;
+  const normalized=typeof value==='string'?value.toLowerCase():'';
+  return ['mes_csv','erp_json','bms_json'].includes(normalized)?normalized:null;
+}
+
+function csvCell(value){
+  const text=value==null?'':String(value);
+  return /[",\n\r]/.test(text)?'"'+text.replace(/"/g,'""')+'"':text;
+}
+
+function integrationProjection(bundle,format){
+  const records=bundle&&bundle.records&&typeof bundle.records==='object'?bundle.records:{};
+  const models=Array.isArray(records.battery_models)?records.battery_models:[];
+  const items=Array.isArray(records.battery_items)?records.battery_items:[];
+  const passports=Array.isArray(records.passports)?records.passports:[];
+  const modelById=new Map(models.map(model=>[model.id,model]));
+  const passportByItem=new Map(passports.map(passport=>[passport.battery_item_id,passport]));
+
+  if(format==='mes_csv'){
+    const header=['unique_identifier','model_identifier','manufacturer_name','category','lifecycle_status','passport_status','item_created_at','item_updated_at'];
+    const lines=[header.map(csvCell).join(',')];
+    for(const item of items){
+      const model=modelById.get(item.model_id)||{},passport=passportByItem.get(item.id)||{};
+      lines.push([
+        item.unique_identifier,model.model_identifier,model.manufacturer_name,model.category,
+        item.lifecycle_status,passport.status||'',item.created_at,item.updated_at
+      ].map(csvCell).join(','));
+    }
+    return lines.join('\n')+'\n';
+  }
+
+  if(format==='erp_json'){
+    return {
+      schema_version:'erp-v1',
+      organization_id:bundle.organization_id,
+      generated_at:bundle.generated_at,
+      models:models.map(model=>({
+        id:model.id,model_identifier:model.model_identifier,manufacturer_name:model.manufacturer_name,
+        category:model.category,created_at:model.created_at,updated_at:model.updated_at
+      })),
+      batteries:items.map(item=>({
+        id:item.id,model_id:item.model_id,unique_identifier:item.unique_identifier,
+        lifecycle_status:item.lifecycle_status,created_at:item.created_at,updated_at:item.updated_at
+      }))
+    };
+  }
+
+  if(format==='bms_json'){
+    return {
+      schema_version:'bms-v1',
+      organization_id:bundle.organization_id,
+      generated_at:bundle.generated_at,
+      batteries:items.map(item=>{
+        const model=modelById.get(item.model_id)||{},passport=passportByItem.get(item.id)||{};
+        return {
+          unique_identifier:item.unique_identifier,
+          lifecycle_status:item.lifecycle_status,
+          model_identifier:model.model_identifier||null,
+          category:model.category||null,
+          telemetry:item.canonical_data&&item.canonical_data.telemetry||null,
+          state_of_health:item.canonical_data&&item.canonical_data.state_of_health||null,
+          passport_status:passport.status||null
+        };
+      })
+    };
+  }
+  throw exportError('EXPORT_FORMAT_UNSUPPORTED',422,'The requested integration export format is unsupported.');
+}
+
+function sendIntegration(res,format,output){
+  res.statusCode=200;
+  res.setHeader('Cache-Control','no-store');
+  if(format==='mes_csv'){
+    res.setHeader('Content-Type','text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition','attachment; filename="dpp-mes.csv"');
+    return res.end(output);
+  }
+  res.setHeader('Content-Type','application/json; charset=utf-8');
+  res.setHeader('Content-Disposition','attachment; filename="dpp-'+format.replace('_','-')+'.json"');
+  return res.end(JSON.stringify({data:output}));
+}
+
 function sendNdjsonPackage(res,output){
   const source=output&&typeof output==='object'?output:{};
   const objects=Array.isArray(source.evidence_objects)?source.evidence_objects:[];
@@ -740,9 +823,11 @@ async function handler(req,res){
   if(!sharedRateLimit.allowed) return send(res,429,rateLimitBody());
   try{
     const ndjsonPackage=ndjsonPackageRequested(req);
+    const integration=integrationFormat(req);
     const includeEvidence=includeEvidenceRequested(req)||ndjsonPackage;
     const page=includeEvidence?evidencePageOptions(req):null;
     const bundle=await rpc(authorization);
+    if(integration) return sendIntegration(res,integration,integrationProjection(bundle,integration));
     if(ndjsonPackage) return await sendNdjsonSpoolPackage(res,bundle,authorization,process.env,fetch,page);
     const output=includeEvidence
       ?await inlineEvidenceBytes(bundle,authorization,process.env,fetch,page)
@@ -758,4 +843,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,mapDatabaseError,rpc,fetchEvidenceObject,evidenceObjectTimeoutError,includeEvidenceRequested,ndjsonPackageRequested,sendNdjsonPackage,canonicalEvidenceManifest,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,responseBodyChunks,writeBase64VerifiedSpool,sendNdjsonSpoolPackage,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION,DEFAULT_RPC_TIMEOUT_MS,DEFAULT_EVIDENCE_OBJECT_TIMEOUT_MS};
+module.exports._test={bearer,mapDatabaseError,rpc,fetchEvidenceObject,evidenceObjectTimeoutError,includeEvidenceRequested,ndjsonPackageRequested,integrationFormat,csvCell,integrationProjection,sendIntegration,sendNdjsonPackage,canonicalEvidenceManifest,evidenceManifestSha256,manifestSigningKey,signEvidenceManifestToken,verifyEvidenceManifestToken,evidencePageOptions,responseContentType,responseContentLength,responseBodyChunks,writeBase64VerifiedSpool,sendNdjsonSpoolPackage,inlineEvidenceBytes,MAX_INLINE_EVIDENCE_BYTES,MAX_EVIDENCE_PAGE_LIMIT,SIGNED_MANIFEST_VERSION,DEFAULT_RPC_TIMEOUT_MS,DEFAULT_EVIDENCE_OBJECT_TIMEOUT_MS};
