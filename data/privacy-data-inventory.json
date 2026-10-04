@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
@@ -175,7 +175,8 @@
         "RLS enabled",
         "no direct anon/authenticated table grants",
         "Step 18 readiness reads only existence for field 50 and never returns evidence payload",
-        "authority-access API intentionally deferred to the dedicated access-control stage"
+        "Step 19 owner/admin/editor may submit or replace field-50 evidence through a write-only RPC; the organization/public API receives receipt metadata only and never reads the stored evidence payload",
+        "authority read access remains deferred to the dedicated authority-access stage"
       ],
       "minimization_note": "Authority-only payload must not be copied into public_payload, organization private_payload, logs, or public exports."
     },
