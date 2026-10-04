@@ -21,8 +21,8 @@
   "manufacturerInputs": [
     {
       "mode": "manual",
-      "surface": "manufacturer_dashboard",
-      "status": "planned"
+      "surface": "/manufacturer",
+      "status": "implemented_production_dashboard"
     },
     {
       "mode": "csv",
@@ -52,7 +52,7 @@
     "qrLabelRoute": "/qr?identifier={url_encoded_unique_identifier}",
     "qrApi": "/api/qr?identifier={url_encoded_unique_identifier}",
     "identifierContract": "unique per individual battery item; production identifier format must be supplied/validated by the responsible economic operator and registry rules",
-    "status": "partial"
+    "status": "implemented_production_api"
   },
   "qr": {
     "payload": "canonical_https_public_passport_url",
@@ -97,7 +97,7 @@
   },
   "schemaContract": "data/scooter-battery-schema-v1.json",
   "validation": {
-    "status": "implemented_ci_accepted_regulatory_matrix_pending_pr",
+    "status": "implemented_ci_accepted_regulatory_matrix_green",
     "validator": "scripts/scooter_schema_validation.py",
     "acceptanceGate": "scripts/validate_scooter_schema.py",
     "syntheticFixture": "data/scooter-battery-sample-v1.json",
@@ -126,5 +126,23 @@
     "note": "The legacy 41 implementation-field schema remains a structural validator. Launch completeness is governed by the 71-point LMT matrix, which maps regulatory data points onto aggregated canonical fields and excludes launch-deferred points."
   },
   "regulatoryMatrix": "data/lmt-battery-71-v2.json",
-  "regulatorySourceLock": "data/lmt-regulatory-source-lock.json"
+  "regulatorySourceLock": "data/lmt-regulatory-source-lock.json",
+  "manufacturerDashboard": {
+    "status": "implemented_production_dashboard",
+    "route": "/manufacturer",
+    "authSession": "dpp_company_session_v1",
+    "tenantSource": "/api/organizations",
+    "modelSource": "/api/models",
+    "itemSource": "/api/items",
+    "provisionSource": "/api/provision",
+    "writeRoles": [
+      "owner",
+      "admin",
+      "editor"
+    ],
+    "readOnlyRoles": [
+      "viewer"
+    ],
+    "browserLocalProductDatabase": false
+  }
 }
