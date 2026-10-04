@@ -26,6 +26,14 @@
       "destination": "/live/manufacturer"
     },
     {
+      "source": "/battery-master/",
+      "destination": "/live/battery-master"
+    },
+    {
+      "source": "/battery-master",
+      "destination": "/live/battery-master"
+    },
+    {
       "source": "/((?!data/|api/).*)",
       "destination": "/index.html"
     }
