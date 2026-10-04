@@ -12,14 +12,14 @@
 <main class="shell">
   <header class="topbar">
     <a class="brand" href="/">DPP AUTOPILOT</a>
-    <span class="badge">PRODUCTION COMPANY ACCESS · V1</span>
+    <span class="badge">PRODUCTION COMPANY ACCESS · V2</span>
   </header>
 
   <section class="hero">
     <div>
-      <p class="eyebrow">STEP 1 · PRODUCTION COMPANY REGISTRATION / LOGIN</p>
+      <p class="eyebrow">STEP 1 + 2 · COMPANY ACCESS + RBAC</p>
       <h1>Фирмен достъп до DPP Autopilot.</h1>
-      <p>Истински Supabase Auth + email verification + отделна организация/tenant. Demo данни не се използват в този flow.</p>
+      <p>Истински Supabase Auth + email verification + отделна организация/tenant + owner/admin/editor/viewer роли. Demo данни не се използват в този flow.</p>
     </div>
     <div class="security-note">
       <strong>SECURE BOUNDARY</strong>
@@ -91,7 +91,39 @@
     </div>
   </section>
 
-  <footer>Step 1 V1 · registration → email verification → login → organization → active tenant. Production acceptance requires real confirmation-email test.</footer>
+  <section class="card" id="teamCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">STEP 2 · PRODUCTION RBAC</p><h2>Екип и роли</h2></div>
+      <span class="state ok" id="teamRoleBadge">RBAC</span>
+    </div>
+    <p class="muted">Добавяй потвърдени DPP акаунти по служебен email. Owner управлява всички роли; admin управлява editor/viewer; editor работи с DPP данните; viewer е read-only.</p>
+
+    <div class="team-add" id="teamAdd">
+      <div class="form-grid">
+        <label><span>Email на член</span><input id="memberEmail" type="email" autocomplete="email" placeholder="engineer@company.eu"></label>
+        <label><span>Роля</span>
+          <select id="memberRole">
+            <option value="viewer">Viewer · read only</option>
+            <option value="editor">Editor · DPP operations</option>
+            <option value="admin">Admin · team + operations</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions"><button class="btn primary" id="addMember" type="button">Добави към фирмата →</button></div>
+      <div class="result" id="teamResult" role="status" aria-live="polite">Членът трябва първо да има потвърден DPP акаунт.</div>
+    </div>
+
+    <div class="role-grid" aria-label="RBAC role summary">
+      <article><strong>OWNER</strong><span>Фирма, екип, всички операции.</span></article>
+      <article><strong>ADMIN</strong><span>Операции + editor/viewer екип.</span></article>
+      <article><strong>EDITOR</strong><span>Създава и променя DPP данни.</span></article>
+      <article><strong>VIEWER</strong><span>Преглед без промени.</span></article>
+    </div>
+
+    <div id="teamList" class="team-list"></div>
+  </section>
+
+  <footer>Step 1 + 2 V2 · auth → verified company tenant → production RBAC team. Общият реален E2E тест остава за финалното acceptance.</footer>
 </main>
 <script src="/assets/csp/company-auth-inline-1.js"></script>
 </body>

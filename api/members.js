@@ -23,6 +23,19 @@ function validUuid(value){
   return typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+function validEmail(value){
+  return typeof value==='string'&&value.length>=3&&value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function requestDetail(req){
+  try{
+    const url=new URL(String(req&&req.url||'/api/members'),'https://dpp.local');
+    return url.searchParams.get('detail')==='1';
+  }catch{
+    return false;
+  }
+}
+
 function upstreamShapeError(){
   const error=new Error('UPSTREAM_ERROR');
   error.status=502;
@@ -32,20 +45,28 @@ function upstreamShapeError(){
 }
 
 function validMember(value){
-  return value&&typeof value==='object'&&!Array.isArray(value)&&
+  if(!(value&&typeof value==='object'&&!Array.isArray(value)&&
     validUuid(value.user_id)&&typeof value.role==='string'&&
-    ['owner','admin','editor','viewer'].includes(value.role);
+    ['owner','admin','editor','viewer'].includes(value.role))) return false;
+  if(value.email!==undefined&&value.email!==null&&!validEmail(value.email)) return false;
+  if(value.is_self!==undefined&&typeof value.is_self!=='boolean') return false;
+  return true;
 }
 
 function validateRpcShape(name,data){
-  if(name==='dpp_api_members_list') return Array.isArray(data)&&data.every(validMember);
-  if(name==='dpp_api_members_add'||name==='dpp_api_members_update') return validMember(data);
+  if(name==='dpp_api_members_list'||name==='dpp_api_members_list_detail') return Array.isArray(data)&&data.every(validMember);
+  if(name==='dpp_api_members_add'||name==='dpp_api_member_add_by_email'||name==='dpp_api_members_update') return validMember(data);
   if(name==='dpp_api_members_delete') return validUuid(data);
   return true;
 }
 
-function validateWrite(body,requireRole){
-  if(!validUuid(body.user_id)) return 'user_id must be a valid UUID';
+function validateWrite(body,requireRole,allowEmail=false){
+  const hasEmail=allowEmail&&typeof body.email==='string'&&body.email.trim().length>0;
+  if(hasEmail){
+    if(!validEmail(body.email.trim().toLowerCase())) return 'email must be valid';
+  }else if(!validUuid(body.user_id)){
+    return 'user_id must be a valid UUID';
+  }
   if(requireRole&&!MEMBER_ROLES.has(body.role)) return 'role must be admin, editor or viewer';
   return null;
 }
@@ -138,7 +159,8 @@ async function handler(req,res){
 
   try{
     if(method==='GET'){
-      const members=await rpc('dpp_api_members_list',{},authorization);
+      const detailed=requestDetail(req);
+      const members=await rpc(detailed?'dpp_api_members_list_detail':'dpp_api_members_list',{},authorization);
       return send(res,200,{data:members});
     }
 
@@ -149,11 +171,14 @@ async function handler(req,res){
       return send(res,response.status,response.body);
     }
 
-    const problem=validateWrite(body,method!=='DELETE');
+    const problem=validateWrite(body,method!=='DELETE',method==='POST');
     if(problem) return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
 
     if(method==='POST'){
-      const member=await rpc('dpp_api_members_add',{p_user_id:body.user_id,p_role:body.role},authorization);
+      const email=typeof body.email==='string'?body.email.trim().toLowerCase():'';
+      const member=email
+        ?await rpc('dpp_api_member_add_by_email',{p_email:email,p_role:body.role},authorization)
+        :await rpc('dpp_api_members_add',{p_user_id:body.user_id,p_role:body.role},authorization);
       return send(res,201,{data:member});
     }
     if(method==='PATCH'){
@@ -174,4 +199,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validUuid,validMember,validateRpcShape,validateWrite,mapDatabaseError,rpc,MEMBER_ROLES,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,validUuid,validEmail,requestDetail,validMember,validateRpcShape,validateWrite,mapDatabaseError,rpc,MEMBER_ROLES,DEFAULT_RPC_TIMEOUT_MS};

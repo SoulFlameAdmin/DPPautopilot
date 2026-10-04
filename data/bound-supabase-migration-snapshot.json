@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-10-04",
+  "observed_at": "2026-10-04T14:04:00Z",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -192,7 +192,11 @@
     {
       "version": "20261004140245",
       "name": "dpp_scooter_single_item_provisioning"
+    },
+    {
+      "version": "20261004140321",
+      "name": "dpp_team_email_rbac_v1"
     }
   ],
-  "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
+  "note": "Supabase-applied version IDs can differ from repository filename timestamps; canonical migration name is the cross-system identity. Snapshot includes scooter provisioning and Step 2 team RBAC migrations."
 }
