@@ -56,6 +56,8 @@ jobs:
         run: python scripts/validate_stage5_batch_provisioning.py
       - name: Validate Stage 5 manufacturer dashboard
         run: python scripts/validate_stage5_manufacturer_dashboard.py
+      - name: Validate official Battery Master 1-100 site
+        run: python scripts/validate_battery_master_100_site.py
       - name: Validate BG Battery Pilot contract
         run: python scripts/validate_bg_battery_pilot.py
       - name: Generate BG Battery Pilot non-client acceptance evidence
