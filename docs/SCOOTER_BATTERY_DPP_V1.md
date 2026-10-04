@@ -69,3 +69,21 @@ Schema: `data/scooter-battery-schema-v1.json`
 Validator: `scripts/scooter_schema_validation.py`  
 Acceptance gate: `scripts/validate_scooter_schema.py`
 
+## Stage 5 acceptance — production Manufacturer Dashboard
+
+Stage 5 is accepted when a manufacturer can use a real company session and active tenant to work with backend data instead of browser-local demo records.
+
+- Clean production route: `/manufacturer`.
+- Reuses the verified company auth session from `/company`.
+- Resolves the active organization through `/api/organizations`.
+- Reads tenant-scoped models from `/api/models`.
+- Reads tenant-scoped individual battery items from `/api/items`.
+- Owner/admin/editor can register an LMT model through the production model API.
+- Owner/admin/editor can provision an individual battery through `/api/provision`, receiving the canonical passport and QR URLs.
+- Viewer is read-only in the dashboard.
+- Product records are not stored in browser local storage.
+- The dashboard exposes direct Passport and QR actions for real backend battery identifiers.
+
+Runtime: `live/manufacturer.html` + `assets/csp/manufacturer-inline-1.js`  
+Acceptance gate: `scripts/validate_stage5_manufacturer_dashboard.py`
+
