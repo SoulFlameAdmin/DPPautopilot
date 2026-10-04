@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "R03",
   "status": "partial",
   "max_body_bytes": 1048576,
@@ -103,6 +103,26 @@
       "id": "invalid_provision_fields",
       "surface": "/api/provision",
       "expected": "400/422 validation error before upstream"
+    },
+    {
+      "id": "oversize_parsed_batch_provision_body",
+      "surface": "/api/batch-provision",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "invalid_batch_provision_fields",
+      "surface": "/api/batch-provision",
+      "expected": "400/422 validation error before upstream"
+    },
+    {
+      "id": "duplicate_batch_identifiers",
+      "surface": "/api/batch-provision",
+      "expected": "422 validation error before upstream"
+    },
+    {
+      "id": "invalid_generated_serial_range",
+      "surface": "/api/batch-provision",
+      "expected": "422 validation error before upstream"
     }
   ],
   "evidence_files": [
