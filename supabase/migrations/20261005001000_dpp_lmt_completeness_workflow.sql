@@ -109,5 +109,77 @@ from public,anon;
 grant execute on function public.dpp_api_scooter_completeness_by_identifier(text)
 to authenticated;
 
+create or replace function public.dpp_api_scooter_authority_evidence_submit(
+  p_passport_id uuid,
+  p_field_number integer,
+  p_evidence jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path=public,pg_temp
+as $fn$
+declare
+  v_org uuid;
+  v_user uuid;
+  v_model_id uuid;
+  v_item_id uuid;
+  v_now timestamptz := now();
+begin
+  v_org:=public.dpp_require_active_role(array['owner','admin','editor']);
+  v_user:=public.dpp_request_user_id();
+
+  if p_field_number<>50 then
+    raise exception 'only launch authority-evidence field 50 is accepted by this workflow' using errcode='DP404';
+  end if;
+  if p_evidence is null or jsonb_typeof(p_evidence)<>'object' or p_evidence='{}'::jsonb then
+    raise exception 'authority evidence must be a non-empty JSON object' using errcode='DP404';
+  end if;
+
+  select p.battery_item_id,i.model_id
+  into v_item_id,v_model_id
+  from public.dpp_passports p
+  join public.dpp_battery_items i
+    on i.id=p.battery_item_id
+   and i.organization_id=p.organization_id
+  join public.dpp_battery_models m
+    on m.id=i.model_id
+   and m.organization_id=p.organization_id
+  where p.id=p_passport_id
+    and p.organization_id=v_org
+    and m.category='light_means_of_transport';
+
+  if not found then
+    raise exception 'passport not found in active LMT organization context' using errcode='DP403';
+  end if;
+
+  insert into public.dpp_authority_evidence(
+    organization_id,model_id,field_number,evidence,created_by,created_at,updated_at
+  ) values (
+    v_org,v_model_id,p_field_number,p_evidence,v_user,v_now,v_now
+  )
+  on conflict (organization_id,model_id,field_number)
+  do update set
+    evidence=excluded.evidence,
+    created_by=excluded.created_by,
+    updated_at=excluded.updated_at;
+
+  return jsonb_build_object(
+    'passport_id',p_passport_id,
+    'model_id',v_model_id,
+    'field_number',p_field_number,
+    'accepted',true,
+    'updated_at',v_now
+  );
+end
+$fn$;
+
+revoke all on function public.dpp_api_scooter_authority_evidence_submit(uuid,integer,jsonb)
+from public,anon;
+grant execute on function public.dpp_api_scooter_authority_evidence_submit(uuid,integer,jsonb)
+to authenticated;
+
 comment on function public.dpp_api_scooter_completeness_by_identifier(text) is
   'Step 19 production completeness workflow report for one LMT battery in the active tenant. Includes blockers, score and passport updated_at for gated activation; returns no authority-only evidence payload.';
+comment on function public.dpp_api_scooter_authority_evidence_submit(uuid,integer,jsonb) is
+  'Step 19 write-only organization submission for authority-only LMT field-50 evidence. Returns acceptance metadata, never the stored evidence payload.';
