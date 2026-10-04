@@ -122,8 +122,8 @@ declare
 begin
   v_org:=public.dpp_require_active_role(array['owner','admin','editor','viewer']);
 
-  select p.*,i.*
-  into v_passport,v_item
+  select p.*
+  into v_passport
   from public.dpp_passports p
   join public.dpp_battery_items i on i.id=p.battery_item_id and i.organization_id=p.organization_id
   where p.organization_id=v_org
@@ -135,6 +135,10 @@ begin
     raise exception 'passport not found in active organization'
       using errcode='DP403';
   end if;
+
+  select i.* into v_item
+  from public.dpp_battery_items i
+  where i.id=v_passport.battery_item_id and i.organization_id=v_org;
 
   return jsonb_build_object(
     'passport_id',v_passport.id,
@@ -173,8 +177,8 @@ begin
       using errcode='DP702';
   end if;
 
-  select p.*,i.*
-  into v_passport,v_item
+  select p.*
+  into v_passport
   from public.dpp_passports p
   join public.dpp_battery_items i on i.id=p.battery_item_id and i.organization_id=p.organization_id
   where i.unique_identifier=p_unique_identifier
@@ -185,6 +189,10 @@ begin
     raise exception 'passport not found'
       using errcode='DP403';
   end if;
+
+  select i.* into v_item
+  from public.dpp_battery_items i
+  where i.id=v_passport.battery_item_id;
 
   select coalesce(a.authority_payload,'{}'::jsonb)
   into v_authority
