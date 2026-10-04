@@ -5,7 +5,7 @@ const assert=require('node:assert/strict');
 const errors=require('../../api/_errors.js');
 
 test('common auth SQLSTATEs map consistently on every API surface',()=>{
-  for(const surface of ['models','items','passport','provision','export','imports','tenant','organizations','members']){
+  for(const surface of ['models','items','passport','provision','batch-provision','export','imports','tenant','organizations','members']){
     assert.deepEqual(errors.mapDatabaseError(surface,{code:'DP101'}),{
       status:401,code:'AUTH_REQUIRED',message:'Authentication is required.'
     });
@@ -42,6 +42,15 @@ test('onboarding surfaces expose stable semantic errors',()=>{
   });
   assert.deepEqual(errors.mapDatabaseError('members',{code:'DP505'}),{
     status:409,code:'MEMBER_CONFLICT',message:'The membership already exists.'
+  });
+});
+
+test('batch provisioning exposes stable batch conflict semantics',()=>{
+  assert.deepEqual(errors.mapDatabaseError('batch-provision',{code:'DP606'}),{
+    status:409,code:'BATCH_KEY_CONFLICT',message:'The batch key already belongs to a different provisioning request.'
+  });
+  assert.deepEqual(errors.mapDatabaseError('batch-provision',{code:'DP607'}),{
+    status:409,code:'BATCH_STATE_CONFLICT',message:'The stored batch membership is inconsistent with the provisioning request.'
   });
 });
 
