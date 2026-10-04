@@ -44,10 +44,21 @@ function validItem(value) {
     validTimestamp(value.created_at) && validTimestamp(value.updated_at);
 }
 
+function validHistory(value) {
+  return value && typeof value==='object' && !Array.isArray(value) &&
+    validUuid(value.item_id) &&
+    typeof value.unique_identifier==='string' &&
+    LIFECYCLE.has(value.lifecycle_status) &&
+    (value.passport_id===null || validUuid(value.passport_id)) &&
+    Array.isArray(value.lifecycle_events) &&
+    Array.isArray(value.passport_versions);
+}
+
 function validateRpcShape(name, data) {
   if (name === 'dpp_api_items_list') return Array.isArray(data) && data.every(validItem);
   if (name === 'dpp_api_items_create' || name === 'dpp_api_items_update_checked') return validItem(data);
   if (name === 'dpp_api_items_delete_checked') return validUuid(data);
+  if (name === 'dpp_api_item_history') return validHistory(data);
   return true;
 }
 
@@ -164,6 +175,16 @@ async function handler(req, res) {
 
   try {
     if (method === 'GET') {
+      const detail=req.query&&req.query.detail;
+      if(detail!=null&&detail!==''&&detail!=='history'){
+        return send(res,422,{error:{code:'INVALID_ITEM_DETAIL',message:'detail must be history when provided.'}});
+      }
+      if(detail==='history'){
+        const id=req.query&&req.query.id;
+        if(!validUuid(id)) return send(res,400,{error:{code:'INVALID_ITEM_ID',message:'A valid item UUID is required.'}});
+        const history=await rpc('dpp_api_item_history',{p_item_id:id},authorization);
+        return send(res,200,{data:history});
+      }
       const items = await rpc('dpp_api_items_list', {}, authorization);
       return send(res, 200, { data: items });
     }
@@ -233,4 +254,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validItem, validateRpcShape, validateCreate, validateCanonicalData, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validItem, validHistory, validateRpcShape, validateCreate, validateCanonicalData, mapDatabaseError, rpc, DEFAULT_RPC_TIMEOUT_MS };
