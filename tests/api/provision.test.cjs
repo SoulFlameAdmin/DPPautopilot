@@ -27,7 +27,8 @@ function resultFixture(overrides={}){
     model_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     unique_identifier:'BAT-LMT-000001',
     lifecycle_status:'original',
-    passport_status:'active',
+    passport_status:'draft',
+    activation_required:true,
     public_payload:{
       model:{identification:{category:'light_means_of_transport',model_id:'LMT-48V-20AH'}},
       item:{unique_identifier:'BAT-LMT-000001'}
@@ -89,7 +90,7 @@ test('missing bearer is rejected before provisioning RPC',async()=>{
   }finally{global.fetch=original;}
 });
 
-test('POST atomically provisions an active battery passport and returns canonical carrier URLs',async()=>{
+test('POST atomically provisions a draft battery passport and returns canonical carrier URLs',async()=>{
   const restore=withEnv(), original=global.fetch;
   let seen;
   global.fetch=async(url,options)=>{
@@ -107,7 +108,8 @@ test('POST atomically provisions an active battery passport and returns canonica
     assert.equal(sent.p_unique_identifier,'BAT-LMT-000001');
     assert.deepEqual(sent.p_item_canonical_data,{serial:'SER-000001'});
     const data=JSON.parse(res.body).data;
-    assert.equal(data.passport_status,'active');
+    assert.equal(data.passport_status,'draft');
+    assert.equal(data.activation_required,true);
     assert.equal(data.passport_url,'https://dpp.example/passport?identifier=BAT-LMT-000001');
     assert.equal(data.qr_url,'https://dpp.example/qr?identifier=BAT-LMT-000001');
     assert.equal(data.qr_api_url,'https://dpp.example/api/qr?identifier=BAT-LMT-000001');
