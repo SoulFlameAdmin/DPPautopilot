@@ -200,6 +200,16 @@
         "http_status": 409,
         "code": "PASSPORT_CONFLICT",
         "message": "The passport conflicts with an existing record."
+      },
+      "DP701": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The authority payload failed validation."
+      },
+      "DP702": {
+        "http_status": 403,
+        "code": "AUTHORITY_REQUIRED",
+        "message": "An approved authority credential is required."
       }
     },
     "export": {},
