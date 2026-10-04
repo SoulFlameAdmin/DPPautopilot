@@ -26,9 +26,9 @@ def main()->None:
 
     counts={s:sum(1 for t in tasks if t["status"]==s) for s in ("green","yellow","red")}
     require(plan.get("counts")=={**counts,"total":100},f"stored counts drift: {plan.get('counts')} vs {counts}")
-    require(plan["sequentialProgress"]=={"greenThrough":19,"next":20},"sequential progress must remain 1-19 GREEN, next 20")
-    require(all(tasks[i-1]["status"]=="green" for i in range(1,20)),"points 1-19 must be GREEN")
-    require(tasks[19]["status"]!="green","point 20 must remain unfinished until its own acceptance closes")
+    require(plan["sequentialProgress"]=={"greenThrough":20,"next":21},"sequential progress must remain 1-20 GREEN, next 21")
+    require(all(tasks[i-1]["status"]=="green" for i in range(1,21)),"points 1-20 must be GREEN")
+    require(tasks[20]["status"]!="green","point 21 must remain unfinished until its own acceptance closes")
     require(tasks[99]["status"]=="red","point 100 cannot be GREEN before 1-99 are complete")
 
     covered=[]
