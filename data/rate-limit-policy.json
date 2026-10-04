@@ -72,6 +72,9 @@
     },
     "provision": {
       "POST": "authenticated_write"
+    },
+    "batch-provision": {
+      "POST": "authenticated_write"
     }
   },
   "response": {
