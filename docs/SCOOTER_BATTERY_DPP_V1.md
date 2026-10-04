@@ -52,3 +52,20 @@ Stage 2 is accepted when all of the following are true:
 
 Physical printer acceptance is intentionally Stage 10; Stage 2 proves identity and carrier uniqueness in the data/API layer.
 
+## Stage 3 acceptance — complete LMT / scooter battery schema + validation
+
+Stage 3 is accepted when the Scooter Battery profile has a machine-readable LMT schema and deterministic validation for the full currently catalogued required field set.
+
+- 41 required LMT fields are covered: 33 model-level and 8 individual-item fields.
+- The EV-only conditional `model.exhaustion_capacity_threshold` is explicitly not required for the LMT profile.
+- Every required field is checked for presence and catalog type.
+- LMT category is fixed to `light_means_of_transport`.
+- Numeric/range checks cover weight, capacity, renewable share, C-rate, state of health and state of charge.
+- Voltage and storage-temperature ordering is validated.
+- Lifecycle values and per-item unique identifiers are validated.
+- A complete synthetic scooter fixture must pass, while missing fields, wrong category, duplicate identifiers and invalid ranges must fail deterministically.
+
+Schema: `data/scooter-battery-schema-v1.json`  
+Validator: `scripts/scooter_schema_validation.py`  
+Acceptance gate: `scripts/validate_scooter_schema.py`
+
