@@ -93,6 +93,16 @@
       "id": "invalid_member_fields",
       "surface": "/api/members",
       "expected": "400/422 validation error before upstream"
+    },
+    {
+      "id": "oversize_parsed_provision_body",
+      "surface": "/api/provision",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "invalid_provision_fields",
+      "surface": "/api/provision",
+      "expected": "400/422 validation error before upstream"
     }
   ],
   "evidence_files": [
