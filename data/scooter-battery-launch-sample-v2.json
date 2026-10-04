@@ -1,0 +1,162 @@
+{
+  "fixtureVersion": "lmt-launch-71-v2-synthetic-1",
+  "synthetic": true,
+  "profileId": "scooter-battery-dpp-v1",
+  "passport": {
+    "responsible_economic_operator": {
+      "name": "SoulFlame Synthetic Operator",
+      "identifier": "DEMO-EO-001",
+      "contact": "demo@example.invalid"
+    }
+  },
+  "model": {
+    "identification": {
+      "manufacturer": {
+        "name": "Northstar Demo Cells (Synthetic)",
+        "postal_address": "100 Demo Park, Test City 00000, EU",
+        "contact": {
+          "email": "demo@example.invalid",
+          "website": "https://example.invalid"
+        }
+      },
+      "category": "light_means_of_transport",
+      "model_id": "SF-LMT-48V-20AH-DEMO",
+      "place_of_manufacture": "Demo City, EU",
+      "date_of_manufacture": "2026-10"
+    },
+    "physical": {
+      "weight_kg": 12.8
+    },
+    "rated_capacity_ah": 20,
+    "composition": {
+      "chemistry": "Lithium-ion NMC",
+      "hazardous_substances": [
+        {
+          "name": "Synthetic electrolyte component"
+        }
+      ],
+      "critical_raw_materials": [
+        {
+          "material": "Lithium",
+          "share_percent": 2.8
+        }
+      ]
+    },
+    "safety": {
+      "usable_extinguishing_agent": "Water for cooling (synthetic example)"
+    },
+    "renewable_content_share": 0,
+    "voltage": {
+      "minimum_v": 39,
+      "nominal_v": 48,
+      "maximum_v": 54.6
+    },
+    "power_capability": {
+      "original_w": 2200,
+      "limits": {
+        "continuous_w": 1400,
+        "temperature_min_c": -10,
+        "temperature_max_c": 40
+      }
+    },
+    "expected_lifetime": {
+      "cycles": 800,
+      "reference_test": "DEMO-LMT-CYCLE-001"
+    },
+    "storage_temperature": {
+      "minimum_c": -20,
+      "maximum_c": 45,
+      "reference_test": "DEMO-LMT-STORAGE-001"
+    },
+    "energy_efficiency": {
+      "initial_round_trip_pct": 93.1,
+      "at_50_percent_cycle_life_pct": 90.3
+    },
+    "internal_resistance": {
+      "cell_ohm": 0.0024,
+      "pack_ohm": 0.0682
+    },
+    "c_rate_test": 1,
+    "markings": {
+      "article_13_4": {
+        "separate_collection_symbol": true
+      }
+    },
+    "eu_declaration_of_conformity": "DEMO-LMT-EU-DOC-001",
+    "waste_information": {
+      "collection": "Return to an authorised collection point"
+    },
+    "restricted_composition": {
+      "cathode": "Synthetic NMC",
+      "anode": "Synthetic graphite",
+      "electrolyte": "Synthetic electrolyte"
+    },
+    "spares": {
+      "part_numbers": [
+        "DEMO-CMU-001"
+      ],
+      "source_contacts": [
+        "parts@example.invalid"
+      ]
+    },
+    "disassembly": {
+      "exploded_diagram_ref": "DEMO-DIAGRAM-001",
+      "sequence": [
+        "Isolate high voltage",
+        "Remove enclosure"
+      ],
+      "tools": [
+        "Insulated torque wrench"
+      ]
+    },
+    "safety_measures": {
+      "service": "Synthetic isolation procedure"
+    },
+    "compliance_test_reports": [
+      "DEMO-TEST-REPORT-001"
+    ]
+  },
+  "pointApplicability": {
+    "35": false,
+    "41": false,
+    "57": true,
+    "58": true,
+    "68": false,
+    "69": false,
+    "70": false,
+    "71": false
+  },
+  "items": [
+    {
+      "unique_identifier": "urn:dpp:demo:lmt:SF-LMT-48V-20AH-DEMO:000001",
+      "performance": {
+        "rated_capacity_ah": 20,
+        "capacity_fade_pct": 0,
+        "power_w": 2200,
+        "power_fade_pct": 0,
+        "internal_resistance_ohm": 0.0682,
+        "internal_resistance_increase_pct": 0,
+        "round_trip_efficiency_pct": 93.1,
+        "round_trip_efficiency_fade_pct": 0,
+        "expected_lifetime_cycles": 800,
+        "expected_lifetime_calendar_years": 5
+      },
+      "state_of_health": {
+        "remaining_capacity": 20,
+        "remaining_power_capability": 2200,
+        "remaining_round_trip_efficiency": 93.1,
+        "self_discharge_rate": 0.5,
+        "ohmic_resistance": 0.0682
+      },
+      "lifecycle_status": "original",
+      "usage": {
+        "cycles": 0,
+        "events": []
+      },
+      "telemetry": {
+        "environment": [],
+        "state_of_charge": []
+      }
+    }
+  ]
+}
