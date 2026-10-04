@@ -10,6 +10,14 @@
       "destination": "/live/qr"
     },
     {
+      "source": "/company",
+      "destination": "/live/company"
+    },
+    {
+      "source": "/company/",
+      "destination": "/live/company"
+    },
+    {
       "source": "/((?!data/|api/).*)",
       "destination": "/index.html"
     }
