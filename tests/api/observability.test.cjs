@@ -10,6 +10,8 @@ const organizations=require('../../api/organizations.js');
 const members=require('../../api/members.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
+const provision=require('../../api/provision.js');
+const batchProvision=require('../../api/batch-provision.js');
 const imports=require('../../api/imports.js');
 const exportApi=require('../../api/export.js');
 
@@ -217,6 +219,8 @@ test('all authenticated API surfaces emit correlated redacted 401 events',async(
       ['members',members,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
       ['models',models,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
       ['items',items,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['provision',provision,{method:'POST',headers:{},body:{secret:'must-not-appear'},query:{}}],
+      ['batch-provision',batchProvision,{method:'POST',headers:{},body:{secret:'must-not-appear'},query:{}}],
       ['imports',imports,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
       ['export',exportApi,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
       ['passport',passport,{
