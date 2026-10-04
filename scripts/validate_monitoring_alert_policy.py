@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/monitoring-alert-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==3
+assert policy.get("version")==4
 assert policy.get("task")=="R10"
 assert policy.get("status")=="partial"
 assert policy.get("input_event")=="dpp_http_request"
@@ -79,8 +79,20 @@ assert drill_contract["safety"]["production_runtime_claimed"] is False
 delivery=policy.get("delivery",{})
 assert delivery.get("live_delivery_configured") is False
 assert "R09" in delivery.get("reason","")
-assert "F08" in delivery.get("reason","")
+assert "F08" not in delivery.get("reason","")
 assert len(delivery.get("required_before_green",[]))>=4
+
+runtime_evidence=policy.get("runtime_evidence",{})
+assert runtime_evidence.get("source")=="Vercel runtime error aggregation"
+assert runtime_evidence.get("structured_event_observed") is True
+assert runtime_evidence.get("deployment_id","").startswith("dpl_")
+runtime_event=runtime_evidence.get("event_shape",{})
+assert runtime_event.get("event")=="dpp_http_request"
+assert runtime_event.get("surface")=="passport"
+assert runtime_event.get("status")==500
+assert runtime_event.get("outcome")=="server_error"
+assert runtime_event.get("error_code")=="SERVER_CONFIGURATION_MISSING"
+assert "does not prove" in runtime_evidence.get("scope_note","").lower()
 
 helper=(ROOT/"api/_monitoring.js").read_text(encoding="utf-8")
 for token in [

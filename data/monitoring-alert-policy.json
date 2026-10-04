@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "task": "R10",
   "status": "partial",
   "input_event": "dpp_http_request",
@@ -87,7 +87,7 @@
   ],
   "delivery": {
     "live_delivery_configured": false,
-    "reason": "R09 has no deployed runtime/log aggregation evidence while F08 is blocked.",
+    "reason": "R09 structured production event ingestion is evidenced, but live alert delivery, accepted production logging retention/backend ownership, and a real fire-and-recover notification drill remain missing.",
     "required_before_green": [
       "Deploy runtime and verify R09 log ingestion",
       "Connect alerts to an approved notification destination",
@@ -112,5 +112,21 @@
     "scenario": "critical availability fire -> SEV1 owner/ack target mapping -> clear/recovery",
     "artifact": "artifacts/r10-r13-monitoring-incident-drill.json",
     "live_delivery_claimed": false
+  },
+  "runtime_evidence": {
+    "source": "Vercel runtime error aggregation",
+    "structured_event_observed": true,
+    "observed_at": "2026-09-21T21:49:22Z",
+    "deployment_id": "dpl_EiGGtCSHLr18wArzAsjQpje63zDu",
+    "event_shape": {
+      "event": "dpp_http_request",
+      "surface": "passport",
+      "method": "GET",
+      "status": 500,
+      "outcome": "server_error",
+      "auth_present": false,
+      "error_code": "SERVER_CONFIGURATION_MISSING"
+    },
+    "scope_note": "This proves deployed R09 structured-event ingestion on a production deployment; it does not prove current production health, live alert notification delivery, retention acceptance, or human acknowledgement."
   }
 }
