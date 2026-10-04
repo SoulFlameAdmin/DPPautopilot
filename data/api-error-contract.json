@@ -342,7 +342,7 @@
         "message": "The battery passport conflicts with an existing state or payload."
       }
     },
-    "batch_provision": {
+    "batch-provision": {
       "23505": {
         "http_status": 409,
         "code": "BATCH_PROVISION_CONFLICT",
