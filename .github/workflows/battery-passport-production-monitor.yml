@@ -1,0 +1,69 @@
+name: Battery Passport Production Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  production-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check canonical production routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORIGIN="https://dpp-autopilot.vercel.app"
+          ID="BAT-SF-NFC-0001"
+
+          curl --fail --silent --show-error --retry 3 --retry-all-errors             "$ORIGIN/api/passport?identifier=$ID" -o passport.json
+
+          python - <<'PY'
+          import json
+          data=json.load(open("passport.json",encoding="utf-8"))["data"]
+          assert data["unique_identifier"]=="BAT-SF-NFC-0001"
+          assert data["status"]=="active"
+          print("PUBLIC_PASSPORT_OK")
+          PY
+
+          curl --fail --silent --show-error --retry 3 --retry-all-errors             "$ORIGIN/passport?identifier=$ID" -o passport.html
+          grep -qi "<html" passport.html
+
+          curl --fail --silent --show-error --retry 3 --retry-all-errors             -D qr.headers "$ORIGIN/api/qr?identifier=$ID" -o qr.svg
+          grep -qi '^x-dpp-identifier: BAT-SF-NFC-0001' qr.headers
+          grep -qi '^x-dpp-target: https://dpp-autopilot.vercel.app/passport?identifier=BAT-SF-NFC-0001' qr.headers
+          grep -qi '<svg' qr.svg
+
+          curl --fail --silent --show-error --retry 3 --retry-all-errors             "$ORIGIN/qr?identifier=$ID" -o qr.html
+          grep -qi "<html" qr.html
+
+          curl --fail --silent --show-error --retry 3 --retry-all-errors             "$ORIGIN/manufacturer" -o manufacturer.html
+          grep -q 'PRODUCTION MANUFACTURER · STAGE 5' manufacturer.html
+
+          curl --fail --silent --show-error --retry 3 --retry-all-errors             "$ORIGIN/manufacturer/import" -o import.html
+          grep -q 'PRODUCTION BATCH IMPORT · STAGE 6' import.html
+
+          curl --fail --silent --show-error --retry 3 --retry-all-errors             "$ORIGIN/manufacturer/labels" -o labels.html
+          grep -q 'BATCH QR LABELS · STAGE 10' labels.html
+
+          echo "BATTERY_PASSPORT_PRODUCTION_MONITOR_PASS"
+
+      - name: Upload smoke evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: battery-passport-production-smoke
+          path: |
+            passport.json
+            passport.html
+            qr.headers
+            qr.svg
+            qr.html
+            manufacturer.html
+            import.html
+            labels.html
+          if-no-files-found: ignore
