@@ -1,0 +1,675 @@
+{
+  "id": "scooter-lmt-battery-master-100",
+  "title": "Scooter / LMT Battery DPP · Official Master Plan 1–100",
+  "language": "bg",
+  "statusLegend": {
+    "green": "Готово и доказано",
+    "yellow": "Има основа / частично готово",
+    "red": "Предстои"
+  },
+  "updatedAt": "2026-10-05",
+  "canonicalRepo": "SoulFlameAdmin/DPPautopilot",
+  "sequentialProgress": {
+    "greenThrough": 18,
+    "next": 19
+  },
+  "counts": {
+    "green": 25,
+    "yellow": 48,
+    "red": 27,
+    "total": 100
+  },
+  "note": "GREEN означава имплементация + приложим тест/evidence. YELLOW не се брои за завършено. Планът е конкретно за Scooter/LMT Battery DPP; общият DPP engine ще се преизползва за други продуктови вертикали.",
+  "externalAfter100": [
+    "Реален производител предоставя истински model data и serials.",
+    "Физически batch: реален етикет/принтер/сканиране на друга машина или телефон.",
+    "Customer UAT с реална фирма.",
+    "Реален EU Registry operator/test access и receipt.",
+    "Квалифициран legal/compliance review.",
+    "Липсващи supplier данни се предоставят от реалната supply chain."
+  ],
+  "phases": [
+    {
+      "id": "P1",
+      "title": "Регулация и core passport",
+      "range": [
+        1,
+        20
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Фирма и ежедневна работа",
+      "range": [
+        21,
+        40
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Интеграции, достъп и EU Registry",
+      "range": [
+        41,
+        60
+      ]
+    },
+    {
+      "id": "P4",
+      "title": "Print, connector, telemetry и UX",
+      "range": [
+        61,
+        80
+      ]
+    },
+    {
+      "id": "P5",
+      "title": "Надеждност, release и 100/100",
+      "range": [
+        81,
+        100
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "title": "EU източници и законова база",
+      "status": "green",
+      "plain": "Заключени са официалните източници за LMT battery DPP."
+    },
+    {
+      "id": 2,
+      "title": "71/71 EU data points",
+      "status": "green",
+      "plain": "Има пълна 71-точкова матрица."
+    },
+    {
+      "id": 3,
+      "title": "Кои точки важат за scooter/LMT",
+      "status": "green",
+      "plain": "Applicability за 18.02.2027 е определена."
+    },
+    {
+      "id": 4,
+      "title": "Свързване EU точки → наши полета",
+      "status": "green",
+      "plain": "Всяка регулаторна точка е вързана към canonical field."
+    },
+    {
+      "id": 5,
+      "title": "Формати, единици и проверки",
+      "status": "green",
+      "plain": "Има validation правила за стойности и формати."
+    },
+    {
+      "id": 6,
+      "title": "Applicability engine",
+      "status": "green",
+      "plain": "Системата знае кое е задължително, условно или неприложимо."
+    },
+    {
+      "id": 7,
+      "title": "Източник и доказателство за всяко поле",
+      "status": "green",
+      "plain": "Има provenance/source-owner модел."
+    },
+    {
+      "id": 8,
+      "title": "Versioning на регулаторната схема",
+      "status": "green",
+      "plain": "Промени в правилата не пренаписват тихо старите паспорти."
+    },
+    {
+      "id": 9,
+      "title": "Battery Model CRUD",
+      "status": "green",
+      "plain": "Фирмата може да създава и управлява LMT модели."
+    },
+    {
+      "id": 10,
+      "title": "Отделна физическа Battery Item бройка",
+      "status": "green",
+      "plain": "Всяка физическа батерия е отделен item."
+    },
+    {
+      "id": 11,
+      "title": "Уникален Battery ID",
+      "status": "green",
+      "plain": "Уникалният идентификатор е задължителен и защитен."
+    },
+    {
+      "id": 12,
+      "title": "Passport create/update/version history",
+      "status": "green",
+      "plain": "Има паспорт и история на материалните промени."
+    },
+    {
+      "id": 13,
+      "title": "Live public passport",
+      "status": "green",
+      "plain": "Публичният паспорт работи по уникален identifier."
+    },
+    {
+      "id": 14,
+      "title": "Live QR",
+      "status": "green",
+      "plain": "QR води към точния публичен паспорт."
+    },
+    {
+      "id": 15,
+      "title": "Произведи X броя",
+      "status": "green",
+      "plain": "Atomic batch provisioning работи за 1–250 батерии."
+    },
+    {
+      "id": 16,
+      "title": "Rollback на batch",
+      "status": "green",
+      "plain": "При грешка не остава половин batch."
+    },
+    {
+      "id": 17,
+      "title": "Batch / serial range",
+      "status": "green",
+      "plain": "Има deterministic serial-range производство и batch key."
+    },
+    {
+      "id": 18,
+      "title": "Passport activation completeness gate",
+      "status": "green",
+      "plain": "Паспортът започва DRAFT и не става ACTIVE/public преди readiness PASS."
+    },
+    {
+      "id": 19,
+      "title": "Production completeness / missing-data workflow",
+      "status": "yellow",
+      "plain": "Core проверката я има; трябва финален удобен клиентски workflow."
+    },
+    {
+      "id": 20,
+      "title": "Финален Public Passport UX",
+      "status": "yellow",
+      "plain": "Live паспортът работи, но дизайнът и production presentation искат финализация."
+    },
+    {
+      "id": 21,
+      "title": "Revoked / replaced / retired passport UX",
+      "status": "yellow",
+      "plain": "Статусите имат backend основа; клиентският UX остава."
+    },
+    {
+      "id": 22,
+      "title": "Production company signup",
+      "status": "green",
+      "plain": "Има реална фирмена регистрация и email verification."
+    },
+    {
+      "id": 23,
+      "title": "Password reset / session revocation",
+      "status": "yellow",
+      "plain": "Auth основата е готова; остава финален production acceptance."
+    },
+    {
+      "id": 24,
+      "title": "Company / tenant onboarding",
+      "status": "green",
+      "plain": "Всяка фирма има собствен tenant и active-company flow."
+    },
+    {
+      "id": 25,
+      "title": "Owner / Admin / Editor / Viewer",
+      "status": "green",
+      "plain": "Ролите и tenant-scoped RBAC са имплементирани."
+    },
+    {
+      "id": 26,
+      "title": "Production Company Dashboard",
+      "status": "green",
+      "plain": "Manufacturer dashboard работи с production API, не demo localStorage."
+    },
+    {
+      "id": 27,
+      "title": "Models tab production",
+      "status": "green",
+      "plain": "Models са вързани към реалния backend."
+    },
+    {
+      "id": 28,
+      "title": "Battery Items tab production",
+      "status": "green",
+      "plain": "Items са вързани към реалния backend."
+    },
+    {
+      "id": 29,
+      "title": "Passports tab production",
+      "status": "yellow",
+      "plain": "Backend има; финалният management UI остава."
+    },
+    {
+      "id": 30,
+      "title": "QR / Print Center production",
+      "status": "yellow",
+      "plain": "QR и printable page работят; центърът за масова работа остава."
+    },
+    {
+      "id": 31,
+      "title": "Secure physical carrier binding",
+      "status": "yellow",
+      "plain": "Има carrier/NFC основа; финалното production binding и acceptance остават."
+    },
+    {
+      "id": 32,
+      "title": "Carrier revoke / reissue / reprint",
+      "status": "yellow",
+      "plain": "Трябва финален операторски flow."
+    },
+    {
+      "id": 33,
+      "title": "Scan history",
+      "status": "yellow",
+      "plain": "Има scan-event основа; production UX/acceptance остават."
+    },
+    {
+      "id": 34,
+      "title": "CSV upload / mapping UI",
+      "status": "yellow",
+      "plain": "CSV core и mapping логика съществуват; финалната production форма остава."
+    },
+    {
+      "id": 35,
+      "title": "CSV transaction / idempotency acceptance",
+      "status": "yellow",
+      "plain": "Core е наличен; иска пълен real-data acceptance."
+    },
+    {
+      "id": 36,
+      "title": "XLSX / Excel import",
+      "status": "red",
+      "plain": "Предстои production XLSX import."
+    },
+    {
+      "id": 37,
+      "title": "Saved import mappings",
+      "status": "yellow",
+      "plain": "Има schema/core; клиентският flow и acceptance остават."
+    },
+    {
+      "id": 38,
+      "title": "Customer API credentials",
+      "status": "red",
+      "plain": "Предстои credential lifecycle за клиенти."
+    },
+    {
+      "id": 39,
+      "title": "API docs + examples",
+      "status": "red",
+      "plain": "Предстои публична клиентска API документация."
+    },
+    {
+      "id": 40,
+      "title": "Webhooks / events",
+      "status": "red",
+      "plain": "Предстои outbound event/webhook система."
+    },
+    {
+      "id": 41,
+      "title": "Integration Assessment в production DB",
+      "status": "red",
+      "plain": "Предстои assessment да стане реален persisted workflow."
+    },
+    {
+      "id": 42,
+      "title": "ERP / MES connector framework",
+      "status": "red",
+      "plain": "Предстои production connector framework."
+    },
+    {
+      "id": 43,
+      "title": "BMS / machine / cloud connector framework",
+      "status": "red",
+      "plain": "Предстои production connector framework за машинни и BMS данни."
+    },
+    {
+      "id": 44,
+      "title": "Supplier Portal production UI",
+      "status": "yellow",
+      "plain": "Има supplier backend основа; UI и acceptance остават."
+    },
+    {
+      "id": 45,
+      "title": "Supplier invitations / expiry",
+      "status": "yellow",
+      "plain": "Има основа; финалното production поведение остава."
+    },
+    {
+      "id": 46,
+      "title": "Supplier evidence packages",
+      "status": "yellow",
+      "plain": "Има evidence инфраструктура; supplier workflow остава."
+    },
+    {
+      "id": 47,
+      "title": "Evidence attachment storage",
+      "status": "yellow",
+      "plain": "Storage/RPC защитата е напреднала; реалният end-to-end lifecycle остава."
+    },
+    {
+      "id": 48,
+      "title": "Public / legitimate-interest / authority matrix",
+      "status": "yellow",
+      "plain": "Access класовете са моделирани; финалното live acceptance остава."
+    },
+    {
+      "id": 49,
+      "title": "Legitimate-interest authenticated access",
+      "status": "red",
+      "plain": "Предстои отделен production access flow."
+    },
+    {
+      "id": 50,
+      "title": "Authority-only access",
+      "status": "red",
+      "plain": "Предстои реален authority context и достъп."
+    },
+    {
+      "id": 51,
+      "title": "Export access enforcement",
+      "status": "yellow",
+      "plain": "Export core има; финалният access-class acceptance остава."
+    },
+    {
+      "id": 52,
+      "title": "RLS intent audit на всички DPP таблици",
+      "status": "yellow",
+      "plain": "RLS е силно покрит; остава финална таблица-по-таблица приемка."
+    },
+    {
+      "id": 53,
+      "title": "Anonymous admin RPC hardening",
+      "status": "yellow",
+      "plain": "Има RPC guard/hardening; остава финален live audit."
+    },
+    {
+      "id": 54,
+      "title": "Cross-company attack suite",
+      "status": "yellow",
+      "plain": "Има tenant isolation тестове; остава финалната пълна матрица."
+    },
+    {
+      "id": 55,
+      "title": "Live Firma A ≠ Firma B proof",
+      "status": "red",
+      "plain": "Трябва реален deployed cross-tenant acceptance."
+    },
+    {
+      "id": 56,
+      "title": "Full API input validation",
+      "status": "green",
+      "plain": "Shared body limits и negative input validation са покрити."
+    },
+    {
+      "id": 57,
+      "title": "Rate-limit live acceptance",
+      "status": "yellow",
+      "plain": "Rate limiting има; остава deployed acceptance."
+    },
+    {
+      "id": 58,
+      "title": "Final auth security acceptance",
+      "status": "yellow",
+      "plain": "Има recovery/session/security основа; final gate остава."
+    },
+    {
+      "id": 59,
+      "title": "EU Registry client / adapter",
+      "status": "yellow",
+      "plain": "Registry abstraction/core има; реалният adapter остава."
+    },
+    {
+      "id": 60,
+      "title": "Registry payload builder",
+      "status": "yellow",
+      "plain": "Има payload/status модел; финалната target схема остава."
+    },
+    {
+      "id": 61,
+      "title": "Registry submission idempotency",
+      "status": "yellow",
+      "plain": "Core idempotency работи; реален provider acceptance остава."
+    },
+    {
+      "id": 62,
+      "title": "Registry status / retry queue",
+      "status": "yellow",
+      "plain": "Status/retry core има; production provider flow остава."
+    },
+    {
+      "id": 63,
+      "title": "Registry receipt evidence storage",
+      "status": "red",
+      "plain": "Предстои реален receipt/evidence lifecycle."
+    },
+    {
+      "id": 64,
+      "title": "Registry sandbox / test harness",
+      "status": "red",
+      "plain": "Предстои integration sandbox срещу реалните технически правила."
+    },
+    {
+      "id": 65,
+      "title": "Real Print Queue",
+      "status": "red",
+      "plain": "Предстои production print queue."
+    },
+    {
+      "id": 66,
+      "title": "Label templates",
+      "status": "yellow",
+      "plain": "Има QR/print основа; template system остава."
+    },
+    {
+      "id": 67,
+      "title": "SF DPP Windows Connector",
+      "status": "red",
+      "plain": "Предстои подписан локален connector."
+    },
+    {
+      "id": 68,
+      "title": "Real printer discovery",
+      "status": "red",
+      "plain": "Предстои откриване на реални принтери."
+    },
+    {
+      "id": 69,
+      "title": "Real test print / retry / status",
+      "status": "red",
+      "plain": "Предстои физически printer workflow."
+    },
+    {
+      "id": 70,
+      "title": "Connector secure pairing",
+      "status": "red",
+      "plain": "Предстои сигурно pairing между cloud и local connector."
+    },
+    {
+      "id": 71,
+      "title": "Connector diagnostics / logs",
+      "status": "red",
+      "plain": "Предстои операторска диагностика."
+    },
+    {
+      "id": 72,
+      "title": "Lifecycle / performance event engine",
+      "status": "yellow",
+      "plain": "Lifecycle core има; performance/event production flow остава."
+    },
+    {
+      "id": 73,
+      "title": "BMS telemetry mapping",
+      "status": "red",
+      "plain": "Предстои реално BMS data mapping."
+    },
+    {
+      "id": 74,
+      "title": "Immutable critical audit acceptance",
+      "status": "yellow",
+      "plain": "Audit log е силно развит; финалният acceptance/retention остава."
+    },
+    {
+      "id": 75,
+      "title": "Customer export / evidence bundle",
+      "status": "yellow",
+      "plain": "Export bundle core има; exhaustive customer package остава."
+    },
+    {
+      "id": 76,
+      "title": "BG / EN public passport",
+      "status": "red",
+      "plain": "Предстои финален двуезичен production passport."
+    },
+    {
+      "id": 77,
+      "title": "Accessibility gate",
+      "status": "yellow",
+      "plain": "Има accessibility probes; финалният acceptance остава."
+    },
+    {
+      "id": 78,
+      "title": "Mobile / tablet / desktop acceptance",
+      "status": "yellow",
+      "plain": "Responsive основата е налична; финален device matrix остава."
+    },
+    {
+      "id": 79,
+      "title": "Chromium / Firefox / WebKit E2E",
+      "status": "yellow",
+      "plain": "Има browser smoke; пълният cross-browser E2E остава."
+    },
+    {
+      "id": 80,
+      "title": "Full production E2E",
+      "status": "red",
+      "plain": "Трябва signup → model → batch → readiness → active passport → QR → export."
+    },
+    {
+      "id": 81,
+      "title": "Failure / retry E2E",
+      "status": "yellow",
+      "plain": "Има много negative/idempotency тестове; пълният production flow остава."
+    },
+    {
+      "id": 82,
+      "title": "Load test",
+      "status": "yellow",
+      "plain": "Има precursor/load coverage; production-like acceptance остава."
+    },
+    {
+      "id": 83,
+      "title": "Monitoring",
+      "status": "yellow",
+      "plain": "Observability има; финалният monitoring setup остава."
+    },
+    {
+      "id": 84,
+      "title": "Alerting",
+      "status": "yellow",
+      "plain": "Policy/precursor има; production alerts остават."
+    },
+    {
+      "id": 85,
+      "title": "Backup / restore drill",
+      "status": "yellow",
+      "plain": "Има synthetic/CI drill основа; финален production drill остава."
+    },
+    {
+      "id": 86,
+      "title": "Incident drill",
+      "status": "yellow",
+      "plain": "Runbook/drill основа има; финалната приемка остава."
+    },
+    {
+      "id": 87,
+      "title": "Exact production smoke gate",
+      "status": "yellow",
+      "plain": "Smoke/evidence tooling има; финален release gate остава."
+    },
+    {
+      "id": 88,
+      "title": "Runtime acceptance window",
+      "status": "red",
+      "plain": "Трябва период без критични production грешки."
+    },
+    {
+      "id": 89,
+      "title": "Final security acceptance",
+      "status": "red",
+      "plain": "Предстои общ финален security sign-off на техническите gates."
+    },
+    {
+      "id": 90,
+      "title": "Privacy / retention / deletion acceptance",
+      "status": "yellow",
+      "plain": "Inventory и precursor-и има; политиките и реалният lifecycle остават."
+    },
+    {
+      "id": 91,
+      "title": "Protect GitHub main",
+      "status": "red",
+      "plain": "Main трябва да стане protected с required checks."
+    },
+    {
+      "id": 92,
+      "title": "Release migration gate",
+      "status": "yellow",
+      "plain": "Migration replay/snapshot gate има; финалният release process остава."
+    },
+    {
+      "id": 93,
+      "title": "Rollback acceptance",
+      "status": "yellow",
+      "plain": "Rollback decision/test основа има; финален production rollback остава."
+    },
+    {
+      "id": 94,
+      "title": "Sync стария MASTER PLAN",
+      "status": "yellow",
+      "plain": "Старият tracker трябва да се изравни с реалния 100-точков план."
+    },
+    {
+      "id": 95,
+      "title": "Един canonical DPP продукт",
+      "status": "yellow",
+      "plain": "UI и backend са свързани на много места; финалното унифициране остава."
+    },
+    {
+      "id": 96,
+      "title": "Production notifications",
+      "status": "red",
+      "plain": "Предстоят email/system notifications."
+    },
+    {
+      "id": 97,
+      "title": "Billing / entitlements",
+      "status": "yellow",
+      "plain": "Има бизнес концепция; production entitlement/billing gate остава."
+    },
+    {
+      "id": 98,
+      "title": "Support workflow",
+      "status": "yellow",
+      "plain": "Има support концепция/части; финалният production flow остава."
+    },
+    {
+      "id": 99,
+      "title": "Final automated production evidence pack",
+      "status": "red",
+      "plain": "Предстои автоматичен пакет доказателства за release."
+    },
+    {
+      "id": 100,
+      "title": "TECHNICAL CODE-COMPLETE",
+      "status": "red",
+      "plain": "GREEN само когато 1–99 са GREEN и няма вътрешна техническа зависимост."
+    }
+  ]
+}
