@@ -72,11 +72,26 @@ function validImportCommit(value){
     typeof value.already_committed==='boolean';
 }
 
+function validImportErrors(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    validUuid(value.import_id)&&IMPORT_STATUSES.has(value.status)&&
+    validNonNegativeInteger(value.row_count)&&
+    validNonNegativeInteger(value.error_count)&&
+    Array.isArray(value.rows)&&value.rows.every(row=>
+      row&&typeof row==='object'&&!Array.isArray(row)&&
+      Number.isInteger(row.row_number)&&row.row_number>=1&&
+      (row.model_identifier===null||typeof row.model_identifier==='string')&&
+      (row.unique_identifier===null||typeof row.unique_identifier==='string')&&
+      Array.isArray(row.validation_errors)&&row.validation_errors.every(x=>typeof x==='string')
+    );
+}
+
 function validateRpcShape(name,data){
   if(name==='dpp_api_import_create') return validImportCreate(data);
   if(name==='dpp_api_import_get') return validImportGet(data);
   if(name==='dpp_api_import_validate') return validImportValidate(data);
   if(name==='dpp_api_import_commit') return validImportCommit(data);
+  if(name==='dpp_api_import_errors') return validImportErrors(data);
   return true;
 }
 
@@ -197,7 +212,12 @@ async function handler(req,res){
       if(!validUuid(id)){
         return send(res,400,{error:{code:'INVALID_IMPORT_ID',message:'A valid import UUID is required.'}});
       }
-      const value=await rpc('dpp_api_import_get',{p_import_id:id},authorization);
+      const detail=req.query&&req.query.detail;
+      const rpcName=detail==='errors'?'dpp_api_import_errors':'dpp_api_import_get';
+      if(detail!=null&&detail!==''&&detail!=='errors'){
+        return send(res,422,{error:{code:'INVALID_IMPORT_DETAIL',message:'detail must be errors when provided.'}});
+      }
+      const value=await rpc(rpcName,{p_import_id:id},authorization);
       return send(res,200,{data:value});
     }
 
@@ -237,4 +257,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validUuid,validTimestamp,validNullableTimestamp,validNonNegativeInteger,validImportCreate,validImportGet,validImportValidate,validImportCommit,validateRpcShape,validRows,mapDatabaseError,rpc,IMPORT_STATUSES,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,validUuid,validTimestamp,validNullableTimestamp,validNonNegativeInteger,validImportCreate,validImportGet,validImportValidate,validImportCommit,validImportErrors,validateRpcShape,validRows,mapDatabaseError,rpc,IMPORT_STATUSES,DEFAULT_RPC_TIMEOUT_MS};
