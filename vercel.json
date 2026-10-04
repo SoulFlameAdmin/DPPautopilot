@@ -18,6 +18,14 @@
       "destination": "/live/company"
     },
     {
+      "source": "/manufacturer",
+      "destination": "/live/manufacturer"
+    },
+    {
+      "source": "/manufacturer/",
+      "destination": "/live/manufacturer"
+    },
+    {
       "source": "/((?!data/|api/).*)",
       "destination": "/index.html"
     }
