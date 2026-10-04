@@ -12,6 +12,7 @@ def require(condition: bool, message: str) -> None:
 
 def main() -> None:
     migration=(ROOT/"supabase/migrations/20261004053000_dpp_scooter_single_item_provisioning.sql").read_text(encoding="utf-8")
+    activation=(ROOT/"supabase/migrations/20261004160000_dpp_lmt_passport_activation_gate.sql").read_text(encoding="utf-8")
     api=(ROOT/"api/provision.js").read_text(encoding="utf-8")
     api_test=(ROOT/"tests/api/provision.test.cjs").read_text(encoding="utf-8")
     db_test=(ROOT/"tests/db/test_scooter_provisioning_subset.sql").read_text(encoding="utf-8")
@@ -27,7 +28,6 @@ def main() -> None:
         "dpp_assert_public_passport_payload_safe",
         "on conflict (unique_identifier) do nothing",
         "status,public_payload,private_payload,created_by",
-        "'active'",
         "'idempotent_replay'",
         "revoke all on function public.dpp_api_scooter_battery_provision",
         "grant execute on function public.dpp_api_scooter_battery_provision",
@@ -49,7 +49,7 @@ def main() -> None:
         require(token in api, f"Stage 4 API missing: {token}")
 
     for token in [
-        "atomically provisions an active battery passport",
+        "atomically provisions a draft battery passport",
         "identical retry returns the same provisioned identity",
         "public payload must carry the exact individual battery identifier",
         "restricted fields cannot enter public payload",
@@ -59,7 +59,7 @@ def main() -> None:
 
     for token in [
         "STAGE4_SINGLE_ITEM_PROVISIONING_PASS",
-        "Stage4 passport was not activated atomically",
+        "Step18 provisioning did not create a draft passport",
         "Stage4 identical retry was not idempotent",
         "Stage4 divergent identifier retry was not rejected",
         "Stage4 non-LMT model was accepted",
@@ -75,7 +75,9 @@ def main() -> None:
     require("provision" in observability["surfaces"],"Stage 4 observability surface missing")
     require(rate_limit["surfaces"].get("provision")=={"POST":"authenticated_write"},"Stage 4 rate-limit policy missing")
 
-    print("STAGE4_PROVISIONING_CONTRACT_PASS: authenticated atomic LMT item -> ACTIVE passport provisioning is idempotent, policy-covered and carrier-link ready")
+    for token in ["status<>'draft'","'draft',p_public_payload","'activation_required',true"]:
+        require(token.lower() in activation.lower(),f"Step 18 activation override missing: {token}")
+    print("STAGE4_PROVISIONING_CONTRACT_PASS: authenticated atomic LMT item -> DRAFT passport provisioning is idempotent and cannot publish before readiness activation")
 
 if __name__=="__main__":
     main()
