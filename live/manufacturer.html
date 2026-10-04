@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · Manufacturer Dashboard</title>
+  <meta name="description" content="Production manufacturer dashboard backed by the DPP tenant, model, item and provisioning APIs.">
+  <link rel="stylesheet" href="/assets/csp/manufacturer.css">
+</head>
+<body data-manufacturer-ready="false" data-manufacturer-auth="unknown" data-manufacturer-tenant="unknown" data-manufacturer-mode="unknown">
+<main class="shell">
+  <header class="topbar">
+    <div>
+      <a class="brand" href="/">DPP AUTOPILOT</a>
+      <span class="badge">PRODUCTION MANUFACTURER · STAGE 5</span>
+    </div>
+    <div class="top-actions">
+      <a class="btn ghost" href="/company">Company access</a>
+      <button class="btn" id="refreshDashboard" type="button">Refresh</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">REAL TENANT DATA · NO DEMO STORAGE</p>
+      <h1>Manufacturer Dashboard</h1>
+      <p>Модели, произведени батерии и provisioning се четат и записват през production DPP API за активната фирма.</p>
+    </div>
+    <div class="tenant-box">
+      <span class="mini-label">ACTIVE COMPANY</span>
+      <strong id="tenantName">—</strong>
+      <span id="tenantMeta">Проверка на фирмения tenant…</span>
+    </div>
+  </section>
+
+  <section class="gate card" id="authGate">
+    <p class="eyebrow">AUTH REQUIRED</p>
+    <h2>Нужен е фирмен вход.</h2>
+    <p>Dashboard-ът не използва demo данни. Влез през Company Access и активирай фирмения tenant.</p>
+    <div class="actions"><a class="btn primary" href="/company">Вход / фирма →</a></div>
+    <div class="result" id="gateResult" role="status" aria-live="polite">Проверка на сесията…</div>
+  </section>
+
+  <div id="dashboard" hidden>
+    <section class="stats" aria-label="Manufacturer summary">
+      <article class="metric"><strong id="modelsCount">0</strong><span>Battery models</span></article>
+      <article class="metric"><strong id="lmtModelsCount">0</strong><span>LMT models</span></article>
+      <article class="metric"><strong id="itemsCount">0</strong><span>Battery items</span></article>
+      <article class="metric"><strong id="originalItemsCount">0</strong><span>Original lifecycle</span></article>
+    </section>
+
+    <section class="grid two">
+      <article class="card">
+        <div class="card-head">
+          <div><p class="eyebrow">MODEL REGISTER</p><h2>Създай LMT модел</h2></div>
+          <span class="state" id="writeRole">ROLE</span>
+        </div>
+        <p class="muted">Записът се създава през <code>POST /api/models</code> в активния tenant.</p>
+        <div class="form-grid">
+          <label><span>Model identifier</span><input id="modelIdentifier" maxlength="128" placeholder="VR-48V-20AH"></label>
+          <label><span>Manufacturer</span><input id="manufacturerName" maxlength="250" placeholder="Company Ltd."></label>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="createModel" type="button">Създай LMT модел →</button>
+        </div>
+        <div class="result" id="modelResult" role="status" aria-live="polite">Готово за production запис.</div>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <div><p class="eyebrow">ATOMIC PROVISIONING</p><h2>Произведи батерия</h2></div>
+          <span class="state ok">STAGE 4 API</span>
+        </div>
+        <p class="muted">Една операция: Battery → unique ID → ACTIVE Passport → public URL → QR.</p>
+        <div class="form-grid">
+          <label><span>LMT model</span><select id="provisionModel"><option value="">Избери модел</option></select></label>
+          <label><span>Battery / serial ID</span><input id="batteryIdentifier" maxlength="300" placeholder="BAT-2026-000001"></label>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="provisionBattery" type="button">Provision + Passport + QR →</button>
+        </div>
+        <div class="result" id="provisionResult" role="status" aria-live="polite">Избери LMT модел и въведи уникален Battery ID.</div>
+      </article>
+    </section>
+
+    <section class="grid two">
+      <article class="card">
+        <div class="card-head"><div><p class="eyebrow">BACKEND MODELS</p><h2>Модели</h2></div><span class="state ok">LIVE API</span></div>
+        <div id="modelsList" class="list" aria-live="polite"></div>
+      </article>
+      <article class="card">
+        <div class="card-head"><div><p class="eyebrow">BACKEND ITEMS</p><h2>Последни батерии</h2></div><span class="state ok">TENANT SCOPED</span></div>
+        <div id="itemsList" class="list" aria-live="polite"></div>
+      </article>
+    </section>
+
+    <section class="card evidence">
+      <div>
+        <p class="eyebrow">STAGE 5 ACCEPTANCE</p>
+        <h2>Този екран работи с production backend.</h2>
+      </div>
+      <div class="evidence-grid">
+        <span><b>/api/organizations</b> active company</span>
+        <span><b>/api/models</b> live model data</span>
+        <span><b>/api/items</b> live battery data</span>
+        <span><b>/api/provision</b> atomic production flow</span>
+      </div>
+    </section>
+  </div>
+
+  <footer>Manufacturer Dashboard V1 · bearer session · active tenant · production APIs · no browser-local product database.</footer>
+</main>
+<script src="/assets/csp/manufacturer-inline-1.js"></script>
+</body>
+</html>
