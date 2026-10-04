@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · Production Batch Import</title>
+  <meta name="description" content="Production CSV/XLSX batch import for LMT battery records with mapping, server validation and row-level error report.">
+  <link rel="stylesheet" href="/assets/csp/manufacturer-import.css">
+</head>
+<body data-import-ready="false" data-import-auth="unknown" data-import-tenant="unknown" data-import-file="none">
+<main class="shell">
+  <header class="topbar">
+    <div><a class="brand" href="/manufacturer">← MANUFACTURER</a><span class="badge">PRODUCTION BATCH IMPORT · STAGE 6</span></div>
+    <a class="btn ghost" href="/company">Company access</a>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">CSV + XLSX · ACTIVE TENANT</p>
+      <h1>Batch import</h1>
+      <p>Файл → mapping → preview → server validation → row-level error report → atomic commit.</p>
+    </div>
+    <div class="tenant-box"><span>ACTIVE COMPANY</span><strong id="tenantName">—</strong><small id="tenantMeta">Проверка…</small></div>
+  </section>
+
+  <section class="card" id="gateCard">
+    <h2>Фирмена сесия</h2>
+    <div class="result" id="gateResult" role="status" aria-live="polite">Проверка на сесията…</div>
+  </section>
+
+  <div id="workspace" hidden>
+    <section class="card">
+      <div class="card-head"><div><p class="eyebrow">1 · FILE</p><h2>Зареди CSV или XLSX</h2></div><span class="state" id="fileState">EMPTY</span></div>
+      <input id="fileInput" type="file" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <p class="muted">До 1000 реда. XLSX използва първия worksheet. Файлът се парсва локално; към backend се изпращат само нормализираните DPP редове.</p>
+      <div class="result" id="fileResult">Няма зареден файл.</div>
+    </section>
+
+    <section class="card" id="mappingCard" hidden>
+      <div class="card-head"><div><p class="eyebrow">2 · MAPPING</p><h2>Map-ни колоните</h2></div><span class="state" id="mappingState">0 mapped</span></div>
+      <div id="mappingRows" class="mapping-list"></div>
+    </section>
+
+    <section class="card" id="previewCard" hidden>
+      <div class="card-head"><div><p class="eyebrow">3 · PREVIEW</p><h2>Провери първите редове</h2></div><span class="state ok" id="rowCount">0 rows</span></div>
+      <div class="table-wrap"><table><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table></div>
+      <div class="actions">
+        <button class="btn primary" id="stageImport" type="button">Stage + Validate →</button>
+      </div>
+      <div class="result" id="importResult">Готово за server validation.</div>
+    </section>
+
+    <section class="card" id="errorCard" hidden>
+      <div class="card-head"><div><p class="eyebrow">VALIDATION REPORT</p><h2>Row-level errors</h2></div><span class="state" id="errorState">0 errors</span></div>
+      <div id="errorRows" class="error-list"></div>
+    </section>
+
+    <section class="card" id="commitCard" hidden>
+      <div class="card-head"><div><p class="eyebrow">4 · COMMIT</p><h2>Запиши batch-а</h2></div><span class="state ok">VALIDATED</span></div>
+      <p class="muted">Commit-ът е tenant-scoped и all-or-nothing в PostgreSQL.</p>
+      <div class="actions"><button class="btn primary" id="commitImport" type="button">Commit batch →</button></div>
+      <div class="result" id="commitResult">Validation passed.</div>
+    </section>
+  </div>
+
+  <footer>Stage 6 · CSV/XLSX → mapping → server validation → error report → transactional commit.</footer>
+</main>
+<script src="/assets/csp/manufacturer-import-inline-1.js"></script>
+</body>
+</html>
