@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "task": "R05",
   "status": "partial",
   "strategy": "dual_layer_local_plus_feature_gated_shared_authenticated_runtime",
@@ -71,6 +71,9 @@
       "GET": "public_passport_read"
     },
     "provision": {
+      "POST": "authenticated_write"
+    },
+    "batch_provision": {
       "POST": "authenticated_write"
     }
   },
