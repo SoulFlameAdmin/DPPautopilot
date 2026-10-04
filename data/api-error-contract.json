@@ -341,6 +341,48 @@
         "code": "PASSPORT_CONFLICT",
         "message": "The battery passport conflicts with an existing state or payload."
       }
+    },
+    "batch_provision": {
+      "23505": {
+        "http_status": 409,
+        "code": "BATCH_PROVISION_CONFLICT",
+        "message": "The battery batch provisioning request conflicts with an existing record."
+      },
+      "DP601": {
+        "http_status": 404,
+        "code": "MODEL_NOT_FOUND",
+        "message": "The LMT battery model was not found."
+      },
+      "DP602": {
+        "http_status": 422,
+        "code": "MODEL_NOT_LMT",
+        "message": "The selected battery model is not an LMT model."
+      },
+      "DP603": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP604": {
+        "http_status": 409,
+        "code": "BATTERY_IDENTIFIER_CONFLICT",
+        "message": "A battery identifier in the batch conflicts with an existing item."
+      },
+      "DP605": {
+        "http_status": 409,
+        "code": "PASSPORT_CONFLICT",
+        "message": "A battery passport in the batch conflicts with an existing state or payload."
+      },
+      "DP606": {
+        "http_status": 409,
+        "code": "BATCH_KEY_CONFLICT",
+        "message": "The batch key already belongs to a different provisioning request."
+      },
+      "DP607": {
+        "http_status": 409,
+        "code": "BATCH_STATE_CONFLICT",
+        "message": "The stored batch membership is inconsistent with the provisioning request."
+      }
     }
   },
   "local_codes": {
