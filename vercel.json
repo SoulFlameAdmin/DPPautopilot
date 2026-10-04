@@ -42,6 +42,14 @@
       "destination": "/live/labels"
     },
     {
+      "source": "/manufacturer/history",
+      "destination": "/live/history"
+    },
+    {
+      "source": "/manufacturer/history/",
+      "destination": "/live/history"
+    },
+    {
       "source": "/((?!data/|api/).*)",
       "destination": "/index.html"
     }
