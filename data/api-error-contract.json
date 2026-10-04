@@ -299,6 +299,48 @@
         "code": "MEMBER_CONFLICT",
         "message": "The membership already exists."
       }
+    },
+    "provision": {
+      "23505": {
+        "http_status": 409,
+        "code": "PROVISION_CONFLICT",
+        "message": "The battery provisioning request conflicts with an existing record."
+      },
+      "DP409": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP410": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP601": {
+        "http_status": 404,
+        "code": "MODEL_NOT_FOUND",
+        "message": "The LMT battery model was not found."
+      },
+      "DP602": {
+        "http_status": 422,
+        "code": "MODEL_NOT_LMT",
+        "message": "The selected battery model is not an LMT model."
+      },
+      "DP603": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      },
+      "DP604": {
+        "http_status": 409,
+        "code": "BATTERY_IDENTIFIER_CONFLICT",
+        "message": "The battery identifier conflicts with an existing item."
+      },
+      "DP605": {
+        "http_status": 409,
+        "code": "PASSPORT_CONFLICT",
+        "message": "The battery passport conflicts with an existing state or payload."
+      }
     }
   },
   "local_codes": {
