@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s);
 const STORAGE="dpp_company_session_v1";
 const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
-let cfg=null,session=null,refreshTimer=null;
+let cfg=null,session=null,refreshTimer=null,currentUser=null,activeOrg=null;
 
 function result(node,message,kind=""){node.textContent=message;node.className="result"+(kind?" "+kind:"")}
 function validEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||"").trim())}
@@ -81,17 +81,18 @@ async function loadTenantState(){
   if(!session?.access_token)return;
   let user;
   try{user=await getUser()}catch(e){clearSession();result($("#authResult"),e.message,"bad");return}
+  currentUser=user;
   result($("#authResult"),"Вход успешен: "+(user.email||"verified user"),"ok");
   $("#verifyCard").hidden=true;
   try{
     const orgs=(await api("/api/organizations")).data||[];
     renderOrganisations(orgs);
     if(!orgs.length){
-      $("#companyCard").hidden=false;$("#tenantCard").hidden=true;$("#readyCard").hidden=true;document.body.dataset.companyTenant="none";
+      activeOrg=null;$("#companyCard").hidden=false;$("#tenantCard").hidden=true;$("#readyCard").hidden=true;$("#teamCard").hidden=true;document.body.dataset.companyTenant="none";
     }else{
       $("#companyCard").hidden=true;$("#tenantCard").hidden=false;
       const active=orgs.find(o=>o.active);
-      if(active)showReady(active);else{$("#readyCard").hidden=true;document.body.dataset.companyTenant="available"}
+      if(active)showReady(active);else{activeOrg=null;$("#readyCard").hidden=true;$("#teamCard").hidden=true;document.body.dataset.companyTenant="available"}
     }
   }catch(e){result($("#companyResult"),"Tenant API: "+e.message,"bad");$("#companyCard").hidden=false}
 }
@@ -114,9 +115,73 @@ async function activateTenant(id){
   try{await api("/api/tenant",{method:"POST",body:{organization_id:id}});await loadTenantState()}catch(e){result($("#companyResult"),e.message,"bad")}
 }
 function showReady(org){
-  document.body.dataset.companyTenant="active";$("#readyCard").hidden=false;
+  activeOrg=org;
+  document.body.dataset.companyTenant="active";$("#readyCard").hidden=false;$("#teamCard").hidden=false;
   $("#readyCompany").textContent=org.name+" е активна.";
   $("#readyMeta").textContent="Role: "+org.role+" · tenant: "+org.slug+" · "+org.organization_id;
+  loadTeam().catch(e=>result($("#teamResult"),e.message,"bad"));
+}
+
+function canManageTarget(targetRole){
+  if(!activeOrg)return false;
+  if(activeOrg.role==="owner")return targetRole!=="owner";
+  if(activeOrg.role==="admin")return targetRole==="editor"||targetRole==="viewer";
+  return false;
+}
+function allowedRoles(){
+  return activeOrg?.role==="owner"?["admin","editor","viewer"]:["editor","viewer"];
+}
+async function loadTeam(){
+  if(!activeOrg)return;
+  $("#teamRoleBadge").textContent=String(activeOrg.role||"rbac").toUpperCase();
+  const manager=activeOrg.role==="owner"||activeOrg.role==="admin";
+  $("#teamAdd").hidden=!manager;
+  const roleSelect=$("#memberRole");
+  Array.from(roleSelect.options).forEach(o=>{o.hidden=activeOrg.role==="admin"&&o.value==="admin";o.disabled=o.hidden});
+  if(activeOrg.role==="admin"&&roleSelect.value==="admin")roleSelect.value="editor";
+  const members=(await api("/api/members?detail=1")).data||[];
+  renderTeam(members);
+}
+function renderTeam(members){
+  const host=$("#teamList");host.replaceChildren();
+  if(!members.length){
+    const empty=document.createElement("div");empty.className="result";empty.textContent="Няма членове в активния tenant.";host.append(empty);return;
+  }
+  for(const member of members){
+    const row=document.createElement("article");row.className="team-member"+(member.is_self?" self":"");
+    const left=document.createElement("div");
+    const title=document.createElement("strong");title.textContent=member.email||member.user_id;
+    const meta=document.createElement("small");meta.textContent=member.role.toUpperCase()+" · "+member.user_id+(member.is_self?" · YOU":"");
+    left.append(title,meta);
+
+    const side=document.createElement("div");side.className="team-member-side";
+    if(canManageTarget(member.role)){
+      const select=document.createElement("select");
+      for(const role of allowedRoles()){
+        const option=document.createElement("option");option.value=role;option.textContent=role.toUpperCase();option.selected=role===member.role;select.append(option);
+      }
+      select.addEventListener("change",()=>updateMemberRole(member.user_id,select.value));
+      const remove=document.createElement("button");remove.type="button";remove.className="btn danger";remove.textContent="Премахни";
+      remove.addEventListener("click",()=>removeMember(member.user_id,member.email||member.user_id));
+      side.append(select,remove);
+    }else{
+      const readonly=document.createElement("span");readonly.className="team-readonly";readonly.textContent=member.role.toUpperCase();side.append(readonly);
+    }
+    row.append(left,side);host.append(row);
+  }
+}
+async function updateMemberRole(userId,role){
+  try{
+    await api("/api/members",{method:"PATCH",body:{user_id:userId,role}});
+    result($("#teamResult"),"Ролята е обновена.","ok");await loadTeam();
+  }catch(e){result($("#teamResult"),e.message,"bad");await loadTeam().catch(()=>{})}
+}
+async function removeMember(userId,label){
+  if(!confirm("Премахване на "+label+" от фирмения tenant?"))return;
+  try{
+    await api("/api/members",{method:"DELETE",body:{user_id:userId}});
+    result($("#teamResult"),"Членът е премахнат.","ok");await loadTeam();
+  }catch(e){result($("#teamResult"),e.message,"bad")}
 }
 async function init(){
   cfg=await fetch("/data/auth-config.json",{cache:"no-store"}).then(async r=>{if(!r.ok)throw new Error("Auth config unavailable.");return r.json()});
@@ -148,7 +213,7 @@ $("#signin").addEventListener("click",async()=>{
 });
 $("#signout").addEventListener("click",async()=>{
   try{if(session?.access_token)await authCall("/auth/v1/logout",{method:"POST",token:session.access_token})}catch{}
-  clearSession();$("#companyCard").hidden=true;$("#tenantCard").hidden=true;$("#readyCard").hidden=true;result($("#authResult"),"Изходът е успешен.","ok");
+  currentUser=null;activeOrg=null;clearSession();$("#companyCard").hidden=true;$("#tenantCard").hidden=true;$("#readyCard").hidden=true;$("#teamCard").hidden=true;result($("#authResult"),"Изходът е успешен.","ok");
 });
 $("#createCompany").addEventListener("click",async()=>{
   const name=$("#companyName").value.trim(),slug=slugify($("#companySlug").value||name);
@@ -159,6 +224,23 @@ $("#createCompany").addEventListener("click",async()=>{
     result($("#companyResult"),"Company tenant created: "+created.name,"ok");
     await loadTenantState();
   }catch(err){result($("#companyResult"),err.message,"bad")}
+});
+$("#addMember").addEventListener("click",async()=>{
+  if(!activeOrg||!(activeOrg.role==="owner"||activeOrg.role==="admin"))return;
+  const email=$("#memberEmail").value.trim().toLowerCase(),role=$("#memberRole").value;
+  if(!validEmail(email)){return result($("#teamResult"),"Въведи валиден служебен email.","bad")}
+  if(activeOrg.role==="admin"&&role==="admin"){return result($("#teamResult"),"Admin не може да добавя друг admin.","bad")}
+  try{
+    await api("/api/members",{method:"POST",body:{email,role}});
+    $("#memberEmail").value="";
+    result($("#teamResult"),"Членът е добавен към активната фирма.","ok");
+    await loadTeam();
+  }catch(e){
+    const msg=/target user/i.test(e.message)
+      ?"Този email още няма потвърден DPP акаунт. Нека първо се регистрира и потвърди email-а в /company."
+      :e.message;
+    result($("#teamResult"),msg,"bad");
+  }
 });
 init().catch(e=>{document.body.dataset.companyAuthReady="false";result($("#authResult"),e.message,"bad")});
 })();
