@@ -5,7 +5,7 @@ const assert=require('node:assert/strict');
 const errors=require('../../api/_errors.js');
 
 test('common auth SQLSTATEs map consistently on every API surface',()=>{
-  for(const surface of ['models','items','passport','export','imports','tenant','organizations','members']){
+  for(const surface of ['models','items','passport','provision','export','imports','tenant','organizations','members']){
     assert.deepEqual(errors.mapDatabaseError(surface,{code:'DP101'}),{
       status:401,code:'AUTH_REQUIRED',message:'Authentication is required.'
     });
@@ -84,5 +84,18 @@ test('local error catalog exposes stable public messages',()=>{
 test('errorBody returns exact machine-readable envelope',()=>{
   assert.deepEqual(errors.errorBody({code:'FORBIDDEN',message:'The request is not permitted.'}),{
     error:{code:'FORBIDDEN',message:'The request is not permitted.'}
+  });
+});
+
+
+test('provisioning surface maps atomic conflicts to stable semantics',()=>{
+  assert.deepEqual(errors.mapDatabaseError('provision',{code:'DP601'}),{
+    status:404,code:'MODEL_NOT_FOUND',message:'The LMT battery model was not found.'
+  });
+  assert.deepEqual(errors.mapDatabaseError('provision',{code:'DP604'}),{
+    status:409,code:'BATTERY_IDENTIFIER_CONFLICT',message:'The battery identifier conflicts with an existing item.'
+  });
+  assert.deepEqual(errors.mapDatabaseError('provision',{code:'DP605'}),{
+    status:409,code:'PASSPORT_CONFLICT',message:'The battery passport conflicts with an existing state or payload.'
   });
 });

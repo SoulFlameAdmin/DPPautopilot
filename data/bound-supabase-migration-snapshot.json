@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-09-21",
+  "observed_at": "2026-10-04",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -188,6 +188,10 @@
     {
       "version": "20260920232617",
       "name": "dpp_evidence_object_metadata_rpc"
+    },
+    {
+      "version": "20261004140245",
+      "name": "dpp_scooter_single_item_provisioning"
     }
   ],
   "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
