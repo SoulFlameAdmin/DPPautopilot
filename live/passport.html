@@ -3,27 +3,61 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#07090d">
   <title>DPP Autopilot · Public Battery Passport</title>
-  <meta name="description" content="Public Battery Digital Product Passport">
-  <link rel="stylesheet" href="/assets/csp/passport.css">
+  <meta name="description" content="Public Digital Product Passport for an individual battery.">
+  <link rel="stylesheet" href="/assets/csp/public-passport.css">
 </head>
-<body data-passport-ready="false" data-passport-source="live-api" data-public-field-count="0">
+<body data-passport-ready="false" data-passport-source="live-api" data-public-field-count="0" data-public-section-count="0">
 <main class="shell">
-  <div class="top">
-    <div>
-      <div class="badge">DPP Autopilot · Public verified view</div>
-      <h1>Battery Digital Product Passport</h1>
+  <header class="topbar">
+    <a class="brand" href="/">DPP AUTOPILOT</a>
+    <div class="top-actions">
+      <span class="privacy-pill">PUBLIC VIEW</span>
+      <a class="button ghost" id="qrLink" href="/qr">QR</a>
     </div>
-    <a href="/">← Dashboard</a>
-  </div>
+  </header>
+
   <section class="hero" id="hero" role="status" aria-live="polite">
-    <div class="empty">Зареждане…</div>
+    <div class="loading-card">
+      <span class="loading-dot" aria-hidden="true"></span>
+      <div><strong>Зареждане на паспорта…</strong><small>Проверяваме публичния ACTIVE запис.</small></div>
+    </div>
   </section>
-  <div class="passport-actions">
-    <a id="qrLink" class="passport-button" href="/qr">QR carrier</a>
-  </div>
-  <section class="grid" id="publicFields" aria-label="Public passport fields"></section>
+
+  <section class="trust-strip" id="trustStrip" hidden aria-label="Passport public status">
+    <div><span class="trust-icon">✓</span><div><strong>ACTIVE public record</strong><small>Данните идват от публичния DPP API.</small></div></div>
+    <div><span class="trust-icon">↗</span><div><strong>Public data only</strong><small>Restricted и authority-only данни не се показват.</small></div></div>
+    <div><span class="trust-icon">#</span><div><strong>EU traceability</strong><small>Полетата са вързани към EU DPP data-point номера.</small></div></div>
+  </section>
+
+  <nav class="section-nav" id="sectionNav" hidden aria-label="Passport sections"></nav>
+
+  <div id="passportSections" class="passport-sections" aria-live="polite"></div>
+
+  <section class="technical card" id="technicalPanel" hidden>
+    <div>
+      <p class="eyebrow">TECHNICAL RECORD</p>
+      <h2>Проверка на идентичността</h2>
+    </div>
+    <dl class="technical-grid">
+      <div><dt>Unique identifier</dt><dd id="techIdentifier">—</dd></div>
+      <div><dt>Passport record</dt><dd id="techPassportId">—</dd></div>
+      <div><dt>Last updated</dt><dd><time id="techUpdated">—</time></dd></div>
+      <div><dt>Access</dt><dd>Public projection only</dd></div>
+    </dl>
+  </section>
+
+  <section class="legal-note">
+    <strong>Важно:</strong> Тази страница показва публичната част на DPP записа. Показването на ACTIVE запис не е самостоятелна правна сертификация на продукта.
+  </section>
+
+  <footer>
+    <span>DPP Autopilot · Public Battery Passport</span>
+    <a id="footerQrLink" href="/qr">Отвори QR carrier</a>
+  </footer>
 </main>
-<script src="/assets/csp/live-passport-inline-1.js"></script>
+<script src="/assets/csp/public-passport-inline-1.js"></script>
 </body>
 </html>
