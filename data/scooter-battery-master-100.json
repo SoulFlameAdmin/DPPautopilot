@@ -10,12 +10,12 @@
   "updatedAt": "2026-10-05",
   "canonicalRepo": "SoulFlameAdmin/DPPautopilot",
   "sequentialProgress": {
-    "greenThrough": 19,
-    "next": 20
+    "greenThrough": 20,
+    "next": 21
   },
   "counts": {
-    "green": 26,
-    "yellow": 47,
+    "green": 27,
+    "yellow": 46,
     "red": 27,
     "total": 100
   },
@@ -188,8 +188,8 @@
     {
       "id": 20,
       "title": "Финален Public Passport UX",
-      "status": "yellow",
-      "plain": "Live паспортът работи, но дизайнът и production presentation искат финализация."
+      "status": "green",
+      "plain": "Финалният public passport UX е production-ready: четим mobile/desktop изглед, човешки секции, EU point traceability, units/links, QR и fail-closed public-only renderer."
     },
     {
       "id": 21,
