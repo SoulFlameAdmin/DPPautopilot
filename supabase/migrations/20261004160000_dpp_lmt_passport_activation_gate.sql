@@ -101,7 +101,7 @@ begin
 
   -- Individual/public identity.
   if length(btrim(coalesce(v_item.unique_identifier,'')))=0 then v_missing:=array_append(v_missing,1); end if;
-  if not public.dpp_json_path_has_value(v_public,array['passport','responsible_economic_operator']) then v_missing:=array_append(v_missing,2); end if;
+  if not public.dpp_json_path_has_value(v_model_data,array['responsible_economic_operator']) then v_missing:=array_append(v_missing,2); end if;
 
   -- Mandatory model-level launch points.
   if not public.dpp_json_path_has_value(v_model_data,array['identification','manufacturer','name']) then v_missing:=array_append(v_missing,3); end if;
