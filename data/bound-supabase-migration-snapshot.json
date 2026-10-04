@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-09-21",
+  "observed_at": "2026-10-02",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -188,6 +188,34 @@
     {
       "version": "20260920232617",
       "name": "dpp_evidence_object_metadata_rpc"
+    },
+    {
+      "version": "20261002175840",
+      "name": "dpp_nfc_crypto_persistence"
+    },
+    {
+      "version": "20261002175846",
+      "name": "dpp_nfc_challenge_consume"
+    },
+    {
+      "version": "20261002175849",
+      "name": "dpp_nfc_api_rpcs"
+    },
+    {
+      "version": "20261002175851",
+      "name": "dpp_nfc_finalize_verification"
+    },
+    {
+      "version": "20261002175853",
+      "name": "dpp_nfc_lifecycle_security"
+    },
+    {
+      "version": "20261002175856",
+      "name": "dpp_nfc_provider_material"
+    },
+    {
+      "version": "20261002175858",
+      "name": "dpp_physical_carriers"
     }
   ],
   "note": "Supabase-applied version IDs can differ from repository filename timestamps when migrations are applied through managed tooling; canonical migration name is the cross-system identity for coverage, while repository SHA-256 protects committed migration contents."
