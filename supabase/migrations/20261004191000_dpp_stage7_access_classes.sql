@@ -84,7 +84,7 @@ begin
 
   if not found then
     raise exception 'passport not found in active organization'
-      using errcode='DP401';
+      using errcode='DP403';
   end if;
 
   insert into public.dpp_passport_authority_payloads(
@@ -133,7 +133,7 @@ begin
 
   if not found then
     raise exception 'passport not found in active organization'
-      using errcode='DP401';
+      using errcode='DP403';
   end if;
 
   return jsonb_build_object(
@@ -183,7 +183,7 @@ begin
 
   if not found then
     raise exception 'passport not found'
-      using errcode='DP401';
+      using errcode='DP403';
   end if;
 
   select coalesce(a.authority_payload,'{}'::jsonb)
