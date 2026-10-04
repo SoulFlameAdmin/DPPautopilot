@@ -72,13 +72,13 @@
           <div><p class="eyebrow">ATOMIC PROVISIONING</p><h2>Произведи батерия</h2></div>
           <span class="state ok">STAGE 4 API</span>
         </div>
-        <p class="muted">Една операция: Battery → unique ID → ACTIVE Passport → public URL → QR.</p>
+        <p class="muted">Една операция: Battery → unique ID → DRAFT Passport. След това Completeness затваря липсващите данни и отключва ACTIVE/public QR.</p>
         <div class="form-grid">
           <label><span>LMT model</span><select id="provisionModel"><option value="">Избери модел</option></select></label>
           <label><span>Battery / serial ID</span><input id="batteryIdentifier" maxlength="300" placeholder="BAT-2026-000001"></label>
         </div>
         <div class="actions">
-          <button class="btn primary" id="provisionBattery" type="button">Provision + Passport + QR →</button>
+          <button class="btn primary" id="provisionBattery" type="button">Provision DRAFT Passport →</button>
         </div>
         <div class="result" id="provisionResult" role="status" aria-live="polite">Избери LMT модел и въведи уникален Battery ID.</div>
       </article>
