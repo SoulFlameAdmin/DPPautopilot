@@ -1,0 +1,363 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "scooter-battery-dpp-v1",
+  "batteryCategory": "light_means_of_transport",
+  "catalogVersion": "2026-09-18",
+  "sourceCatalog": "data/dpp-field-catalog.json",
+  "requiredFieldCount": 41,
+  "requiredModelFieldCount": 33,
+  "requiredItemFieldCount": 8,
+  "requiredFields": [
+    {
+      "path": "model.identification.manufacturer.name",
+      "type": "string",
+      "access": "public",
+      "source": "Annex VI Part A(1); Article 38(7)",
+      "uiTarget": "modelForm.manufacturerName"
+    },
+    {
+      "path": "model.identification.manufacturer.postal_address",
+      "type": "string",
+      "access": "public",
+      "source": "Annex VI Part A(1); Article 38(7)",
+      "uiTarget": "modelForm.manufacturerPostalAddress"
+    },
+    {
+      "path": "model.identification.manufacturer.contact",
+      "type": "string",
+      "access": "public",
+      "source": "Annex VI Part A(1); Article 38(7)",
+      "uiTarget": "modelForm.manufacturerContact"
+    },
+    {
+      "path": "model.identification.category",
+      "type": "enum",
+      "access": "public",
+      "source": "Annex VI Part A(2); Article 38(6); Article 77(1)",
+      "uiTarget": "modelForm.category"
+    },
+    {
+      "path": "model.identification.model_id",
+      "type": "string",
+      "access": "public",
+      "source": "Annex VI Part A(2); Article 38(6)",
+      "uiTarget": "modelForm.modelId"
+    },
+    {
+      "path": "model.identification.place_of_manufacture",
+      "type": "string",
+      "access": "public",
+      "source": "Annex VI Part A(3)",
+      "uiTarget": "modelForm.placeOfManufacture"
+    },
+    {
+      "path": "model.identification.date_of_manufacture",
+      "type": "month",
+      "access": "public",
+      "source": "Annex VI Part A(4)",
+      "uiTarget": "modelForm.dateOfManufacture"
+    },
+    {
+      "path": "model.physical.weight_kg",
+      "type": "number",
+      "access": "public",
+      "source": "Annex VI Part A(5)",
+      "uiTarget": "modelForm.weightKg"
+    },
+    {
+      "path": "model.rated_capacity_ah",
+      "type": "number",
+      "access": "public",
+      "source": "Annex VI Part A(6); Annex XIII 1(g)",
+      "uiTarget": "modelForm.ratedCapacityAh"
+    },
+    {
+      "path": "model.composition.chemistry",
+      "type": "string",
+      "access": "public",
+      "source": "Annex VI Part A(7); Annex XIII 1(b)",
+      "uiTarget": "modelForm.chemistry"
+    },
+    {
+      "path": "model.composition.hazardous_substances",
+      "type": "array",
+      "access": "public",
+      "source": "Annex VI Part A(8); Annex XIII 1(b)",
+      "uiTarget": "modelForm.hazardousSubstances"
+    },
+    {
+      "path": "model.safety.usable_extinguishing_agent",
+      "type": "string",
+      "access": "public",
+      "source": "Annex VI Part A(9)",
+      "uiTarget": "modelForm.extinguishingAgent"
+    },
+    {
+      "path": "model.composition.critical_raw_materials",
+      "type": "array",
+      "access": "public",
+      "source": "Annex VI Part A(10); Annex XIII 1(b)",
+      "uiTarget": "modelForm.criticalRawMaterials"
+    },
+    {
+      "path": "model.carbon_footprint",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(c); Article 7",
+      "uiTarget": "modelForm.carbonFootprint"
+    },
+    {
+      "path": "model.responsible_sourcing",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(d); Article 52(3)",
+      "uiTarget": "modelForm.responsibleSourcing"
+    },
+    {
+      "path": "model.recycled_content",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(e); Article 8(1)",
+      "uiTarget": "modelForm.recycledContent"
+    },
+    {
+      "path": "model.renewable_content_share",
+      "type": "number",
+      "access": "public",
+      "source": "Annex XIII 1(f)",
+      "uiTarget": "modelForm.renewableContentShare"
+    },
+    {
+      "path": "model.voltage",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(h)",
+      "uiTarget": "modelForm.voltage"
+    },
+    {
+      "path": "model.power_capability",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(i)",
+      "uiTarget": "modelForm.powerCapability"
+    },
+    {
+      "path": "model.expected_lifetime",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(j)",
+      "uiTarget": "modelForm.expectedLifetime"
+    },
+    {
+      "path": "model.storage_temperature",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(l)",
+      "uiTarget": "modelForm.storageTemperature"
+    },
+    {
+      "path": "model.warranty_calendar_life",
+      "type": "string",
+      "access": "public",
+      "source": "Annex XIII 1(m)",
+      "uiTarget": "modelForm.warrantyCalendarLife"
+    },
+    {
+      "path": "model.energy_efficiency",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(n)",
+      "uiTarget": "modelForm.energyEfficiency"
+    },
+    {
+      "path": "model.internal_resistance",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(o)",
+      "uiTarget": "modelForm.internalResistance"
+    },
+    {
+      "path": "model.c_rate_test",
+      "type": "number",
+      "access": "public",
+      "source": "Annex XIII 1(p)",
+      "uiTarget": "modelForm.cRateTest"
+    },
+    {
+      "path": "model.markings",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(q); Article 13(4)-(5)",
+      "uiTarget": "modelForm.markings"
+    },
+    {
+      "path": "model.eu_declaration_of_conformity",
+      "type": "document_ref",
+      "access": "public",
+      "source": "Annex XIII 1(r); Article 18",
+      "uiTarget": "modelForm.euDeclaration"
+    },
+    {
+      "path": "model.waste_information",
+      "type": "object",
+      "access": "public",
+      "source": "Annex XIII 1(s); Article 74(1)(a)-(f)",
+      "uiTarget": "modelForm.wasteInformation"
+    },
+    {
+      "path": "model.restricted_composition",
+      "type": "object",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 2(a)",
+      "uiTarget": "restrictedModel.composition"
+    },
+    {
+      "path": "model.spares",
+      "type": "array",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 2(b)",
+      "uiTarget": "restrictedModel.spares"
+    },
+    {
+      "path": "model.disassembly",
+      "type": "object",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 2(c)",
+      "uiTarget": "restrictedModel.disassembly"
+    },
+    {
+      "path": "model.safety_measures",
+      "type": "object",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 2(d)",
+      "uiTarget": "restrictedModel.safetyMeasures"
+    },
+    {
+      "path": "model.compliance_test_reports",
+      "type": "document_ref_array",
+      "access": "authority_only",
+      "source": "Annex XIII 3",
+      "uiTarget": "authorityModel.testReports"
+    },
+    {
+      "path": "item.unique_identifier",
+      "type": "string",
+      "access": "public_identifier",
+      "source": "Article 77(3),(10); ESPR Registry architecture",
+      "uiTarget": "itemForm.uniqueIdentifier"
+    },
+    {
+      "path": "item.performance_history",
+      "type": "array",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 4(a); Article 10(1)",
+      "uiTarget": "itemForm.performanceHistory"
+    },
+    {
+      "path": "item.state_of_health",
+      "type": "object",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 4(b); Article 14",
+      "uiTarget": "itemForm.stateOfHealth"
+    },
+    {
+      "path": "item.lifecycle_status",
+      "type": "enum",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 4(c)",
+      "uiTarget": "itemForm.lifecycleStatus"
+    },
+    {
+      "path": "item.usage.cycles",
+      "type": "integer",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 4(d)",
+      "uiTarget": "itemForm.cycleCount"
+    },
+    {
+      "path": "item.usage.events",
+      "type": "array",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 4(d)",
+      "uiTarget": "itemForm.events"
+    },
+    {
+      "path": "item.telemetry.environment",
+      "type": "array",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 4(d)",
+      "uiTarget": "itemForm.environmentHistory"
+    },
+    {
+      "path": "item.telemetry.state_of_charge",
+      "type": "array",
+      "access": "legitimate_interest",
+      "source": "Annex XIII 4(d)",
+      "uiTarget": "itemForm.stateOfChargeHistory"
+    }
+  ],
+  "excludedConditionalFields": [
+    {
+      "path": "model.exhaustion_capacity_threshold",
+      "requirement": "conditional_ev"
+    }
+  ],
+  "validationRules": {
+    "categoryEquals": "light_means_of_transport",
+    "strings": "non_empty_trimmed",
+    "month": "YYYY-MM",
+    "numbers": "finite",
+    "arrays": "array",
+    "objects": "object",
+    "uniqueIdentifier": {
+      "minLength": 1,
+      "maxLength": 300,
+      "uniquePerBattery": true
+    },
+    "lifecycleStatus": [
+      "original",
+      "repurposed",
+      "remanufactured",
+      "second_life",
+      "waste",
+      "retired"
+    ],
+    "ranges": {
+      "model.physical.weight_kg": {
+        "exclusiveMin": 0
+      },
+      "model.rated_capacity_ah": {
+        "exclusiveMin": 0
+      },
+      "model.renewable_content_share": {
+        "min": 0,
+        "max": 100
+      },
+      "model.c_rate_test": {
+        "exclusiveMin": 0
+      },
+      "item.state_of_health.percent": {
+        "min": 0,
+        "max": 100
+      },
+      "item.usage.cycles": {
+        "min": 0
+      },
+      "item.telemetry.state_of_charge[].percent": {
+        "min": 0,
+        "max": 100
+      }
+    },
+    "orderedGroups": [
+      [
+        "model.voltage.minimum_v",
+        "model.voltage.nominal_v",
+        "model.voltage.maximum_v"
+      ],
+      [
+        "model.storage_temperature.minimum_c",
+        "model.storage_temperature.maximum_c"
+      ]
+    ]
+  }
+}

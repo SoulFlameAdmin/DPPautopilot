@@ -1,5 +1,5 @@
 {
-  "profileVersion": "1.1.0",
+  "profileVersion": "1.2.0",
   "profileId": "scooter-battery-dpp-v1",
   "displayName": "Scooter Battery DPP",
   "batteryCategory": "light_means_of_transport",
@@ -94,5 +94,27 @@
       "confirm_same_active_passport"
     ],
     "rule": "No production-ready or compliant claim until every acceptance requirement has deployed evidence and the physical carrier test is passed."
+  },
+  "schemaContract": "data/scooter-battery-schema-v1.json",
+  "validation": {
+    "status": "implemented_ci_accepted_pending_merge",
+    "validator": "scripts/scooter_schema_validation.py",
+    "acceptanceGate": "scripts/validate_scooter_schema.py",
+    "syntheticFixture": "data/scooter-battery-sample-v1.json",
+    "requiredLmtFields": 41,
+    "requiredModelFields": 33,
+    "requiredItemFields": 8,
+    "excludes": [
+      "model.exhaustion_capacity_threshold"
+    ],
+    "rules": [
+      "type",
+      "non_empty",
+      "category",
+      "range",
+      "ordering",
+      "lifecycle",
+      "unique_identifier"
+    ]
   }
 }
