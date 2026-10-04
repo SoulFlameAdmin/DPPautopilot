@@ -26,6 +26,14 @@ def main()->None:
         require(p.get("canonicalFieldPath"),f"point {p['number']} missing canonical mapping")
         require(p.get("access"),f"point {p['number']} missing access class")
         require(p.get("level"),f"point {p['number']} missing model/item level")
+        require(p.get("valuePath"),f"point {p['number']} missing exact value path")
+        require(p.get("valueType"),f"point {p['number']} missing value type")
+        require(p.get("sourceOwner"),f"point {p['number']} missing provenance source owner")
+        require(isinstance(p.get("effectiveAtLaunch"),bool),f"point {p['number']} missing effectiveAtLaunch flag")
+        if s=="not_required_2027":
+            require(p["effectiveAtLaunch"] is False,f"point {p['number']} must be launch-disabled")
+        else:
+            require(p["effectiveAtLaunch"] is True,f"point {p['number']} must be launch-enabled")
     expected={"mandatory":50,"if_applicable":8,"optional":1,"not_required_2027":12}
     require(counts==expected,f"LMT launch applicability drift: {counts}")
     not_required={p["number"] for p in pts if p["lmtStatusAt2027_02_18"]=="not_required_2027"}
@@ -36,7 +44,10 @@ def main()->None:
     require(next(p for p in pts if p["number"]==50)["access"]=="authority_only","point 50 must remain authority-only")
     for n in range(51,72):
         require(next(p for p in pts if p["number"]==n)["access"]=="legitimate_interest",f"point {n} must be legitimate-interest")
-    print("LMT_71_MATRIX_PASS: 71 total / 50 mandatory / 8 conditional / 1 optional / 12 not-required-at-launch")
+    require(data.get("validation",{}).get("schemaVersioned") is True,"versioned validation contract missing")
+    require(data.get("provenance",{}).get("everyPointHasSourceOwner") is True,"provenance contract missing")
+    require(data.get("versioning",{}).get("noSilentSemanticRewrite") is True,"schema versioning rule missing")
+    print("LMT_71_MATRIX_PASS: 71 total / 50 mandatory / 8 conditional / 1 optional / 12 not-required-at-launch; mappings, validation, provenance and versioning present")
 
 if __name__=="__main__":
     main()
