@@ -86,9 +86,10 @@ function validProvisionResult(value){
     value.unique_identifier.trim().length>=1 &&
     value.unique_identifier.trim().length<=300 &&
     value.lifecycle_status==='original' &&
-    value.passport_status==='active' &&
+    value.passport_status==='draft' &&
     plainObject(value.public_payload) &&
     typeof value.created_item==='boolean' &&
+    value.activation_required===true &&
     typeof value.created_passport==='boolean' &&
     typeof value.idempotent_replay==='boolean' &&
     validTimestamp(value.created_at) &&
