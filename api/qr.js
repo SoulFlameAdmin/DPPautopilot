@@ -71,6 +71,7 @@ function handler(req, res) {
   res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
   res.setHeader('Content-Disposition', (download ? 'attachment' : 'inline') + '; filename="dpp-passport-qr.svg"');
   res.setHeader('X-DPP-Carrier', 'qr');
+  res.setHeader('X-DPP-Identifier', identifier);
   res.setHeader('X-DPP-Target', targetUrl);
   res.end(svg);
 }
