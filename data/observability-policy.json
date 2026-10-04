@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "task": "R09",
   "status": "partial",
   "event_name": "dpp_http_request",
@@ -47,6 +47,7 @@
     "passport",
     "qr",
     "provision",
+    "batch_provision",
     "imports",
     "export"
   ],
