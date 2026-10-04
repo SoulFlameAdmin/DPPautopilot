@@ -56,7 +56,11 @@ def evaluate(matrix: dict, fixture: dict, item_index: int=0)->dict:
             optional.append(n)
         elif status=="not_required_2027":
             not_required.append(n)
-            if is_present:
+            # Some Commission rows are launch-deferred duplicate views of data that is
+            # already mandatory elsewhere (for example material-composition grouping
+            # and rated capacity). Presence of the underlying canonical value must not
+            # create a false warning when the row is explicitly mapped as a derived duplicate.
+            if is_present and point.get("sourceOwner")!="derived_duplicate":
                 warnings.append({"number":n,"code":"NOT_REQUIRED_AT_LAUNCH_VALUE_PRESENT","name":point["name"]})
 
     total=len(required)
