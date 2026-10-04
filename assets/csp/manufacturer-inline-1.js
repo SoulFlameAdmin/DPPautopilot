@@ -112,6 +112,9 @@ function renderItems(){
   const host=$("#itemsList");host.replaceChildren();
   $("#itemsCount").textContent=String(items.length);
   $("#originalItemsCount").textContent=String(items.filter(i=>i.lifecycle_status==="original").length);
+  const labelIds=items.slice(0,50).map(i=>i.unique_identifier);
+  const batchLink=$("#batchLabelsLink");
+  if(batchLink)batchLink.href="/manufacturer/labels"+(labelIds.length?"?ids="+encodeURIComponent(labelIds.join(",")):"");
   if(!items.length){const e=document.createElement("div");e.className="empty";e.textContent="Няма произведени battery items в активната фирма.";host.append(e);return}
   for(const item of items.slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))).slice(0,30)){
     const row=document.createElement("article");row.className="row";
