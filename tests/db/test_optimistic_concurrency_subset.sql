@@ -82,10 +82,13 @@ begin
     raise exception 'M23 checked item update failed';
   end if;
 
+  -- Step 18 reserves DRAFT -> ACTIVE for the readiness activation route.
+  -- M23 only needs a successful checked write to advance updated_at before
+  -- proving that the original token rejects a stale second writer.
   payload:=public.dpp_api_passport_update_checked(
-    passport_a,'active',null,null,passport_ts
+    passport_a,'suspended',null,null,passport_ts
   );
-  if payload->>'status'<>'active' then
+  if payload->>'status'<>'suspended' then
     raise exception 'M23 checked passport update failed';
   end if;
 
@@ -106,7 +109,7 @@ begin
 
   seen:=false;
   begin
-    perform public.dpp_api_passport_update_checked(passport_a,'suspended',null,null,passport_ts);
+    perform public.dpp_api_passport_update_checked(passport_a,'retired',null,null,passport_ts);
   exception when sqlstate 'DP411' then seen:=true;
   end;
   if not seen then raise exception 'M23 stale passport write was not rejected'; end if;
