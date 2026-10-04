@@ -10,6 +10,7 @@ const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
 const provision=require('../../api/provision.js');
+const batchProvision=require('../../api/batch-provision.js');
 const imports=require('../../api/imports.js');
 const request=require('../../api/_request.js');
 
@@ -56,7 +57,7 @@ test('shared parser rejects malformed JSON and unserializable objects',()=>{
   );
 });
 
-for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['provision',provision],['imports',imports]]){
+for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['provision',provision],['batch-provision',batchProvision],['imports',imports]]){
   test(`${name} rejects >1 MiB parsed object before upstream DB access`,async()=>{
     const original=global.fetch;
     let called=false;
@@ -259,6 +260,36 @@ test('passport rejects invalid identifiers, ids, status and payload shapes local
   assertError(res,422,'VALIDATION_ERROR');
 });
 
+
+test('batch provision rejects malformed, duplicate and invalid generated ranges before upstream',async()=>{
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('upstream must not be called');};
+  try{
+    let res=makeRes();
+    await batchProvision(req('POST','{"bad":'),res);
+    assertError(res,400,'INVALID_JSON');
+
+    res=makeRes();
+    await batchProvision(req('POST',{model_id:'bad',batch_key:'BATCH-A',units:[]}),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    const unit={unique_identifier:'BAT-DUP',item_canonical_data:{},public_payload:{item:{unique_identifier:'BAT-DUP'}},private_payload:{}};
+    res=makeRes();
+    await batchProvision(req('POST',{
+      model_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',batch_key:'BATCH-A',units:[unit,{...unit}]
+    }),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    res=makeRes();
+    await batchProvision(req('POST',{
+      model_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',batch_key:'BATCH-A',
+      generator:{quantity:2,identifier_prefix:'BAT-',serial_start:999999,serial_width:6,public_payload_template:{item:{}},item_canonical_data_template:{},private_payload_template:{}}
+    }),res);
+    assertError(res,422,'VALIDATION_ERROR');
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
+});
 
 test('provision rejects malformed JSON and invalid provisioning fields locally before upstream',async()=>{
   const original=global.fetch;
