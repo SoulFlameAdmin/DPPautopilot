@@ -43,6 +43,7 @@ test('GET returns SVG and exact canonical target header',()=>{
     assert.equal(res.statusCode,200);
     assert.match(res.headers['content-type'],/^image\/svg\+xml/);
     assert.equal(res.headers['x-dpp-carrier'],'qr');
+    assert.equal(res.headers['x-dpp-identifier'],'BAT-001');
     assert.equal(res.headers['x-dpp-target'],'https://dpp.example/passport?identifier=BAT-001');
     assert.match(res.body,/^<svg\b/);
   } finally {
@@ -68,4 +69,25 @@ test('invalid identifier and unsupported methods fail closed',()=>{
   handler(makeReq('POST',{identifier:'BAT-001'}),res);
   assert.equal(res.statusCode,405);
   assert.equal(res.headers.allow,'GET');
+});
+
+
+test('different battery identifiers produce different canonical targets and different QR carriers',()=>{
+  const old=process.env.DPP_PUBLIC_ORIGIN;
+  process.env.DPP_PUBLIC_ORIGIN='https://dpp.example';
+  try{
+    const a=makeRes();
+    const b=makeRes();
+    handler(makeReq('GET',{identifier:'BAT-UNIQUE-0001'}),a);
+    handler(makeReq('GET',{identifier:'BAT-UNIQUE-0002'}),b);
+    assert.equal(a.statusCode,200);
+    assert.equal(b.statusCode,200);
+    assert.equal(a.headers['x-dpp-identifier'],'BAT-UNIQUE-0001');
+    assert.equal(b.headers['x-dpp-identifier'],'BAT-UNIQUE-0002');
+    assert.notEqual(a.headers['x-dpp-target'],b.headers['x-dpp-target']);
+    assert.notEqual(a.body,b.body);
+  } finally {
+    if(old===undefined) delete process.env.DPP_PUBLIC_ORIGIN;
+    else process.env.DPP_PUBLIC_ORIGIN=old;
+  }
 });
