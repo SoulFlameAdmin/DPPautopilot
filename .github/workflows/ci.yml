@@ -48,6 +48,8 @@ jobs:
         run: python scripts/validate_stage2_unique_item_qr.py
       - name: Validate Stage 3 LMT scooter schema
         run: python scripts/validate_scooter_schema.py
+      - name: Validate Stage 5 Produce-X batch provisioning
+        run: python scripts/validate_stage5_batch_provisioning.py
       - name: Validate BG Battery Pilot contract
         run: python scripts/validate_bg_battery_pilot.py
       - name: Generate BG Battery Pilot non-client acceptance evidence
@@ -182,6 +184,8 @@ jobs:
         run: node --test tests/api/models.test.cjs
       - name: Run M18 items HTTP contract unit tests
         run: node --test tests/api/items.test.cjs
+      - name: Run Stage 5 batch provisioning API tests
+        run: node --test tests/api/batch-provision.test.cjs
       - name: Run M19 passport HTTP contract unit tests
         run: node --test tests/api/passport.test.cjs
       - name: Run QR production carrier unit tests
@@ -509,6 +513,16 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_global_rls_grants_guard.sql
+      - name: Run Stage 5 atomic batch provisioning subset
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          \i tests/db/test_scooter_batch_provisioning_subset.sql
+          rollback;
+          SQL
       - name: Run DPP security definer RPC guard
         env:
           PGPASSWORD: postgres
