@@ -128,7 +128,7 @@ function validBatchResult(value){
     value.units.every(validProvisionUnit);
 }
 function mapDatabaseError(data){
-  const mapped=mapSharedDatabaseError('batch_provision',data);
+  const mapped=mapSharedDatabaseError('batch-provision',data);
   return [mapped.status,mapped.code,mapped.message];
 }
 const DEFAULT_RPC_TIMEOUT_MS=15000;
@@ -167,14 +167,14 @@ async function rpc(payload,authorization,env=process.env,fetchImpl=fetch,timeout
   return data;
 }
 async function handler(req,res){
-  startRequestObservability(req,res,'batch_provision');
-  const local=enforceRateLimit(req,res,'batch_provision');
+  startRequestObservability(req,res,'batch-provision');
+  const local=enforceRateLimit(req,res,'batch-provision');
   if(!local.allowed)return send(res,429,rateLimitBody());
   const method=String(req.method||'POST').toUpperCase();
   if(method!=='POST'){res.setHeader('Allow','POST');return send(res,405,{error:{code:'METHOD_NOT_ALLOWED',message:'Unsupported method.'}});}
   const authorization=bearer(req);
   if(!authorization)return send(res,401,{error:{code:'AUTH_REQUIRED',message:'Bearer authentication is required.'}});
-  const shared=await enforceSharedRateLimit(req,res,'batch_provision',authorization,{ruleName:'authenticated_write'});
+  const shared=await enforceSharedRateLimit(req,res,'batch-provision',authorization,{ruleName:'authenticated_write'});
   if(shared.error)return send(res,503,sharedRateLimitUnavailableBody());
   if(!shared.allowed)return send(res,429,rateLimitBody());
 
