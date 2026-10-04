@@ -2,13 +2,6 @@
   "fixtureVersion": "lmt-launch-71-v2-synthetic-1",
   "synthetic": true,
   "profileId": "scooter-battery-dpp-v1",
-  "passport": {
-    "responsible_economic_operator": {
-      "name": "SoulFlame Synthetic Operator",
-      "identifier": "DEMO-EO-001",
-      "contact": "demo@example.invalid"
-    }
-  },
   "model": {
     "identification": {
       "manufacturer": {
@@ -114,7 +107,12 @@
     },
     "compliance_test_reports": [
       "DEMO-TEST-REPORT-001"
-    ]
+    ],
+    "responsible_economic_operator": {
+      "name": "SoulFlame Synthetic Operator",
+      "identifier": "DEMO-EO-001",
+      "contact": "demo@example.invalid"
+    }
   },
   "pointApplicability": {
     "35": false,
