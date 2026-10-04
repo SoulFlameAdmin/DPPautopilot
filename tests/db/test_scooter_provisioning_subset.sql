@@ -72,8 +72,11 @@ begin
   if first_result->>'lifecycle_status'<>'original' then
     raise exception 'Stage4 new battery lifecycle is not original';
   end if;
-  if first_result->>'passport_status'<>'active' then
-    raise exception 'Stage4 passport was not activated atomically';
+  if first_result->>'passport_status'<>'draft' then
+    raise exception 'Step18 provisioning did not create a draft passport';
+  end if;
+  if (first_result->>'activation_required')::boolean is not true then
+    raise exception 'Step18 provisioning did not signal activation_required';
   end if;
   if (first_result->>'created_item')::boolean is not true
      or (first_result->>'created_passport')::boolean is not true
@@ -84,12 +87,17 @@ begin
   if (select count(*) from public.dpp_battery_items where id=item_id and organization_id=org_a)<>1 then
     raise exception 'Stage4 item row missing';
   end if;
-  if (select count(*) from public.dpp_passports where id=passport_id and battery_item_id=item_id and status='active')<>1 then
-    raise exception 'Stage4 active passport row missing';
+  if (select count(*) from public.dpp_passports where id=passport_id and battery_item_id=item_id and status='draft')<>1 then
+    raise exception 'Step18 draft passport row missing';
   end if;
 
-  if (public.dpp_api_passport_public('urn:dpp:stage4:lmt:a:000001')->>'passport_id')::uuid<>passport_id then
-    raise exception 'Stage4 public passport does not resolve to provisioned passport';
+  seen:=false;
+  begin
+    perform public.dpp_api_passport_public('urn:dpp:stage4:lmt:a:000001');
+  exception when sqlstate 'DP402' then seen:=true;
+  end;
+  if not seen then
+    raise exception 'Step18 draft passport leaked through public passport RPC';
   end if;
 
   -- Identical retry must return the same item/passport without duplicate rows.
