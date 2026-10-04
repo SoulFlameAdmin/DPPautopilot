@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
@@ -117,18 +117,21 @@
       "processor": "Supabase",
       "tables": [
         "dpp_battery_models",
-        "dpp_battery_items"
+        "dpp_battery_items",
+        "dpp_provision_batches",
+        "dpp_provision_batch_items"
       ],
-      "fields": "model/manufacturer/category, battery unique identifier, lifecycle status, canonical_data JSON, creator user ID, timestamps",
+      "fields": "model/manufacturer/category, battery unique identifier, lifecycle status, canonical_data JSON, production batch key/request fingerprint/quantity, batch-to-item/passport membership, creator user ID, timestamps",
       "retention": {
         "status": "pending_policy",
-        "current_behavior": "Persists until authorized lifecycle/deletion; no automatic time-based expiry"
+        "current_behavior": "Battery/model records and committed provisioning batch metadata persist until authorized lifecycle/deletion; no automatic time-based expiry. Batch metadata contains business production identifiers and cryptographic request fingerprints, not raw authentication secrets."
       },
       "controls": [
         "tenant scope",
         "field validation",
         "lifecycle rules",
-        "created_by actor linkage"
+        "created_by actor linkage",
+        "batch provisioning tables deny direct client table access and are written through tenant/RBAC RPC only"
       ],
       "minimization_note": "canonical_data must remain product/business data; personal data should not be placed in flexible JSON without an approved catalog purpose"
     },
