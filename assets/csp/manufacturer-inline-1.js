@@ -160,8 +160,8 @@ async function createModel(){
       canonical_data:{identification:{model_id:modelIdentifier,category:"light_means_of_transport",manufacturer:{name:manufacturer}}}
     }})).data;
     $("#modelIdentifier").value="";$("#manufacturerName").value="";
-    setResult($("#modelResult"),"LMT моделът е създаден: "+created.model_identifier,"ok");
     await loadData();$("#provisionModel").value=created.id;
+    setResult($("#modelResult"),"LMT моделът е създаден в production backend: "+created.model_identifier,"ok");
   }catch(e){setResult($("#modelResult"),e.message,"bad")}
   finally{$("#createModel").disabled=!canWrite()}
 }
@@ -191,8 +191,8 @@ async function provisionBattery(){
       private_payload:{}
     }});
     $("#batteryIdentifier").value="";
-    showProvision(response.data);
     await loadData();
+    showProvision(response.data);
   }catch(e){setResult($("#provisionResult"),e.message,"bad")}
   finally{$("#provisionBattery").disabled=!canWrite()}
 }
