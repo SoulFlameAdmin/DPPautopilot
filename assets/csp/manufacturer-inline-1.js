@@ -125,7 +125,8 @@ function renderItems(){
     const pill=document.createElement("span");pill.className="pill"+(item.lifecycle_status==="original"?" ok":"");pill.textContent=item.lifecycle_status;
     const passport=document.createElement("a");passport.className="btn";passport.href="/passport?identifier="+encodeURIComponent(item.unique_identifier);passport.target="_blank";passport.rel="noopener";passport.textContent="Passport";
     const qr=document.createElement("a");qr.className="btn";qr.href="/qr?identifier="+encodeURIComponent(item.unique_identifier);qr.target="_blank";qr.rel="noopener";qr.textContent="QR";
-    side.append(pill,passport,qr);row.append(left,side);host.append(row);
+    const history=document.createElement("a");history.className="btn";history.href="/manufacturer/history?id="+encodeURIComponent(item.id);history.textContent="History";
+    side.append(pill,passport,qr,history);row.append(left,side);host.append(row);
   }
 }
 async function loadTenant(){
