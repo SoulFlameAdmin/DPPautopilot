@@ -10,6 +10,7 @@ const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
 const provision=require('../../api/provision.js');
+const batchProvision=require('../../api/batch-provision.js');
 const imports=require('../../api/imports.js');
 const request=require('../../api/_request.js');
 
@@ -56,7 +57,7 @@ test('shared parser rejects malformed JSON and unserializable objects',()=>{
   );
 });
 
-for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['provision',provision],['imports',imports]]){
+for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['provision',provision],['batch-provision',batchProvision],['imports',imports]]){
   test(`${name} rejects >1 MiB parsed object before upstream DB access`,async()=>{
     const original=global.fetch;
     let called=false;
@@ -286,4 +287,15 @@ test('provision rejects malformed JSON and invalid provisioning fields locally b
     assertError(res,422,'VALIDATION_ERROR');
     assert.equal(called,false);
   }finally{global.fetch=original;}
+});
+
+
+test('batch provision rejects malformed JSON and invalid batch fields locally',async()=>{
+  let res=makeRes();
+  await batchProvision(req('POST','{"bad":'),res);
+  assertError(res,400,'INVALID_JSON');
+
+  res=makeRes();
+  await batchProvision(req('POST',{model_id:'bad',batch_key:'B',units:[]}),res);
+  assertError(res,422,'VALIDATION_ERROR');
 });
