@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 contract=json.loads((ROOT/"data/incident-runbook-contract.json").read_text(encoding="utf-8"))
 doc=(ROOT/"docs/INCIDENT_RUNBOOK.md").read_text(encoding="utf-8")
 
-assert contract.get("version")==2
+assert contract.get("version")==3
 assert contract.get("task")=="R13"
 assert contract.get("status")=="partial"
 assert contract.get("runbook")=="docs/INCIDENT_RUNBOOK.md"
@@ -76,9 +76,15 @@ for required in [
 for unsafe_claim in [
     "live paging is configured",
     "production rollback is proven",
-    "f08 is green",
+    "f08 is blocked",
 ]:
     assert unsafe_claim not in doc.lower()
+
+runtime_evidence=contract.get("runtime_evidence",{})
+assert runtime_evidence.get("source")=="Vercel runtime error aggregation"
+assert runtime_evidence.get("structured_event_observed") is True
+assert runtime_evidence.get("deployment_id","").startswith("dpl_")
+assert "remain unproven" in runtime_evidence.get("scope_note","")
 
 assert len(contract.get("safety_rules",[]))>=5
 gaps=" ".join(contract.get("runtime_gaps",[]))

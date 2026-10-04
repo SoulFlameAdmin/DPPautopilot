@@ -1,6 +1,6 @@
 # DPP Autopilot Incident Runbook
 
-> R13 status: **RED / PARTIAL precursor**. This runbook is repository-tested operational guidance. R09/R10 are not yet GREEN, so no live paging, production runtime logs or production rollback capability is claimed.
+> R13 status: **RED / PARTIAL precursor**. This runbook is repository-tested operational guidance. R09/R10 are not yet GREEN, so no live paging, human acknowledgement or production rollback capability is claimed. Structured production-log ingestion is evidenced, but full R09 runtime/retention acceptance is not.
 
 ## 1. Purpose and evidence boundaries
 
@@ -8,11 +8,11 @@ Use this runbook for DPP availability, authentication/authorization, tenant-isol
 
 Current proven foundations:
 
-- R09 supplies redacted structured `dpp_http_request` events and `X-Request-ID` correlation in repository tests.
+- R09 supplies redacted structured `dpp_http_request` events and `X-Request-ID` correlation; Vercel runtime aggregation has returned a real production `dpp_http_request` event, proving deployed structured-event ingestion on a production deployment.
 - R10 defines deterministic monitoring signals and owners, but live delivery is not configured.
 - R11 defines backup scope and recovery objectives.
 - R12 has a passing isolated PostgreSQL restore drill.
-- F08 is blocked, so production-deployment/runtime evidence must not be invented.
+- F08 is GREEN and production deployment exists; this does not by itself prove R09 retention acceptance, R10 live delivery, or production rollback.
 - C05 production rollback is not yet accepted. “Rollback” below means follow an approved deployment/database rollback mechanism if and when C05 proves it; until then use containment and isolated recovery validation.
 
 ## 2. Roles
@@ -175,13 +175,13 @@ Do not close merely because an alert stopped firing if user/data impact is unres
 
 A repository-level drill now exercises the R09 event contract through R10 `availability_5xx_rate`, maps the critical signal to `SEV1` and the DPP operations owner, verifies a synthetic 5-minute acknowledgement against the 15-minute target, walks every required runbook phase, and proves recovery clears the alert in a later monitoring window.
 
-This is deliberately not live incident evidence: there is no deployed log ingestion, notification destination, human acknowledgement, production rollback or production incident recovery claim.
+This is deliberately not live incident-drill evidence: deployed structured-log ingestion is evidenced, but there is no approved notification destination, human acknowledgement, production rollback or production incident recovery claim.
 
 ## 13. Current gaps before R13 GREEN
 
 R13 cannot be GREEN until:
 
-- R09 production log/correlation evidence is accepted;
+- R09 production logging/correlation and retention/backend ownership are fully accepted;
 - R10 has a live notification destination plus fire/recover/acknowledgement evidence;
 - production rollback procedure C05 is defined where rollback is required;
 - at least one runtime incident drill exercises detection → triage → containment → communication → recovery → verification using deployed evidence.
