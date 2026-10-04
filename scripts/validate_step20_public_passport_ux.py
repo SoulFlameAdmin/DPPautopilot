@@ -42,7 +42,7 @@ def main()->None:
         "fetch('/data/lmt-battery-71-v2.json'",
         "point.sourceOwner==='derived_duplicate'",
         "point.number===1",
-        "data.publicFieldCount",
+        "dataset.publicFieldCount",
         "dataset.passportStatus='active'",
         "dataset.restrictedLeak='false'",
         "PUBLIC_PASSPORT_NOT_FOUND",
