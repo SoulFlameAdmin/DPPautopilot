@@ -26,6 +26,14 @@
       "destination": "/live/manufacturer"
     },
     {
+      "source": "/manufacturer/import",
+      "destination": "/live/import"
+    },
+    {
+      "source": "/manufacturer/import/",
+      "destination": "/live/import"
+    },
+    {
       "source": "/((?!data/|api/).*)",
       "destination": "/index.html"
     }
