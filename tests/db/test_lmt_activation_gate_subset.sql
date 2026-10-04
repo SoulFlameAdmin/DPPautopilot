@@ -53,7 +53,6 @@ begin
     'urn:dpp:step18:lmt:000001',
     '{}'::jsonb,
     '{
-      "passport":{"responsible_economic_operator":{"name":"Step18 Operator","identifier":"STEP18-EO"}},
       "model":{"identification":{"category":"light_means_of_transport","model_id":"S18-LMT-A","manufacturer":{"name":"Step18 Maker"}}},
       "item":{"unique_identifier":"urn:dpp:step18:lmt:000001"}
     }'::jsonb,
@@ -101,6 +100,7 @@ begin
 
   update public.dpp_battery_models
   set canonical_data='{
+    "responsible_economic_operator":{"name":"Step18 Operator","identifier":"STEP18-EO"},
     "identification":{
       "manufacturer":{"name":"Step18 Maker","postal_address":"1 Test Street, EU"},
       "category":"light_means_of_transport",
