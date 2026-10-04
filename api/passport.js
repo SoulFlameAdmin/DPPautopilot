@@ -79,9 +79,26 @@ function validReadinessReport(value) {
     typeof value.ready === 'boolean';
 }
 
+function validCompletenessReport(value) {
+  return validReadinessReport(value) &&
+    validTimestamp(value.passport_updated_at) &&
+    Number.isInteger(value.required_point_count) &&
+    value.required_point_count >= 50 &&
+    Number.isInteger(value.complete_point_count) &&
+    value.complete_point_count >= 0 &&
+    value.complete_point_count <= value.required_point_count &&
+    Number.isInteger(value.blocking_count) &&
+    value.blocking_count === value.missing_count + value.undecided_count &&
+    typeof value.workflow_score_percent === 'number' &&
+    Number.isFinite(value.workflow_score_percent) &&
+    value.workflow_score_percent >= 0 &&
+    value.workflow_score_percent <= 100;
+}
+
 function validateRpcShape(name, data) {
   if (name === 'dpp_api_passport_public') return validPublicPassport(data);
   if (name === 'dpp_api_scooter_passport_readiness') return validReadinessReport(data);
+  if (name === 'dpp_api_scooter_completeness_by_identifier') return validCompletenessReport(data);
   if (name === 'dpp_api_passport_private' ||
       name === 'dpp_api_passport_create' ||
       name === 'dpp_api_passport_update_checked' ||
@@ -224,6 +241,19 @@ async function handler(req, res) {
         if (typeof identifier !== 'string' || identifier.trim().length < 1 || identifier.trim().length > 300) {
           return send(res, 400, { error: { code: 'INVALID_IDENTIFIER', message: 'identifier must contain 1..300 characters.' } });
         }
+        if (readiness === '1' || readiness === 'true') {
+          const authorization = bearer(req);
+          if (!authorization) {
+            return send(res, 401, { error: { code: 'AUTH_REQUIRED', message: 'Bearer authentication is required.' } });
+          }
+          const sharedReadinessRateLimit=await enforceSharedRateLimit(req,res,'passport',authorization,{ruleName:'authenticated_read'});
+          if(sharedReadinessRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
+          if(!sharedReadinessRateLimit.allowed) return send(res,429,rateLimitBody());
+          const report = await rpc('dpp_api_scooter_completeness_by_identifier', {
+            p_unique_identifier: identifier.trim()
+          }, authorization);
+          return send(res, 200, { data: report });
+        }
         const passport = await rpc('dpp_api_passport_public', { p_unique_identifier: identifier.trim() }, null);
         return send(res, 200, { data: sanitizePublicPassport(passport) });
       }
@@ -339,4 +369,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPrivatePassport, validReadinessReport, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPrivatePassport, validReadinessReport, validCompletenessReport, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, DEFAULT_RPC_TIMEOUT_MS };
