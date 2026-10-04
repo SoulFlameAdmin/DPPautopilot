@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · Battery Master 1–100</title>
+  <meta name="description" content="Официалният 100-точков master plan за Scooter/LMT Battery DPP.">
+  <link rel="stylesheet" href="/assets/csp/battery-master.css">
+</head>
+<body data-plan-ready="false">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">DPP AUTOPILOT</a>
+      <nav class="nav">
+        <a class="btn" href="/manufacturer">Manufacturer</a>
+        <a class="btn" href="/company">Company</a>
+        <a class="btn primary" href="/">Начало</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">OFFICIAL SCOOTER / LMT BATTERY ROADMAP</p>
+      <h1>Battery Master Plan <span>1–100</span></h1>
+      <p class="lead">Един официален списък за това какво е готово, какво е частично и какво остава до техническо 100/100 за Scooter/LMT Battery DPP.</p>
+      <div class="status-note" id="statusNote">Зареждане на canonical plan…</div>
+    </section>
+
+    <section class="summary" aria-label="Master plan summary">
+      <article class="metric"><strong id="greenCount">—</strong><span>🟢 GREEN</span><small>готово и доказано</small></article>
+      <article class="metric"><strong id="yellowCount">—</strong><span>🟡 YELLOW</span><small>частично / има основа</small></article>
+      <article class="metric"><strong id="redCount">—</strong><span>🔴 RED</span><small>предстои</small></article>
+      <article class="metric focus"><strong id="nextPoint">—</strong><span>Следва по ред</span><small id="greenThrough">—</small></article>
+    </section>
+
+    <section class="toolbar">
+      <div class="filters" role="group" aria-label="Филтър по статус">
+        <button class="filter active" type="button" data-filter="all">Всички 100</button>
+        <button class="filter" type="button" data-filter="green">🟢 GREEN</button>
+        <button class="filter" type="button" data-filter="yellow">🟡 YELLOW</button>
+        <button class="filter" type="button" data-filter="red">🔴 RED</button>
+      </div>
+      <label class="search"><span>Търси</span><input id="planSearch" type="search" placeholder="пример: Registry, QR, printer…"></label>
+    </section>
+
+    <section id="planHost" class="plan-host" aria-live="polite"></section>
+
+    <section class="after100">
+      <div>
+        <p class="eyebrow">AFTER TECHNICAL 100/100</p>
+        <h2>Какво остава с реални хора и фирми</h2>
+        <p>Това не е вътрешна разработка. Това са външните доказателства, които изискват реален клиент, физически продукт или външен достъп.</p>
+      </div>
+      <div id="externalGates" class="external-gates"></div>
+    </section>
+
+    <footer>
+      Source of truth: <code>data/scooter-battery-master-100.json</code> · GREEN се използва само за доказано завършени точки. Планът е за Scooter/LMT Battery DPP.
+    </footer>
+  </main>
+
+  <script src="/assets/csp/battery-master-inline-1.js"></script>
+</body>
+</html>
