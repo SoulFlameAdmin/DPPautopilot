@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · LMT Completeness</title>
+  <meta name="description" content="Production completeness и missing-data workflow за Scooter/LMT Battery DPP.">
+  <link rel="stylesheet" href="/assets/csp/manufacturer-completeness.css">
+</head>
+<body data-completeness-ready="false" data-completeness-auth="unknown" data-completeness-status="loading">
+<main class="shell">
+  <header class="topbar">
+    <div>
+      <a class="brand" href="/manufacturer">DPP AUTOPILOT</a>
+      <span class="badge">PRODUCTION COMPLETENESS · STEP 19</span>
+    </div>
+    <div class="actions">
+      <a class="btn" href="/manufacturer">Manufacturer</a>
+      <a class="btn" href="/battery-master">Master 1–100</a>
+      <button class="btn" id="refreshReadiness" type="button">Refresh</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">REAL TENANT DATA · 18 FEB 2027 LMT LAUNCH CONTRACT</p>
+      <h1>Completeness / Missing Data</h1>
+      <p id="batteryIdentity" class="lead">Проверка на батерията…</p>
+    </div>
+    <div class="tenant-box">
+      <span class="mini">ACTIVE COMPANY</span>
+      <strong id="tenantName">—</strong>
+      <span id="tenantMeta">—</span>
+    </div>
+  </section>
+
+  <section id="authGate" class="card gate">
+    <p class="eyebrow">AUTH REQUIRED</p>
+    <h2>Нужен е фирмен вход.</h2>
+    <p>Completeness страницата работи само с реалния tenant и production API.</p>
+    <a class="btn primary" href="/company">Вход / фирма →</a>
+    <div class="result" id="gateResult" role="status" aria-live="polite">Проверка на сесията…</div>
+  </section>
+
+  <div id="workspace" hidden>
+    <section class="summary">
+      <article class="score-card">
+        <div class="score" id="scoreValue">0%</div>
+        <div class="progress"><span id="scoreBar"></span></div>
+        <strong id="readyLabel">Проверка…</strong>
+        <small id="scoreMeta">—</small>
+      </article>
+      <article class="metric"><strong id="missingCount">0</strong><span>Липсващи данни</span></article>
+      <article class="metric"><strong id="undecidedCount">0</strong><span>Нерешена приложимост</span></article>
+      <article class="metric"><strong id="passportStatus">—</strong><span>Passport status</span></article>
+    </section>
+
+    <section class="card action-card">
+      <div>
+        <p class="eyebrow">FINAL GATE</p>
+        <h2 id="actionTitle">Попълни блокерите.</h2>
+        <p class="muted" id="actionText">ACTIVE е забранен, докато readiness не стане PASS.</p>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="activatePassport" type="button" disabled>Активирай Passport</button>
+        <a class="btn" id="publicPassport" href="#" target="_blank" rel="noopener" hidden>Public Passport</a>
+        <a class="btn" id="publicQr" href="#" target="_blank" rel="noopener" hidden>QR</a>
+      </div>
+      <div class="result" id="actionResult" role="status" aria-live="polite">—</div>
+    </section>
+
+    <section class="grid two">
+      <article class="card">
+        <div class="card-head"><div><p class="eyebrow">MISSING</p><h2>Липсващи задължителни данни</h2></div><span class="state" id="missingState">0</span></div>
+        <div id="missingList" class="issue-list"></div>
+      </article>
+      <article class="card">
+        <div class="card-head"><div><p class="eyebrow">APPLICABILITY</p><h2>Условни точки за решение</h2></div><span class="state" id="undecidedState">0</span></div>
+        <div id="undecidedList" class="issue-list"></div>
+      </article>
+    </section>
+
+    <section class="card legend-card">
+      <p><b>Как работи:</b> всяка липсваща точка показва EU номер, име, къде се пази и кой обичайно дава данните. Записът се прави директно в production Model/Item API. Точка 50 се подава по write-only evidence flow и съдържанието ѝ не се връща в organization/public API.</p>
+    </section>
+  </div>
+
+  <footer>Step 19 · Production completeness workflow · tenant scoped · readiness-gated activation · no demo storage.</footer>
+</main>
+<script src="/assets/csp/manufacturer-completeness-inline-1.js"></script>
+</body>
+</html>
