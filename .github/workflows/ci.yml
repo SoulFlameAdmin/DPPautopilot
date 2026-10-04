@@ -932,6 +932,18 @@ jobs:
           python scripts/validate_auth_ui.py artifacts/m01-auth-dom.html
 
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
+            --dump-dom 'http://127.0.0.1:8000/live/manufacturer.html' > artifacts/stage5-manufacturer-anon-dom.html
+          python - <<'PY'
+          from pathlib import Path
+          dom=Path("artifacts/stage5-manufacturer-anon-dom.html").read_text(encoding="utf-8",errors="replace")
+          assert 'data-manufacturer-ready="true"' in dom
+          assert 'data-manufacturer-auth="missing"' in dom
+          assert 'Няма активна фирмена сесия.' in dom
+          assert 'PRODUCTION MANUFACTURER · STAGE 5' in dom
+          print("STAGE5_MANUFACTURER_UI_PASS: production dashboard loads safely and requires company auth when no session exists")
+          PY
+
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 \
             --dump-dom 'http://127.0.0.1:8000/demo/auth.html?invalid=1' > artifacts/u03-auth-invalid-dom.html
 
           "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2000 \
