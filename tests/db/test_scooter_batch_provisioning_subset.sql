@@ -126,9 +126,9 @@ begin
     select count(*)
     from public.dpp_passports p
     join public.dpp_battery_items i on i.id=p.battery_item_id
-    where i.unique_identifier like 'urn:dpp:stage5:lmt:a:%' and p.status='active'
+    where i.unique_identifier like 'urn:dpp:stage5:lmt:a:%' and p.status='draft'
   )<>3 then
-    raise exception 'Stage5 did not activate exactly three passports';
+    raise exception 'Step18 batch provisioning did not create exactly three draft passports';
   end if;
 
   retry_result:=public.dpp_api_scooter_battery_batch_provision(model_a,'S5-A',units);

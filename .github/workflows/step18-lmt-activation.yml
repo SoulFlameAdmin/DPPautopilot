@@ -1,0 +1,61 @@
+name: Step 18 LMT Activation Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  step18:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dpp_step18
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dpp_step18"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Validate Step 18 contract
+        run: python scripts/validate_step18_activation_gate.py
+
+      - name: Run Step 18 API tests
+        run: node --test tests/api/passport-activation.test.cjs
+
+      - name: Replay migrations and run Step 18 DB acceptance
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSQL=(psql -h 127.0.0.1 -U postgres -d dpp_step18 -v ON_ERROR_STOP=1)
+          "${PSQL[@]}" <<'SQL'
+          create extension if not exists pgcrypto;
+          create role anon nologin;
+          create role authenticated nologin;
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          SQL
+          for file in supabase/migrations/*.sql; do
+            echo "Replaying $file"
+            "${PSQL[@]}" -f "$file"
+          done
+          "${PSQL[@]}" <<'SQL'
+          begin;
+          \i tests/db/test_lmt_activation_gate_subset.sql
+          rollback;
+          SQL
