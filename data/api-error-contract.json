@@ -220,6 +220,21 @@
         "http_status": 409,
         "code": "PASSPORT_STATE_NOT_ACTIVATABLE",
         "message": "The current passport state cannot be activated."
+      },
+      "DP601": {
+        "http_status": 404,
+        "code": "MODEL_NOT_FOUND",
+        "message": "The LMT battery model was not found."
+      },
+      "DP602": {
+        "http_status": 422,
+        "code": "MODEL_NOT_LMT",
+        "message": "The selected battery model is not an LMT model."
+      },
+      "DP603": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
       }
     },
     "export": {},
