@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · Company Access</title>
+  <meta name="description" content="Production company registration, email verification, sign-in and DPP tenant onboarding.">
+  <link rel="stylesheet" href="/assets/csp/company-auth.css">
+</head>
+<body data-company-auth-ready="false" data-company-session="anonymous" data-company-tenant="none">
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/">DPP AUTOPILOT</a>
+    <span class="badge">PRODUCTION COMPANY ACCESS · V1</span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">STEP 1 · PRODUCTION COMPANY REGISTRATION / LOGIN</p>
+      <h1>Фирмен достъп до DPP Autopilot.</h1>
+      <p>Истински Supabase Auth + email verification + отделна организация/tenant. Demo данни не се използват в този flow.</p>
+    </div>
+    <div class="security-note">
+      <strong>SECURE BOUNDARY</strong>
+      <span>Publishable key only · Bearer session · tenant/RBAC APIs · no service-role secret in browser.</span>
+    </div>
+  </section>
+
+  <section class="card" id="authCard">
+    <div class="card-head">
+      <div><p class="eyebrow">ACCOUNT</p><h2>Регистрация или вход</h2></div>
+      <span class="state" id="authState">Проверка…</span>
+    </div>
+    <div class="form-grid">
+      <label><span>Служебен email</span><input id="email" type="email" autocomplete="email" placeholder="office@company.eu"></label>
+      <label><span>Парола</span><input id="password" type="password" minlength="8" autocomplete="current-password" placeholder="Минимум 8 символа"></label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="signup" type="button">Създай фирмен акаунт</button>
+      <button class="btn" id="signin" type="button">Вход</button>
+      <button class="btn ghost" id="signout" type="button" hidden>Изход</button>
+    </div>
+    <div class="result" id="authResult" role="status" aria-live="polite">Зареждане на auth конфигурацията…</div>
+  </section>
+
+  <section class="card" id="verifyCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">EMAIL VERIFICATION</p><h2>Потвърди служебния email</h2></div>
+      <span class="state pending">PENDING</span>
+    </div>
+    <p>Изпратихме заявка за потвърждение. След натискане на линка в email-а ще се върнеш тук и ще продължиш с фирмата.</p>
+    <div class="result" id="verifyResult">Ако email-ът е допустим за регистрация, Supabase ще изпрати confirmation link.</div>
+  </section>
+
+  <section class="card" id="companyCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">COMPANY TENANT</p><h2>Създай фирменото пространство</h2></div>
+      <span class="state ok">AUTHENTICATED</span>
+    </div>
+    <p class="muted">Организацията се създава през защитения DPP API. Потребителят, който я създаде, става owner.</p>
+    <div class="form-grid">
+      <label><span>Име на фирмата</span><input id="companyName" maxlength="200" placeholder="VOLTRAX Ltd."></label>
+      <label><span>Tenant slug</span><input id="companySlug" maxlength="120" placeholder="voltrax"></label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="createCompany" type="button">Създай company tenant →</button>
+    </div>
+    <div class="result" id="companyResult" role="status" aria-live="polite">Въведи фирмените данни.</div>
+  </section>
+
+  <section class="card" id="tenantCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">YOUR ORGANISATIONS</p><h2>Фирмени пространства</h2></div>
+      <span class="state ok">RBAC</span>
+    </div>
+    <div id="tenantList" class="tenant-list"></div>
+  </section>
+
+  <section class="card success-card" id="readyCard" hidden>
+    <div class="ready-mark">✓</div>
+    <div>
+      <p class="eyebrow">COMPANY TENANT ACTIVE</p>
+      <h2 id="readyCompany">Фирмата е готова.</h2>
+      <p id="readyMeta" class="muted"></p>
+      <div class="actions">
+        <a class="btn primary" href="/">Отвори DPP dashboard →</a>
+        <a class="btn" href="/demo/model.html">Models</a>
+        <a class="btn" href="/demo/import.html">Imports</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>Step 1 V1 · registration → email verification → login → organization → active tenant. Production acceptance requires real confirmation-email test.</footer>
+</main>
+<script src="/assets/csp/company-auth-inline-1.js"></script>
+</body>
+</html>
