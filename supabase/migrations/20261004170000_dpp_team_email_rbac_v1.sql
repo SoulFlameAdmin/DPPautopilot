@@ -1,6 +1,7 @@
 -- Step 2: customer-grade DPP team RBAC helpers.
 -- Adds email-based member onboarding without exposing auth.users to the client.
 -- Acceptance note: authenticated RPC exposure is explicitly covered by the DPP SECURITY DEFINER guard.
+-- Team UI contract: email lookup never grants owner and never bypasses the active-tenant role guard.
 
 create or replace function public.dpp_api_members_list_detail()
 returns jsonb
