@@ -83,11 +83,11 @@ function issueCard(p,kind){
 }
 function render(){
   $("#batteryIdentity").textContent=report.unique_identifier+" · "+report.schema_version;
-  const score=Number(report.workflow_score_percent)||0;$("#scoreValue").textContent=score.toFixed(1)+"%";$("#scoreBar").style.width=Math.max(0,Math.min(100,score))+"%";
+  const score=Number(report.workflow_score_percent)||0;$("#scoreValue").textContent=score.toFixed(1)+"%";$("#scoreBar").className="pct-"+Math.round(Math.max(0,Math.min(100,score)));
   $("#missingCount").textContent=String(report.missing_count);$("#undecidedCount").textContent=String(report.undecided_count);$("#passportStatus").textContent=String(report.status).toUpperCase();
   $("#missingState").textContent=String(report.missing_count);$("#undecidedState").textContent=String(report.undecided_count);
   $("#scoreMeta").textContent=report.complete_point_count+" / "+report.required_point_count+" required points complete · "+report.blocking_count+" blockers";
-  $("#readyLabel").textContent=report.ready?"READINESS PASS":"NOT READY";$("#readyLabel").style.color=report.ready?"var(--green)":"var(--yellow)";
+  $("#readyLabel").textContent=report.ready?"READINESS PASS":"NOT READY";$("#readyLabel").className=report.ready?"ready":"blocked";
   $("#actionTitle").textContent=report.ready?(report.status==="active"?"Passport е ACTIVE.":"Всички readiness проверки са PASS."):"Попълни "+report.blocking_count+" blocker"+(report.blocking_count===1?"":"s")+".";
   $("#actionText").textContent=report.ready?"Може да се публикува/активира безопасно през readiness gate.":"ACTIVE и публичният QR остават заключени до 0 blockers.";
   const activate=$("#activatePassport");activate.disabled=!canWrite()||!report.ready||report.status==="active";activate.textContent=report.status==="active"?"Passport ACTIVE":"Активирай Passport";
