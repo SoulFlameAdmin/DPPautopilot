@@ -59,6 +59,14 @@ async function api(path,{method="GET",body,retry=true}={}){
   if(!r.ok)throw new Error(data?.error?.message||data?.error?.code||("HTTP "+r.status));
   return data;
 }
+async function downloadExport(format){
+  if(!session?.access_token)throw new Error("Login required.");
+  const r=await fetch("/api/export?format="+encodeURIComponent(format),{headers:{Authorization:"Bearer "+session.access_token},cache:"no-store"});
+  if(!r.ok){let d={};try{d=await r.json()}catch{}throw new Error(d?.error?.message||d?.error?.code||("HTTP "+r.status))}
+  const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement("a");
+  const cd=r.headers.get("content-disposition")||"",match=/filename="([^"]+)"/.exec(cd);
+  a.href=url;a.download=match?match[1]:"dpp-export";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
 function canWrite(){return !!activeOrg&&["owner","admin","editor"].includes(activeOrg.role)}
 function setMode(){
   const write=canWrite();
@@ -225,3 +233,6 @@ $("#createModel").addEventListener("click",createModel);
 $("#provisionBattery").addEventListener("click",provisionBattery);
 init().catch(e=>{document.body.dataset.manufacturerReady="false";showGate(e.message)});
 })();
+$("#exportMes").addEventListener("click",()=>downloadExport("mes_csv").catch(e=>alert(e.message)));
+$("#exportErp").addEventListener("click",()=>downloadExport("erp_json").catch(e=>alert(e.message)));
+$("#exportBms").addEventListener("click",()=>downloadExport("bms_json").catch(e=>alert(e.message)));
