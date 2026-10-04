@@ -1,0 +1,26 @@
+name: Step 20 Public Passport UX
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  step20:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Validate Step 20 public passport contract
+        run: python scripts/validate_step20_public_passport_ux.py
+
+      - name: Prove public API projection remains fail-closed
+        run: node --test tests/api/passport.test.cjs
+
+      - name: Prove strict CSP client contract
+        run: python scripts/validate_security_headers.py
