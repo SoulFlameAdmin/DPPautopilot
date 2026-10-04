@@ -120,9 +120,9 @@ function renderItems(){
     left.append(strong,small);
     const side=document.createElement("div");side.className="row-side";
     const pill=document.createElement("span");pill.className="pill"+(item.lifecycle_status==="original"?" ok":"");pill.textContent=item.lifecycle_status;
+    const completeness=document.createElement("a");completeness.className="btn primary";completeness.href="/manufacturer/completeness?identifier="+encodeURIComponent(item.unique_identifier);completeness.textContent="Completeness";
     const passport=document.createElement("a");passport.className="btn";passport.href="/passport?identifier="+encodeURIComponent(item.unique_identifier);passport.target="_blank";passport.rel="noopener";passport.textContent="Passport";
-    const qr=document.createElement("a");qr.className="btn";qr.href="/qr?identifier="+encodeURIComponent(item.unique_identifier);qr.target="_blank";qr.rel="noopener";qr.textContent="QR";
-    side.append(pill,passport,qr);row.append(left,side);host.append(row);
+    side.append(pill,completeness,passport);row.append(left,side);host.append(row);
   }
 }
 async function loadTenant(){
@@ -169,9 +169,14 @@ function showProvision(data){
   const host=$("#provisionResult");host.replaceChildren();host.className="result ok";
   const line=document.createElement("div");line.textContent=(data.idempotent_replay?"Idempotent replay":"Created")+" · "+data.unique_identifier+" · passport "+data.passport_status;
   const links=document.createElement("div");links.className="actions";
-  const p=document.createElement("a");p.className="btn";p.href=data.passport_url;p.target="_blank";p.rel="noopener";p.textContent="Отвори Passport";
-  const q=document.createElement("a");q.className="btn primary";q.href=data.qr_url;q.target="_blank";q.rel="noopener";q.textContent="Отвори QR";
-  links.append(p,q);host.append(line,links);
+  const readiness=document.createElement("a");readiness.className="btn primary";readiness.href="/manufacturer/completeness?identifier="+encodeURIComponent(data.unique_identifier);readiness.textContent="Completeness →";
+  links.append(readiness);
+  if(data.passport_status==="active"){
+    const p=document.createElement("a");p.className="btn";p.href=data.passport_url;p.target="_blank";p.rel="noopener";p.textContent="Отвори Passport";
+    const q=document.createElement("a");q.className="btn";q.href=data.qr_url;q.target="_blank";q.rel="noopener";q.textContent="Отвори QR";
+    links.append(p,q);
+  }
+  host.append(line,links);
 }
 async function provisionBattery(){
   if(!canWrite())return;

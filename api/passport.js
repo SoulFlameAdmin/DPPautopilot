@@ -79,9 +79,36 @@ function validReadinessReport(value) {
     typeof value.ready === 'boolean';
 }
 
+function validCompletenessReport(value) {
+  return validReadinessReport(value) &&
+    validTimestamp(value.passport_updated_at) &&
+    Number.isInteger(value.required_point_count) &&
+    value.required_point_count >= 50 &&
+    Number.isInteger(value.complete_point_count) &&
+    value.complete_point_count >= 0 &&
+    value.complete_point_count <= value.required_point_count &&
+    Number.isInteger(value.blocking_count) &&
+    value.blocking_count === value.missing_count + value.undecided_count &&
+    typeof value.workflow_score_percent === 'number' &&
+    Number.isFinite(value.workflow_score_percent) &&
+    value.workflow_score_percent >= 0 &&
+    value.workflow_score_percent <= 100;
+}
+
+function validAuthorityEvidenceReceipt(value) {
+  return plainObject(value) &&
+    validUuid(value.passport_id) &&
+    validUuid(value.model_id) &&
+    value.field_number === 50 &&
+    value.accepted === true &&
+    validTimestamp(value.updated_at);
+}
+
 function validateRpcShape(name, data) {
   if (name === 'dpp_api_passport_public') return validPublicPassport(data);
   if (name === 'dpp_api_scooter_passport_readiness') return validReadinessReport(data);
+  if (name === 'dpp_api_scooter_completeness_by_identifier') return validCompletenessReport(data);
+  if (name === 'dpp_api_scooter_authority_evidence_submit') return validAuthorityEvidenceReceipt(data);
   if (name === 'dpp_api_passport_private' ||
       name === 'dpp_api_passport_create' ||
       name === 'dpp_api_passport_update_checked' ||
@@ -224,6 +251,19 @@ async function handler(req, res) {
         if (typeof identifier !== 'string' || identifier.trim().length < 1 || identifier.trim().length > 300) {
           return send(res, 400, { error: { code: 'INVALID_IDENTIFIER', message: 'identifier must contain 1..300 characters.' } });
         }
+        if (readiness === '1' || readiness === 'true') {
+          const authorization = bearer(req);
+          if (!authorization) {
+            return send(res, 401, { error: { code: 'AUTH_REQUIRED', message: 'Bearer authentication is required.' } });
+          }
+          const sharedReadinessRateLimit=await enforceSharedRateLimit(req,res,'passport',authorization,{ruleName:'authenticated_read'});
+          if(sharedReadinessRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
+          if(!sharedReadinessRateLimit.allowed) return send(res,429,rateLimitBody());
+          const report = await rpc('dpp_api_scooter_completeness_by_identifier', {
+            p_unique_identifier: identifier.trim()
+          }, authorization);
+          return send(res, 200, { data: report });
+        }
         const passport = await rpc('dpp_api_passport_public', { p_unique_identifier: identifier.trim() }, null);
         return send(res, 200, { data: sanitizePublicPassport(passport) });
       }
@@ -290,8 +330,19 @@ async function handler(req, res) {
     if (!validTimestamp(body.expected_updated_at)) {
       return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
     }
-    if (body.action != null && body.action !== 'activate') {
+    if (body.action != null && !['activate','submit_authority_evidence'].includes(body.action)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+    }
+    if (body.action === 'submit_authority_evidence') {
+      if (body.field_number !== 50 || !plainObject(body.evidence) || Object.keys(body.evidence).length === 0) {
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+      }
+      const receipt = await rpc('dpp_api_scooter_authority_evidence_submit', {
+        p_passport_id: id,
+        p_field_number: body.field_number,
+        p_evidence: body.evidence
+      }, authorization);
+      return send(res, 200, { data: receipt });
     }
     if (body.action === 'activate') {
       const passport = await rpc('dpp_api_scooter_passport_activate', {
@@ -339,4 +390,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPrivatePassport, validReadinessReport, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPrivatePassport, validReadinessReport, validCompletenessReport, validAuthorityEvidenceReceipt, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, DEFAULT_RPC_TIMEOUT_MS };
