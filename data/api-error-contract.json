@@ -200,6 +200,26 @@
         "http_status": 409,
         "code": "PASSPORT_CONFLICT",
         "message": "The passport conflicts with an existing record."
+      },
+      "DP608": {
+        "http_status": 409,
+        "code": "PASSPORT_INCOMPLETE",
+        "message": "The LMT passport is incomplete and cannot be activated."
+      },
+      "DP609": {
+        "http_status": 409,
+        "code": "APPLICABILITY_UNDECIDED",
+        "message": "Conditional LMT applicability decisions must be completed before activation."
+      },
+      "DP610": {
+        "http_status": 409,
+        "code": "ACTIVATION_ROUTE_REQUIRED",
+        "message": "Use the readiness-gated activation action to activate this passport."
+      },
+      "DP611": {
+        "http_status": 409,
+        "code": "PASSPORT_STATE_NOT_ACTIVATABLE",
+        "message": "The current passport state cannot be activated."
       }
     },
     "export": {},
