@@ -115,7 +115,7 @@ function validProvisionUnit(value){
   return plainObject(value)&&Number.isInteger(value.position)&&value.position>=1&&
     validUuid(value.item_id)&&validUuid(value.passport_id)&&validUuid(value.model_id)&&
     typeof value.unique_identifier==='string'&&value.unique_identifier.trim().length>=1&&value.unique_identifier.trim().length<=300&&
-    value.lifecycle_status==='original'&&value.passport_status==='active'&&plainObject(value.public_payload)&&
+    value.lifecycle_status==='original'&&value.passport_status==='draft'&&value.activation_required===true&&plainObject(value.public_payload)&&
     typeof value.created_item==='boolean'&&typeof value.created_passport==='boolean'&&typeof value.idempotent_replay==='boolean'&&
     validTimestamp(value.created_at)&&validTimestamp(value.updated_at);
 }
