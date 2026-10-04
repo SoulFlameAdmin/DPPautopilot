@@ -65,9 +65,12 @@ test('readiness by identifier requires bearer and never falls through to public 
 
 test('field-50 evidence submission is write-only and returns receipt metadata only',async()=>{
   const restore=withEnv(),original=global.fetch;let seen;
-  global.fetch=async(url,options)=>{seen={url,options};return {ok:true,async json(){return {
-    passport_id:passportId,model_id:modelId,field_number:50,accepted:true,updated_at:'2026-10-05T00:12:00.000Z'
-  };}};
+  global.fetch=async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return {
+      passport_id:passportId,model_id:modelId,field_number:50,accepted:true,updated_at:'2026-10-05T00:12:00.000Z'
+    };}};
+  };
   try{
     const res=makeRes();
     await handler(req('PATCH',{
