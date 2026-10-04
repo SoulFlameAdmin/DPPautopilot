@@ -13,6 +13,7 @@ const exportApi=require('../../api/export.js');
 const imports=require('../../api/imports.js');
 const items=require('../../api/items.js');
 const provision=require('../../api/provision.js');
+const batchProvision=require('../../api/batch-provision.js');
 
 function makeRes(){
   return {
@@ -45,6 +46,7 @@ test('classifies public/authenticated/import/export budgets deterministically',(
   assert.equal(limiter.classify('models',req('GET')),'authenticated_read');
   assert.equal(limiter.classify('models',req('POST',{})),'authenticated_write');
   assert.equal(limiter.classify('provision',req('POST',{})),'authenticated_write');
+  assert.equal(limiter.classify('batch-provision',req('POST',{})),'authenticated_write');
   assert.equal(limiter.classify('imports',req('PATCH',{})),'import_write');
   assert.equal(limiter.classify('export',req('GET')),'export_read');
 });
@@ -530,6 +532,7 @@ test('all authenticated API surfaces honor shared limiter 429 before business RP
       ['models',models,req('GET')],
       ['items',items,req('GET')],
       ['provision',provision,req('POST',{})],
+      ['batch-provision',batchProvision,req('POST',{})],
       ['imports',imports,req('GET')],
       ['export',exportApi,req('GET')],
       ['passport',passport,req('GET',null,{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'})]
