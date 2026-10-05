@@ -316,12 +316,22 @@ function renderError(message,identifier=''){
   $('#qrLink').href=qrHref;$('#footerQrLink').href=qrHref;
 
   try{
-    const [passportResponse,matrixResponse]=await Promise.all([
-      fetch('/api/passport?identifier='+encodeURIComponent(identifier),{cache:'no-store'}),
+    const carrierParam=(new URLSearchParams(location.search).get('carrier')||'').trim().toLowerCase();
+    const carrier=['qr','nfc'].includes(carrierParam)?carrierParam:'';
+    const basePassportUrl='/api/passport?identifier='+encodeURIComponent(identifier);
+    let [passportResponse,matrixResponse]=await Promise.all([
+      fetch(basePassportUrl+(carrier?'&carrier='+carrier:''),{cache:'no-store'}),
       fetch('/data/lmt-battery-71-v2.json',{cache:'no-store'})
     ]);
     let body=null;
     try{body=await passportResponse.json()}catch{}
+    if(!passportResponse.ok&&carrier&&body?.error?.code==='CARRIER_NOT_BOUND'){
+      passportResponse=await fetch(basePassportUrl,{cache:'no-store'});
+      try{body=await passportResponse.json()}catch{body=null}
+      document.body.dataset.carrierScan='unbound_fallback';
+    }else if(carrier&&passportResponse.ok){
+      document.body.dataset.carrierScan='recorded';
+    }
     if(!passportResponse.ok){
       const code=body?.error?.code||('HTTP_'+passportResponse.status);
       if(code==='PUBLIC_PASSPORT_NOT_FOUND'||code==='PASSPORT_NOT_FOUND')throw new Error('Не е намерен ACTIVE публичен паспорт за този identifier.');
