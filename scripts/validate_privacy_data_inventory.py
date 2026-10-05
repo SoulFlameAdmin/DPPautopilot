@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 inventory=json.loads((ROOT/"data/privacy-data-inventory.json").read_text(encoding="utf-8"))
 doc=(ROOT/"docs/PRIVACY_DATA_INVENTORY.md").read_text(encoding="utf-8")
 
-assert inventory.get("version")==7
+assert inventory.get("version")==8
 assert inventory.get("task")=="R07"
 assert inventory.get("status")=="partial"
 assert "DPP Autopilot only" in inventory.get("scope","")
