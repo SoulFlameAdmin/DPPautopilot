@@ -17,7 +17,7 @@ function makeReq(method='GET',query={}){
 
 test('buildPassportUrl is canonical and percent-encodes identifier',()=>{
   const url=handler._test.buildPassportUrl('BAT SF/0001',{DPP_PUBLIC_ORIGIN:'https://dpp.example'});
-  assert.equal(url,'https://dpp.example/passport?identifier=BAT%20SF%2F0001');
+  assert.equal(url,'https://dpp.example/passport?identifier=BAT%20SF%2F0001&carrier=qr');
 });
 
 test('rejects missing, oversized and control-character identifiers',()=>{
@@ -28,7 +28,7 @@ test('rejects missing, oversized and control-character identifiers',()=>{
 });
 
 test('renders a standalone SVG QR carrier',()=>{
-  const svg=handler._test.renderQrSvg('https://dpp.example/passport?identifier=BAT-001');
+  const svg=handler._test.renderQrSvg('https://dpp.example/passport?identifier=BAT-001&carrier=qr');
   assert.match(svg,/^<svg\b/);
   assert.match(svg,/<path\b/);
   assert.ok(svg.length>500);
@@ -44,7 +44,7 @@ test('GET returns SVG and exact canonical target header',()=>{
     assert.match(res.headers['content-type'],/^image\/svg\+xml/);
     assert.equal(res.headers['x-dpp-carrier'],'qr');
     assert.equal(res.headers['x-dpp-identifier'],'BAT-001');
-    assert.equal(res.headers['x-dpp-target'],'https://dpp.example/passport?identifier=BAT-001');
+    assert.equal(res.headers['x-dpp-target'],'https://dpp.example/passport?identifier=BAT-001&carrier=qr');
     assert.match(res.body,/^<svg\b/);
   } finally {
     if(old===undefined) delete process.env.DPP_PUBLIC_ORIGIN;
