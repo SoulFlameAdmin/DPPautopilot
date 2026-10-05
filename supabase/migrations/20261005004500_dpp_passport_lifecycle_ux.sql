@@ -56,17 +56,21 @@ begin
     raise exception 'unique_identifier must contain 1..300 printable characters' using errcode='DP401';
   end if;
 
-  select i.*,p.*
-  into v_item,v_passport
-  from public.dpp_battery_items i
-  join public.dpp_passports p
-    on p.battery_item_id=i.id
-   and p.organization_id=i.organization_id
+  select p.* into v_passport
+  from public.dpp_passports p
+  join public.dpp_battery_items i
+    on i.id=p.battery_item_id
+   and i.organization_id=p.organization_id
   where i.unique_identifier=v_identifier;
 
   if not found then
     raise exception 'public passport not found' using errcode='DP402';
   end if;
+
+  select i.* into v_item
+  from public.dpp_battery_items i
+  where i.id=v_passport.battery_item_id
+    and i.organization_id=v_passport.organization_id;
 
   if v_passport.status='active' then
     return jsonb_build_object(
@@ -180,14 +184,19 @@ begin
       raise exception 'replacement identifier is required' using errcode='DP404';
     end if;
 
-    select i.*,p.*
-    into v_replacement_item,v_replacement_passport
+    select i.* into v_replacement_item
     from public.dpp_battery_items i
-    join public.dpp_passports p
-      on p.battery_item_id=i.id
-     and p.organization_id=i.organization_id
     where i.unique_identifier=btrim(p_replacement_identifier)
       and i.organization_id=v_org;
+
+    if not found then
+      raise exception 'replacement must be an active passport in the same organization' using errcode='DP616';
+    end if;
+
+    select p.* into v_replacement_passport
+    from public.dpp_passports p
+    where p.battery_item_id=v_replacement_item.id
+      and p.organization_id=v_org;
 
     if not found or v_replacement_passport.status<>'active' then
       raise exception 'replacement must be an active passport in the same organization' using errcode='DP616';
