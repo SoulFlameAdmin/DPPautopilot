@@ -1,92 +1,137 @@
-(()=>{
-const canvas=document.getElementById('globe'),ctx=canvas.getContext('2d');
-const list=document.getElementById('companyList'),count=document.getElementById('companyCount');
-const dialog=document.getElementById('targetDialog'),form=document.getElementById('targetForm');
+(()=>{"use strict";
+const STORAGE="dpp_company_session_v1";
+const $=s=>document.querySelector(s);
+const list=$("#companyList"),count=$("#companyCount"),dialog=$("#targetDialog"),form=$("#targetForm");
+const cloudState=$("#cloudState"),tenantLabel=$("#tenantLabel"),mapHint=$("#mapHint"),globeWrap=document.querySelector(".globe-wrap");
+const colors={target:"#ff6b6b",contacted:"#ffd166",pilot:"#69a7ff",client:"#62f6c9"};
+const system=[["QR / Identifier",100],["Public Passport",100],["Battery Schema",88],["Import / Mapping",82],["Auth",62],["RBAC / RLS",55],["Registry",58],["Audit / Evidence",61],["NFC",30],["Production UX",44]];
 const seed=[
-{id:'voltrax',name:'VOLTRAX',country:'Bulgaria',city:'Sofia region',lat:42.7,lon:23.32,sector:'battery',status:'contacted',mrr:149,next:'Battery DPP demo + commercial offer'},
-{id:'biokom',name:'Biokom Trendafilov',country:'Bulgaria',city:'Sliven',lat:42.6817,lon:26.3229,sector:'detergent',status:'target',mrr:120,next:'2027 first contact / DPP roadmap'},
-{id:'eu-battery-1',name:'EU Battery Prospect',country:'Germany',city:'Berlin',lat:52.52,lon:13.405,sector:'battery',status:'target',mrr:250,next:'Identify manufacturer + compliance owner'}
+{id:"demo-voltrax",name:"VOLTRAX",country:"Bulgaria",city:"Sofia region",latitude:42.6977,longitude:23.3219,sector:"battery",status:"contacted",monthly_potential_eur:149,next_step:"Battery DPP demo + commercial offer"},
+{id:"demo-biokom",name:"Biokom Trendafilov",country:"Bulgaria",city:"Sliven",latitude:42.6817,longitude:26.3229,sector:"detergent",status:"target",monthly_potential_eur:120,next_step:"2027 first contact / DPP roadmap"}
 ];
-let companies=JSON.parse(localStorage.getItem('dpp-world-companies')||'null')||seed;
-let filter='all',selected=null,rotX=-0.25,rotY=-0.4,zoom=1,drag=false,lastX=0,lastY=0;
-const colors={target:'#ff6b6b',contacted:'#ffd166',pilot:'#69a7ff',client:'#62f6c9'};
-const system=[
-['QR / Identifier',100],['Public Passport',100],['Battery Schema',88],['Import / Mapping',82],['Auth',45],['RBAC / RLS',42],['Registry',58],['Audit / Evidence',61],['NFC',30],['Production UX',36]
-];
-function save(){localStorage.setItem('dpp-world-companies',JSON.stringify(companies))}
-function project(lat,lon,R,cx,cy){
- const p=lat*Math.PI/180,l=lon*Math.PI/180+rotY;
- let x=Math.cos(p)*Math.sin(l),y=Math.sin(p),z=Math.cos(p)*Math.cos(l);
- const cyy=Math.cos(rotX),sy=Math.sin(rotX); const y2=y*cyy-z*sy,z2=y*sy+z*cyy;
- return {x:cx+x*R,y:cy-y2*R,z:z2,visible:z2>0};
+let cfg=null,session=null,activeOrg=null,companies=[],filter="all",selected=null,pickMode=false,viewer=null;
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function setCloud(text,kind=""){cloudState.textContent=text;cloudState.className="cloud-state"+(kind?" "+kind:"")}
+function restoreSession(){try{const v=JSON.parse(sessionStorage.getItem(STORAGE)||"null");if(v?.access_token){session=v;return true}}catch{}return false}
+async function api(path,opts={}){
+ if(!session?.access_token)throw new Error("LOGIN_REQUIRED");
+ const r=await fetch(path,{method:opts.method||"GET",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json",Accept:"application/json"},body:opts.body?JSON.stringify(opts.body):undefined,cache:"no-store"});
+ let data={};try{data=await r.json()}catch{}
+ if(!r.ok)throw new Error(data?.error?.message||data?.message||("HTTP "+r.status));
+ return data;
 }
-function spherePoint(lat,lon,R,cx,cy){return project(lat,lon,R,cx,cy)}
-function draw(){
- const w=canvas.width,h=canvas.height,cx=w/2,cy=h/2+8,R=Math.min(w,h)*.39*zoom;
- ctx.clearRect(0,0,w,h);
- const g=ctx.createRadialGradient(cx-R*.28,cy-R*.32,R*.06,cx,cy,R*1.08);
- g.addColorStop(0,'#2075a5');g.addColorStop(.38,'#0f4e76');g.addColorStop(.76,'#082c48');g.addColorStop(1,'#03131f');
- ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
- ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
- ctx.globalAlpha=.62;ctx.strokeStyle='#58bce0';ctx.lineWidth=1;
- for(let lat=-75;lat<=75;lat+=15){ctx.beginPath();let first=true;for(let lon=-180;lon<=180;lon+=3){const p=spherePoint(lat,lon,R,cx,cy);if(p.visible){if(first){ctx.moveTo(p.x,p.y);first=false}else ctx.lineTo(p.x,p.y)}}ctx.stroke()}
- for(let lon=-180;lon<180;lon+=15){ctx.beginPath();let first=true;for(let lat=-90;lat<=90;lat+=3){const p=spherePoint(lat,lon,R,cx,cy);if(p.visible){if(first){ctx.moveTo(p.x,p.y);first=false}else ctx.lineTo(p.x,p.y)}}ctx.stroke()}
- ctx.globalAlpha=.18;ctx.fillStyle='#7ee5bd';
- const land=[
-  [[70,-165],[58,-140],[50,-125],[35,-118],[20,-102],[8,-82],[24,-72],[45,-65],[58,-80],[70,-105]],
-  [[12,-81],[-5,-78],[-20,-70],[-40,-64],[-55,-68],[-35,-52],[-12,-47],[3,-52]],
-  [[72,-10],[60,-15],[48,3],[35,-5],[25,15],[10,10],[-5,20],[-35,18],[-35,35],[-10,42],[15,50],[30,42],[45,35],[55,20],[65,35],[72,55]],
-  [[70,55],[58,70],[50,95],[55,125],[45,145],[30,125],[20,100],[30,75],[42,60]],
-  [[-12,112],[-25,115],[-38,145],[-30,154],[-14,145]],
-  [[82,-50],[72,-62],[62,-44],[68,-25]]
- ];
- for(const poly of land){ctx.beginPath();let started=false;for(const [lat,lon] of poly){const p=project(lat,lon,R,cx,cy);if(!p.visible)continue;if(!started){ctx.moveTo(p.x,p.y);started=true}else ctx.lineTo(p.x,p.y)}if(started){ctx.closePath();ctx.fill()}}
- ctx.restore();
- ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.strokeStyle='rgba(127,207,255,.42)';ctx.lineWidth=2;ctx.stroke();
- ctx.beginPath();ctx.arc(cx-R*.20,cy-R*.22,R*.82,Math.PI*1.07,Math.PI*1.63);ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=11;ctx.stroke();
- const active=companies.filter(c=>filter==='all'||c.sector===filter).map(c=>({c,p:project(c.lat,c.lon,R,cx,cy)})).filter(o=>o.p.visible).sort((a,b)=>a.p.z-b.p.z);
- canvas._points=[];
- for(const o of active){
-  const r=o.c.id===selected?10:7;
-  ctx.beginPath();ctx.arc(o.p.x,o.p.y,r*2.4,0,Math.PI*2);ctx.fillStyle=colors[o.c.status]+'22';ctx.fill();
-  ctx.beginPath();ctx.arc(o.p.x,o.p.y,r,0,Math.PI*2);ctx.fillStyle=colors[o.c.status];ctx.fill();
-  ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-  if(o.c.id===selected||R>300){ctx.font='600 19px system-ui';ctx.fillStyle='#e9f3ff';ctx.fillText(o.c.name,o.p.x+13,o.p.y-10)}
-  canvas._points.push({x:o.p.x,y:o.p.y,c:o.c});
- }
+async function rest(path,opts={}){
+ if(!cfg||!session?.access_token)throw new Error("LOGIN_REQUIRED");
+ const headers={apikey:cfg.publishableKey,Authorization:"Bearer "+session.access_token,Accept:"application/json","Content-Type":"application/json"};
+ if(opts.prefer)headers.Prefer=opts.prefer;
+ const r=await fetch(cfg.supabaseUrl+"/rest/v1/"+path,{method:opts.method||"GET",headers,body:opts.body?JSON.stringify(opts.body):undefined,cache:"no-store"});
+ const text=await r.text();let data=null;try{data=text?JSON.parse(text):null}catch{}
+ if(!r.ok)throw new Error(data?.message||data?.error||("HTTP "+r.status));
+ return data;
 }
-function renderList(){
- const arr=companies.filter(c=>filter==='all'||c.sector===filter);
- count.textContent=arr.length;
- list.innerHTML=arr.map(c=>`<div class="company ${c.id===selected?'active':''}" data-id="${c.id}">
- <span class="status-pin" style="background:${colors[c.status]};color:${colors[c.status]}"></span>
- <div><strong>${esc(c.name)}</strong><div class="meta">${esc(c.city||'—')}, ${esc(c.country)} · ${esc(c.sector)}</div></div>
- <div class="money">${c.mrr?('€'+Number(c.mrr).toLocaleString()+'/mo'):'—'}<div class="meta">${esc(c.status)}</div></div>
- <div class="company-detail"><b>Следваща стъпка:</b> ${esc(c.next||'—')}<br><span class="meta">${c.lat.toFixed(3)}, ${c.lon.toFixed(3)}</span></div>
- </div>`).join('')||'<div class="meta">Няма targets в този филтър.</div>';
- list.querySelectorAll('.company').forEach(el=>el.addEventListener('click',()=>{selected=el.dataset.id;const c=companies.find(x=>x.id===selected);if(c){rotY=-(c.lon*Math.PI/180);rotX=-(c.lat*Math.PI/180)*.55}renderList();draw()}));
-}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function statusColor(status){return Cesium.Color.fromCssColorString(colors[status]||colors.target)}
 function renderProgress(){
  const avg=Math.round(system.reduce((a,x)=>a+x[1],0)/system.length);
- document.getElementById('systemPct').textContent=avg+'%';
- document.getElementById('systemProgress').innerHTML=system.map(([n,p])=>`<div class="prow"><span>${n}</span><div class="bar"><span style="width:${p}%"></span></div><span class="pct">${p}%</span></div>`).join('');
+ $("#systemPct").textContent=avg+"%";
+ $("#systemProgress").innerHTML=system.map(([n,p])=>'<div class="prow"><span>'+esc(n)+'</span><div class="bar"><span style="width:'+p+'%"></span></div><span class="pct">'+p+'%</span></div>').join("");
 }
-document.getElementById('filters').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('active',x===b));renderList();draw()}));
-document.getElementById('addTarget').addEventListener('click',()=>dialog.showModal());
-form.addEventListener('submit',e=>{
- if(e.submitter&&e.submitter.value==='cancel')return;
- e.preventDefault(); const d=new FormData(form);
- const c={id:'c'+Date.now(),name:d.get('name').trim(),country:d.get('country').trim(),city:d.get('city').trim(),lat:Number(d.get('lat')),lon:Number(d.get('lon')),sector:d.get('sector'),status:d.get('status'),mrr:Number(d.get('mrr')||0),next:d.get('next').trim()};
- if(!c.name||!c.country||!Number.isFinite(c.lat)||!Number.isFinite(c.lon))return;
- companies.push(c);save();selected=c.id;form.reset();dialog.close();renderList();draw();
+function filtered(){return companies.filter(c=>filter==="all"||c.sector===filter)}
+function renderSummary(){
+ const f=filtered(),by=s=>f.filter(x=>x.status===s).length,total=f.reduce((a,x)=>a+Number(x.monthly_potential_eur||0),0);
+ $("#summaryStrip").innerHTML='<div class="summary-chip"><strong>'+f.length+'</strong>visible</div><div class="summary-chip"><strong>'+by("target")+'</strong>targets</div><div class="summary-chip"><strong>'+by("client")+'</strong>clients</div><div class="summary-chip"><strong>€'+Math.round(total).toLocaleString()+'</strong>potential/mo</div>';
+}
+function renderList(){
+ const arr=filtered();count.textContent=arr.length;renderSummary();
+ list.innerHTML=arr.map(c=>'<div class="company '+(c.id===selected?"active":"")+'" data-id="'+esc(c.id)+'"><span class="status-pin" style="background:'+colors[c.status]+';color:'+colors[c.status]+'"></span><div><strong>'+esc(c.name)+'</strong><div class="meta">'+esc(c.city||"—")+', '+esc(c.country)+' · '+esc(c.sector)+'</div></div><div class="money">'+(c.monthly_potential_eur?("€"+Number(c.monthly_potential_eur).toLocaleString()+"/mo"):"—")+'<div class="meta">'+esc(c.status)+'</div></div><div class="company-detail"><b>Следваща стъпка:</b> '+esc(c.next_step||"—")+'<br><span class="meta">'+Number(c.latitude).toFixed(4)+", "+Number(c.longitude).toFixed(4)+'</span></div></div>').join("")||'<div class="meta">Няма фирми в този филтър.</div>';
+ list.querySelectorAll(".company").forEach(el=>el.addEventListener("click",()=>focusCompany(el.dataset.id)));
+}
+function clearEntities(){if(!viewer)return;viewer.entities.removeAll()}
+function renderPins(){
+ if(!viewer)return;clearEntities();
+ for(const c of filtered()){
+  viewer.entities.add({
+   id:c.id,
+   name:c.name,
+   position:Cesium.Cartesian3.fromDegrees(Number(c.longitude),Number(c.latitude),120),
+   point:{pixelSize:c.id===selected?15:11,color:statusColor(c.status),outlineColor:Cesium.Color.WHITE,outlineWidth:2,heightReference:Cesium.HeightReference.NONE},
+   label:{text:c.name,font:"600 15px sans-serif",fillColor:Cesium.Color.WHITE,outlineColor:Cesium.Color.BLACK,outlineWidth:3,style:Cesium.LabelStyle.FILL_AND_OUTLINE,pixelOffset:new Cesium.Cartesian2(16,-18),distanceDisplayCondition:new Cesium.DistanceDisplayCondition(0,7000000),disableDepthTestDistance:Number.POSITIVE_INFINITY},
+   properties:{companyId:c.id}
+  });
+ }
+}
+function focusCompany(id){
+ const c=companies.find(x=>x.id===id);if(!c||!viewer)return;
+ selected=id;renderList();renderPins();
+ viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(Number(c.longitude),Number(c.latitude),900000),duration:.8});
+}
+function resetEarth(){
+ selected=null;renderList();renderPins();
+ viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(20,35,18500000),duration:.9});
+}
+function initCesium(){
+ if(!window.Cesium)throw new Error("CesiumJS failed to load.");
+ viewer=new Cesium.Viewer("globe",{animation:false,timeline:false,baseLayerPicker:false,geocoder:false,homeButton:false,sceneModePicker:false,navigationHelpButton:false,fullscreenButton:false,infoBox:false,selectionIndicator:false,baseLayer:false,terrainProvider:new Cesium.EllipsoidTerrainProvider(),requestRenderMode:true,maximumRenderTimeChange:Infinity});
+ viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({url:"https://tile.openstreetmap.org/",credit:"© OpenStreetMap contributors"}));
+ viewer.scene.globe.enableLighting=true;
+ viewer.scene.backgroundColor=Cesium.Color.fromCssColorString("#020509");
+ viewer.camera.setView({destination:Cesium.Cartesian3.fromDegrees(20,35,18500000)});
+ viewer.screenSpaceEventHandler.setInputAction(movement=>{
+   if(pickMode){
+     const ray=viewer.camera.getPickRay(movement.position);const pos=viewer.scene.globe.pick(ray,viewer.scene);
+     if(pos){
+       const cart=Cesium.Cartographic.fromCartesian(pos);
+       form.elements.lat.value=Cesium.Math.toDegrees(cart.latitude).toFixed(6);
+       form.elements.lon.value=Cesium.Math.toDegrees(cart.longitude).toFixed(6);
+       pickMode=false;$("#pickLocation").classList.remove("active");globeWrap.classList.remove("pick-mode");
+       mapHint.textContent="Мястото е избрано. Попълни фирмата и запази.";
+       dialog.showModal();
+     }
+     return;
+   }
+   const picked=viewer.scene.pick(movement.position);
+   if(Cesium.defined(picked)&&picked.id?.id)focusCompany(String(picked.id.id));
+ },Cesium.ScreenSpaceEventType.LEFT_CLICK);
+}
+async function loadCloud(){
+ cfg=await fetch("/data/auth-config.json",{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("AUTH_CONFIG");return r.json()});
+ if(!restoreSession()){
+   companies=seed;setCloud("LOCAL DEMO","bad");tenantLabel.textContent="Влез през Company Login, за да пазим targets в Supabase.";renderList();renderPins();return;
+ }
+ const tenant=(await api("/api/tenant")).data;activeOrg=tenant.active_organization_id;
+ if(!activeOrg){
+   companies=seed;setCloud("NO ACTIVE TENANT","bad");tenantLabel.textContent="Имаш акаунт, но няма активен DPP tenant. Активирай фирма в Company Login.";renderList();renderPins();return;
+ }
+ const membership=tenant.memberships.find(x=>x.organization_id===activeOrg);
+ tenantLabel.textContent="Cloud tenant: "+activeOrg+" · role: "+(membership?.role||"member");
+ setCloud("SUPABASE LIVE","ok");
+ companies=await rest("dpp_world_companies?organization_id=eq."+encodeURIComponent(activeOrg)+"&select=id,name,country,city,latitude,longitude,sector,status,monthly_potential_eur,contact_name,contact_email,next_step,created_at&order=created_at.desc")||[];
+ renderList();renderPins();
+}
+async function saveCompany(c){
+ if(!activeOrg||!session?.access_token){
+   c.id="local-"+Date.now();companies.unshift(c);renderList();renderPins();return c;
+ }
+ const payload={organization_id:activeOrg,name:c.name,country:c.country,city:c.city,latitude:c.latitude,longitude:c.longitude,sector:c.sector,status:c.status,monthly_potential_eur:c.monthly_potential_eur,contact_name:c.contact_name,contact_email:c.contact_email,next_step:c.next_step};
+ const rows=await rest("dpp_world_companies",{method:"POST",body:payload,prefer:"return=representation"});
+ const saved=Array.isArray(rows)?rows[0]:null;if(!saved)throw new Error("Save returned no row.");
+ companies.unshift(saved);return saved;
+}
+$("#filters").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));renderList();renderPins()}));
+$("#addTarget").addEventListener("click",()=>dialog.showModal());
+$("#pickLocation").addEventListener("click",()=>{pickMode=true;dialog.close();$("#pickLocation").classList.add("active");globeWrap.classList.add("pick-mode");mapHint.textContent="📍 PICK MODE: кликни върху точната позиция на Земята."});
+form.addEventListener("submit",async e=>{
+ if(e.submitter&&e.submitter.value==="cancel"){pickMode=false;return}
+ e.preventDefault();const d=new FormData(form);
+ const c={name:String(d.get("name")||"").trim(),country:String(d.get("country")||"").trim(),city:String(d.get("city")||"").trim(),latitude:Number(d.get("lat")),longitude:Number(d.get("lon")),sector:String(d.get("sector")),status:String(d.get("status")),monthly_potential_eur:Number(d.get("mrr")||0),contact_name:String(d.get("contact_name")||"").trim(),contact_email:String(d.get("contact_email")||"").trim(),next_step:String(d.get("next")||"").trim()};
+ if(!c.name||!c.country||!Number.isFinite(c.latitude)||!Number.isFinite(c.longitude)){ $("#saveState").textContent="Попълни фирма, държава и валидна позиция.";$("#saveState").className="save-state bad";return}
+ $("#saveTarget").disabled=true;$("#saveState").textContent="Записване…";$("#saveState").className="save-state";
+ try{const saved=await saveCompany(c);selected=saved.id;form.reset();dialog.close();renderList();renderPins();focusCompany(saved.id);$("#saveState").textContent="";mapHint.textContent=activeOrg?"Записано в Supabase DPP WORLD.":"Записано локално (demo mode).";}
+ catch(err){$("#saveState").textContent="Грешка: "+err.message;$("#saveState").className="save-state bad"}
+ finally{$("#saveTarget").disabled=false}
 });
-document.getElementById('resetView').addEventListener('click',()=>{rotX=-.25;rotY=-.4;zoom=1;selected=null;renderList();draw()});
-canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
-canvas.addEventListener('pointermove',e=>{if(!drag)return;rotY+=(e.clientX-lastX)*.006;rotX+=(e.clientY-lastY)*.004;rotX=Math.max(-1.2,Math.min(1.2,rotX));lastX=e.clientX;lastY=e.clientY;draw()});
-canvas.addEventListener('pointerup',e=>{drag=false;canvas.releasePointerCapture(e.pointerId)});
-canvas.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.78,Math.min(1.35,zoom-e.deltaY*.0008));draw()},{passive:false});
-canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height;let hit=null,best=999;for(const p of canvas._points||[]){const d=Math.hypot(x-p.x,y-p.y);if(d<18&&d<best){hit=p.c;best=d}}if(hit){selected=hit.id;renderList();draw()}});
-renderProgress();renderList();draw();
-addEventListener('resize',draw);
+$("#resetView").addEventListener("click",resetEarth);
+renderProgress();
+try{initCesium();loadCloud().catch(e=>{companies=seed;setCloud("CLOUD ERROR","bad");tenantLabel.textContent="Cloud sync error: "+e.message;renderList();renderPins()})}
+catch(e){setCloud("MAP ERROR","bad");tenantLabel.textContent=e.message}
 })();
