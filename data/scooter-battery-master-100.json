@@ -10,12 +10,12 @@
   "updatedAt": "2026-10-05",
   "canonicalRepo": "SoulFlameAdmin/DPPautopilot",
   "sequentialProgress": {
-    "greenThrough": 20,
-    "next": 21
+    "greenThrough": 22,
+    "next": 23
   },
   "counts": {
-    "green": 27,
-    "yellow": 46,
+    "green": 28,
+    "yellow": 45,
     "red": 27,
     "total": 100
   },
@@ -194,8 +194,8 @@
     {
       "id": 21,
       "title": "Revoked / replaced / retired passport UX",
-      "status": "yellow",
-      "plain": "Статусите имат backend основа; клиентският UX остава."
+      "status": "green",
+      "plain": "Retired / revoked / replaced паспортите вече имат production lifecycle: старият QR identifier остава разбираемо резолвируем като публичен tombstone без стар payload, а replaced води към новия ACTIVE паспорт."
     },
     {
       "id": 22,
