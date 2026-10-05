@@ -34,21 +34,36 @@ function validObject(value) {
 }
 
 const PASSPORT_STATUSES = new Set(['draft','active','suspended','retired']);
+const PUBLIC_PASSPORT_STATES = new Set(['active','unavailable','revoked','replaced','retired']);
+const PUBLIC_TERMINAL_STATES = new Set(['revoked','replaced','retired']);
 
 function plainObject(value) {
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
 function validPublicPassport(value) {
-  return plainObject(value) &&
-    validUuid(value.passport_id) &&
-    validUuid(value.battery_item_id) &&
-    typeof value.unique_identifier === 'string' &&
-    value.unique_identifier.trim().length >= 1 &&
-    value.unique_identifier.trim().length <= 300 &&
-    value.status === 'active' &&
-    plainObject(value.public_payload) &&
-    validTimestamp(value.updated_at);
+  if (!plainObject(value) ||
+      !validUuid(value.passport_id) ||
+      !validUuid(value.battery_item_id) ||
+      typeof value.unique_identifier !== 'string' ||
+      value.unique_identifier.trim().length < 1 ||
+      value.unique_identifier.trim().length > 300 ||
+      !PASSPORT_STATUSES.has(value.status) ||
+      !plainObject(value.public_payload) ||
+      !validTimestamp(value.updated_at)) return false;
+
+  const publicState = value.public_state == null && value.status === 'active'
+    ? 'active'
+    : value.public_state;
+  if (!PUBLIC_PASSPORT_STATES.has(publicState) || value.status === 'draft') return false;
+  if (publicState === 'active' && value.status !== 'active') return false;
+  if (publicState === 'replaced') {
+    return typeof value.replacement_identifier === 'string' &&
+      value.replacement_identifier.trim().length >= 1 &&
+      value.replacement_identifier.trim().length <= 300 &&
+      value.replacement_identifier.trim() !== value.unique_identifier.trim();
+  }
+  return value.replacement_identifier == null;
 }
 
 function validPrivatePassport(value) {
@@ -112,6 +127,7 @@ function validateRpcShape(name, data) {
   if (name === 'dpp_api_passport_private' ||
       name === 'dpp_api_passport_create' ||
       name === 'dpp_api_passport_update_checked' ||
+      name === 'dpp_api_passport_terminalize' ||
       name === 'dpp_api_scooter_passport_activate') return validPrivatePassport(data);
   return true;
 }
@@ -130,11 +146,21 @@ function validateOrganizationPrivatePayloadAccess(value) {
 
 function sanitizePublicPassport(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
-  const allowed = ['passport_id','unique_identifier','status','public_payload','updated_at'];
+  const publicState = value.public_state == null && value.status === 'active'
+    ? 'active'
+    : value.public_state;
+  const allowed = ['passport_id','unique_identifier','status','public_state','replacement_identifier','public_payload','updated_at'];
   const out = {};
   for (const key of allowed) {
-    if (Object.prototype.hasOwnProperty.call(value, key)) out[key] = key === 'public_payload' ? sanitizePublicPayload(value[key]) : value[key];
+    if (!Object.prototype.hasOwnProperty.call(value, key)) continue;
+    if (key === 'public_payload') {
+      out[key] = publicState === 'active' ? sanitizePublicPayload(value[key]) : {};
+    } else {
+      out[key] = value[key];
+    }
   }
+  if (!Object.prototype.hasOwnProperty.call(out,'public_state') && publicState) out.public_state=publicState;
+  if (publicState !== 'replaced') delete out.replacement_identifier;
   return out;
 }
 
@@ -330,8 +356,31 @@ async function handler(req, res) {
     if (!validTimestamp(body.expected_updated_at)) {
       return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
     }
-    if (body.action != null && !['activate','submit_authority_evidence'].includes(body.action)) {
+    if (body.action != null && !['activate','submit_authority_evidence','terminalize'].includes(body.action)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+    }
+    if (body.action === 'terminalize') {
+      if (!PUBLIC_TERMINAL_STATES.has(body.terminal_state)) {
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+      }
+      let replacementIdentifier = null;
+      if (body.terminal_state === 'replaced') {
+        if (typeof body.replacement_identifier !== 'string' ||
+            body.replacement_identifier.trim().length < 1 ||
+            body.replacement_identifier.trim().length > 300) {
+          return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+        }
+        replacementIdentifier = body.replacement_identifier.trim();
+      } else if (body.replacement_identifier != null) {
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+      }
+      const passport = await rpc('dpp_api_passport_terminalize', {
+        p_id: id,
+        p_terminal_state: body.terminal_state,
+        p_replacement_identifier: replacementIdentifier,
+        p_expected_updated_at: body.expected_updated_at
+      }, authorization);
+      return send(res, 200, { data: sanitizeOrganizationPrivatePassport(passport) });
     }
     if (body.action === 'submit_authority_evidence') {
       if (body.field_number !== 50 || !plainObject(body.evidence) || Object.keys(body.evidence).length === 0) {
@@ -390,4 +439,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPrivatePassport, validReadinessReport, validCompletenessReport, validAuthorityEvidenceReceipt, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPrivatePassport, validReadinessReport, validCompletenessReport, validAuthorityEvidenceReceipt, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, PUBLIC_PASSPORT_STATES, PUBLIC_TERMINAL_STATES, DEFAULT_RPC_TIMEOUT_MS };
