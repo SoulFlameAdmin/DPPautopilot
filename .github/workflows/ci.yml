@@ -60,6 +60,8 @@ jobs:
         run: python scripts/validate_battery_master_100_site.py
       - name: Validate Step 19 completeness workflow
         run: python scripts/validate_step19_completeness_workflow.py
+      - name: Validate Step 20 public passport UX
+        run: python scripts/validate_step20_public_passport_ux.py
       - name: Validate BG Battery Pilot contract
         run: python scripts/validate_bg_battery_pilot.py
       - name: Generate BG Battery Pilot non-client acceptance evidence

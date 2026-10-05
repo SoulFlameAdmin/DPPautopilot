@@ -80,9 +80,12 @@ def main()->None:
         require(token in db_test,f"Step 19 DB acceptance missing: {token}")
 
     task=next(t for t in master["tasks"] if t["id"]==19)
-    require(task["status"]=="green","Official master point 19 must be GREEN only with this acceptance contract")
-    require(master["sequentialProgress"]=={"greenThrough":19,"next":20},"Official master must advance to point 20")
-    require(master["counts"]["green"]==26 and master["counts"]["yellow"]==47 and master["counts"]["red"]==27,"Official master counts drift after Step 19")
+    require(task["status"]=="green","Official master point 19 must remain GREEN with this acceptance contract")
+    progress=master["sequentialProgress"]
+    require(progress["greenThrough"]>=19 and progress["next"]==progress["greenThrough"]+1,
+            "Official master may advance beyond Step 19 but cannot regress below it")
+    require(master["counts"]["green"]>=26 and master["counts"]["total"]==100,
+            "Official master counts regressed below Step 19")
 
     print("STEP19_COMPLETENESS_WORKFLOW_CONTRACT_PASS: real tenant readiness score, actionable missing fields, conditional decisions, write-only authority evidence and gated activation are wired")
 
