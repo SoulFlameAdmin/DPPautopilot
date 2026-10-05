@@ -303,6 +303,23 @@ async function handler(req, res) {
       const id = req.query && req.query.id;
       const readiness = req.query && req.query.readiness;
       const carrier = req.query && req.query.carrier;
+      const list = req.query && req.query.list;
+
+      if (list === '1' || list === 'true') {
+        const authorization = bearer(req);
+        if (!authorization) {
+          return send(res, 401, { error: { code: 'AUTH_REQUIRED', message: 'Bearer authentication is required.' } });
+        }
+        const limit = Number(req.query && req.query.limit || 250);
+        if (!Number.isInteger(limit) || limit < 1 || limit > 500) {
+          return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'limit must be 1..500.' } });
+        }
+        const sharedListRateLimit=await enforceSharedRateLimit(req,res,'passport',authorization,{ruleName:'authenticated_read'});
+        if(sharedListRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
+        if(!sharedListRateLimit.allowed) return send(res,429,rateLimitBody());
+        const rows = await rpc('dpp_api_passports_list', { p_limit: limit }, authorization);
+        return send(res, 200, { data: Array.isArray(rows) ? rows : [] });
+      }
 
       if (identifier) {
         if (typeof identifier !== 'string' || identifier.trim().length < 1 || identifier.trim().length > 300) {
