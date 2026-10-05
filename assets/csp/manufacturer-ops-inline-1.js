@@ -335,6 +335,7 @@ async function validateImport(){
 }
 async function commitImport(){
  if(!csv.importId||!csv.validated)return;
+ let passed=false;
  try{
   $("#commitImport").disabled=true;setText($("#csvResult"),"Atomic commit + idempotency replay acceptance…");
   const first=(await api("/api/imports",{method:"PATCH",body:{id:csv.importId,action:"commit"}})).data;
@@ -342,11 +343,15 @@ async function commitImport(){
   if(first.status!=="committed"||first.already_committed!==false||second.status!=="committed"||second.already_committed!==true||first.committed_rows!==second.committed_rows){
    throw new Error("Idempotency acceptance failed.");
   }
+  passed=true;
   document.body.dataset.importIdempotency="pass";
   setText($("#csvResult"),"COMMITTED "+first.committed_rows+" rows · replay = NO-OP ✓ · idempotency PASS","ok");
   await loadBase();$("#refreshDashboard").click();
  }catch(e){document.body.dataset.importIdempotency="fail";setText($("#csvResult"),e.message,"bad")}
- finally{renderCsvSummary()}
+ finally{
+  if(passed){csv.validated=false;$("#commitImport").disabled=true}
+  else renderCsvSummary();
+ }
 }
 
 async function init(){
