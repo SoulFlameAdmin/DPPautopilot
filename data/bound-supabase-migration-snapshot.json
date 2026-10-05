@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-10-04T23:09:30Z",
+  "observed_at": "2026-10-05T00:14:10Z",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -208,7 +208,11 @@
     {
       "version": "20261004230855",
       "name": "dpp_lmt_completeness_workflow"
+    },
+    {
+      "version": "20261005001337",
+      "name": "dpp_passport_lifecycle_ux"
     }
   ],
-  "note": "Supabase-applied version IDs can differ from repository filename timestamps; canonical migration name is the cross-system identity. Snapshot includes scooter single-item provisioning, Step 2 team RBAC, Stage 5 atomic batch provisioning, Step 18 LMT activation gate, and Step 19 production completeness workflow."
+  "note": "Supabase-applied version IDs can differ from repository filename timestamps; canonical migration name is the cross-system identity. Snapshot includes scooter single-item provisioning, team RBAC, atomic batch provisioning, LMT activation gate, completeness workflow, and terminal passport lifecycle UX."
 }
