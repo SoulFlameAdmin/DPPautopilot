@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · Starter Documents v0.1</title>
+  <meta name="description" content="DPP STARTER DOCUMENTS v0.1 — demo and approval package for SoulFlame DPP Autopilot.">
+  <link rel="stylesheet" href="/assets/csp/starter-documents.css">
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/">SOULFLAME · DPP AUTOPILOT</a>
+    <nav class="nav">
+      <a class="btn" href="/battery-master">Battery Master</a>
+      <a class="btn" href="/manufacturer">Manufacturer</a>
+      <a class="btn primary" href="/">Начало</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">DEMO / APPROVAL PACKAGE · v0.1</p>
+      <h1>DPP STARTER DOCUMENTS</h1>
+      <p class="lead">Първият официален визуален пакет за одобрение преди production. Тези материали са демо и не представляват самостоятелно правно доказателство за съответствие.</p>
+    </div>
+    <div class="approval">
+      <strong>STATUS</strong>
+      <span>WAITING FOR MITKO APPROVAL</span>
+      <small>След одобрение дизайнът може да се заключи като production template.</small>
+    </div>
+  </section>
+
+  <section class="notice">
+    <strong>Важно:</strong> Реалният DPP е електронният запис зад QR кода. Фактурата е допълнителна commercial функция. Production данните трябва да идват от реалния производител/икономически оператор.
+  </section>
+
+  <section class="doc-grid">
+    <article class="doc-card">
+      <div class="doc-head">
+        <div><span class="step">01</span><h2>QR Carrier Demo</h2></div>
+        <span class="tag">REQUIRED CORE</span>
+      </div>
+      <div class="sheet carrier-sheet">
+        <div class="wordmark">SOULFLAME <small>DPP AUTOPILOT</small></div>
+        <h3>Battery Digital Product Passport</h3>
+        <p class="subhead">VERIFIED QR CARRIER · DEMO</p>
+        <div class="qr-frame">
+          <img src="/api/qr?identifier=BAT-SF-NFC-0001" alt="QR carrier for BAT-SF-NFC-0001">
+        </div>
+        <dl class="rows">
+          <div><dt>Battery / DPP identifier</dt><dd>BAT-SF-NFC-0001</dd></div>
+          <div><dt>Status</dt><dd><b class="active">ACTIVE</b></dd></div>
+          <div><dt>Encoded public URL</dt><dd>/passport?identifier=BAT-SF-NFC-0001</dd></div>
+        </dl>
+        <p class="scan-note">Scan the QR code to open the active public passport.</p>
+      </div>
+      <div class="doc-actions">
+        <a class="btn primary" href="/qr?identifier=BAT-SF-NFC-0001">Отвори live QR</a>
+        <span>Цел: печат върху етикет / carrier.</span>
+      </div>
+    </article>
+
+    <article class="doc-card">
+      <div class="doc-head">
+        <div><span class="step">02</span><h2>Battery Passport Demo</h2></div>
+        <span class="tag">PUBLIC VIEW</span>
+      </div>
+      <div class="sheet passport-sheet">
+        <div class="wordmark">SOULFLAME <small>DPP AUTOPILOT</small></div>
+        <div class="sheet-title"><h3>Battery Passport</h3><span>DEMO DATA FOR APPROVAL</span></div>
+        <div class="passport-layout">
+          <div>
+            <dl class="specs">
+              <div><dt>Battery ID</dt><dd>SF-BAT-000001</dd></div>
+              <div><dt>Model</dt><dd>SF-48V20</dd></div>
+              <div><dt>Category</dt><dd>LMT Battery</dd></div>
+              <div><dt>Chemistry</dt><dd>Li-ion NMC</dd></div>
+              <div><dt>Voltage</dt><dd>48 V</dd></div>
+              <div><dt>Capacity</dt><dd>20 Ah</dd></div>
+              <div><dt>Energy</dt><dd>960 Wh</dd></div>
+              <div><dt>Serial</dt><dd>2026-000001</dd></div>
+              <div><dt>Manufacturer</dt><dd>Sample Client Ltd.</dd></div>
+              <div><dt>Status</dt><dd><b class="active">ACTIVE</b></dd></div>
+            </dl>
+            <div class="summary-box">
+              <strong>Sustainability & compliance summary</strong>
+              <p>Service life, warranty, repairability, carbon-footprint and recycled-content fields are shown only when verified source data is available.</p>
+            </div>
+          </div>
+          <div class="passport-qr">
+            <img src="/api/qr?identifier=BAT-SF-NFC-0001" alt="DPP QR">
+            <strong>Scan for DPP</strong>
+            <span>Public passport access</span>
+          </div>
+        </div>
+      </div>
+      <div class="doc-actions">
+        <a class="btn primary" href="/passport?identifier=BAT-SF-NFC-0001">Отвори public passport</a>
+        <span>Цел: визуална preview версия на електронния паспорт.</span>
+      </div>
+    </article>
+
+    <article class="doc-card">
+      <div class="doc-head">
+        <div><span class="step">03</span><h2>Invoice + DPP QR Demo</h2></div>
+        <span class="tag optional">COMMERCIAL ADD-ON</span>
+      </div>
+      <div class="sheet invoice-sheet">
+        <div class="invoice-top">
+          <div><div class="wordmark">SOULFLAME <small>DPP AUTOPILOT</small></div><h3>Invoice</h3><p>DEMO / SAMPLE COMMERCIAL DOCUMENT</p></div>
+          <dl>
+            <div><dt>Invoice No</dt><dd>INV-2026-001</dd></div>
+            <div><dt>Date</dt><dd>05.10.2026</dd></div>
+          </dl>
+        </div>
+        <div class="parties">
+          <div><b>SELLER</b><strong>SoulFlame Demo</strong><span>Sliven, Bulgaria</span></div>
+          <div><b>BUYER</b><strong>Sample Client Ltd.</strong><span>EU demo customer</span></div>
+        </div>
+        <div class="line-item">
+          <div><b>Scooter Battery SF-48V20</b><span>48 V / 20 Ah / 960 Wh</span></div>
+          <strong>DEMO PRICE</strong>
+        </div>
+        <div class="invoice-bottom">
+          <div>
+            <b>BATTERY PASSPORT INFORMATION</b>
+            <p>Battery ID: SF-BAT-000001</p>
+            <p>DPP Reference: DPP-SF-000001</p>
+          </div>
+          <div class="mini-qr"><img src="/api/qr?identifier=BAT-SF-NFC-0001" alt="DPP QR on invoice"><span>Open DPP passport</span></div>
+        </div>
+      </div>
+      <div class="doc-actions">
+        <span class="warning">Не е задължителен елемент на Battery Passport Regulation; това е SoulFlame commercial feature.</span>
+      </div>
+    </article>
+
+    <article class="doc-card">
+      <div class="doc-head">
+        <div><span class="step">04</span><h2>DPP Autopilot Dashboard Demo</h2></div>
+        <span class="tag">PRODUCT UI</span>
+      </div>
+      <div class="sheet dashboard-sheet">
+        <aside>
+          <div class="dash-brand">SOULFLAME<small>DPP AUTOPILOT</small></div>
+          <b>Dashboard</b><span>Passports</span><span>Create Passport</span><span>QR Carriers</span><span>Imports</span><span>Clients</span><span>Compliance</span>
+        </aside>
+        <div class="dash-main">
+          <h3>Manufacturer dashboard · demo</h3>
+          <div class="metrics">
+            <div><strong>248</strong><span>Total Passports</span></div>
+            <div><strong>231</strong><span>Active</span></div>
+            <div><strong>12</strong><span>Pending Data</span></div>
+            <div><strong>198</strong><span>QR Carriers</span></div>
+          </div>
+          <div class="demo-table">
+            <div class="thead"><span>Battery ID</span><span>Model</span><span>Status</span></div>
+            <div><span>BAT-SF-NFC-0001</span><span>SF-48V20</span><span class="active">ACTIVE</span></div>
+            <div><span>BAT-SF-NFC-0002</span><span>SF-60V30</span><span class="active">ACTIVE</span></div>
+            <div><span>BAT-SF-NFC-0003</span><span>SF-48V20</span><span>PENDING</span></div>
+          </div>
+          <p class="synthetic">Illustrative metrics only · production dashboard uses real tenant/API data.</p>
+        </div>
+      </div>
+      <div class="doc-actions">
+        <a class="btn primary" href="/manufacturer">Отвори Manufacturer Dashboard</a>
+        <a class="btn" href="/demo/import.html?sample=1">CSV Import Demo</a>
+      </div>
+    </article>
+  </section>
+
+  <section class="next">
+    <p class="eyebrow">NEXT AFTER APPROVAL</p>
+    <h2>Starter Documents v0.2</h2>
+    <div class="next-grid">
+      <span>Create Passport</span>
+      <span>Public Passport</span>
+      <span>Compliance & Data Access</span>
+      <span>CSV / API Import</span>
+    </div>
+  </section>
+
+  <footer>
+    DPP STARTER DOCUMENTS v0.1 · SoulFlame DPP Autopilot · DEMO / APPROVAL ONLY · All rights reserved.
+  </footer>
+</main>
+</body>
+</html>
