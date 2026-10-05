@@ -302,6 +302,7 @@ async function handler(req, res) {
       const identifier = req.query && req.query.identifier;
       const id = req.query && req.query.id;
       const readiness = req.query && req.query.readiness;
+      const carrier = req.query && req.query.carrier;
 
       if (identifier) {
         if (typeof identifier !== 'string' || identifier.trim().length < 1 || identifier.trim().length > 300) {
@@ -319,6 +320,16 @@ async function handler(req, res) {
             p_unique_identifier: identifier.trim()
           }, authorization);
           return send(res, 200, { data: report });
+        }
+        if (carrier != null && carrier !== '') {
+          if (!['qr','nfc'].includes(String(carrier))) {
+            return send(res, 400, { error: { code: 'VALIDATION_ERROR', message: 'carrier must be qr or nfc.' } });
+          }
+          const scanned = await rpc('dpp_api_carrier_open', {
+            p_unique_identifier: identifier.trim(),
+            p_source: String(carrier)
+          }, null);
+          return send(res, 200, { data: sanitizePublicResolve({ kind: 'active', ...scanned }) });
         }
         const passport = await rpc('dpp_api_passport_public_resolve', { p_unique_identifier: identifier.trim() }, null);
         return send(res, 200, { data: sanitizePublicResolve(passport) });
