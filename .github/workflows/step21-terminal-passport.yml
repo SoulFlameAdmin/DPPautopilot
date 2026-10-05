@@ -1,0 +1,61 @@
+name: Step 21 Terminal Passport UX
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  step21:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dpp_step21
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dpp_step21"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Validate Step 21 static contract
+        run: python scripts/validate_step21_terminal_passport_ux.py
+
+      - name: Run passport API tests
+        run: node --test tests/api/passport.test.cjs
+
+      - name: Replay migrations and run Step 21 DB acceptance
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSQL=(psql -h 127.0.0.1 -U postgres -d dpp_step21 -v ON_ERROR_STOP=1)
+          "${PSQL[@]}" <<'SQL'
+          create extension if not exists pgcrypto;
+          create role anon nologin;
+          create role authenticated nologin;
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          SQL
+          for file in supabase/migrations/*.sql; do
+            echo "Replaying $file"
+            "${PSQL[@]}" -f "$file"
+          done
+          "${PSQL[@]}" <<'SQL'
+          begin;
+          \i tests/db/test_step21_terminal_passport.sql
+          rollback;
+          SQL

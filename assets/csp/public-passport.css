@@ -76,3 +76,15 @@ footer a{color:#9db5ce}
 [hidden]{display:none!important}
 @media(max-width:820px){.hero-card{grid-template-columns:1fr}.status-stack{min-width:0}.trust-strip{grid-template-columns:1fr}.field-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.shell{padding:14px}.topbar{align-items:flex-start}.privacy-pill{display:none}.section{padding:14px}.technical-grid{grid-template-columns:1fr}.object-row{grid-template-columns:1fr}.hero-card h1{font-size:34px}footer{flex-direction:column}}
+
+.status-card.terminal{border-color:#354356;background:#0c1118}
+.status-card.terminal strong{color:#c8d4e1}
+.status-card.terminal.revoked{border-color:rgba(255,92,108,.45);background:rgba(255,92,108,.07)}
+.status-card.terminal.revoked strong{color:var(--red)}
+.status-card.terminal.replaced{border-color:rgba(105,167,255,.45);background:rgba(105,167,255,.07)}
+.status-card.terminal.replaced strong{color:var(--blue)}
+.status-card.terminal.retired{border-color:rgba(247,201,72,.45);background:rgba(247,201,72,.07)}
+.status-card.terminal.retired strong{color:var(--amber)}
+.status-card.terminal.neutral strong{color:#b9c6d4}
+.terminal-note{max-width:760px}
+.replacement-id{margin-top:12px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#9fb3ca;overflow-wrap:anywhere}

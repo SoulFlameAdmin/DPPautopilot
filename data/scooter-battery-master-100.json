@@ -10,12 +10,12 @@
   "updatedAt": "2026-10-05",
   "canonicalRepo": "SoulFlameAdmin/DPPautopilot",
   "sequentialProgress": {
-    "greenThrough": 20,
-    "next": 21
+    "greenThrough": 22,
+    "next": 23
   },
   "counts": {
-    "green": 27,
-    "yellow": 46,
+    "green": 28,
+    "yellow": 45,
     "red": 27,
     "total": 100
   },
@@ -194,8 +194,8 @@
     {
       "id": 21,
       "title": "Revoked / replaced / retired passport UX",
-      "status": "yellow",
-      "plain": "Статусите имат backend основа; клиентският UX остава."
+      "status": "green",
+      "plain": "Старият QR/identifier остава публично проверим при revoked, replaced и retired; terminal записът е fail-closed и replacement сочи само към валиден ACTIVE паспорт."
     },
     {
       "id": 22,

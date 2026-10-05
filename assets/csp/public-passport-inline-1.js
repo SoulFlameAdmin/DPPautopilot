@@ -16,6 +16,12 @@ const CATEGORY_LABELS={
   starting_lighting_ignition:'SLI',
   other:'Other'
 };
+const TERMINAL_COPY={
+  revoked:{label:'REVOKED',title:'Паспортът е отменен',detail:'Този DPP запис е отменен и не трябва да се използва като текущ паспорт.'},
+  replaced:{label:'REPLACED',title:'Паспортът е заменен',detail:'Този DPP запис е заменен с нов паспорт. Използвайте replacement identifier-а по-долу.'},
+  retired:{label:'RETIRED',title:'Паспортът е архивиран',detail:'Този DPP запис е изведен от активна употреба и се пази като публичен lifecycle запис.'},
+  unavailable:{label:'UNAVAILABLE',title:'Паспортът временно не е активен',detail:'Identifier-ът съществува, но текущият публичен паспорт не е ACTIVE.'}
+};
 
 const $=selector=>document.querySelector(selector);
 function identifierFromLocation(){
@@ -227,11 +233,60 @@ function renderHero(passport,identifier){
 
   card.append(left,right);hero.append(card);
 }
-function renderTechnical(passport,identifier){
+function renderTechnical(passport,identifier,publicState='active'){
   $('#technicalPanel').hidden=false;
   $('#techIdentifier').textContent=identifier;
   $('#techPassportId').textContent=passport.passport_id;
+  $('#techState').textContent=publicState;
   const time=$('#techUpdated');time.textContent=formatDate(passport.updated_at);time.dateTime=passport.updated_at;
+}
+function renderTerminal(passport,identifier,publicState){
+  const copy=TERMINAL_COPY[publicState]||TERMINAL_COPY.unavailable;
+  const hero=$('#hero');hero.replaceChildren();
+  const card=document.createElement('div');card.className='hero-card terminal-hero';
+  const left=document.createElement('div');
+  const eyebrow=document.createElement('p');eyebrow.className='eyebrow';eyebrow.textContent=copy.label+' · PUBLIC PASSPORT STATUS';
+  const h1=document.createElement('h1');h1.textContent=copy.title;
+  const detail=document.createElement('p');detail.className='hero-subtitle terminal-note';detail.textContent=copy.detail;
+  const uid=document.createElement('div');uid.className='identifier';uid.dataset.publicUid='';uid.textContent=identifier;
+  left.append(eyebrow,h1,detail,uid);
+
+  const actions=document.createElement('div');actions.className='hero-actions';
+  if(publicState==='replaced'&&present(passport.replacement_identifier)){
+    const replacement=document.createElement('a');
+    replacement.className='button primary replacement';
+    replacement.href='/passport?identifier='+encodeURIComponent(passport.replacement_identifier);
+    replacement.textContent='Отвори replacement passport';
+    actions.append(replacement);
+    const replacementId=document.createElement('div');
+    replacementId.className='replacement-id';
+    replacementId.textContent='Replacement identifier: '+passport.replacement_identifier;
+    left.append(replacementId);
+  }
+  if(actions.children.length)left.append(actions);
+
+  const right=document.createElement('div');right.className='status-stack';
+  const status=document.createElement('div');status.className='status-card terminal '+publicState;
+  const strong=document.createElement('strong');strong.textContent='● '+copy.label;
+  const small=document.createElement('small');small.textContent='Това е публичен lifecycle tombstone, не ACTIVE паспорт.';
+  status.append(strong,small);
+  const updated=document.createElement('div');updated.className='status-card terminal neutral';
+  const updatedStrong=document.createElement('strong');updatedStrong.textContent='Last updated';
+  const updatedSmall=document.createElement('small');updatedSmall.textContent=formatDate(passport.updated_at);
+  updated.append(updatedStrong,updatedSmall);right.append(status,updated);
+  card.append(left,right);hero.append(card);
+
+  $('#trustStrip').hidden=true;
+  $('#sectionNav').hidden=true;
+  $('#passportSections').replaceChildren();
+  renderTechnical(passport,identifier,publicState);
+  document.body.dataset.passportReady='true';
+  document.body.dataset.passportError='false';
+  document.body.dataset.passportTerminal='true';
+  document.body.dataset.passportIdentifier=identifier;
+  document.body.dataset.passportStatus=passport.status;
+  document.body.dataset.passportPublicState=publicState;
+  document.body.dataset.restrictedLeak='false';
 }
 function renderError(message,identifier=''){
   const hero=$('#hero');hero.replaceChildren();
@@ -259,31 +314,39 @@ function renderError(message,identifier=''){
   $('#qrLink').href=qrHref;$('#footerQrLink').href=qrHref;
 
   try{
-    const [passportResponse,matrixResponse]=await Promise.all([
-      fetch('/api/passport?identifier='+encodeURIComponent(identifier),{cache:'no-store'}),
-      fetch('/data/lmt-battery-71-v2.json',{cache:'no-store'})
-    ]);
+    const passportResponse=await fetch('/api/passport?identifier='+encodeURIComponent(identifier),{cache:'no-store'});
     let body=null;
     try{body=await passportResponse.json()}catch{}
     if(!passportResponse.ok){
       const code=body?.error?.code||('HTTP_'+passportResponse.status);
-      if(code==='PUBLIC_PASSPORT_NOT_FOUND'||code==='PASSPORT_NOT_FOUND')throw new Error('Не е намерен ACTIVE публичен паспорт за този identifier.');
+      if(code==='PUBLIC_PASSPORT_NOT_FOUND'||code==='PASSPORT_NOT_FOUND')throw new Error('Не е намерен публичен паспорт за този identifier.');
       throw new Error(body?.error?.message||code);
     }
+
+    const passport=body?.data;
+    const publicState=passport?.public_state||(passport?.status==='active'?'active':'unavailable');
+    if(!passport||!passport.public_payload)throw new Error('Публичният DPP запис е невалиден.');
+
+    if(publicState!=='active'){
+      renderTerminal(passport,identifier,publicState);
+      return;
+    }
+
+    const matrixResponse=await fetch('/data/lmt-battery-71-v2.json',{cache:'no-store'});
     if(!matrixResponse.ok)throw new Error('Public field mapping is temporarily unavailable.');
     const matrix=await matrixResponse.json();
-    const passport=body?.data;
-    if(!passport||passport.status!=='active'||!passport.public_payload)throw new Error('Публичният паспорт не е ACTIVE.');
 
     renderHero(passport,identifier);
     renderSections(passport,matrix);
-    renderTechnical(passport,identifier);
+    renderTechnical(passport,identifier,'active');
     $('#trustStrip').hidden=false;
 
     document.body.dataset.passportReady='true';
     document.body.dataset.passportError='false';
+    document.body.dataset.passportTerminal='false';
     document.body.dataset.passportIdentifier=identifier;
     document.body.dataset.passportStatus='active';
+    document.body.dataset.passportPublicState='active';
     document.body.dataset.restrictedLeak='false';
   }catch(error){
     renderError(error?.message||'Public passport could not be loaded.',identifier);
