@@ -233,6 +233,49 @@ function renderTechnical(passport,identifier){
   $('#techPassportId').textContent=passport.passport_id;
   const time=$('#techUpdated');time.textContent=formatDate(passport.updated_at);time.dateTime=passport.updated_at;
 }
+function renderLifecycle(passport,identifier){
+  const labels={
+    retired:{title:'Този паспорт е RETIRED',message:'Този DPP запис е приключен и вече не е активен за текущо използване.',tone:'retired'},
+    revoked:{title:'Този паспорт е REVOKED',message:'Операторът е оттеглил този DPP запис. Публичните продуктови данни вече не се показват.',tone:'revoked'},
+    replaced:{title:'Този паспорт е REPLACED',message:'Този DPP запис е заменен с друг активен паспорт.',tone:'replaced'}
+  };
+  const state=labels[passport.status]||labels.retired;
+  const hero=$('#hero');hero.replaceChildren();
+  const card=document.createElement('div');card.className='lifecycle-card '+state.tone;
+  const eyebrow=document.createElement('p');eyebrow.className='eyebrow';eyebrow.textContent='PASSPORT LIFECYCLE NOTICE';
+  const h1=document.createElement('h1');h1.textContent=state.title;
+  const p=document.createElement('p');p.className='lifecycle-message';p.textContent=state.message;
+  const uid=document.createElement('div');uid.className='identifier';uid.dataset.publicUid='';uid.textContent=identifier;
+  const meta=document.createElement('div');meta.className='lifecycle-meta';
+  const reason=document.createElement('span');reason.textContent='Reason code: '+String(passport.reason_code||'—').replace(/_/g,' ');
+  const changed=document.createElement('span');changed.textContent='Changed: '+formatDate(passport.changed_at||passport.updated_at);
+  meta.append(reason,changed);
+  card.append(eyebrow,h1,p,uid,meta);
+
+  if(passport.status==='replaced'&&passport.replacement_identifier){
+    const actions=document.createElement('div');actions.className='hero-actions';
+    const replacement=document.createElement('a');replacement.className='button primary';
+    replacement.href='/passport?identifier='+encodeURIComponent(passport.replacement_identifier);
+    replacement.textContent='Отвори заместващия паспорт →';
+    actions.append(replacement);card.append(actions);
+  }
+
+  hero.append(card);
+  $('#trustStrip').hidden=true;
+  $('#sectionNav').hidden=true;
+  $('#passportSections').replaceChildren();
+  $('#qrLink').hidden=true;
+  $('#footerQrLink').hidden=true;
+  renderTechnical(passport,identifier);
+  document.body.dataset.passportReady='true';
+  document.body.dataset.passportError='false';
+  document.body.dataset.passportIdentifier=identifier;
+  document.body.dataset.passportStatus=passport.status;
+  document.body.dataset.publicFieldCount='0';
+  document.body.dataset.publicSectionCount='0';
+  document.body.dataset.restrictedLeak='false';
+}
+
 function renderError(message,identifier=''){
   const hero=$('#hero');hero.replaceChildren();
   const card=document.createElement('div');card.className='error-card';
@@ -273,7 +316,12 @@ function renderError(message,identifier=''){
     if(!matrixResponse.ok)throw new Error('Public field mapping is temporarily unavailable.');
     const matrix=await matrixResponse.json();
     const passport=body?.data;
-    if(!passport||passport.status!=='active'||!passport.public_payload)throw new Error('Публичният паспорт не е ACTIVE.');
+    if(!passport)throw new Error('Публичният DPP запис липсва.');
+    if(['retired','revoked','replaced'].includes(passport.status)){
+      renderLifecycle(passport,identifier);
+      return;
+    }
+    if(passport.status!=='active'||!passport.public_payload)throw new Error('Публичният паспорт не е ACTIVE.');
 
     renderHero(passport,identifier);
     renderSections(passport,matrix);
