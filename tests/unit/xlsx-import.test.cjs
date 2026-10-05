@@ -6,8 +6,8 @@ const fs=require('node:fs');
 const path=require('node:path');
 const XLSX=require('../../vendor/xlsx.full.min.js');
 
-test('vendored SheetJS parser is pinned and can round-trip XLSX rows',()=>{
-  assert.equal(XLSX.version,'0.18.5');
+test('vendored SheetJS parser is patched and can round-trip XLSX rows',()=>{
+  assert.equal(XLSX.version,'0.20.3');
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
     ['manufacturer_name','model_id','category','unique_identifier'],
