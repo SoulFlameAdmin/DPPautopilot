@@ -33,7 +33,9 @@ function validObject(value) {
   return value == null || (!Array.isArray(value) && typeof value === 'object');
 }
 
-const PASSPORT_STATUSES = new Set(['draft','active','suspended','retired']);
+const PASSPORT_STATUSES = new Set(['draft','active','suspended','retired','revoked','replaced']);
+const TERMINAL_PASSPORT_STATUSES = new Set(['retired','revoked','replaced']);
+const LIFECYCLE_REASON_CODES = new Set(['end_of_life','operator_revoked','safety_or_compliance','incorrect_record','product_replaced','other']);
 
 function plainObject(value) {
   return !!value && typeof value === 'object' && !Array.isArray(value);
@@ -49,6 +51,28 @@ function validPublicPassport(value) {
     value.status === 'active' &&
     plainObject(value.public_payload) &&
     validTimestamp(value.updated_at);
+}
+
+function validPublicPassportResolution(value) {
+  if (!plainObject(value) || !validUuid(value.passport_id) ||
+      typeof value.unique_identifier !== 'string' ||
+      value.unique_identifier.trim().length < 1 ||
+      value.unique_identifier.trim().length > 300 ||
+      !validTimestamp(value.updated_at)) return false;
+
+  if (value.kind === 'active') {
+    return validPublicPassport(value);
+  }
+  if (value.kind !== 'lifecycle' || !TERMINAL_PASSPORT_STATUSES.has(value.status) ||
+      !LIFECYCLE_REASON_CODES.has(value.reason_code) ||
+      !validTimestamp(value.changed_at)) return false;
+
+  if (value.status === 'replaced') {
+    return typeof value.replacement_identifier === 'string' &&
+      value.replacement_identifier.trim().length >= 1 &&
+      value.replacement_identifier.trim().length <= 300;
+  }
+  return value.replacement_identifier == null;
 }
 
 function validPrivatePassport(value) {
@@ -106,6 +130,7 @@ function validAuthorityEvidenceReceipt(value) {
 
 function validateRpcShape(name, data) {
   if (name === 'dpp_api_passport_public') return validPublicPassport(data);
+  if (name === 'dpp_api_passport_public_resolve') return validPublicPassportResolution(data);
   if (name === 'dpp_api_scooter_passport_readiness') return validReadinessReport(data);
   if (name === 'dpp_api_scooter_completeness_by_identifier') return validCompletenessReport(data);
   if (name === 'dpp_api_scooter_authority_evidence_submit') return validAuthorityEvidenceReceipt(data);
@@ -134,6 +159,19 @@ function sanitizePublicPassport(value) {
   const out = {};
   for (const key of allowed) {
     if (Object.prototype.hasOwnProperty.call(value, key)) out[key] = key === 'public_payload' ? sanitizePublicPayload(value[key]) : value[key];
+  }
+  return out;
+}
+
+function sanitizePublicPassportResolution(value) {
+  if (!plainObject(value)) return value;
+  if (value.kind === 'active') {
+    return { kind: 'active', ...sanitizePublicPassport(value) };
+  }
+  const allowed = ['kind','passport_id','unique_identifier','status','reason_code','replacement_identifier','updated_at','changed_at'];
+  const out = {};
+  for (const key of allowed) {
+    if (Object.prototype.hasOwnProperty.call(value,key)) out[key]=value[key];
   }
   return out;
 }
@@ -264,8 +302,8 @@ async function handler(req, res) {
           }, authorization);
           return send(res, 200, { data: report });
         }
-        const passport = await rpc('dpp_api_passport_public', { p_unique_identifier: identifier.trim() }, null);
-        return send(res, 200, { data: sanitizePublicPassport(passport) });
+        const passport = await rpc('dpp_api_passport_public_resolve', { p_unique_identifier: identifier.trim() }, null);
+        return send(res, 200, { data: sanitizePublicPassportResolution(passport) });
       }
 
       if (!validUuid(id)) {
@@ -330,8 +368,29 @@ async function handler(req, res) {
     if (!validTimestamp(body.expected_updated_at)) {
       return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
     }
-    if (body.action != null && !['activate','submit_authority_evidence'].includes(body.action)) {
+    if (body.action != null && !['activate','submit_authority_evidence','retire','revoke','replace'].includes(body.action)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+    }
+    if (['retire','revoke','replace'].includes(body.action)) {
+      const status = body.action === 'retire' ? 'retired' : body.action === 'revoke' ? 'revoked' : 'replaced';
+      if (!LIFECYCLE_REASON_CODES.has(body.reason_code) ||
+          (body.reason_note != null && (typeof body.reason_note !== 'string' || body.reason_note.trim().length > 500)) ||
+          (status === 'replaced' && (body.reason_code !== 'product_replaced' ||
+            typeof body.replacement_identifier !== 'string' ||
+            body.replacement_identifier.trim().length < 1 ||
+            body.replacement_identifier.trim().length > 300)) ||
+          (status !== 'replaced' && body.replacement_identifier != null)) {
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+      }
+      const passport = await rpc('dpp_api_scooter_passport_transition', {
+        p_passport_id: id,
+        p_transition: status,
+        p_reason_code: body.reason_code,
+        p_reason_note: body.reason_note == null ? null : body.reason_note.trim() || null,
+        p_replacement_identifier: status === 'replaced' ? body.replacement_identifier.trim() : null,
+        p_expected_updated_at: body.expected_updated_at
+      }, authorization);
+      return send(res, 200, { data: sanitizeOrganizationPrivatePassport(passport) });
     }
     if (body.action === 'submit_authority_evidence') {
       if (body.field_number !== 50 || !plainObject(body.evidence) || Object.keys(body.evidence).length === 0) {
@@ -353,6 +412,9 @@ async function handler(req, res) {
     }
     if (body.status != null && !PASSPORT_STATUSES.has(body.status)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+    }
+    if (body.status != null && TERMINAL_PASSPORT_STATUSES.has(body.status)) {
+      return send(res, 409, { error: { code: 'LIFECYCLE_ROUTE_REQUIRED', message: 'Use a lifecycle action for terminal passport transitions.' } });
     }
     if (!validObject(body.public_payload)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
@@ -390,4 +452,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPrivatePassport, validReadinessReport, validCompletenessReport, validAuthorityEvidenceReceipt, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPublicPassportResolution, validPrivatePassport, validReadinessReport, validCompletenessReport, validAuthorityEvidenceReceipt, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizePublicPassportResolution, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, TERMINAL_PASSPORT_STATUSES, LIFECYCLE_REASON_CODES, DEFAULT_RPC_TIMEOUT_MS };
