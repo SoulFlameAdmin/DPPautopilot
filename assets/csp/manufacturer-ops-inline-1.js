@@ -27,7 +27,7 @@ const DEFAULT_MAP={
  lifecycle_status:"item.lifecycle_status",
  state_of_health_percent:"item.state_of_health.percent"
 };
-let cfg=null,session=null,activeOrg=null,items=[],passports=[],csv={headers:[],rows:[],mapping:{},importId:null,validated:false};
+let cfg=null,session=null,activeOrg=null,items=[],passports=[],csv={headers:[],rows:[],mapping:{},importId:null,validated:false,sourceType:null,sourceName:"",workbook:null,sheetNames:[],selectedSheet:null};
 
 function setText(node,msg,kind=""){if(!node)return;node.textContent=msg;node.className="result"+(kind?" "+kind:"")}
 function readSession(){
@@ -222,6 +222,19 @@ async function bindCarrier(){
  finally{syncCarrierForm()}
 }
 
+function normalizeTabularData(headers,rows,sourceLabel){
+ const normalizedHeaders=(headers||[]).map(x=>String(x??"").trim());
+ if(normalizedHeaders.length<1)throw new Error(sourceLabel+" няма header.");
+ if(normalizedHeaders.length>100)throw new Error("Максимумът е 100 колони на import.");
+ if(normalizedHeaders.some(x=>!x))throw new Error(sourceLabel+" има празно име на колона.");
+ if(new Set(normalizedHeaders).size!==normalizedHeaders.length)throw new Error(sourceLabel+" има дублирани колони.");
+ const normalizedRows=(rows||[])
+  .filter(row=>Array.isArray(row)&&row.some(v=>String(v??"").trim()!==""))
+  .map(row=>normalizedHeaders.map((_,i)=>String(row[i]??"").trim()));
+ if(normalizedRows.length<1)throw new Error(sourceLabel+" трябва да има поне един data row.");
+ if(normalizedRows.length>1000)throw new Error("Максимумът е 1000 data rows на import.");
+ return {headers:normalizedHeaders,rows:normalizedRows};
+}
 function parseCSV(text){
  const rows=[];let row=[],cell="",quoted=false;
  for(let i=0;i<text.length;i++){
@@ -234,11 +247,49 @@ function parseCSV(text){
  if(quoted)throw new Error("CSV има незатворена кавичка.");
  if(cell!==""||row.length){row.push(cell);if(row.some(v=>v!==""))rows.push(row)}
  if(rows.length<2)throw new Error("CSV трябва да има header и поне един data row.");
- const headers=rows[0].map(x=>x.trim());
- if(headers.some(x=>!x))throw new Error("CSV има празно име на колона.");
- if(new Set(headers).size!==headers.length)throw new Error("CSV има дублирани колони.");
- if(rows.length-1>1000)throw new Error("Максимумът е 1000 data rows на import.");
- return {headers,rows:rows.slice(1).map(r=>headers.map((_,i)=>r[i]??""))};
+ return normalizeTabularData(rows[0],rows.slice(1),"CSV");
+}
+function parseXlsxSheet(workbook,sheetName){
+ if(!window.XLSX?.utils)throw new Error("XLSX parser не е зареден.");
+ const sheet=workbook?.Sheets?.[sheetName];
+ if(!sheet)throw new Error("Worksheet не е намерен.");
+ const ref=sheet["!fullref"]||sheet["!ref"];
+ if(!ref)throw new Error("Worksheet е празен.");
+ const range=window.XLSX.utils.decode_range(ref);
+ const rowSpan=range.e.r-range.s.r+1;
+ const colSpan=range.e.c-range.s.c+1;
+ if(rowSpan>1001)throw new Error("Worksheet има над 1000 data rows.");
+ if(colSpan>100)throw new Error("Worksheet има над 100 колони.");
+ const matrix=window.XLSX.utils.sheet_to_json(sheet,{header:1,raw:false,defval:"",blankrows:false});
+ if(matrix.length<2)throw new Error("Worksheet трябва да има header и поне един data row.");
+ return normalizeTabularData(matrix[0],matrix.slice(1),"XLSX worksheet");
+}
+function renderXlsxSheetOptions(){
+ const group=$("#xlsxSheetGroup"),select=$("#xlsxSheet");
+ if(!csv.workbook||csv.sourceType!=="xlsx"){
+  group.hidden=true;select.replaceChildren();return;
+ }
+ group.hidden=false;select.replaceChildren();
+ for(const name of csv.sheetNames)select.append(option(name,name));
+ select.value=csv.selectedSheet||csv.sheetNames[0]||"";
+}
+function setImportData(parsed,meta={}){
+ csv={
+  headers:parsed.headers,
+  rows:parsed.rows,
+  mapping:{},
+  importId:null,
+  validated:false,
+  sourceType:meta.sourceType||null,
+  sourceName:meta.sourceName||"",
+  workbook:meta.workbook||null,
+  sheetNames:Array.isArray(meta.sheetNames)?meta.sheetNames:[],
+  selectedSheet:meta.selectedSheet||null
+ };
+ for(const h of csv.headers)csv.mapping[h]=DEFAULT_MAP[h.trim().toLowerCase()]||"";
+ renderXlsxSheetOptions();
+ renderCsvMapping();renderCsvPreview();renderCsvSummary();
+ document.body.dataset.importSource=csv.sourceType||"none";
 }
 function renderCsvMapping(){
  const host=$("#csvMappings");host.replaceChildren();
@@ -254,6 +305,7 @@ function renderCsvMapping(){
 }
 function renderCsvPreview(){
  const host=$("#csvPreview");host.replaceChildren();
+ if(!csv.headers.length)return;
  const table=document.createElement("table"),thead=document.createElement("thead"),tr=document.createElement("tr");
  for(const h of csv.headers){const th=document.createElement("th");th.textContent=h;tr.append(th)}thead.append(tr);
  const tbody=document.createElement("tbody");
@@ -300,26 +352,61 @@ function buildImportRows(){
   return {normalized_model:{model_identifier:modelId,manufacturer_name:manufacturer,category,canonical_data:modelCanonical},normalized_item:{unique_identifier:identifier,lifecycle_status:lifecycle,canonical_data:itemCanonical},validation_errors:errors};
  });
 }
+function importSourceLabel(){
+ if(csv.sourceType==="xlsx")return "XLSX · "+(csv.selectedSheet||"worksheet");
+ if(csv.sourceType==="csv")return "CSV";
+ return "NO FILE";
+}
 function renderCsvSummary(){
  $("#csvRows").textContent=csv.rows.length;$("#csvColumns").textContent=csv.headers.length;
  $("#csvMapped").textContent=Object.values(csv.mapping).filter(Boolean).length;
+ $("#importSourcePill").textContent=importSourceLabel();
  let valid=false,error="";
  try{if(csv.rows.length){const rows=buildImportRows();valid=rows.every(r=>r.validation_errors.length===0);if(!valid)error=rows.reduce((n,r)=>n+r.validation_errors.length,0)+" local validation errors"}}
  catch(e){error=e.message}
  $("#stageImport").disabled=!canWrite()||!valid;
  $("#validateImport").disabled=!canWrite()||!csv.importId;
  $("#commitImport").disabled=!canWrite()||!csv.importId||!csv.validated;
- setText($("#csvResult"),error||(!csv.rows.length?"Зареди CSV файл.":"Mapping е валиден за staging."),error?"bad":(valid?"ok":""));
+ setText($("#csvResult"),error||(!csv.rows.length?"Зареди CSV или XLSX файл.":importSourceLabel()+" mapping е валиден за staging."),error?"bad":(valid?"ok":""));
 }
 async function loadCsvFile(file){
- if(!file)return;if(file.size>2*1024*1024)throw new Error("CSV файлът е над 2 MiB.");
- const parsed=parseCSV(await file.text());csv={headers:parsed.headers,rows:parsed.rows,mapping:{},importId:null,validated:false};
- for(const h of csv.headers)csv.mapping[h]=DEFAULT_MAP[h.trim().toLowerCase()]||"";
- renderCsvMapping();renderCsvPreview();renderCsvSummary();
+ if(!file)return;
+ if(!/\.csv$/i.test(file.name))throw new Error("Избери .csv файл.");
+ if(file.size>2*1024*1024)throw new Error("CSV файлът е над 2 MiB.");
+ const parsed=parseCSV(await file.text());
+ $("#xlsxFile").value="";
+ setImportData(parsed,{sourceType:"csv",sourceName:file.name});
+}
+async function loadXlsxFile(file){
+ if(!file)return;
+ if(!/\.xlsx$/i.test(file.name))throw new Error("Избери .xlsx Excel файл.");
+ if(file.size>5*1024*1024)throw new Error("XLSX файлът е над 5 MiB.");
+ if(!window.XLSX?.read||!window.XLSX?.utils)throw new Error("XLSX parser не е зареден. Refresh-ни страницата и опитай пак.");
+ const workbook=window.XLSX.read(await file.arrayBuffer(),{
+  type:"array",
+  dense:true,
+  cellFormula:false,
+  cellHTML:false,
+  cellStyles:false,
+  cellDates:false,
+  sheetRows:1002
+ });
+ const sheetNames=(workbook.SheetNames||[]).slice(0,50);
+ if(!sheetNames.length)throw new Error("XLSX workbook няма worksheets.");
+ const selectedSheet=sheetNames.find(name=>workbook.Sheets?.[name]?.["!ref"])||sheetNames[0];
+ const parsed=parseXlsxSheet(workbook,selectedSheet);
+ $("#csvFile").value="";
+ setImportData(parsed,{sourceType:"xlsx",sourceName:file.name,workbook,sheetNames,selectedSheet});
+}
+async function switchXlsxSheet(sheetName){
+ if(csv.sourceType!=="xlsx"||!csv.workbook)return;
+ const workbook=csv.workbook,sheetNames=csv.sheetNames.slice(),sourceName=csv.sourceName;
+ const parsed=parseXlsxSheet(workbook,sheetName);
+ setImportData(parsed,{sourceType:"xlsx",sourceName,workbook,sheetNames,selectedSheet:sheetName});
 }
 async function stageImport(){
  try{
-  const rows=buildImportRows();$("#stageImport").disabled=true;setText($("#csvResult"),"Staging "+rows.length+" rows към production import API…");
+  const rows=buildImportRows();$("#stageImport").disabled=true;setText($("#csvResult"),"Staging "+rows.length+" "+importSourceLabel()+" rows към production import API…");
   const data=(await api("/api/imports",{method:"POST",body:{rows}})).data;
   csv.importId=data.import_id;csv.validated=false;renderCsvSummary();setText($("#csvResult"),"STAGED · "+data.staged_rows+" rows · "+data.import_id,"ok");
  }catch(e){setText($("#csvResult"),e.message,"bad");renderCsvSummary()}
@@ -372,6 +459,8 @@ $("#carrierKind").addEventListener("change",syncCarrierForm);
 $("#bindCarrier").addEventListener("click",bindCarrier);
 $("#refreshCarriers").addEventListener("click",loadCarrierPanel);
 $("#csvFile").addEventListener("change",async e=>{try{await loadCsvFile(e.target.files?.[0])}catch(err){setText($("#csvResult"),err.message,"bad")}});
+$("#xlsxFile").addEventListener("change",async e=>{try{await loadXlsxFile(e.target.files?.[0])}catch(err){setText($("#csvResult"),err.message,"bad")}});
+$("#xlsxSheet").addEventListener("change",async e=>{try{await switchXlsxSheet(e.target.value)}catch(err){setText($("#csvResult"),err.message,"bad")}});
 $("#stageImport").addEventListener("click",stageImport);
 $("#validateImport").addEventListener("click",validateImport);
 $("#commitImport").addEventListener("click",commitImport);
