@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
   <title>DPP WORLD · Control Center</title>
-  <meta name="description" content="DPP World Control Center — глобална карта за targets, контакти, клиенти и системен прогрес.">
+  <meta name="description" content="DPP World Control Center — 3D Earth, targets, clients and system progress in one place.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/Widgets/widgets.css">
   <link rel="stylesheet" href="/world/world.css">
 </head>
 <body>
@@ -12,6 +14,8 @@
     <a class="brand" href="/">DPP AUTOPILOT</a>
     <div class="title">WORLD CONTROL CENTER</div>
     <div class="actions">
+      <span id="cloudState" class="cloud-state">CHECKING CLOUD…</span>
+      <a id="loginLink" class="ghost link-btn" href="/company">Company Login</a>
       <button id="resetView" class="ghost">Reset Earth</button>
       <button id="addTarget" class="primary">+ Добави target</button>
     </div>
@@ -23,6 +27,7 @@
         <div>
           <div class="eyebrow">GLOBAL DPP PIPELINE</div>
           <h1>Една Земя. Всички targets.</h1>
+          <p id="tenantLabel" class="tenant-label">Зареждане на DPP tenant…</p>
         </div>
         <div class="legend">
           <span><i class="dot target"></i>Target</span>
@@ -33,17 +38,19 @@
       </div>
 
       <div class="globe-wrap">
-        <canvas id="globe" width="1100" height="780" aria-label="Интерактивна 3D Земя с DPP targets"></canvas>
-        <div class="globe-tip">Drag → върти · wheel → zoom · клик върху точка → фирма</div>
+        <div id="globe" aria-label="Интерактивна 3D Земя с DPP targets"></div>
+        <div id="mapHint" class="globe-tip">Drag → върти · wheel → zoom · клик върху pin → фирма</div>
       </div>
 
       <div class="filters" id="filters">
         <button data-filter="all" class="active">Всички</button>
         <button data-filter="battery">Battery</button>
         <button data-filter="scooter">Scooter</button>
+        <button data-filter="ev">EV</button>
         <button data-filter="solar">Solar</button>
         <button data-filter="detergent">Detergents</button>
         <button data-filter="textile">Textile</button>
+        <button data-filter="other">Other</button>
       </div>
     </section>
 
@@ -53,6 +60,7 @@
           <div><div class="eyebrow">CRM</div><h2>Targets & Clients</h2></div>
           <span id="companyCount" class="badge">0</span>
         </div>
+        <div id="summaryStrip" class="summary-strip"></div>
         <div id="companyList" class="company-list"></div>
       </section>
 
@@ -72,19 +80,25 @@
         <div><div class="eyebrow">NEW COMPANY</div><h2>Добави DPP target</h2></div>
         <button value="cancel" class="ghost" type="submit">✕</button>
       </div>
+
+      <button type="button" id="pickLocation" class="pick-location">📍 Избери място директно от Земята</button>
+      <div id="pickHelp" class="pick-help">Натисни бутона, после кликни върху картата. Latitude/Longitude ще се попълнят сами.</div>
+
       <div class="form-grid">
-        <label>Фирма<input name="name" required placeholder="Company name"></label>
-        <label>Държава<input name="country" required placeholder="Bulgaria"></label>
-        <label>Град<input name="city" placeholder="Sofia"></label>
-        <label>Latitude<input name="lat" required type="number" step="0.0001" min="-90" max="90" placeholder="42.6977"></label>
-        <label>Longitude<input name="lon" required type="number" step="0.0001" min="-180" max="180" placeholder="23.3219"></label>
+        <label>Фирма<input name="name" required maxlength="200" placeholder="Company name"></label>
+        <label>Държава<input name="country" required maxlength="120" placeholder="Bulgaria"></label>
+        <label>Град<input name="city" maxlength="160" placeholder="Sofia"></label>
+        <label>Latitude<input name="lat" required type="number" step="0.000001" min="-90" max="90" placeholder="42.697700"></label>
+        <label>Longitude<input name="lon" required type="number" step="0.000001" min="-180" max="180" placeholder="23.321900"></label>
         <label>Сектор
           <select name="sector">
             <option value="battery">Battery</option>
             <option value="scooter">Scooter</option>
+            <option value="ev">EV</option>
             <option value="solar">Solar</option>
             <option value="detergent">Detergents</option>
             <option value="textile">Textile</option>
+            <option value="other">Other</option>
           </select>
         </label>
         <label>Статус
@@ -96,15 +110,19 @@
           </select>
         </label>
         <label>Потенциал €/мес<input name="mrr" type="number" min="0" step="1" value="0"></label>
+        <label>Контакт<input name="contact_name" maxlength="160" placeholder="Name / role"></label>
+        <label>Email<input name="contact_email" type="email" maxlength="254" placeholder="office@company.eu"></label>
       </div>
-      <label>Следваща стъпка<textarea name="next" rows="3" placeholder="Demo / call / contract / integration"></textarea></label>
+      <label>Следваща стъпка<textarea name="next" maxlength="2000" rows="3" placeholder="Demo / call / contract / integration"></textarea></label>
+      <div id="saveState" class="save-state"></div>
       <div class="dialog-actions">
         <button value="cancel" type="submit" class="ghost">Отказ</button>
-        <button value="default" type="submit" class="primary" id="saveTarget">Запази</button>
+        <button value="default" type="submit" class="primary" id="saveTarget">Запази в DPP WORLD</button>
       </div>
     </form>
   </dialog>
 
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/Cesium.js"></script>
   <script src="/world/world.js"></script>
 </body>
 </html>
