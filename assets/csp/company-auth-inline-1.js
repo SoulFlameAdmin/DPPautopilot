@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s);
 const STORAGE="dpp_company_session_v1";
 const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
-let cfg=null,session=null,refreshTimer=null,currentUser=null,activeOrg=null;
+let cfg=null,session=null,refreshTimer=null,currentUser=null,activeOrg=null,recoveryMode=false;
 
 function result(node,message,kind=""){node.textContent=message;node.className="result"+(kind?" "+kind:"")}
 function validEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||"").trim())}
@@ -45,13 +45,22 @@ function restoreSession(){
   return false;
 }
 function confirmationRedirect(){return new URL("/company",location.origin).href}
+function recoveryRedirect(){return new URL("/company",location.origin).href}
 function parseConfirmationFragment(){
   const p=new URLSearchParams(location.hash.replace(/^#/,""));
   if(!p.get("access_token"))return false;
+  recoveryMode=p.get("type")==="recovery"||new URLSearchParams(location.search).get("recovery")==="1";
   saveSession({access_token:p.get("access_token"),refresh_token:p.get("refresh_token"),expires_in:p.get("expires_in")});
-  history.replaceState(null,"",location.pathname+location.search);
+  const clean=new URL(location.href);clean.hash="";clean.searchParams.delete("recovery");history.replaceState(null,"",clean.pathname+clean.search);
+  document.body.dataset.companyRecovery=recoveryMode?"active":"none";
+  if(recoveryMode){
+    $("#resetCard").hidden=false;
+    result($("#resetResult"),"Recovery сесията е потвърдена. Въведи новата парола.","ok");
+    result($("#authResult"),"Password recovery mode.","ok");
+    return "recovery";
+  }
   result($("#authResult"),"Email verified. Authenticated session received.","ok");
-  return true;
+  return "confirmation";
 }
 function slugify(value){
   const map={а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"ts",ч:"ch",ш:"sh",щ:"sht",ъ:"a",ь:"",ю:"yu",я:"ya"};
@@ -67,10 +76,13 @@ async function api(path,{method="GET",body}={}){
 }
 function syncAuthUi(){
   const on=!!session?.access_token;
-  $("#signout").hidden=!on;
+  const recovery=on&&recoveryMode;
+  $("#signout").hidden=!on||recovery;
+  $("#forgotPassword").disabled=on;
   $("#signup").disabled=on;$("#signin").disabled=on;
   $("#email").disabled=on;$("#password").disabled=on;
-  $("#authState").textContent=on?"AUTHENTICATED":"NOT SIGNED IN";
+  $("#sessionCard").hidden=!on||recovery;
+  $("#authState").textContent=recovery?"RECOVERY":(on?"AUTHENTICATED":"NOT SIGNED IN");
   $("#authState").className="state"+(on?" ok":"");
 }
 async function getUser(){
@@ -78,7 +90,7 @@ async function getUser(){
   return user;
 }
 async function loadTenantState(){
-  if(!session?.access_token)return;
+  if(!session?.access_token||recoveryMode)return;
   let user;
   try{user=await getUser()}catch(e){clearSession();result($("#authResult"),e.message,"bad");return}
   currentUser=user;
@@ -188,6 +200,7 @@ async function init(){
   if(cfg.supabaseUrl!==PROJECT_URL||!String(cfg.publishableKey||"").startsWith("sb_publishable_"))throw new Error("Invalid DPP auth configuration.");
   document.body.dataset.companyAuthReady="true";
   restoreSession();parseConfirmationFragment();syncAuthUi();
+  if(recoveryMode)return;
   if(session?.refresh_token){try{await refreshSession()}catch{clearSession()}}
   if(session?.access_token)await loadTenantState();
   else result($("#authResult"),"Готово. Създай акаунт или влез.","ok");
@@ -205,6 +218,16 @@ $("#signup").addEventListener("click",async()=>{
     result($("#authResult"),"Регистрацията е приета. Нужно е email потвърждение.","ok");
   }catch(err){result($("#authResult"),err.message,"bad")}
 });
+$("#forgotPassword").addEventListener("click",async()=>{
+  const e=$("#email").value.trim();
+  if(!validEmail(e))return result($("#authResult"),"Въведи валиден email за recovery.","bad");
+  $("#forgotPassword").disabled=true;
+  try{
+    await authCall("/auth/v1/recover?redirect_to="+encodeURIComponent(recoveryRedirect()),{method:"POST",body:{email:e}});
+    result($("#authResult"),"Ако акаунтът съществува, recovery линкът е изпратен на email-а.","ok");
+  }catch(err){result($("#authResult"),err.message,"bad")}
+  finally{$("#forgotPassword").disabled=false}
+});
 $("#signin").addEventListener("click",async()=>{
   const e=$("#email").value.trim(),p=$("#password").value;
   if(!validEmail(e)||!validPassword(p)){return result($("#authResult"),"Въведи валиден email и парола.","bad")}
@@ -212,8 +235,35 @@ $("#signin").addEventListener("click",async()=>{
   catch(err){result($("#authResult"),err.message,"bad")}
 });
 $("#signout").addEventListener("click",async()=>{
-  try{if(session?.access_token)await authCall("/auth/v1/logout",{method:"POST",token:session.access_token})}catch{}
-  currentUser=null;activeOrg=null;clearSession();$("#companyCard").hidden=true;$("#tenantCard").hidden=true;$("#readyCard").hidden=true;$("#teamCard").hidden=true;result($("#authResult"),"Изходът е успешен.","ok");
+  try{if(session?.access_token)await authCall("/auth/v1/logout?scope=local",{method:"POST",token:session.access_token})}catch{}
+  currentUser=null;activeOrg=null;recoveryMode=false;clearSession();
+  $("#companyCard").hidden=true;$("#tenantCard").hidden=true;$("#readyCard").hidden=true;$("#teamCard").hidden=true;$("#sessionCard").hidden=true;
+  result($("#authResult"),"Текущата сесия е приключена.","ok");
+});
+$("#revokeSessions").addEventListener("click",async()=>{
+  if(!session?.access_token)return;
+  $("#revokeSessions").disabled=true;result($("#sessionResult"),"Отнемане на refresh сесиите…");
+  try{
+    await authCall("/auth/v1/logout?scope=global",{method:"POST",token:session.access_token});
+    currentUser=null;activeOrg=null;recoveryMode=false;clearSession();
+    $("#companyCard").hidden=true;$("#tenantCard").hidden=true;$("#readyCard").hidden=true;$("#teamCard").hidden=true;$("#sessionCard").hidden=true;
+    result($("#authResult"),"Сесиите са отнети. Влез отново.","ok");
+  }catch(err){result($("#sessionResult"),err.message,"bad");$("#revokeSessions").disabled=false}
+});
+$("#updatePassword").addEventListener("click",async()=>{
+  const password=$("#newPassword").value,confirmPassword=$("#confirmNewPassword").value;
+  if(!recoveryMode||!session?.access_token)return result($("#resetResult"),"Няма активна recovery сесия.","bad");
+  if(!validPassword(password))return result($("#resetResult"),"Новата парола трябва да е минимум 8 символа.","bad");
+  if(password!==confirmPassword)return result($("#resetResult"),"Двете пароли не съвпадат.","bad");
+  $("#updatePassword").disabled=true;result($("#resetResult"),"Смяна на паролата…");
+  try{
+    await authCall("/auth/v1/user",{method:"PUT",body:{password},token:session.access_token});
+    await authCall("/auth/v1/logout?scope=global",{method:"POST",token:session.access_token});
+    recoveryMode=false;currentUser=null;activeOrg=null;clearSession();
+    $("#newPassword").value="";$("#confirmNewPassword").value="";$("#resetCard").hidden=true;
+    document.body.dataset.companyRecovery="complete";
+    result($("#authResult"),"Паролата е сменена и refresh сесиите са отнети. Влез отново.","ok");
+  }catch(err){result($("#resetResult"),err.message,"bad");$("#updatePassword").disabled=false}
 });
 $("#createCompany").addEventListener("click",async()=>{
   const name=$("#companyName").value.trim(),slug=slugify($("#companySlug").value||name);

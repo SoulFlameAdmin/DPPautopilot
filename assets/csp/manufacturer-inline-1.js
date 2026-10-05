@@ -108,6 +108,91 @@ function renderModels(){
     row.append(left,side);host.append(row);
   }
 }
+function lifecycleEditor(item){
+  const editor=document.createElement("div");editor.className="lifecycle-editor";editor.hidden=true;
+  const title=document.createElement("strong");title.textContent="Passport lifecycle";
+  const status=document.createElement("div");status.className="result";status.textContent="Отвори, за да провериш текущия passport status.";
+
+  const form=document.createElement("div");form.className="lifecycle-form";form.hidden=true;
+  const transitionWrap=document.createElement("label"),transitionLabel=document.createElement("span"),transition=document.createElement("select");
+  transitionLabel.textContent="Действие";
+  [["retired","Retire"],["revoked","Revoke"],["replaced","Replace"]].forEach(([value,label])=>transition.append(new Option(label,value)));
+  transitionWrap.append(transitionLabel,transition);
+
+  const reasonWrap=document.createElement("label"),reasonLabel=document.createElement("span"),reason=document.createElement("select");
+  reasonLabel.textContent="Причина";
+  [
+    ["end_of_life","Край на жизнения цикъл"],
+    ["operator_revoked","Отнет от оператора"],
+    ["safety_or_compliance","Безопасност / compliance"],
+    ["incorrect_record","Некоректен запис"],
+    ["product_replaced","Продуктът е заменен"],
+    ["other","Друга причина"]
+  ].forEach(([value,label])=>reason.append(new Option(label,value)));
+  reasonWrap.append(reasonLabel,reason);
+
+  const noteWrap=document.createElement("label"),noteLabel=document.createElement("span"),note=document.createElement("input");
+  noteLabel.textContent="Бележка";note.maxLength=500;note.placeholder="По избор · до 500 символа";noteWrap.append(noteLabel,note);
+
+  const replacementWrap=document.createElement("label"),replacementLabel=document.createElement("span"),replacement=document.createElement("input");
+  replacementLabel.textContent="Replacement Battery ID";replacement.maxLength=300;replacement.placeholder="Задължително при Replace";replacementWrap.append(replacementLabel,replacement);replacementWrap.hidden=true;
+
+  const apply=document.createElement("button");apply.type="button";apply.className="btn danger";apply.textContent="Потвърди lifecycle промяната";
+  form.append(transitionWrap,reasonWrap,noteWrap,replacementWrap,apply);
+  editor.append(title,form,status);
+
+  let report=null;
+  function sync(){
+    const isReplacement=transition.value==="replaced";
+    replacementWrap.hidden=!isReplacement;
+    if(transition.value==="retired")reason.value="end_of_life";
+    else if(transition.value==="revoked")reason.value="operator_revoked";
+    else reason.value="product_replaced";
+  }
+  transition.addEventListener("change",sync);
+
+  async function load(){
+    status.className="result";status.textContent="Проверка на passport lifecycle…";form.hidden=true;
+    try{
+      report=(await api("/api/passport?identifier="+encodeURIComponent(item.unique_identifier)+"&readiness=1")).data;
+      if(!report?.passport_id)throw new Error("Passport record not found.");
+      if(report.status!=="active"){
+        status.className="result ok";status.textContent="Passport status: "+String(report.status).toUpperCase()+". Terminal transition не е достъпен.";
+        return;
+      }
+      form.hidden=!canWrite();sync();
+      status.className="result ok";status.textContent=canWrite()
+        ?"ACTIVE passport · можеш да го retire/revoke/replace."
+        :"ACTIVE passport · read-only role.";
+    }catch(e){status.className="result bad";status.textContent=e.message}
+  }
+
+  apply.addEventListener("click",async()=>{
+    if(!canWrite()||!report||report.status!=="active")return;
+    const repl=replacement.value.trim();
+    if(transition.value==="replaced"&&!repl){
+      status.className="result bad";status.textContent="Въведи Replacement Battery ID.";return;
+    }
+    const label=transition.value.toUpperCase();
+    if(!confirm(label+" passport "+item.unique_identifier+"? Това е terminal lifecycle действие."))return;
+    apply.disabled=true;status.className="result";status.textContent="Запис на lifecycle transition…";
+    try{
+      const response=await api("/api/passport",{method:"PATCH",body:{
+        id:report.passport_id,
+        action:"transition",
+        transition:transition.value,
+        reason_code:reason.value,
+        reason_note:note.value.trim()||null,
+        replacement_identifier:transition.value==="replaced"?repl:null,
+        expected_updated_at:report.passport_updated_at
+      }});
+      status.className="result ok";status.textContent="Passport → "+String(response.data.status).toUpperCase()+". Public lifecycle view е обновен.";
+      await loadData();
+    }catch(e){status.className="result bad";status.textContent=e.message;apply.disabled=false}
+  });
+
+  return {editor,load};
+}
 function renderItems(){
   const host=$("#itemsList");host.replaceChildren();
   $("#itemsCount").textContent=String(items.length);
@@ -122,7 +207,16 @@ function renderItems(){
     const pill=document.createElement("span");pill.className="pill"+(item.lifecycle_status==="original"?" ok":"");pill.textContent=item.lifecycle_status;
     const completeness=document.createElement("a");completeness.className="btn primary";completeness.href="/manufacturer/completeness?identifier="+encodeURIComponent(item.unique_identifier);completeness.textContent="Completeness";
     const passport=document.createElement("a");passport.className="btn";passport.href="/passport?identifier="+encodeURIComponent(item.unique_identifier);passport.target="_blank";passport.rel="noopener";passport.textContent="Passport";
-    side.append(pill,completeness,passport);row.append(left,side);host.append(row);
+    side.append(pill,completeness,passport);
+
+    if(canWrite()){
+      const lifecycle=document.createElement("button");lifecycle.className="btn";lifecycle.type="button";lifecycle.textContent="Lifecycle";
+      const panel=lifecycleEditor(item);
+      lifecycle.addEventListener("click",async()=>{panel.editor.hidden=!panel.editor.hidden;if(!panel.editor.hidden)await panel.load()});
+      side.append(lifecycle);row.append(left,side,panel.editor);
+    }else row.append(left,side);
+
+    host.append(row);
   }
 }
 async function loadTenant(){

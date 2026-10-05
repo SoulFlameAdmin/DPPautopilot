@@ -10,12 +10,12 @@
   "updatedAt": "2026-10-05",
   "canonicalRepo": "SoulFlameAdmin/DPPautopilot",
   "sequentialProgress": {
-    "greenThrough": 20,
-    "next": 21
+    "greenThrough": 26,
+    "next": 27
   },
   "counts": {
-    "green": 27,
-    "yellow": 46,
+    "green": 29,
+    "yellow": 44,
     "red": 27,
     "total": 100
   },
@@ -194,8 +194,8 @@
     {
       "id": 21,
       "title": "Revoked / replaced / retired passport UX",
-      "status": "yellow",
-      "plain": "Статусите имат backend основа; клиентският UX остава."
+      "status": "green",
+      "plain": "Production lifecycle flow е завършен: ACTIVE passport може контролирано да стане retired/revoked/replaced с reason, stale-write guard и replacement validation; public identifier остава като минимален lifecycle tombstone и при replacement води към новия ACTIVE passport."
     },
     {
       "id": 22,
@@ -206,8 +206,8 @@
     {
       "id": 23,
       "title": "Password reset / session revocation",
-      "status": "yellow",
-      "plain": "Auth основата е готова; остава финален production acceptance."
+      "status": "green",
+      "plain": "Production auth има forgot-password recovery, защитена смяна на парола, local logout и global refresh-session revocation; recovery приключва с нов вход."
     },
     {
       "id": 24,
