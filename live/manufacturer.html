@@ -6,7 +6,7 @@
   <meta name="referrer" content="no-referrer">
   <title>DPP Autopilot · Manufacturer Dashboard</title>
   <meta name="description" content="Production manufacturer dashboard backed by the DPP tenant, model, item and provisioning APIs.">
-  <link rel="stylesheet" href="/assets/csp/manufacturer.css">
+  <link rel="stylesheet" href="/assets/csp/manufacturer.css">\n  <link rel="stylesheet" href="/assets/csp/manufacturer-ops.css">
 </head>
 <body data-manufacturer-ready="false" data-manufacturer-auth="unknown" data-manufacturer-tenant="unknown" data-manufacturer-mode="unknown">
 <main class="shell">
@@ -95,7 +95,77 @@
       </article>
     </section>
 
-    <section class="card evidence">
+
+    <section class="card ops-card" id="productionOps">
+      <div class="card-head">
+        <div><p class="eyebrow">STAGES 6–7 · PRODUCTION OPERATIONS</p><h2>Passports · Print · Carriers · Import</h2></div>
+        <span class="state" id="opsRole">ROLE</span>
+      </div>
+      <div class="ops-toolbar">
+        <div class="group"><button class="btn" id="refreshOps" type="button">Refresh operations</button></div>
+        <div class="result" id="opsStatus" role="status" aria-live="polite">Проверка на production operations…</div>
+      </div>
+    </section>
+
+    <section class="card ops-card" id="passportsProduction">
+      <div class="card-head"><div><p class="eyebrow">29 · PASSPORTS TAB PRODUCTION</p><h2>Passports</h2></div><span class="state ok">LIVE TENANT API</span></div>
+      <div class="ops-summary">
+        <div class="ops-metric"><strong id="opsPassportCount">0</strong><span>All passports</span></div>
+        <div class="ops-metric"><strong id="opsActiveCount">0</strong><span>ACTIVE</span></div>
+        <div class="ops-metric"><strong id="opsDraftCount">0</strong><span>DRAFT</span></div>
+        <div class="ops-metric"><strong id="opsTerminalCount">0</strong><span>Lifecycle terminal</span></div>
+      </div>
+      <div class="ops-toolbar"><input class="ops-search" id="passportSearch" type="search" placeholder="Търси по Battery ID или status"></div>
+      <div class="ops-list" id="passportOpsList" aria-live="polite"></div>
+    </section>
+
+    <section class="card ops-card" id="printCenterProduction">
+      <div class="card-head"><div><p class="eyebrow">30 · QR / PRINT CENTER</p><h2>Bulk QR labels</h2></div><span class="state ok">SCAN-AWARE QR</span></div>
+      <p class="ops-note">Избираш ACTIVE passports отгоре. При печат системата гарантира активен QR carrier за всяка бройка и генерира отделен QR към точния public passport.</p>
+      <div class="ops-toolbar">
+        <div class="group"><button class="btn" id="selectActivePassports" type="button">Select ACTIVE</button><button class="btn" id="clearPassportSelection" type="button">Clear</button><button class="btn primary" id="printSelected" type="button">Bind QR + Print selected</button></div>
+        <div class="result" id="printResult" role="status" aria-live="polite">Няма избрани labels.</div>
+      </div>
+    </section>
+
+    <section class="ops-grid">
+      <article class="card ops-card" id="carrierProduction">
+        <div class="card-head"><div><p class="eyebrow">31–32 · PHYSICAL CARRIERS</p><h2>QR / NFC binding</h2></div><span class="state ok">SERVER-DERIVED URL</span></div>
+        <div class="ops-form">
+          <label class="wide"><span>Battery item</span><select id="carrierItem"><option value="">Избери battery item</option></select></label>
+          <label><span>Carrier</span><select id="carrierKind"><option value="qr">QR</option><option value="nfc">NFC</option></select></label>
+          <div id="nfcFields" hidden>
+            <label><span>NFC technology</span><select id="carrierNfcTech"><option value="ntag213">NTAG213</option><option value="ntag215">NTAG215</option><option value="ntag216">NTAG216</option><option value="ntag424_dna">NTAG424 DNA</option><option value="other">Other</option></select></label>
+          </div>
+          <label class="wide"><span>External UID (optional, NFC)</span><input id="carrierExternalUid" maxlength="256" placeholder="chip/tag UID"></label>
+        </div>
+        <div class="ops-toolbar"><div class="group"><button class="btn primary" id="bindCarrier" type="button">Bind / Reissue</button><button class="btn" id="refreshCarriers" type="button">Refresh</button></div></div>
+        <div class="result" id="carrierResult" role="status" aria-live="polite">Избери battery item.</div>
+        <div class="ops-list" id="carrierList"></div>
+      </article>
+
+      <article class="card ops-card" id="scanHistoryProduction">
+        <div class="card-head"><div><p class="eyebrow">33 · SCAN HISTORY</p><h2>QR / NFC opens</h2></div><span class="state ok">TENANT SCOPED</span></div>
+        <p class="ops-note">Scan event се записва при отваряне на bound QR/NFC URL. Показват се source, Battery ID и timestamp.</p>
+        <div class="scan-list" id="scanHistory"></div>
+      </article>
+    </section>
+
+    <section class="card ops-card" id="csvImportProduction">
+      <div class="card-head"><div><p class="eyebrow">34–35 · CSV PRODUCTION IMPORT</p><h2>Upload → Mapping → Validate → Atomic Commit</h2></div><span class="state ok">IDEMPOTENT</span></div>
+      <p class="ops-note">До 1000 реда. Commit е transaction-safe. След първия commit системата прави втори replay и приема PASS само ако той е доказан NO-OP.</p>
+      <div class="ops-toolbar">
+        <div class="group"><input id="csvFile" type="file" accept=".csv,text/csv"></div>
+        <div class="group"><span class="pill"><b id="csvRows">0</b> rows</span><span class="pill"><b id="csvColumns">0</b> columns</span><span class="pill"><b id="csvMapped">0</b> mapped</span></div>
+      </div>
+      <div class="csv-map" id="csvMappings"></div>
+      <div class="csv-preview" id="csvPreview"></div>
+      <div class="ops-toolbar">
+        <div class="group"><button class="btn" id="stageImport" type="button" disabled>1 · Stage</button><button class="btn" id="validateImport" type="button" disabled>2 · Validate</button><button class="btn primary" id="commitImport" type="button" disabled>3 · Commit + replay test</button></div>
+        <div class="result" id="csvResult" role="status" aria-live="polite">Зареди CSV файл.</div>
+      </div>
+    </section>
+\n    <section class="card evidence">
       <div>
         <p class="eyebrow">STAGE 5 ACCEPTANCE</p>
         <h2>Този екран работи с production backend.</h2>
@@ -109,8 +179,8 @@
     </section>
   </div>
 
-  <footer>Manufacturer Dashboard V1 · bearer session · active tenant · production APIs · no browser-local product database.</footer>
+  <section class="print-sheet" id="printSheet" aria-hidden="true"></section>\n\n  <footer>Manufacturer Dashboard V1 · bearer session · active tenant · production APIs · no browser-local product database.</footer>
 </main>
-<script src="/assets/csp/manufacturer-inline-1.js"></script>
+<script src="/assets/csp/manufacturer-inline-1.js"></script>\n<script src="/assets/csp/manufacturer-ops-inline-1.js"></script>
 </body>
 </html>
