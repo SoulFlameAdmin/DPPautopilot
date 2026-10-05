@@ -1,6 +1,6 @@
 # Stage 36 · XLSX / Excel Import · Production Acceptance
 
-Accepted on 2026-10-05.
+Implementation accepted on 2026-10-05; final production-alias acceptance is pending deployment of the patched parser.
 
 ## Production implementation
 - Manufacturer Operations now accepts both CSV and Excel `.xlsx` sources.
@@ -27,4 +27,4 @@ Accepted on 2026-10-05.
 - Regression test `tests/unit/xlsx-import.test.cjs` covers parser round-trip plus production-page self-hosting and XLSX controls.
 
 ## Result
-Stage 36 is accepted as GREEN. XLSX data feeds the existing production DPP import transaction rather than a separate demo or browser-only storage path.
+Implementation/regression acceptance is PASS in `main`, but Stage 36 remains **YELLOW** until the production alias serves SheetJS 0.20.3. The current live alias was verified to still serve legacy 0.18.5 because the Vercel daily API deployment quota was exhausted. No bypass is accepted as production evidence.
