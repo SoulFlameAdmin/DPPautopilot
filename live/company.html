@@ -39,6 +39,7 @@
     <div class="actions">
       <button class="btn primary" id="signup" type="button">Създай фирмен акаунт</button>
       <button class="btn" id="signin" type="button">Вход</button>
+      <button class="btn ghost" id="forgotPassword" type="button">Забравена парола</button>
       <button class="btn ghost" id="signout" type="button" hidden>Изход</button>
     </div>
     <div class="result" id="authResult" role="status" aria-live="polite">Зареждане на auth конфигурацията…</div>
@@ -51,6 +52,20 @@
     </div>
     <p>Изпратихме заявка за потвърждение. След натискане на линка в email-а ще се върнеш тук и ще продължиш с фирмата.</p>
     <div class="result" id="verifyResult">Ако email-ът е допустим за регистрация, Supabase ще изпрати confirmation link.</div>
+  </section>
+
+  <section class="card" id="resetCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">PASSWORD RECOVERY</p><h2>Задай нова парола</h2></div>
+      <span class="state pending">RECOVERY</span>
+    </div>
+    <p class="muted">Recovery линкът от email-а отваря защитена временна сесия. След смяната всички refresh сесии се отнемат и се изисква нов вход.</p>
+    <div class="form-grid">
+      <label><span>Нова парола</span><input id="newPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Минимум 8 символа"></label>
+      <label><span>Повтори паролата</span><input id="confirmNewPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Повтори новата парола"></label>
+    </div>
+    <div class="actions"><button class="btn primary" id="updatePassword" type="button">Смени паролата →</button></div>
+    <div class="result" id="resetResult" role="status" aria-live="polite">Въведи новата парола.</div>
   </section>
 
   <section class="card" id="companyCard" hidden>
@@ -89,6 +104,16 @@
         <a class="btn" href="/demo/import.html">Imports</a>
       </div>
     </div>
+  </section>
+
+  <section class="card" id="sessionCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">SESSION SECURITY</p><h2>Активни сесии</h2></div>
+      <span class="state ok">AUTH</span>
+    </div>
+    <p class="muted">Обикновеният „Изход“ приключва текущата сесия. Тук можеш да отнемеш refresh сесиите на акаунта на всички устройства.</p>
+    <div class="actions"><button class="btn danger" id="revokeSessions" type="button">Изход от всички устройства</button></div>
+    <div class="result" id="sessionResult" role="status" aria-live="polite">Няма предприето действие.</div>
   </section>
 
   <section class="card" id="teamCard" hidden>
