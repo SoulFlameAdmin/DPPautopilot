@@ -532,3 +532,21 @@ test('M19 passport RPC rejects syntactically valid but malformed success shape',
     }
   );
 });
+
+
+test('public carrier GET records an attributed QR scan', async () => {
+  const restore=withEnv(), original=global.fetch;
+  let seen;
+  global.fetch=async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return publicPassportFixture({unique_identifier:'urn:dpp:scan:1'});}};
+  };
+  try {
+    const res=makeRes();
+    await handler(makeReq('GET',null,{identifier:'urn:dpp:scan:1',carrier:'qr'},null),res);
+    assert.equal(res.statusCode,200);
+    assert.match(seen.url,/dpp_api_carrier_open$/);
+    assert.deepEqual(JSON.parse(seen.options.body),{p_unique_identifier:'urn:dpp:scan:1',p_source:'qr'});
+    assert.equal(JSON.parse(res.body).data.kind,'active');
+  } finally { global.fetch=original; restore(); }
+});
