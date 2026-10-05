@@ -153,17 +153,35 @@
     </section>
 
     <section class="card ops-card" id="csvImportProduction">
-      <div class="card-head"><div><p class="eyebrow">34–35 · CSV PRODUCTION IMPORT</p><h2>Upload → Mapping → Validate → Atomic Commit</h2></div><span class="state ok">IDEMPOTENT</span></div>
-      <p class="ops-note">До 1000 реда. Commit е transaction-safe. След първия commit системата прави втори replay и приема PASS само ако той е доказан NO-OP.</p>
+      <div class="card-head"><div><p class="eyebrow">34–36 · CSV / XLSX PRODUCTION IMPORT</p><h2>Upload → Sheet → Mapping → Validate → Atomic Commit</h2></div><span class="state ok">CSV + EXCEL</span></div>
+      <p class="ops-note">CSV до 2 MiB или Excel .xlsx до 5 MiB. До 1000 data rows и 100 колони. XLSX се чете локално в браузъра; към production backend се изпращат само normalized DPP rows. Commit остава transaction-safe и idempotent.</p>
+      <div class="import-source-grid">
+        <label class="import-source">
+          <span>CSV</span>
+          <input id="csvFile" type="file" accept=".csv,text/csv">
+        </label>
+        <label class="import-source">
+          <span>Excel XLSX</span>
+          <input id="xlsxFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+        </label>
+      </div>
       <div class="ops-toolbar">
-        <div class="group"><input id="csvFile" type="file" accept=".csv,text/csv"></div>
-        <div class="group"><span class="pill"><b id="csvRows">0</b> rows</span><span class="pill"><b id="csvColumns">0</b> columns</span><span class="pill"><b id="csvMapped">0</b> mapped</span></div>
+        <div class="group xlsx-sheet-group" id="xlsxSheetGroup" hidden>
+          <label for="xlsxSheet">Worksheet</label>
+          <select id="xlsxSheet" aria-label="Excel worksheet"></select>
+        </div>
+        <div class="group">
+          <span class="pill" id="importSourcePill">NO FILE</span>
+          <span class="pill"><b id="csvRows">0</b> rows</span>
+          <span class="pill"><b id="csvColumns">0</b> columns</span>
+          <span class="pill"><b id="csvMapped">0</b> mapped</span>
+        </div>
       </div>
       <div class="csv-map" id="csvMappings"></div>
       <div class="csv-preview" id="csvPreview"></div>
       <div class="ops-toolbar">
         <div class="group"><button class="btn" id="stageImport" type="button" disabled>1 · Stage</button><button class="btn" id="validateImport" type="button" disabled>2 · Validate</button><button class="btn primary" id="commitImport" type="button" disabled>3 · Commit + replay test</button></div>
-        <div class="result" id="csvResult" role="status" aria-live="polite">Зареди CSV файл.</div>
+        <div class="result" id="csvResult" role="status" aria-live="polite">Зареди CSV или XLSX файл.</div>
       </div>
     </section>
 
@@ -186,6 +204,7 @@
   <footer>Manufacturer Dashboard V1 · bearer session · active tenant · production APIs · no browser-local product database.</footer>
 </main>
 <script src="/assets/csp/manufacturer-inline-1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
 <script src="/assets/csp/manufacturer-ops-inline-1.js"></script>
 </body>
 </html>
