@@ -84,7 +84,7 @@ def main()->None:
     require(any(p["number"]==1 for p in public_points),"Step 20 matrix missing public unique identifier")
     require(any(p["number"]==43 for p in public_points),"Step 20 matrix missing public waste information")
 
-    require("sanitizePublicPayload(passport)" in api,"Step 20 server public projection sanitizer missing")
+    require("function sanitizePublicPassport" in api and "sanitizePublicPayload(value[key])" in api,"Step 20 server public projection sanitizer missing")
     require("public GET strips catalog-restricted nested fields even if upstream regresses" in api_tests,
             "Step 20 API regression proof for restricted public leakage missing")
     require("POST rejects restricted public fields before upstream access" in api_tests,
