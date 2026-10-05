@@ -235,6 +235,31 @@
         "http_status": 422,
         "code": "VALIDATION_ERROR",
         "message": "The request failed validation."
+      },
+      "DP612": {
+        "http_status": 409,
+        "code": "LIFECYCLE_ROUTE_REQUIRED",
+        "message": "Use a lifecycle action for terminal passport transitions."
+      },
+      "DP613": {
+        "http_status": 409,
+        "code": "LIFECYCLE_METADATA_MISSING",
+        "message": "Terminal passport lifecycle metadata is unavailable."
+      },
+      "DP614": {
+        "http_status": 409,
+        "code": "REPLACEMENT_NOT_ACTIVE",
+        "message": "The replacement passport is not active."
+      },
+      "DP615": {
+        "http_status": 409,
+        "code": "PASSPORT_STATE_NOT_TRANSITIONABLE",
+        "message": "Only an active passport may enter a terminal lifecycle state."
+      },
+      "DP616": {
+        "http_status": 422,
+        "code": "REPLACEMENT_INVALID",
+        "message": "The replacement passport is invalid."
       }
     },
     "export": {},
