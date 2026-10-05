@@ -2,6 +2,14 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/starter-documents",
+      "destination": "/demo/starter-documents.html"
+    },
+    {
+      "source": "/starter-documents/",
+      "destination": "/demo/starter-documents.html"
+    },
+    {
       "source": "/world",
       "destination": "/world/index.html"
     },
