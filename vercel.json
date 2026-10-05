@@ -2,6 +2,14 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/world",
+      "destination": "/world/index.html"
+    },
+    {
+      "source": "/world/",
+      "destination": "/world/index.html"
+    },
+    {
       "source": "/passport",
       "destination": "/live/passport"
     },
