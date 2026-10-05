@@ -45,7 +45,7 @@ function restoreSession(){
   return false;
 }
 function confirmationRedirect(){return new URL("/company",location.origin).href}
-function recoveryRedirect(){const u=new URL("/company",location.origin);u.searchParams.set("recovery","1");return u.href}
+function recoveryRedirect(){return new URL("/company",location.origin).href}
 function parseConfirmationFragment(){
   const p=new URLSearchParams(location.hash.replace(/^#/,""));
   if(!p.get("access_token"))return false;
