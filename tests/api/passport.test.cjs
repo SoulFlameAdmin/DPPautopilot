@@ -22,6 +22,8 @@ function publicPassportFixture(overrides={}) {
     battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     unique_identifier:'urn:dpp:1',
     status:'active',
+    public_state:'active',
+    replacement_identifier:null,
     public_payload:{},
     updated_at:'2026-09-19T04:00:00.000Z',
     ...overrides
@@ -66,6 +68,36 @@ test('public GET uses anon RPC without bearer', async () => {
     assert.equal(seen.options.headers.Authorization,undefined);
     assert.equal(seen.options.headers.apikey,'anon-key');
     assert.deepEqual(JSON.parse(seen.options.body),{p_unique_identifier:'urn:dpp:1'});
+  } finally { global.fetch=original; restore(); }
+});
+
+
+test('public GET terminal tombstone preserves lifecycle state but strips payload', async () => {
+  const restore=withEnv(), original=global.fetch;
+  global.fetch=async()=>({
+    ok:true,
+    async json(){
+      return publicPassportFixture({
+        unique_identifier:'urn:dpp:old',
+        status:'retired',
+        public_state:'replaced',
+        replacement_identifier:'urn:dpp:new',
+        public_payload:{
+          model:{identification:{manufacturer:{name:'Previously public maker'}}},
+          item:{unique_identifier:'urn:dpp:old'}
+        }
+      });
+    }
+  });
+  try {
+    const res=makeRes();
+    await handler(makeReq('GET',null,{identifier:'urn:dpp:old'},null),res);
+    assert.equal(res.statusCode,200);
+    const data=JSON.parse(res.body).data;
+    assert.equal(data.public_state,'replaced');
+    assert.equal(data.replacement_identifier,'urn:dpp:new');
+    assert.deepEqual(data.public_payload,{});
+    assert.equal(res.body.includes('Previously public maker'),false);
   } finally { global.fetch=original; restore(); }
 });
 
@@ -203,6 +235,56 @@ test('PATCH validates status and forwards update', async () => {
       p_expected_updated_at:'2026-09-19T04:00:00.000Z'
     });
   } finally { global.fetch=original; restore(); }
+});
+
+
+test('PATCH terminalize forwards fail-closed replacement transition', async () => {
+  const restore=withEnv(), original=global.fetch;
+  let seen;
+  global.fetch=async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return privatePassportFixture({
+      status:'retired',
+      public_terminal_state:'replaced',
+      replacement_identifier:'urn:dpp:new'
+    });}};
+  };
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      action:'terminalize',
+      terminal_state:'replaced',
+      replacement_identifier:' urn:dpp:new ',
+      expected_updated_at:'2026-09-19T04:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,200);
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_passport_terminalize');
+    assert.deepEqual(JSON.parse(seen.options.body),{
+      p_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      p_terminal_state:'replaced',
+      p_replacement_identifier:'urn:dpp:new',
+      p_expected_updated_at:'2026-09-19T04:00:00.000Z'
+    });
+  } finally { global.fetch=original; restore(); }
+});
+
+test('PATCH terminalize rejects replacement identifier for non-replaced states before upstream', async () => {
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true; throw new Error('unexpected');};
+  try {
+    const res=makeRes();
+    await handler(makeReq('PATCH',{
+      id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      action:'terminalize',
+      terminal_state:'retired',
+      replacement_identifier:'urn:dpp:should-not-be-here',
+      expected_updated_at:'2026-09-19T04:00:00.000Z'
+    }),res);
+    assert.equal(res.statusCode,422);
+    assert.equal(called,false);
+  } finally { global.fetch=original; }
 });
 
 test('privacy policy violation maps to stable 422 without DB detail leak', async () => {
