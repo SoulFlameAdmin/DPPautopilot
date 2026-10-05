@@ -62,7 +62,7 @@ test('public GET uses anon RPC without bearer', async () => {
     const res=makeRes();
     await handler(makeReq('GET',null,{identifier:' urn:dpp:1 '},null),res);
     assert.equal(res.statusCode,200);
-    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_passport_public');
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_passport_public_resolve');
     assert.equal(seen.options.headers.Authorization,undefined);
     assert.equal(seen.options.headers.apikey,'anon-key');
     assert.deepEqual(JSON.parse(seen.options.body),{p_unique_identifier:'urn:dpp:1'});
@@ -549,4 +549,22 @@ test('public carrier GET records an attributed QR scan', async () => {
     assert.deepEqual(JSON.parse(seen.options.body),{p_unique_identifier:'urn:dpp:scan:1',p_source:'qr'});
     assert.equal(JSON.parse(res.body).data.kind,'active');
   } finally { global.fetch=original; restore(); }
+});
+
+
+test('authenticated passport list uses one tenant-scoped management RPC', async () => {
+  const restore=withEnv(), original=global.fetch;
+  let seen;
+  global.fetch=async(url,options)=>{
+    seen={url,options};
+    return {ok:true,async json(){return [{passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',unique_identifier:'BAT-LIST-1',status:'active',created_at:'2026-10-05T10:00:00Z',updated_at:'2026-10-05T10:00:00Z'}];}};
+  };
+  try{
+    const res=makeRes();
+    await handler(makeReq('GET',null,{list:'1',limit:'100'}),res);
+    assert.equal(res.statusCode,200);
+    assert.match(seen.url,/dpp_api_passports_list$/);
+    assert.deepEqual(JSON.parse(seen.options.body),{p_limit:100});
+    assert.equal(JSON.parse(res.body).data.length,1);
+  }finally{global.fetch=original;restore();}
 });
