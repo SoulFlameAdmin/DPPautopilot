@@ -46,19 +46,24 @@ begin
   where n.nspname='public'
     and p.proname like 'dpp\_%' escape '\'
     and has_function_privilege('anon',p.oid,'EXECUTE')
-    and p.oid::regprocedure::text <> 'dpp_api_passport_public(text)';
+    and p.oid::regprocedure::text not in (
+      'dpp_api_passport_public(text)',
+      'dpp_api_passport_public_resolve(text)'
+    );
 
   if v_anon_extra is not null then
     raise exception 'Unexpected anon DPP RPC exposure: %',v_anon_extra;
   end if;
 
-  if not has_function_privilege(
-    'anon',
-    to_regprocedure('public.dpp_api_passport_public(text)'),
-    'EXECUTE'
-  ) then
-    v_anon_missing := 'dpp_api_passport_public(text)';
-  end if;
+  with required(signature) as (
+    values
+      ('dpp_api_passport_public(text)'),
+      ('dpp_api_passport_public_resolve(text)')
+  )
+  select string_agg(r.signature,', ' order by r.signature)
+    into v_anon_missing
+  from required r
+  where not has_function_privilege('anon',to_regprocedure('public.'||r.signature),'EXECUTE');
 
   if v_anon_missing is not null then
     raise exception 'Required anon DPP RPC missing EXECUTE: %',v_anon_missing;
@@ -93,6 +98,8 @@ begin
       'dpp_api_scooter_battery_batch_provision(uuid,text,jsonb)',
       'dpp_api_scooter_passport_readiness(uuid)',
       'dpp_api_scooter_passport_activate(uuid,timestamp with time zone)',
+      'dpp_api_passport_public_resolve(text)',
+      'dpp_api_scooter_passport_transition(uuid,text,text,text,text,timestamp with time zone)',
       'dpp_api_scooter_completeness_by_identifier(text)',
       'dpp_api_scooter_authority_evidence_submit(uuid,integer,jsonb)',
       'dpp_api_retention_status()',
@@ -144,6 +151,8 @@ begin
       ('dpp_api_scooter_battery_batch_provision(uuid,text,jsonb)'),
       ('dpp_api_scooter_passport_readiness(uuid)'),
       ('dpp_api_scooter_passport_activate(uuid,timestamp with time zone)'),
+      ('dpp_api_passport_public_resolve(text)'),
+      ('dpp_api_scooter_passport_transition(uuid,text,text,text,text,timestamp with time zone)'),
       ('dpp_api_scooter_completeness_by_identifier(text)'),
       ('dpp_api_scooter_authority_evidence_submit(uuid,integer,jsonb)'),
       ('dpp_api_retention_status()'),

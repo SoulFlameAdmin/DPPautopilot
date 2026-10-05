@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
@@ -312,6 +312,29 @@
         "shared consume RPC requires authenticated request-user context and validated pseudonymous key format",
         "canonical 429 behavior remains process-local until shared runtime wiring is accepted"
       ]
+    },
+    {
+      "id": "passport_lifecycle_tombstones",
+      "classification": "business_operational_public_status",
+      "purpose": "Preserve a resolvable public status when an individual passport is retired, revoked, or replaced, while withholding the old public/private payload",
+      "location": "Supabase Postgres public.dpp_passport_lifecycle with public access only through a minimal security-definer resolver",
+      "processor": "Supabase",
+      "tables": [
+        "dpp_passport_lifecycle"
+      ],
+      "fields": "passport_id, organization_id, disposition, standardized reason_code, private reason_note, optional replacement_item_id, changed_by, changed_at",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "Lifecycle tombstone persists with the passport so previously printed QR identifiers remain explainable. Final legal retention period remains a separate acceptance gate."
+      },
+      "controls": [
+        "RLS enabled and direct anon/authenticated table access revoked",
+        "public resolver returns disposition, reason_code, timestamps and replacement identifier only",
+        "reason_note, changed_by, organization_id and old passport payloads are never returned on the public tombstone",
+        "replacement must be an ACTIVE passport in the same organization",
+        "terminal transition requires owner/admin/editor role and optimistic concurrency"
+      ],
+      "minimization_note": "Free-text reason_note is organization-private. Public users receive only a standardized reason_code and, for replaced records, the active replacement identifier."
     }
   ],
   "out_of_scope_shared_project_data": "All non-dpp_* application tables in the shared Supabase project are owned by other applications and are not part of DPP Autopilot privacy inventory.",

@@ -18,6 +18,7 @@ function makeReq(method, body, query, auth='Bearer test-token') {
 }
 function publicPassportFixture(overrides={}) {
   return {
+    kind:'active',
     passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     unique_identifier:'urn:dpp:1',
@@ -62,7 +63,7 @@ test('public GET uses anon RPC without bearer', async () => {
     const res=makeRes();
     await handler(makeReq('GET',null,{identifier:' urn:dpp:1 '},null),res);
     assert.equal(res.statusCode,200);
-    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_passport_public');
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_passport_public_resolve');
     assert.equal(seen.options.headers.Authorization,undefined);
     assert.equal(seen.options.headers.apikey,'anon-key');
     assert.deepEqual(JSON.parse(seen.options.body),{p_unique_identifier:'urn:dpp:1'});
@@ -282,6 +283,7 @@ test('public GET strips catalog-restricted nested fields even if upstream regres
     ok:true,
     async json(){
       return {
+        kind:'active',
         passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         unique_identifier:'urn:dpp:public-safe',

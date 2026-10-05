@@ -97,9 +97,12 @@ def main()->None:
         require(token in docs,f"Step 20 acceptance doc missing: {token}")
 
     task=next(t for t in master["tasks"] if t["id"]==20)
-    require(task["status"]=="green","Official master point 20 must be GREEN")
-    require(master["sequentialProgress"]=={"greenThrough":20,"next":21},"Official master must advance to point 21")
-    require(master["counts"]=={"green":27,"yellow":46,"red":27,"total":100},"Official master counts drift after Step 20")
+    require(task["status"]=="green","Official master point 20 must remain GREEN")
+    progress=master["sequentialProgress"]
+    require(progress["greenThrough"]>=20 and progress["next"]==progress["greenThrough"]+1,
+            "Official master may advance beyond Step 20 but cannot regress below it")
+    require(master["counts"]["green"]>=27 and master["counts"]["total"]==100,
+            "Official master counts regressed below Step 20")
 
     print("STEP20_PUBLIC_PASSPORT_UX_PASS: ACTIVE public passport is human-readable, EU-traceable, responsive and double-allowlisted against restricted data")
 
