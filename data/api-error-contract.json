@@ -255,6 +255,11 @@
         "http_status": 409,
         "code": "REPLACEMENT_PASSPORT_INVALID",
         "message": "The replacement must be a different active passport in the same organization."
+      },
+      "DP705": {
+        "http_status": 404,
+        "code": "CARRIER_NOT_BOUND",
+        "message": "No active physical carrier is bound for this scan source."
       }
     },
     "export": {},
@@ -437,6 +442,48 @@
         "http_status": 409,
         "code": "BATCH_STATE_CONFLICT",
         "message": "The stored batch membership is inconsistent with the provisioning request."
+      }
+    },
+    "carrier": {
+      "23505": {
+        "http_status": 409,
+        "code": "CARRIER_CONFLICT",
+        "message": "The physical carrier conflicts with an existing record."
+      },
+      "DP701": {
+        "http_status": 422,
+        "code": "INVALID_CARRIER_KIND",
+        "message": "The carrier kind is invalid."
+      },
+      "DP702": {
+        "http_status": 422,
+        "code": "INVALID_NFC_TECHNOLOGY",
+        "message": "The NFC technology is invalid."
+      },
+      "DP703": {
+        "http_status": 422,
+        "code": "INVALID_CARRIER_URL",
+        "message": "The carrier target URL is invalid."
+      },
+      "DP704": {
+        "http_status": 422,
+        "code": "INVALID_EXTERNAL_UID",
+        "message": "The external carrier UID is invalid."
+      },
+      "DP705": {
+        "http_status": 404,
+        "code": "CARRIER_NOT_FOUND",
+        "message": "The active physical carrier was not found."
+      },
+      "DP706": {
+        "http_status": 404,
+        "code": "ITEM_NOT_FOUND",
+        "message": "The battery item was not found."
+      },
+      "DP707": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The carrier request failed validation."
       }
     }
   },
