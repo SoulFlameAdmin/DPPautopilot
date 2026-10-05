@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DPP WORLD · Control Center</title>
+  <meta name="description" content="DPP World Control Center — глобална карта за targets, контакти, клиенти и системен прогрес.">
+  <link rel="stylesheet" href="/world/world.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">DPP AUTOPILOT</a>
+    <div class="title">WORLD CONTROL CENTER</div>
+    <div class="actions">
+      <button id="resetView" class="ghost">Reset Earth</button>
+      <button id="addTarget" class="primary">+ Добави target</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="globe-panel">
+      <div class="globe-head">
+        <div>
+          <div class="eyebrow">GLOBAL DPP PIPELINE</div>
+          <h1>Една Земя. Всички targets.</h1>
+        </div>
+        <div class="legend">
+          <span><i class="dot target"></i>Target</span>
+          <span><i class="dot contacted"></i>Contacted</span>
+          <span><i class="dot pilot"></i>Pilot</span>
+          <span><i class="dot client"></i>Client</span>
+        </div>
+      </div>
+
+      <div class="globe-wrap">
+        <canvas id="globe" width="1100" height="780" aria-label="Интерактивна 3D Земя с DPP targets"></canvas>
+        <div class="globe-tip">Drag → върти · wheel → zoom · клик върху точка → фирма</div>
+      </div>
+
+      <div class="filters" id="filters">
+        <button data-filter="all" class="active">Всички</button>
+        <button data-filter="battery">Battery</button>
+        <button data-filter="scooter">Scooter</button>
+        <button data-filter="solar">Solar</button>
+        <button data-filter="detergent">Detergents</button>
+        <button data-filter="textile">Textile</button>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="panel">
+        <div class="panel-head">
+          <div><div class="eyebrow">CRM</div><h2>Targets & Clients</h2></div>
+          <span id="companyCount" class="badge">0</span>
+        </div>
+        <div id="companyList" class="company-list"></div>
+      </section>
+
+      <section class="panel progress-panel">
+        <div class="panel-head">
+          <div><div class="eyebrow">SYSTEM</div><h2>DPP System Progress</h2></div>
+          <strong id="systemPct">0%</strong>
+        </div>
+        <div id="systemProgress" class="progress-list"></div>
+      </section>
+    </aside>
+  </main>
+
+  <dialog id="targetDialog">
+    <form method="dialog" id="targetForm">
+      <div class="dialog-head">
+        <div><div class="eyebrow">NEW COMPANY</div><h2>Добави DPP target</h2></div>
+        <button value="cancel" class="ghost" type="submit">✕</button>
+      </div>
+      <div class="form-grid">
+        <label>Фирма<input name="name" required placeholder="Company name"></label>
+        <label>Държава<input name="country" required placeholder="Bulgaria"></label>
+        <label>Град<input name="city" placeholder="Sofia"></label>
+        <label>Latitude<input name="lat" required type="number" step="0.0001" min="-90" max="90" placeholder="42.6977"></label>
+        <label>Longitude<input name="lon" required type="number" step="0.0001" min="-180" max="180" placeholder="23.3219"></label>
+        <label>Сектор
+          <select name="sector">
+            <option value="battery">Battery</option>
+            <option value="scooter">Scooter</option>
+            <option value="solar">Solar</option>
+            <option value="detergent">Detergents</option>
+            <option value="textile">Textile</option>
+          </select>
+        </label>
+        <label>Статус
+          <select name="status">
+            <option value="target">Target</option>
+            <option value="contacted">Contacted</option>
+            <option value="pilot">Pilot</option>
+            <option value="client">Client</option>
+          </select>
+        </label>
+        <label>Потенциал €/мес<input name="mrr" type="number" min="0" step="1" value="0"></label>
+      </div>
+      <label>Следваща стъпка<textarea name="next" rows="3" placeholder="Demo / call / contract / integration"></textarea></label>
+      <div class="dialog-actions">
+        <button value="cancel" type="submit" class="ghost">Отказ</button>
+        <button value="default" type="submit" class="primary" id="saveTarget">Запази</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/world/world.js"></script>
+</body>
+</html>
