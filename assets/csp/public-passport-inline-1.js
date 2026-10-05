@@ -16,6 +16,19 @@ const CATEGORY_LABELS={
   starting_lighting_ignition:'SLI',
   other:'Other'
 };
+const LIFECYCLE_LABELS={
+  retired:'Паспортът е приключил жизнения си цикъл',
+  revoked:'Паспортът е отнет',
+  replaced:'Паспортът е заменен'
+};
+const LIFECYCLE_REASON_LABELS={
+  end_of_life:'Край на жизнения цикъл',
+  operator_revoked:'Отнет от оператора',
+  safety_or_compliance:'Безопасност или съответствие',
+  incorrect_record:'Некоректен запис',
+  product_replaced:'Продуктът е заменен',
+  other:'Друга причина'
+};
 
 const $=selector=>document.querySelector(selector);
 function identifierFromLocation(){
@@ -227,6 +240,50 @@ function renderHero(passport,identifier){
 
   card.append(left,right);hero.append(card);
 }
+function renderLifecycle(passport,identifier){
+  const hero=$('#hero');hero.replaceChildren();
+  const card=document.createElement('div');card.className='hero-card lifecycle-hero';
+  const left=document.createElement('div');
+  const eyebrow=document.createElement('p');eyebrow.className='eyebrow';eyebrow.textContent='PUBLIC PASSPORT LIFECYCLE';
+  const h1=document.createElement('h1');h1.textContent=LIFECYCLE_LABELS[passport.status]||'Паспортът вече не е активен';
+  const sub=document.createElement('p');sub.className='hero-subtitle';
+  sub.textContent='Старите продуктови данни не се публикуват след terminal transition. Показва се само минималният lifecycle запис.';
+  const uid=document.createElement('div');uid.className='identifier';uid.dataset.publicUid='';uid.textContent=identifier;
+  const meta=document.createElement('div');meta.className='lifecycle-meta';
+  const reason=document.createElement('div');reason.className='lifecycle-meta-row';
+  const reasonKey=document.createElement('span');reasonKey.textContent='Причина';
+  const reasonValue=document.createElement('strong');reasonValue.textContent=LIFECYCLE_REASON_LABELS[passport.reason_code]||labelize(passport.reason_code);
+  reason.append(reasonKey,reasonValue);
+  const changed=document.createElement('div');changed.className='lifecycle-meta-row';
+  const changedKey=document.createElement('span');changedKey.textContent='Променен';
+  const changedValue=document.createElement('strong');changedValue.textContent=formatDate(passport.changed_at||passport.updated_at);
+  changed.append(changedKey,changedValue);
+  meta.append(reason,changed);
+  left.append(eyebrow,h1,sub,uid,meta);
+
+  const right=document.createElement('div');right.className='status-stack';
+  const status=document.createElement('div');status.className='status-card terminal';
+  const statusStrong=document.createElement('strong');statusStrong.textContent='● '+String(passport.status||'terminal').toUpperCase();
+  const statusSmall=document.createElement('small');statusSmall.textContent='Този identifier не сочи към ACTIVE паспорт.';
+  status.append(statusStrong,statusSmall);right.append(status);
+
+  if(passport.status==='replaced'&&passport.replacement_identifier){
+    const replacement=document.createElement('a');
+    replacement.className='button primary replacement-link';
+    replacement.href='/passport?identifier='+encodeURIComponent(passport.replacement_identifier);
+    replacement.textContent='Отвори заместващия паспорт →';
+    right.append(replacement);
+  }
+
+  card.append(left,right);hero.append(card);
+  $('#trustStrip').hidden=true;
+  $('#sectionNav').hidden=true;
+  $('#passportSections').replaceChildren();
+  renderTechnical(passport,identifier);
+  document.body.dataset.publicFieldCount='0';
+  document.body.dataset.publicSectionCount='0';
+}
+
 function renderTechnical(passport,identifier){
   $('#technicalPanel').hidden=false;
   $('#techIdentifier').textContent=identifier;
@@ -270,10 +327,21 @@ function renderError(message,identifier=''){
       if(code==='PUBLIC_PASSPORT_NOT_FOUND'||code==='PASSPORT_NOT_FOUND')throw new Error('Не е намерен ACTIVE публичен паспорт за този identifier.');
       throw new Error(body?.error?.message||code);
     }
+    const passport=body?.data;
+    if(passport?.kind==='lifecycle'){
+      renderLifecycle(passport,identifier);
+      document.body.dataset.passportReady='true';
+      document.body.dataset.passportError='false';
+      document.body.dataset.passportIdentifier=identifier;
+      document.body.dataset.passportStatus=passport.status;
+      document.body.dataset.passportLifecycle='terminal';
+      document.body.dataset.restrictedLeak='false';
+      return;
+    }
+
     if(!matrixResponse.ok)throw new Error('Public field mapping is temporarily unavailable.');
     const matrix=await matrixResponse.json();
-    const passport=body?.data;
-    if(!passport||passport.status!=='active'||!passport.public_payload)throw new Error('Публичният паспорт не е ACTIVE.');
+    if(!passport||passport.kind!=='active'||passport.status!=='active'||!passport.public_payload)throw new Error('Публичният паспорт не е ACTIVE.');
 
     renderHero(passport,identifier);
     renderSections(passport,matrix);
@@ -284,6 +352,7 @@ function renderError(message,identifier=''){
     document.body.dataset.passportError='false';
     document.body.dataset.passportIdentifier=identifier;
     document.body.dataset.passportStatus='active';
+    document.body.dataset.passportLifecycle='active';
     document.body.dataset.restrictedLeak='false';
   }catch(error){
     renderError(error?.message||'Public passport could not be loaded.',identifier);
