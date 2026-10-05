@@ -285,7 +285,7 @@
       "id": 36,
       "title": "XLSX / Excel import",
       "status": "green",
-      "plain": "Production XLSX import е live: self-hosted pinned parser, multi-sheet selection, local size/row/column/header guards и същият authenticated mapping→validate→atomic commit→idempotency pipeline като CSV."
+      "plain": "Production XLSX import е live: self-hosted patched SheetJS 0.20.3, multi-sheet selection, local size/row/column/header guards и същият authenticated mapping→validate→atomic commit→idempotency pipeline като CSV."
     },
     {
       "id": 37,
