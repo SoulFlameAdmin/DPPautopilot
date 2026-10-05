@@ -46,19 +46,24 @@ begin
   where n.nspname='public'
     and p.proname like 'dpp\_%' escape '\'
     and has_function_privilege('anon',p.oid,'EXECUTE')
-    and p.oid::regprocedure::text <> 'dpp_api_passport_public(text)';
+    and p.oid::regprocedure::text not in (
+      'dpp_api_passport_public(text)',
+      'dpp_api_passport_public_resolve(text)'
+    );
 
   if v_anon_extra is not null then
     raise exception 'Unexpected anon DPP RPC exposure: %',v_anon_extra;
   end if;
 
-  if not has_function_privilege(
-    'anon',
-    to_regprocedure('public.dpp_api_passport_public(text)'),
-    'EXECUTE'
-  ) then
-    v_anon_missing := 'dpp_api_passport_public(text)';
-  end if;
+  with required(signature) as (
+    values
+      ('dpp_api_passport_public(text)'),
+      ('dpp_api_passport_public_resolve(text)')
+  )
+  select string_agg(r.signature,', ' order by r.signature)
+    into v_anon_missing
+  from required r
+  where not has_function_privilege('anon',to_regprocedure('public.'||r.signature),'EXECUTE');
 
   if v_anon_missing is not null then
     raise exception 'Required anon DPP RPC missing EXECUTE: %',v_anon_missing;
