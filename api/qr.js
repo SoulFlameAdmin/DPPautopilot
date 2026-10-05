@@ -29,7 +29,7 @@ function canonicalOrigin(env = process.env) {
 }
 
 function buildPassportUrl(identifier, env = process.env) {
-  return canonicalOrigin(env) + '/passport?identifier=' + encodeURIComponent(identifier);
+  return canonicalOrigin(env) + '/passport?identifier=' + encodeURIComponent(identifier) + '&carrier=qr';
 }
 
 function renderQrSvg(targetUrl) {
