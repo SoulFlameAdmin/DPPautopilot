@@ -10,12 +10,12 @@
   "updatedAt": "2026-10-05",
   "canonicalRepo": "SoulFlameAdmin/DPPautopilot",
   "sequentialProgress": {
-    "greenThrough": 36,
-    "next": 37
+    "greenThrough": 35,
+    "next": 36
   },
   "counts": {
-    "green": 37,
-    "yellow": 37,
+    "green": 36,
+    "yellow": 38,
     "red": 26,
     "total": 100
   },
@@ -284,8 +284,8 @@
     {
       "id": 36,
       "title": "XLSX / Excel import",
-      "status": "green",
-      "plain": "Production XLSX import е live: self-hosted patched SheetJS 0.20.3, multi-sheet selection, local size/row/column/header guards и същият authenticated mapping→validate→atomic commit→idempotency pipeline като CSV."
+      "status": "yellow",
+      "plain": "XLSX implementation и regression acceptance са готови в main с patched SheetJS 0.20.3, multi-sheet selection и production import pipeline; остава новият main commit да достигне production alias след Vercel daily deployment reset."
     },
     {
       "id": 37,
