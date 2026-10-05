@@ -260,6 +260,11 @@
         "http_status": 404,
         "code": "CARRIER_NOT_BOUND",
         "message": "No active physical carrier is bound for this scan source."
+      },
+      "DP417": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The passport list request failed validation."
       }
     },
     "export": {},
