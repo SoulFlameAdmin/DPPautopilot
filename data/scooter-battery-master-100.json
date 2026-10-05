@@ -10,12 +10,12 @@
   "updatedAt": "2026-10-05",
   "canonicalRepo": "SoulFlameAdmin/DPPautopilot",
   "sequentialProgress": {
-    "greenThrough": 28,
-    "next": 29
+    "greenThrough": 35,
+    "next": 36
   },
   "counts": {
-    "green": 29,
-    "yellow": 44,
+    "green": 36,
+    "yellow": 37,
     "red": 27,
     "total": 100
   },
@@ -242,44 +242,44 @@
     {
       "id": 29,
       "title": "Passports tab production",
-      "status": "yellow",
-      "plain": "Backend има; финалният management UI остава."
+      "status": "green",
+      "plain": "Production Passports management е live: tenant-scoped list RPC + status/search + links към completeness, public passport и QR."
     },
     {
       "id": 30,
       "title": "QR / Print Center production",
-      "status": "yellow",
-      "plain": "QR и printable page работят; центърът за масова работа остава."
+      "status": "green",
+      "plain": "Bulk QR/Print Center е live: избира ACTIVE passports, гарантира QR carrier binding и генерира print sheet с отделен scan-aware QR за всяка физическа батерия."
     },
     {
       "id": 31,
       "title": "Secure physical carrier binding",
-      "status": "yellow",
-      "plain": "Има carrier/NFC основа; финалното production binding и acceptance остават."
+      "status": "green",
+      "plain": "Secure carrier binding е production: QR/NFC URL се derive-ва server-side от tenant battery identifier; arbitrary public_url bind е заключен; production DB acceptance PASS."
     },
     {
       "id": 32,
       "title": "Carrier revoke / reissue / reprint",
-      "status": "yellow",
-      "plain": "Трябва финален операторски flow."
+      "status": "green",
+      "plain": "Carrier lifecycle е production: revoke, reissue и non-mutating QR reprint са в операторския UI; bind→revoke→reissue acceptance PASS."
     },
     {
       "id": 33,
       "title": "Scan history",
-      "status": "yellow",
-      "plain": "Има scan-event основа; production UX/acceptance остават."
+      "status": "green",
+      "plain": "Scan history е production: bound QR/NFC opens записват attributed events и tenant-scoped history UI ги показва; production DB acceptance PASS."
     },
     {
       "id": 34,
       "title": "CSV upload / mapping UI",
-      "status": "yellow",
-      "plain": "CSV core и mapping логика съществуват; финалната production форма остава."
+      "status": "green",
+      "plain": "CSV upload/mapping е production: real file upload, canonical column mapping, preview/local validation и staging през authenticated /api/imports."
     },
     {
       "id": 35,
       "title": "CSV transaction / idempotency acceptance",
-      "status": "yellow",
-      "plain": "Core е наличен; иска пълен real-data acceptance."
+      "status": "green",
+      "plain": "Transactional import/idempotency acceptance е PASS: validate→commit→second commit NO-OP, еднакъв committed row count и rollback-isolated production DB proof."
     },
     {
       "id": 36,
