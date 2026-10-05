@@ -1,0 +1,374 @@
+(()=>{"use strict";
+const $=s=>document.querySelector(s);
+const STORAGE="dpp_company_session_v1";
+const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
+const CATEGORIES=new Set(["portable","light_means_of_transport","starting_lighting_ignition","industrial","electric_vehicle","other"]);
+const FIELD_OPTIONS=[
+ ["","— Ignore —"],
+ ["model.identification.manufacturer.name","Manufacturer name"],
+ ["model.identification.model_id","Model ID"],
+ ["model.identification.category","Category"],
+ ["model.rated_capacity_ah","Rated capacity (Ah)"],
+ ["model.composition.chemistry","Chemistry"],
+ ["item.unique_identifier","Unique identifier"],
+ ["item.lifecycle_status","Lifecycle status"],
+ ["item.state_of_health.percent","State of health (%)"]
+];
+const DEFAULT_MAP={
+ manufacturer_name:"model.identification.manufacturer.name",
+ manufacturer:"model.identification.manufacturer.name",
+ model_id:"model.identification.model_id",
+ model_identifier:"model.identification.model_id",
+ category:"model.identification.category",
+ rated_capacity_ah:"model.rated_capacity_ah",
+ chemistry:"model.composition.chemistry",
+ unique_identifier:"item.unique_identifier",
+ serial:"item.unique_identifier",
+ lifecycle_status:"item.lifecycle_status",
+ state_of_health_percent:"item.state_of_health.percent"
+};
+let cfg=null,session=null,activeOrg=null,items=[],passports=[],csv={headers:[],rows:[],mapping:{},importId:null,validated:false};
+
+function setText(node,msg,kind=""){if(!node)return;node.textContent=msg;node.className="result"+(kind?" "+kind:"")}
+function readSession(){
+ try{const v=JSON.parse(sessionStorage.getItem(STORAGE)||"null");if(v?.access_token){session=v;return true}}catch{}
+ session=null;return false;
+}
+function saveSession(v){
+ if(v?.access_token){session={access_token:v.access_token,refresh_token:v.refresh_token||session?.refresh_token||"",expires_in:Number(v.expires_in)||3600};sessionStorage.setItem(STORAGE,JSON.stringify(session))}
+ else{session=null;sessionStorage.removeItem(STORAGE)}
+}
+async function authCall(path,body){
+ const r=await fetch(cfg.supabaseUrl+path,{method:"POST",headers:{apikey:cfg.publishableKey,"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(body)});
+ const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.msg||data.message||data.error_description||data.error||("HTTP "+r.status));return data;
+}
+async function refresh(){
+ if(!session?.refresh_token)return false;
+ try{saveSession(await authCall("/auth/v1/token?grant_type=refresh_token",{refresh_token:session.refresh_token}));return true}catch{return false}
+}
+async function api(path,{method="GET",body,retry=true}={}){
+ if(!session?.access_token)throw new Error("Login required.");
+ const r=await fetch(path,{method,headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json",Accept:"application/json"},body:body?JSON.stringify(body):undefined,cache:"no-store"});
+ const data=await r.json().catch(()=>({}));
+ if(r.status===401&&retry&&await refresh())return api(path,{method,body,retry:false});
+ if(!r.ok)throw new Error(data?.error?.message||data?.error?.code||("HTTP "+r.status));
+ return data;
+}
+function canWrite(){return !!activeOrg&&["owner","admin","editor"].includes(activeOrg.role)}
+function fmt(v){const d=new Date(v);return Number.isNaN(d.getTime())?String(v||"—"):new Intl.DateTimeFormat("bg-BG",{dateStyle:"medium",timeStyle:"short"}).format(d)}
+function button(label,cls="btn"){const b=document.createElement("button");b.type="button";b.className=cls;b.textContent=label;return b}
+function link(label,href,cls="btn"){const a=document.createElement("a");a.className=cls;a.href=href;a.textContent=label;return a}
+function option(text,value){return new Option(text,value)}
+function itemById(id){return items.find(x=>x.id===id)||null}
+function passportByItem(id){return passports.find(x=>x.battery_item_id===id)||null}
+
+async function loadBase(){
+ const [orgData,itemData,passportData]=await Promise.all([
+  api("/api/organizations"),api("/api/items"),api("/api/passport?list=1&limit=500")
+ ]);
+ const orgs=orgData.data||[];activeOrg=orgs.find(o=>o.active)||null;
+ if(!activeOrg)throw new Error("Active company is required.");
+ items=itemData.data||[];passports=passportData.data||[];
+ renderPassportStats();renderPassports();renderCarrierItemOptions();
+ document.body.dataset.manufacturerOpsReady="true";
+}
+
+function renderPassportStats(){
+ const counts={all:passports.length,draft:0,active:0,terminal:0};
+ for(const p of passports){if(p.status==="draft")counts.draft++;else if(p.status==="active")counts.active++;else counts.terminal++}
+ $("#opsPassportCount").textContent=counts.all;$("#opsActiveCount").textContent=counts.active;$("#opsDraftCount").textContent=counts.draft;$("#opsTerminalCount").textContent=counts.terminal;
+}
+function renderPassports(){
+ const host=$("#passportOpsList"),q=$("#passportSearch").value.trim().toLowerCase();host.replaceChildren();
+ const rows=passports.filter(p=>!q||p.unique_identifier.toLowerCase().includes(q)||p.status.toLowerCase().includes(q));
+ if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent="Няма паспорти за този филтър.";host.append(e);return}
+ for(const p of rows){
+  const row=document.createElement("article");row.className="ops-row";row.dataset.passportId=p.passport_id;
+  const left=document.createElement("div");
+  const checkWrap=document.createElement("label");checkWrap.className="ops-check";
+  const check=document.createElement("input");check.type="checkbox";check.className="passport-print-check";check.dataset.itemId=p.battery_item_id;check.dataset.identifier=p.unique_identifier;check.disabled=p.status!=="active";
+  const strong=document.createElement("strong");strong.textContent=p.unique_identifier;
+  checkWrap.append(check,strong);
+  const small=document.createElement("small");small.textContent="passport "+p.passport_id+" · updated "+fmt(p.updated_at);
+  left.append(checkWrap,small);
+  const actions=document.createElement("div");actions.className="ops-actions";
+  const pill=document.createElement("span");pill.className="pill"+(p.status==="active"?" ok":"");pill.textContent=p.status.toUpperCase();
+  const completeness=link("Completeness","/manufacturer/completeness?identifier="+encodeURIComponent(p.unique_identifier),"btn");
+  const publicLink=link("Public","/passport?identifier="+encodeURIComponent(p.unique_identifier),"btn");publicLink.target="_blank";publicLink.rel="noopener";
+  const qr=link("QR","/qr?identifier="+encodeURIComponent(p.unique_identifier),"btn");qr.target="_blank";qr.rel="noopener";
+  actions.append(pill,completeness,publicLink,qr);row.append(left,actions);host.append(row);
+ }
+}
+async function carriersFor(itemId){return (await api("/api/carriers?battery_item_id="+encodeURIComponent(itemId))).data||[]}
+async function ensureQrCarrier(itemId){
+ const existing=await carriersFor(itemId);
+ const active=existing.find(c=>c.carrier_kind==="qr"&&c.status==="active");
+ if(active)return active;
+ if(!canWrite())throw new Error("QR carrier is not bound and this role cannot bind one.");
+ return (await api("/api/carriers",{method:"POST",body:{battery_item_id:itemId,carrier_kind:"qr"}})).data;
+}
+function buildPrintSheet(rows){
+ const sheet=$("#printSheet");sheet.replaceChildren();
+ for(const p of rows){
+  const card=document.createElement("article");card.className="print-label";
+  const img=document.createElement("img");img.alt="DPP QR";img.src="/api/qr?identifier="+encodeURIComponent(p.unique_identifier);
+  const meta=document.createElement("div"),name=document.createElement("strong"),small=document.createElement("small");
+  name.textContent=p.unique_identifier;small.textContent="DPP Autopilot · ACTIVE battery passport";
+  meta.append(name,small);card.append(img,meta);sheet.append(card);
+ }
+ return [...sheet.querySelectorAll("img")];
+}
+async function printPassports(rows,{bind=true}={}){
+ if(!rows.length)throw new Error("Избери поне един ACTIVE passport.");
+ setText($("#printResult"),"Подготовка на "+rows.length+" QR labels…");
+ if(bind){for(const p of rows)await ensureQrCarrier(p.battery_item_id)}
+ const images=buildPrintSheet(rows);
+ await Promise.all(images.map(img=>img.decode?img.decode().catch(()=>{}):Promise.resolve()));
+ setText($("#printResult"),"QR labels са подготвени. Отварям системния print dialog.","ok");
+ window.print();
+}
+function selectedPassports(){
+ const ids=new Set([...document.querySelectorAll(".passport-print-check:checked")].map(x=>x.dataset.itemId));
+ return passports.filter(p=>ids.has(p.battery_item_id)&&p.status==="active");
+}
+
+function renderCarrierItemOptions(){
+ const select=$("#carrierItem"),old=select.value;select.replaceChildren(option("Избери battery item",""));
+ for(const item of items.slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))){
+  select.append(option(item.unique_identifier,item.id));
+ }
+ if(items.some(i=>i.id===old))select.value=old;
+}
+function syncCarrierForm(){
+ const nfc=$("#carrierKind").value==="nfc";
+ $("#nfcFields").hidden=!nfc;
+ $("#carrierNfcTech").disabled=!nfc||!canWrite();
+ $("#carrierExternalUid").disabled=!canWrite();
+ $("#bindCarrier").disabled=!canWrite()||!$("#carrierItem").value;
+}
+async function loadCarrierPanel(){
+ const itemId=$("#carrierItem").value,carrierHost=$("#carrierList"),historyHost=$("#scanHistory");
+ carrierHost.replaceChildren();historyHost.replaceChildren();
+ if(!itemId){setText($("#carrierResult"),"Избери battery item.");return}
+ setText($("#carrierResult"),"Зареждане на carriers и scan history…");
+ try{
+  const [carrierData,historyData]=await Promise.all([
+   api("/api/carriers?battery_item_id="+encodeURIComponent(itemId)),
+   api("/api/carriers?history=1&battery_item_id="+encodeURIComponent(itemId)+"&limit=100")
+  ]);
+  renderCarriers(carrierData.data||[]);renderScanHistory(historyData.data||[]);
+  setText($("#carrierResult"),"Production carrier state е зареден.","ok");
+ }catch(e){setText($("#carrierResult"),e.message,"bad")}
+}
+function renderCarriers(rows){
+ const host=$("#carrierList");host.replaceChildren();
+ if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent="Няма physical carriers за тази батерия.";host.append(e);return}
+ for(const c of rows){
+  const row=document.createElement("article");row.className="ops-row";
+  const left=document.createElement("div"),strong=document.createElement("strong"),small=document.createElement("small"),url=document.createElement("div");
+  strong.textContent=c.carrier_kind.toUpperCase()+" · "+c.status.toUpperCase()+(c.nfc_technology?" · "+c.nfc_technology:"");
+  small.textContent=(c.external_uid?"UID "+c.external_uid+" · ":"")+"bound "+fmt(c.bound_at);
+  url.className="carrier-url";url.textContent=c.public_url;
+  left.append(strong,small,url);
+  const actions=document.createElement("div");actions.className="ops-actions";
+  const copy=button("Copy URL");copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(c.public_url);copy.textContent="Copied ✓"}catch{copy.textContent="Copy failed"}});
+  actions.append(copy);
+  if(c.carrier_kind==="qr"){
+   const reprint=button("Reprint");reprint.addEventListener("click",async()=>{
+    const item=itemById(c.battery_item_id),p=passportByItem(c.battery_item_id);
+    try{await printPassports([p||{battery_item_id:item.id,unique_identifier:item.unique_identifier,status:"active"}],{bind:false})}catch(e){setText($("#carrierResult"),e.message,"bad")}
+   });actions.append(reprint);
+  }
+  if(c.status==="active"&&canWrite()){
+   const reissue=button("Reissue");reissue.addEventListener("click",async()=>{
+    try{
+     reissue.disabled=true;setText($("#carrierResult"),"Reissue на "+c.carrier_kind.toUpperCase()+" carrier…");
+     await api("/api/carriers",{method:"POST",body:{battery_item_id:c.battery_item_id,carrier_kind:c.carrier_kind,nfc_technology:c.carrier_kind==="nfc"?(c.nfc_technology||"other"):null,external_uid:c.external_uid||null}});
+     await loadCarrierPanel();setText($("#carrierResult"),"Carrier е reissued; старият е REPLACED.","ok");
+    }catch(e){setText($("#carrierResult"),e.message,"bad")}finally{reissue.disabled=false}
+   });
+   const revoke=button("Revoke","btn danger");revoke.addEventListener("click",async()=>{
+    if(!confirm("Revoke "+c.carrier_kind.toUpperCase()+" carrier?"))return;
+    try{await api("/api/carriers",{method:"PATCH",body:{id:c.id,action:"revoke",reason:"operator revoke"}});await loadCarrierPanel();setText($("#carrierResult"),"Carrier е revoked.","ok")}catch(e){setText($("#carrierResult"),e.message,"bad")}
+   });
+   actions.append(reissue,revoke);
+  }
+  row.append(left,actions);host.append(row);
+ }
+}
+function renderScanHistory(rows){
+ const host=$("#scanHistory");host.replaceChildren();
+ if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent="Все още няма записани QR/NFC opens.";host.append(e);return}
+ for(const e of rows){
+  const row=document.createElement("div");row.className="scan-row";
+  const src=document.createElement("span");src.className="scan-source";src.textContent=e.source;
+  const id=document.createElement("div");id.textContent=e.unique_identifier;
+  const when=document.createElement("small");when.textContent=fmt(e.occurred_at);
+  row.append(src,id,when);host.append(row);
+ }
+}
+async function bindCarrier(){
+ if(!canWrite())return;
+ const itemId=$("#carrierItem").value,kind=$("#carrierKind").value;
+ if(!itemId)return setText($("#carrierResult"),"Избери battery item.","bad");
+ const body={battery_item_id:itemId,carrier_kind:kind};
+ if(kind==="nfc"){body.nfc_technology=$("#carrierNfcTech").value;const uid=$("#carrierExternalUid").value.trim();if(uid)body.external_uid=uid}
+ $("#bindCarrier").disabled=true;setText($("#carrierResult"),"Secure binding към production backend…");
+ try{
+  const c=(await api("/api/carriers",{method:"POST",body})).data;
+  await loadCarrierPanel();
+  setText($("#carrierResult"),c.carrier_kind.toUpperCase()+" carrier ACTIVE · URL е derivеd server-side.","ok");
+ }catch(e){setText($("#carrierResult"),e.message,"bad")}
+ finally{syncCarrierForm()}
+}
+
+function parseCSV(text){
+ const rows=[];let row=[],cell="",quoted=false;
+ for(let i=0;i<text.length;i++){
+  const ch=text[i];
+  if(ch==='"'){if(quoted&&text[i+1]==='"'){cell+='"';i++}else quoted=!quoted}
+  else if(ch===","&&!quoted){row.push(cell);cell=""}
+  else if((ch==="\n"||ch==="\r")&&!quoted){if(ch==="\r"&&text[i+1]==="\n")i++;row.push(cell);cell="";if(row.some(v=>v!==""))rows.push(row);row=[]}
+  else cell+=ch;
+ }
+ if(quoted)throw new Error("CSV има незатворена кавичка.");
+ if(cell!==""||row.length){row.push(cell);if(row.some(v=>v!==""))rows.push(row)}
+ if(rows.length<2)throw new Error("CSV трябва да има header и поне един data row.");
+ const headers=rows[0].map(x=>x.trim());
+ if(headers.some(x=>!x))throw new Error("CSV има празно име на колона.");
+ if(new Set(headers).size!==headers.length)throw new Error("CSV има дублирани колони.");
+ if(rows.length-1>1000)throw new Error("Максимумът е 1000 data rows на import.");
+ return {headers,rows:rows.slice(1).map(r=>headers.map((_,i)=>r[i]??""))};
+}
+function renderCsvMapping(){
+ const host=$("#csvMappings");host.replaceChildren();
+ for(const h of csv.headers){
+  const row=document.createElement("div");row.className="csv-map-row";
+  const name=document.createElement("span");name.textContent=h;
+  const select=document.createElement("select");select.dataset.column=h;select.setAttribute("aria-label","Map "+h);
+  for(const [value,label] of FIELD_OPTIONS)select.append(option(label,value));
+  select.value=csv.mapping[h]||"";
+  select.addEventListener("change",()=>{csv.mapping[h]=select.value;csv.importId=null;csv.validated=false;renderCsvSummary()});
+  row.append(name,select);host.append(row);
+ }
+}
+function renderCsvPreview(){
+ const host=$("#csvPreview");host.replaceChildren();
+ const table=document.createElement("table"),thead=document.createElement("thead"),tr=document.createElement("tr");
+ for(const h of csv.headers){const th=document.createElement("th");th.textContent=h;tr.append(th)}thead.append(tr);
+ const tbody=document.createElement("tbody");
+ for(const values of csv.rows.slice(0,8)){const r=document.createElement("tr");for(const v of values){const td=document.createElement("td");td.textContent=v;r.append(td)}tbody.append(r)}
+ table.append(thead,tbody);host.append(table);
+}
+function mappedValue(values,target){
+ const idx=csv.headers.findIndex(h=>csv.mapping[h]===target);return idx>=0?String(values[idx]??"").trim():"";
+}
+function setPath(root,path,value){
+ const parts=path.split(".");let cur=root;
+ for(let i=0;i<parts.length-1;i++){if(!cur[parts[i]]||typeof cur[parts[i]]!=="object")cur[parts[i]]={};cur=cur[parts[i]]}
+ cur[parts.at(-1)]=value;
+}
+function buildImportRows(){
+ const targets=Object.values(csv.mapping).filter(Boolean);
+ if(new Set(targets).size!==targets.length)throw new Error("Едно canonical field не може да е map-нато от две колони.");
+ const required=["model.identification.manufacturer.name","model.identification.model_id","model.identification.category","item.unique_identifier"];
+ for(const target of required)if(!targets.includes(target))throw new Error("Липсва mapping за "+target);
+ return csv.rows.map(values=>{
+  const manufacturer=mappedValue(values,"model.identification.manufacturer.name");
+  const modelId=mappedValue(values,"model.identification.model_id");
+  const category=mappedValue(values,"model.identification.category");
+  const identifier=mappedValue(values,"item.unique_identifier");
+  const lifecycle=mappedValue(values,"item.lifecycle_status")||"original";
+  const errors=[];
+  if(!manufacturer)errors.push("manufacturer_name is required");
+  if(!modelId)errors.push("model_id is required");
+  if(!identifier)errors.push("unique_identifier is required");
+  if(!CATEGORIES.has(category))errors.push("unsupported category: "+category);
+  if(!["original","repurposed","remanufactured","second_life","waste","retired"].includes(lifecycle))errors.push("unsupported lifecycle_status: "+lifecycle);
+  const modelCanonical={identification:{manufacturer:{name:manufacturer},model_id:modelId,category}};
+  const itemCanonical={unique_identifier:identifier};
+  for(let i=0;i<csv.headers.length;i++){
+   const target=csv.mapping[csv.headers[i]],value=String(values[i]??"").trim();
+   if(!target||!value)continue;
+   if(target.startsWith("model.")&&!["model.identification.manufacturer.name","model.identification.model_id","model.identification.category"].includes(target)){
+    setPath(modelCanonical,target.slice(6),/^\d+(\.\d+)?$/.test(value)?Number(value):value);
+   }
+   if(target.startsWith("item.")&&!["item.unique_identifier","item.lifecycle_status"].includes(target)){
+    setPath(itemCanonical,target.slice(5),/^\d+(\.\d+)?$/.test(value)?Number(value):value);
+   }
+  }
+  return {normalized_model:{model_identifier:modelId,manufacturer_name:manufacturer,category,canonical_data:modelCanonical},normalized_item:{unique_identifier:identifier,lifecycle_status:lifecycle,canonical_data:itemCanonical},validation_errors:errors};
+ });
+}
+function renderCsvSummary(){
+ $("#csvRows").textContent=csv.rows.length;$("#csvColumns").textContent=csv.headers.length;
+ $("#csvMapped").textContent=Object.values(csv.mapping).filter(Boolean).length;
+ let valid=false,error="";
+ try{if(csv.rows.length){const rows=buildImportRows();valid=rows.every(r=>r.validation_errors.length===0);if(!valid)error=rows.reduce((n,r)=>n+r.validation_errors.length,0)+" local validation errors"}}
+ catch(e){error=e.message}
+ $("#stageImport").disabled=!canWrite()||!valid;
+ $("#validateImport").disabled=!canWrite()||!csv.importId;
+ $("#commitImport").disabled=!canWrite()||!csv.importId||!csv.validated;
+ setText($("#csvResult"),error||(!csv.rows.length?"Зареди CSV файл.":"Mapping е валиден за staging."),error?"bad":(valid?"ok":""));
+}
+async function loadCsvFile(file){
+ if(!file)return;if(file.size>2*1024*1024)throw new Error("CSV файлът е над 2 MiB.");
+ const parsed=parseCSV(await file.text());csv={headers:parsed.headers,rows:parsed.rows,mapping:{},importId:null,validated:false};
+ for(const h of csv.headers)csv.mapping[h]=DEFAULT_MAP[h.trim().toLowerCase()]||"";
+ renderCsvMapping();renderCsvPreview();renderCsvSummary();
+}
+async function stageImport(){
+ try{
+  const rows=buildImportRows();$("#stageImport").disabled=true;setText($("#csvResult"),"Staging "+rows.length+" rows към production import API…");
+  const data=(await api("/api/imports",{method:"POST",body:{rows}})).data;
+  csv.importId=data.import_id;csv.validated=false;renderCsvSummary();setText($("#csvResult"),"STAGED · "+data.staged_rows+" rows · "+data.import_id,"ok");
+ }catch(e){setText($("#csvResult"),e.message,"bad");renderCsvSummary()}
+}
+async function validateImport(){
+ if(!csv.importId)return;
+ try{
+  $("#validateImport").disabled=true;setText($("#csvResult"),"Server-side validation…");
+  const data=(await api("/api/imports",{method:"PATCH",body:{id:csv.importId,action:"validate"}})).data;
+  csv.validated=data.status==="validated"&&data.error_count===0;renderCsvSummary();
+  setText($("#csvResult"),csv.validated?"VALIDATED · 0 errors":"INVALID · "+data.error_count+" errors",csv.validated?"ok":"bad");
+ }catch(e){setText($("#csvResult"),e.message,"bad");renderCsvSummary()}
+}
+async function commitImport(){
+ if(!csv.importId||!csv.validated)return;
+ try{
+  $("#commitImport").disabled=true;setText($("#csvResult"),"Atomic commit + idempotency replay acceptance…");
+  const first=(await api("/api/imports",{method:"PATCH",body:{id:csv.importId,action:"commit"}})).data;
+  const second=(await api("/api/imports",{method:"PATCH",body:{id:csv.importId,action:"commit"}})).data;
+  if(first.status!=="committed"||first.already_committed!==false||second.status!=="committed"||second.already_committed!==true||first.committed_rows!==second.committed_rows){
+   throw new Error("Idempotency acceptance failed.");
+  }
+  document.body.dataset.importIdempotency="pass";
+  setText($("#csvResult"),"COMMITTED "+first.committed_rows+" rows · replay = NO-OP ✓ · idempotency PASS","ok");
+  await loadBase();$("#refreshDashboard").click();
+ }catch(e){document.body.dataset.importIdempotency="fail";setText($("#csvResult"),e.message,"bad")}
+ finally{renderCsvSummary()}
+}
+
+async function init(){
+ cfg=await fetch("/data/auth-config.json",{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("Auth config unavailable.");return r.json()});
+ if(cfg.supabaseUrl!==PROJECT_URL)throw new Error("Unexpected auth project.");
+ if(!readSession()){setText($("#opsStatus"),"Влез през Company Access, за да използваш production operations.","bad");return}
+ await loadBase();
+ $("#opsRole").textContent=activeOrg.role.toUpperCase();$("#opsRole").className="state "+(canWrite()?"ok":"readonly");
+ syncCarrierForm();renderCsvSummary();setText($("#opsStatus"),"Operations center е свързан към production tenant.","ok");
+}
+$("#passportSearch").addEventListener("input",renderPassports);
+$("#refreshOps").addEventListener("click",async()=>{try{setText($("#opsStatus"),"Refresh…");await loadBase();setText($("#opsStatus"),"Production data refreshed.","ok")}catch(e){setText($("#opsStatus"),e.message,"bad")}});
+$("#selectActivePassports").addEventListener("click",()=>document.querySelectorAll(".passport-print-check:not(:disabled)").forEach(x=>x.checked=true));
+$("#clearPassportSelection").addEventListener("click",()=>document.querySelectorAll(".passport-print-check").forEach(x=>x.checked=false));
+$("#printSelected").addEventListener("click",async()=>{try{await printPassports(selectedPassports(),{bind:true})}catch(e){setText($("#printResult"),e.message,"bad")}});
+$("#carrierItem").addEventListener("change",()=>{syncCarrierForm();loadCarrierPanel()});
+$("#carrierKind").addEventListener("change",syncCarrierForm);
+$("#bindCarrier").addEventListener("click",bindCarrier);
+$("#refreshCarriers").addEventListener("click",loadCarrierPanel);
+$("#csvFile").addEventListener("change",async e=>{try{await loadCsvFile(e.target.files?.[0])}catch(err){setText($("#csvResult"),err.message,"bad")}});
+$("#stageImport").addEventListener("click",stageImport);
+$("#validateImport").addEventListener("click",validateImport);
+$("#commitImport").addEventListener("click",commitImport);
+init().catch(e=>{document.body.dataset.manufacturerOpsReady="false";setText($("#opsStatus"),e.message,"bad")});
+})();
