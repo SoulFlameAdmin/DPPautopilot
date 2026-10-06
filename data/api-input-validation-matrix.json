@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "task": "R03",
   "status": "partial",
   "max_body_bytes": 1048576,
@@ -123,6 +123,16 @@
       "id": "invalid_generated_serial_range",
       "surface": "/api/batch-provision",
       "expected": "422 validation error before upstream"
+    },
+    {
+      "id": "oversize_parsed_carrier_body",
+      "surface": "/api/carriers",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "invalid_carrier_fields",
+      "surface": "/api/carriers",
+      "expected": "400/422 validation error before upstream"
     }
   ],
   "evidence_files": [

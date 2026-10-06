@@ -14,6 +14,7 @@ const imports=require('../../api/imports.js');
 const items=require('../../api/items.js');
 const provision=require('../../api/provision.js');
 const batchProvision=require('../../api/batch-provision.js');
+const carriers=require('../../api/carriers.js');
 
 function makeRes(){
   return {
@@ -36,7 +37,7 @@ function json(res){return JSON.parse(res.body);}
 test.beforeEach(()=>limiter._test.resetForTests());
 
 test('versioned policy explicitly covers organization discovery GET',()=>{
-  assert.equal(limiter.policy.version,10);
+  assert.equal(limiter.policy.version,11);
   assert.equal(limiter.policy.surfaces.organizations.GET,'authenticated_read');
   assert.equal(limiter.policy.surfaces.organizations.POST,'authenticated_write');
 });
@@ -47,6 +48,8 @@ test('classifies public/authenticated/import/export budgets deterministically',(
   assert.equal(limiter.classify('models',req('POST',{})),'authenticated_write');
   assert.equal(limiter.classify('provision',req('POST',{})),'authenticated_write');
   assert.equal(limiter.classify('batch-provision',req('POST',{})),'authenticated_write');
+  assert.equal(limiter.classify('carriers',req('GET')),'authenticated_read');
+  assert.equal(limiter.classify('carriers',req('POST',{})),'authenticated_write');
   assert.equal(limiter.classify('imports',req('PATCH',{})),'import_write');
   assert.equal(limiter.classify('export',req('GET')),'export_read');
 });
@@ -141,6 +144,7 @@ test('31st anonymous public passport read is blocked before upstream',async()=>{
       ok:true,
       async json(){
         return {
+          kind:'active',
           passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
           battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
           unique_identifier:'urn:dpp:r05:public',
@@ -533,6 +537,7 @@ test('all authenticated API surfaces honor shared limiter 429 before business RP
       ['items',items,req('GET')],
       ['provision',provision,req('POST',{})],
       ['batch-provision',batchProvision,req('POST',{})],
+      ['carriers',carriers,req('GET')],
       ['imports',imports,req('GET')],
       ['export',exportApi,req('GET')],
       ['passport',passport,req('GET',null,{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'})]

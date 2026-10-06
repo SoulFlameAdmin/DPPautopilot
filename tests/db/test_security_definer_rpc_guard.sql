@@ -46,19 +46,29 @@ begin
   where n.nspname='public'
     and p.proname like 'dpp\_%' escape '\'
     and has_function_privilege('anon',p.oid,'EXECUTE')
-    and p.oid::regprocedure::text <> 'dpp_api_passport_public(text)';
+    and p.oid::regprocedure::text not in (
+      'dpp_api_passport_public(text)',
+      'dpp_api_passport_public_resolve(text)',
+      'dpp_api_carrier_open(text,text)'
+    );
 
   if v_anon_extra is not null then
     raise exception 'Unexpected anon DPP RPC exposure: %',v_anon_extra;
   end if;
 
-  if not has_function_privilege(
-    'anon',
-    to_regprocedure('public.dpp_api_passport_public(text)'),
-    'EXECUTE'
-  ) then
-    v_anon_missing := 'dpp_api_passport_public(text)';
-  end if;
+  with required(signature) as (
+    values
+      ('dpp_api_passport_public(text)'),
+      ('dpp_api_passport_public_resolve(text)'),
+      ('dpp_api_carrier_open(text,text)')
+  )
+  select string_agg(r.signature,', ' order by r.signature)
+    into v_anon_missing
+  from required r
+  where not coalesce(
+    has_function_privilege('anon',to_regprocedure('public.'||r.signature),'EXECUTE'),
+    false
+  );
 
   if v_anon_missing is not null then
     raise exception 'Required anon DPP RPC missing EXECUTE: %',v_anon_missing;
@@ -114,6 +124,35 @@ begin
       'dpp_evidence_storage_registered(text)',
       'dpp_has_org_role(uuid,text[])',
       'dpp_request_user_id()',
+      'dpp_api_authority_payload_set(uuid,jsonb)',
+      'dpp_api_carrier_bind_secure(uuid,text,text,text)',
+      'dpp_api_carrier_open(text,text)',
+      'dpp_api_carrier_revoke(uuid,text)',
+      'dpp_api_carrier_scan_history(uuid,integer)',
+      'dpp_api_carriers_list(uuid)',
+      'dpp_api_field_events_append(text,uuid,jsonb)',
+      'dpp_api_import_errors(uuid)',
+      'dpp_api_import_mapping_delete(uuid)',
+      'dpp_api_import_mapping_list()',
+      'dpp_api_import_mapping_save(uuid,text,text,jsonb,jsonb)',
+      'dpp_api_item_history(uuid)',
+      'dpp_api_nfc_challenge_create(text,text,text,timestamp with time zone)',
+      'dpp_api_nfc_status(text)',
+      'dpp_api_passport_authority(text)',
+      'dpp_api_passport_legitimate_interest(text)',
+      'dpp_api_passport_public_resolve(text)',
+      'dpp_api_passports_list(integer)',
+      'dpp_api_scooter_passport_transition(uuid,text,text,text,text,timestamp with time zone)',
+      'dpp_api_supplier_create(text,text)',
+      'dpp_api_supplier_invitation_accept(text)',
+      'dpp_api_supplier_invitation_create(uuid,text,text,text,timestamp with time zone)',
+      'dpp_api_supplier_invitations_list(uuid)',
+      'dpp_api_supplier_package_create(uuid,text,text,uuid,uuid,text,text,jsonb,timestamp with time zone,uuid)',
+      'dpp_api_supplier_package_verify(uuid,text,text,text)',
+      'dpp_api_supplier_reminder_create(uuid,text,text,text)',
+      'dpp_api_supplier_reminders_list(uuid)',
+      'dpp_api_suppliers_list()',
+      'dpp_api_technical_pilot_publish(uuid,jsonb,jsonb)',
       'dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)'
     );
 
@@ -165,6 +204,18 @@ begin
       ('dpp_evidence_storage_registered(text)'),
       ('dpp_has_org_role(uuid,text[])'),
       ('dpp_request_user_id()'),
+      ('dpp_api_carrier_bind_secure(uuid,text,text,text)'),
+      ('dpp_api_carrier_open(text,text)'),
+      ('dpp_api_carrier_revoke(uuid,text)'),
+      ('dpp_api_carrier_scan_history(uuid,integer)'),
+      ('dpp_api_carriers_list(uuid)'),
+      ('dpp_api_import_mapping_delete(uuid)'),
+      ('dpp_api_import_mapping_list()'),
+      ('dpp_api_import_mapping_save(uuid,text,text,jsonb,jsonb)'),
+      ('dpp_api_passport_public_resolve(text)'),
+      ('dpp_api_passports_list(integer)'),
+      ('dpp_api_scooter_passport_transition(uuid,text,text,text,text,timestamp with time zone)'),
+      ('dpp_api_technical_pilot_publish(uuid,jsonb,jsonb)'),
       ('dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)')
   )
   select string_agg(r.signature,', ' order by r.signature)

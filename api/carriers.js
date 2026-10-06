@@ -1,6 +1,6 @@
 'use strict';
 
-const { mapDatabaseError } = require('./_errors.js');
+const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
@@ -54,15 +54,15 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
     throw upstreamError();
   }finally{clearTimeout(timer);}
   if(!response.ok){
-    const mapped=mapDatabaseError('carrier',data);
+    const mapped=mapSharedDatabaseError('carrier',data);
     throw upstreamError(mapped.code,mapped.message,mapped.status);
   }
   return data;
 }
 
 async function handler(req,res){
-  startRequestObservability(req,res,'carrier');
-  const local=enforceRateLimit(req,res,'carrier');
+  startRequestObservability(req,res,'carriers');
+  const local=enforceRateLimit(req,res,'carriers');
   if(!local.allowed)return send(res,429,rateLimitBody());
   const authorization=bearer(req);
   if(!authorization)return send(res,401,{error:{code:'AUTH_REQUIRED',message:'Bearer authentication is required.'}});
@@ -71,7 +71,7 @@ async function handler(req,res){
     res.setHeader('Allow','GET, POST, PATCH');
     return send(res,405,{error:{code:'METHOD_NOT_ALLOWED',message:'Unsupported method.'}});
   }
-  const shared=await enforceSharedRateLimit(req,res,'carrier',authorization,{ruleName:method==='GET'?'authenticated_read':'authenticated_write'});
+  const shared=await enforceSharedRateLimit(req,res,'carriers',authorization,{ruleName:method==='GET'?'authenticated_read':'authenticated_write'});
   if(shared.error)return send(res,503,sharedRateLimitUnavailableBody());
   if(!shared.allowed)return send(res,429,rateLimitBody());
 
@@ -90,7 +90,7 @@ async function handler(req,res){
       if(String(req.query&&req.query.history||'')==='1'){
         const limit=Number(req.query&&req.query.limit||100);
         if(!Number.isInteger(limit)||limit<1||limit>500){
-          return send(res,422,{error:{code:'VALIDATION_ERROR',message:'history limit must be 1..500.'}});
+          return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
         }
         const value=await rpc('dpp_api_carrier_scan_history',{p_battery_item_id:itemId||null,p_limit:limit},authorization);
         return send(res,200,{data:value});
@@ -101,16 +101,16 @@ async function handler(req,res){
 
     if(method==='POST'){
       if(!validUuid(body.battery_item_id)||!validKind(body.carrier_kind)){
-        return send(res,422,{error:{code:'VALIDATION_ERROR',message:'battery_item_id and carrier_kind are required.'}});
+        return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
       }
       if(body.carrier_kind==='nfc'&&!validNfcTechnology(body.nfc_technology)){
-        return send(res,422,{error:{code:'VALIDATION_ERROR',message:'A supported NFC technology is required.'}});
+        return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
       }
       if(body.carrier_kind==='qr'&&body.nfc_technology!=null){
-        return send(res,422,{error:{code:'VALIDATION_ERROR',message:'QR carriers cannot have NFC technology.'}});
+        return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
       }
       if(!validExternalUid(body.external_uid)){
-        return send(res,422,{error:{code:'VALIDATION_ERROR',message:'external_uid must contain 1..256 characters.'}});
+        return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
       }
       const value=await rpc('dpp_api_carrier_bind_secure',{
         p_battery_item_id:body.battery_item_id,
@@ -122,14 +122,14 @@ async function handler(req,res){
     }
 
     if(!validUuid(body.id)){
-      return send(res,400,{error:{code:'VALIDATION_ERROR',message:'A valid carrier UUID is required.'}});
+      return send(res,400,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
     }
     if(body.action!=='revoke'){
-      return send(res,422,{error:{code:'VALIDATION_ERROR',message:'action must be revoke.'}});
+      return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
     }
     const reason=body.reason==null?'manual revoke':String(body.reason).trim();
     if(!reason||reason.length>500){
-      return send(res,422,{error:{code:'VALIDATION_ERROR',message:'reason must contain 1..500 characters.'}});
+      return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
     }
     const value=await rpc('dpp_api_carrier_revoke',{p_id:body.id,p_reason:reason},authorization);
     return send(res,200,{data:value});

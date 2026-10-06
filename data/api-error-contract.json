@@ -547,7 +547,7 @@
     },
     "INVALID_IMPORT_ACTION": {
       "http_status": 422,
-      "message": "action must be validate or commit."
+      "message": "action must be validate, commit, or delete_mapping."
     },
     "INVALID_IMPORT_ID": {
       "http_status": 400,
@@ -596,6 +596,10 @@
     "EVIDENCE_EXPORT_SIGNING_UNAVAILABLE": {
       "http_status": 500,
       "message": "Evidence export signing configuration is unavailable."
+    },
+    "INVALID_IMPORT_MAPPING_ID": {
+      "http_status": 400,
+      "message": "A valid mapping UUID is required."
     }
   }
 }

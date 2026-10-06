@@ -24,6 +24,7 @@
       <a href="#csvImportProduction"><span class="ico">⇧</span>Imports</a>
       <a href="#modelsList"><span class="ico">♙</span>Clients</a>
       <a href="/manufacturer/completeness"><span class="ico">◇</span>Compliance</a>
+      <a href="/battery-master"><span class="ico">✓</span>Battery Master</a>
       <a href="/company"><span class="ico">⚙</span>Settings</a>
     </nav>
     <div class="sidebar-foot">
@@ -61,7 +62,8 @@
       <div class="workspace">
         <section class="workspace-main">
           <div class="welcome">
-            <p class="eyebrow">PRIVATE COMPANY WORKSPACE</p>
+            <p class="eyebrow">PRODUCTION MANUFACTURER · STAGE 5</p>
+            <span class="state ok">REAL TENANT DATA · NO DEMO STORAGE</span>
             <h1>Welcome to SOULFLAME DPP AUTOPILOT</h1>
             <p>Create, manage and distribute Digital Product Passports for your batteries.</p>
             <div class="tenant-line"><strong id="tenantName">—</strong><span id="tenantMeta">Проверка на фирмения tenant…</span></div>
@@ -147,23 +149,53 @@
             <div class="section-head"><div><p class="eyebrow">CREATE & SAVE</p><h2>Create Passport / Product</h2></div><span class="state" id="opsRole">ROLE</span></div>
             <div class="grid two">
               <article class="card">
-                <div class="card-head"><div><p class="eyebrow">MODEL REGISTER</p><h2>Create LMT model</h2></div><span class="state" id="writeRole">ROLE</span></div>
+                <div class="card-head"><div><p class="eyebrow">MODEL REGISTER</p><h2>Create battery model</h2></div><span class="state" id="writeRole">ROLE</span></div>
                 <div class="form-grid">
-                  <label><span>SKU / Model ID</span><input id="modelIdentifier" maxlength="128" placeholder="SF-LMT-48V20AH"></label>
+                  <label><span>SKU / Model ID</span><input id="modelIdentifier" maxlength="128" placeholder="BAT-MODEL-001"></label>
                   <label><span>Manufacturer</span><input id="manufacturerName" maxlength="250" placeholder="Company Ltd."></label>
+                  <label><span>Battery category</span>
+                    <select id="modelCategory">
+                      <option value="industrial">Industrial</option>
+                      <option value="portable">Portable</option>
+                      <option value="electric_vehicle">Electric vehicle</option>
+                      <option value="starting_lighting_ignition">Starting / lighting / ignition</option>
+                      <option value="light_means_of_transport">Light means of transport (LMT)</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </label>
+                  <label><span>Manufacturer contact</span><input id="manufacturerContact" maxlength="250" placeholder="battery@company.eu"></label>
+                  <label><span>Manufacturer postal address</span><input id="manufacturerAddress" maxlength="500" placeholder="Street, city, country"></label>
+                  <label><span>Place of manufacture</span><input id="manufacturePlace" maxlength="250" placeholder="Bilbao, Spain"></label>
+                  <label><span>Manufacture month</span><input id="manufactureMonth" type="month"></label>
+                  <label><span>Weight (kg)</span><input id="batteryWeightKg" type="number" min="0" step="0.001" placeholder="12.5"></label>
+                  <label><span>Rated capacity (Ah)</span><input id="batteryCapacityAh" type="number" min="0" step="0.001" placeholder="100"></label>
+                  <label><span>Chemistry</span><input id="batteryChemistry" maxlength="120" placeholder="LFP / NMC / ..."></label>
+                  <label><span>Nominal voltage (V)</span><input id="batteryVoltageV" type="number" min="0" step="0.001" placeholder="51.2"></label>
                 </div>
-                <div class="actions"><button class="btn primary" id="createModel" type="button">Save model</button></div>
+                <p class="muted">Use customer-approved real data. Non-LMT models can be published as a Technical QR Pilot; this does not claim regulatory compliance. LMT keeps the strict readiness/activation route.</p>
+                <div class="actions"><button class="btn primary" id="createModel" type="button">Save real model</button></div>
                 <div class="result" id="modelResult" role="status" aria-live="polite">Ready.</div>
               </article>
 
               <article class="card">
                 <div class="card-head"><div><p class="eyebrow">PASSPORT CREATION</p><h2>Create battery passport</h2></div><span class="state ok">PRODUCTION API</span></div>
                 <div class="form-grid">
-                  <label><span>LMT model</span><select id="provisionModel"><option value="">Select model</option></select></label>
+                  <label><span>LMT model</span><select id="provisionModel"><option value="">Select LMT model</option></select></label>
                   <label><span>Battery / serial ID</span><input id="batteryIdentifier" maxlength="300" placeholder="BAT-SF-000001"></label>
                 </div>
                 <div class="actions"><button class="btn primary" id="provisionBattery" type="button">Create DRAFT passport</button></div>
                 <div class="result" id="provisionResult" role="status" aria-live="polite">Select model and enter Battery ID.</div>
+              </article>
+
+              <article class="card" id="technicalPilotCard">
+                <div class="card-head"><div><p class="eyebrow">REAL COMPANY TEST</p><h2>Technical QR Pilot</h2></div><span class="state ok">ACTIVE + QR</span></div>
+                <p class="muted">For non-LMT batteries only. Creates a real tenant-scoped battery item, publishes an ACTIVE technical passport with <strong>regulatory_compliance=false</strong>, binds a QR carrier and makes it ready for print/scan.</p>
+                <div class="form-grid">
+                  <label><span>Battery model / SKU</span><select id="pilotModel"><option value="">Select non-LMT model</option></select></label>
+                  <label><span>Battery / serial ID</span><input id="pilotBatteryIdentifier" maxlength="300" placeholder="REALTEST-000001"></label>
+                </div>
+                <div class="actions"><button class="btn primary" id="publishTechnicalPilot" type="button">Create ACTIVE QR pilot</button></div>
+                <div class="result" id="pilotResult" role="status" aria-live="polite">Create a non-LMT model, then publish one real test battery.</div>
               </article>
 
               <article class="card">

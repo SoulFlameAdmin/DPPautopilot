@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-10-04T23:09:30Z",
+  "observed_at": "2026-10-06T20:58:04.944Z",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -154,7 +154,7 @@
       "name": "dpp_models_delete_checked"
     },
     {
-      "version": "20260920004250",
+      "version": "20260920010139",
       "name": "dpp_items_delete_checked"
     },
     {
@@ -194,10 +194,6 @@
       "name": "dpp_scooter_single_item_provisioning"
     },
     {
-      "version": "20261004140321",
-      "name": "dpp_team_email_rbac_v1"
-    },
-    {
       "version": "20261004154754",
       "name": "dpp_scooter_batch_provisioning"
     },
@@ -206,9 +202,57 @@
       "name": "dpp_lmt_passport_activation_gate"
     },
     {
+      "version": "20261004140321",
+      "name": "dpp_team_email_rbac_v1"
+    },
+    {
       "version": "20261004230855",
       "name": "dpp_lmt_completeness_workflow"
+    },
+    {
+      "version": "20261005191126",
+      "name": "dpp_stage7_secure_carrier_management"
+    },
+    {
+      "version": "20261005191435",
+      "name": "dpp_stage6_passports_management_list"
+    },
+    {
+      "version": "20261005192112",
+      "name": "dpp_carrier_scan_fk_index"
+    },
+    {
+      "version": "20261005192248",
+      "name": "dpp_secure_carrier_bind_lockdown"
+    },
+    {
+      "version": "20261006035048",
+      "name": "dpp_saved_import_mapping_api"
+    },
+    {
+      "version": "20261006144624",
+      "name": "dpp_batch_provision_pgcrypto_search_path"
+    },
+    {
+      "version": "20261006152956",
+      "name": "dpp_technical_pilot_publish"
+    },
+    {
+      "version": "20261006203909",
+      "name": "dpp_batch_provision_security_definer_search_path"
+    },
+    {
+      "version": "20261006204122",
+      "name": "dpp_pgcrypto_extensions_schema_normalization"
+    },
+    {
+      "version": "20261006205209",
+      "name": "dpp_public_resolve_anon_grant"
+    },
+    {
+      "version": "20261006205653",
+      "name": "dpp_passport_lifecycle_public_resolve_replay"
     }
   ],
-  "note": "Supabase-applied version IDs can differ from repository filename timestamps; canonical migration name is the cross-system identity. Snapshot includes scooter single-item provisioning, Step 2 team RBAC, Stage 5 atomic batch provisioning, Step 18 LMT activation gate, and Step 19 production completeness workflow."
+  "note": "Read-only bound snapshot refreshed from the live Supabase migration history for the exact repository migration set; canonical migration name is the cross-system identity."
 }

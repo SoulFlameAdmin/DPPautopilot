@@ -196,6 +196,40 @@ function renderSections(passport,matrix){
   nav.hidden=sectionCount<2;
   return {fieldCount,sectionCount};
 }
+function isTechnicalPilot(passport){
+  return getPath(passport,'public_payload.pilot.mode')==='technical_pilot' &&
+    getPath(passport,'public_payload.pilot.regulatory_compliance')===false;
+}
+function renderPilotSections(passport){
+  const host=$('#passportSections');host.replaceChildren();
+  const nav=$('#sectionNav');nav.replaceChildren();nav.hidden=true;
+  const payload=passport.public_payload||{};
+  const entries=Object.entries(payload).filter(([key,value])=>key!=='pilot'&&present(value));
+  const section=document.createElement('section');section.className='section';section.id='section-pilot';
+  const head=document.createElement('div');head.className='section-head';
+  const titleWrap=document.createElement('div');
+  const eyebrow=document.createElement('p');eyebrow.className='eyebrow';eyebrow.textContent='APPROVED CUSTOMER DATA';
+  const h2=document.createElement('h2');h2.textContent='Technical pilot data';
+  const sub=document.createElement('span');sub.textContent='Технически запис за валидиране на data flow. Не е регулаторна сертификация.';
+  titleWrap.append(eyebrow,h2);head.append(titleWrap,sub);
+  const grid=document.createElement('div');grid.className='field-grid';
+  for(const [key,value] of entries){
+    const article=document.createElement('article');article.className='field';article.dataset.publicField=key;
+    const top=document.createElement('div');top.className='field-top';
+    const label=document.createElement('div');label.className='field-label';label.textContent=labelize(key);
+    const badge=document.createElement('span');badge.className='point-badge';badge.textContent='PILOT';
+    top.append(label,badge);
+    const content=document.createElement('div');content.className='field-value';appendValue(content,value,null,key);
+    const meta=document.createElement('div');meta.className='field-meta';
+    const access=document.createElement('span');access.className='meta-chip';access.textContent='public';
+    const status=document.createElement('span');status.className='meta-chip';status.textContent='technical pilot';
+    meta.append(access,status);article.append(top,content,meta);grid.append(article);
+  }
+  section.append(head,grid);host.append(section);
+  document.body.dataset.publicFieldCount=String(entries.length);
+  document.body.dataset.publicSectionCount='1';
+  return {fieldCount:entries.length,sectionCount:1};
+}
 function formatDate(value){
   const d=new Date(value);
   if(Number.isNaN(d.getTime()))return String(value||'—');
@@ -212,10 +246,11 @@ function subtitleFor(passport){
   return category?(CATEGORY_LABELS[category]||String(category)):'Individual battery public passport';
 }
 function renderHero(passport,identifier){
+  const pilot=isTechnicalPilot(passport);
   const hero=$('#hero');hero.replaceChildren();
   const card=document.createElement('div');card.className='hero-card';
   const left=document.createElement('div');
-  const eyebrow=document.createElement('p');eyebrow.className='eyebrow';eyebrow.textContent='ACTIVE · PUBLIC BATTERY PASSPORT';
+  const eyebrow=document.createElement('p');eyebrow.className='eyebrow';eyebrow.textContent=pilot?'TECHNICAL PILOT · PUBLIC BATTERY RECORD':'ACTIVE · PUBLIC BATTERY PASSPORT';
   const h1=document.createElement('h1');h1.textContent=titleFor(passport);
   const sub=document.createElement('p');sub.className='hero-subtitle';sub.textContent=subtitleFor(passport);
   const uid=document.createElement('div');uid.className='identifier';uid.dataset.publicUid='';uid.textContent=identifier;
@@ -230,8 +265,8 @@ function renderHero(passport,identifier){
 
   const right=document.createElement('div');right.className='status-stack';
   const status=document.createElement('div');status.className='status-card';
-  const strong=document.createElement('strong');strong.textContent='● ACTIVE';
-  const small=document.createElement('small');small.textContent='Публичният запис е активен.';
+  const strong=document.createElement('strong');strong.textContent=pilot?'● TECHNICAL PILOT':'● ACTIVE';
+  const small=document.createElement('small');small.textContent=pilot?'Публикуван за техническа data-flow валидация; без compliance claim.':'Публичният запис е активен.';
   status.append(strong,small);
   const updated=document.createElement('div');updated.className='status-card';
   const updatedStrong=document.createElement('strong');updatedStrong.textContent='Last updated';
@@ -318,15 +353,14 @@ function renderError(message,identifier=''){
   try{
     const carrierParam=(new URLSearchParams(location.search).get('carrier')||'').trim().toLowerCase();
     const carrier=['qr','nfc'].includes(carrierParam)?carrierParam:'';
-    const basePassportUrl='/api/passport?identifier='+encodeURIComponent(identifier);
     let [passportResponse,matrixResponse]=await Promise.all([
-      fetch(basePassportUrl+(carrier?'&carrier='+carrier:''),{cache:'no-store'}),
+      fetch('/api/passport?identifier='+encodeURIComponent(identifier)+(carrier?'&carrier='+carrier:''),{cache:'no-store'}),
       fetch('/data/lmt-battery-71-v2.json',{cache:'no-store'})
     ]);
     let body=null;
     try{body=await passportResponse.json()}catch{}
     if(!passportResponse.ok&&carrier&&body?.error?.code==='CARRIER_NOT_BOUND'){
-      passportResponse=await fetch(basePassportUrl,{cache:'no-store'});
+      passportResponse=await fetch('/api/passport?identifier='+encodeURIComponent(identifier),{cache:'no-store'});
       try{body=await passportResponse.json()}catch{body=null}
       document.body.dataset.carrierScan='unbound_fallback';
     }else if(carrier&&passportResponse.ok){
@@ -349,13 +383,26 @@ function renderError(message,identifier=''){
       return;
     }
 
-    if(!matrixResponse.ok)throw new Error('Public field mapping is temporarily unavailable.');
-    const matrix=await matrixResponse.json();
     if(!passport||passport.kind!=='active'||passport.status!=='active'||!passport.public_payload)throw new Error('Публичният паспорт не е ACTIVE.');
+    const pilot=isTechnicalPilot(passport);
+    let matrix=null;
+    if(!pilot){
+      if(!matrixResponse.ok)throw new Error('Public field mapping is temporarily unavailable.');
+      matrix=await matrixResponse.json();
+    }
 
     renderHero(passport,identifier);
-    renderSections(passport,matrix);
+    if(pilot)renderPilotSections(passport);
+    else renderSections(passport,matrix);
     renderTechnical(passport,identifier);
+    if(pilot){
+      const trace=$('#traceabilityTrust');
+      if(trace){
+        const strong=trace.querySelector('strong'),small=trace.querySelector('small');
+        if(strong)strong.textContent='Traceable identifier';
+        if(small)small.textContent='QR сочи към индивидуалния публичен battery record.';
+      }
+    }
     $('#trustStrip').hidden=false;
 
     document.body.dataset.passportReady='true';
@@ -363,6 +410,7 @@ function renderError(message,identifier=''){
     document.body.dataset.passportIdentifier=identifier;
     document.body.dataset.passportStatus='active';
     document.body.dataset.passportLifecycle='active';
+    document.body.dataset.passportPilot=isTechnicalPilot(passport)?'technical_pilot':'false';
     document.body.dataset.restrictedLeak='false';
   }catch(error){
     renderError(error?.message||'Public passport could not be loaded.',identifier);

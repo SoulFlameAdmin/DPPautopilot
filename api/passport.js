@@ -86,6 +86,27 @@ function validPublicResolve(value) {
   return false;
 }
 
+function validTechnicalPilotPassport(value) {
+  return plainObject(value) &&
+    validUuid(value.passport_id) &&
+    validUuid(value.battery_item_id) &&
+    validUuid(value.model_id) &&
+    typeof value.unique_identifier === 'string' &&
+    value.unique_identifier.trim().length >= 1 &&
+    value.unique_identifier.trim().length <= 300 &&
+    value.status === 'active' &&
+    plainObject(value.public_payload) &&
+    plainObject(value.private_payload) &&
+    value.public_payload?.pilot?.mode === 'technical_pilot' &&
+    value.public_payload?.pilot?.regulatory_compliance === false &&
+    value.technical_pilot === true &&
+    value.regulatory_compliance === false &&
+    typeof value.created === 'boolean' &&
+    typeof value.idempotent_replay === 'boolean' &&
+    validTimestamp(value.created_at) &&
+    validTimestamp(value.updated_at);
+}
+
 function validPrivatePassport(value) {
   return plainObject(value) &&
     validUuid(value.passport_id) &&
@@ -145,6 +166,7 @@ function validateRpcShape(name, data) {
   if (name === 'dpp_api_scooter_passport_readiness') return validReadinessReport(data);
   if (name === 'dpp_api_scooter_completeness_by_identifier') return validCompletenessReport(data);
   if (name === 'dpp_api_scooter_authority_evidence_submit') return validAuthorityEvidenceReceipt(data);
+  if (name === 'dpp_api_technical_pilot_publish') return validTechnicalPilotPassport(data);
   if (name === 'dpp_api_passport_private' ||
       name === 'dpp_api_passport_create' ||
       name === 'dpp_api_passport_update_checked' ||
@@ -312,7 +334,7 @@ async function handler(req, res) {
         }
         const limit = Number(req.query && req.query.limit || 250);
         if (!Number.isInteger(limit) || limit < 1 || limit > 500) {
-          return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'limit must be 1..500.' } });
+          return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
         }
         const sharedListRateLimit=await enforceSharedRateLimit(req,res,'passport',authorization,{ruleName:'authenticated_read'});
         if(sharedListRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
@@ -340,7 +362,7 @@ async function handler(req, res) {
         }
         if (carrier != null && carrier !== '') {
           if (!['qr','nfc'].includes(String(carrier))) {
-            return send(res, 400, { error: { code: 'VALIDATION_ERROR', message: 'carrier must be qr or nfc.' } });
+            return send(res, 400, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
           }
           const scanned = await rpc('dpp_api_carrier_open', {
             p_unique_identifier: identifier.trim(),
@@ -397,6 +419,26 @@ async function handler(req, res) {
       const privateAccessProblem = validateOrganizationPrivatePayloadAccess(body.private_payload);
       if (privateAccessProblem) {
         return send(res, 403, { error: { code: 'FORBIDDEN', message: 'Authority-only fields are not available to organization users.' } });
+      }
+
+      if (body.action != null && !['publish_technical_pilot'].includes(body.action)) {
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+      }
+
+      if (body.action === 'publish_technical_pilot') {
+        if (!plainObject(body.public_payload?.item) ||
+            typeof body.public_payload.item.unique_identifier !== 'string' ||
+            !body.public_payload.item.unique_identifier.trim()) {
+          return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+        }
+        const passport = await rpc('dpp_api_technical_pilot_publish', {
+          p_battery_item_id: body.battery_item_id,
+          p_public_payload: body.public_payload || {},
+          p_private_payload: body.private_payload || {}
+        }, authorization);
+        return send(res, passport.idempotent_replay ? 200 : 201, {
+          data: sanitizeOrganizationPrivatePassport(passport)
+        });
       }
 
       const passport = await rpc('dpp_api_passport_create', {
@@ -505,4 +547,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPublicResolve, validPrivatePassport, validReadinessReport, validCompletenessReport, validAuthorityEvidenceReceipt, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizePublicResolve, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, DIRECT_UPDATE_STATUSES, TERMINAL_PASSPORT_STATUSES, LIFECYCLE_REASONS, DEFAULT_RPC_TIMEOUT_MS };
+module.exports._test = { bearer, parseBody, validUuid, validTimestamp, validObject, plainObject, validPublicPassport, validPublicResolve, validTechnicalPilotPassport, validPrivatePassport, validReadinessReport, validCompletenessReport, validAuthorityEvidenceReceipt, validateRpcShape, validatePublicPayloadAccess, validateOrganizationPrivatePayloadAccess, sanitizePublicPassport, sanitizePublicResolve, sanitizeOrganizationPrivatePassport, mapDatabaseError, rpc, PASSPORT_STATUSES, DIRECT_UPDATE_STATUSES, TERMINAL_PASSPORT_STATUSES, LIFECYCLE_REASONS, DEFAULT_RPC_TIMEOUT_MS };
