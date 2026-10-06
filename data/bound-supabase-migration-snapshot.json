@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-10-06T20:39:09Z",
+  "observed_at": "2026-10-06T20:41:22Z",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -240,7 +240,11 @@
     {
       "version": "20261006203909",
       "name": "dpp_batch_provision_security_definer_search_path"
+    },
+    {
+      "version": "20261006204122",
+      "name": "dpp_pgcrypto_extensions_schema_normalization"
     }
   ],
-  "note": "Read-only bound snapshot refreshed after applying the batch provisioning SECURITY DEFINER search_path hardening migration; canonical migration name is the cross-system identity."
+  "note": "Read-only bound snapshot refreshed after pgcrypto extensions-schema normalization; all repository migrations are matched to live Supabase by canonical migration name."
 }
