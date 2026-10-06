@@ -327,7 +327,7 @@ function renderMappingProfiles(){
  $("#deleteMappingProfile").disabled=!selectedMappingId||!canWrite();
 }
 async function loadMappingProfiles(){
- const response=await api("/api/import-mappings");
+ const response=await api("/api/imports?mappings=1");
  mappingProfiles=Array.isArray(response.data)?response.data:[];
  renderMappingProfiles();
 }
@@ -363,7 +363,7 @@ async function saveCurrentMappingProfile(){
  $("#saveMappingProfile").disabled=true;
  setText($("#mappingProfileStatus"),"Saving mapping profile…");
  try{
-  const response=await api("/api/import-mappings",{method:"POST",body:{
+  const response=await api("/api/imports",{method:"POST",body:{action:"save_mapping",
    id:profile?.id||null,
    name,
    source_format:csv.sourceType,
@@ -385,7 +385,7 @@ async function deleteCurrentMappingProfile(){
  $("#deleteMappingProfile").disabled=true;
  setText($("#mappingProfileStatus"),"Deleting mapping profile…");
  try{
-  await api("/api/import-mappings?id="+encodeURIComponent(profile.id),{method:"DELETE"});
+  await api("/api/imports",{method:"PATCH",body:{action:"delete_mapping",id:profile.id}});
   if(csv.mappingProfileId===profile.id)csv.mappingProfileId=null;
   selectedMappingId=null;
   await loadMappingProfiles();
