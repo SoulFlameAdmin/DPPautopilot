@@ -974,7 +974,8 @@ jobs:
           assert 'data-manufacturer-ready="true"' in dom
           assert 'data-manufacturer-auth="missing"' in dom
           assert 'Няма активна фирмена сесия.' in dom
-          assert 'PRODUCTION MANUFACTURER · STAGE 5' in dom
+          assert 'PRODUCTION API' in dom
+          assert 'Production tenant data' in dom
           print("STAGE5_MANUFACTURER_UI_PASS: production dashboard loads safely and requires company auth when no session exists")
           PY
 
