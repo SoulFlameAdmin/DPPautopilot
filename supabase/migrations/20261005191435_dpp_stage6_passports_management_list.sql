@@ -44,7 +44,15 @@ end
 $fn$;
 
 revoke all on function public.dpp_api_passports_list(integer) from public,anon;
-grant execute on function public.dpp_api_passports_list(integer) to authenticated,service_role;
+grant execute on function public.dpp_api_passports_list(integer) to authenticated;
+
+do $grant$
+begin
+  if exists (select 1 from pg_roles where rolname='service_role') then
+    execute 'grant execute on function public.dpp_api_passports_list(integer) to service_role';
+  end if;
+end
+$grant$;
 
 create index if not exists dpp_passports_org_updated_idx
   on public.dpp_passports(organization_id,updated_at desc,id);
