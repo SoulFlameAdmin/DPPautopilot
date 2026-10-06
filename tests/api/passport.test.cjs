@@ -18,6 +18,7 @@ function makeReq(method, body, query, auth='Bearer test-token') {
 }
 function publicPassportFixture(overrides={}) {
   return {
+    kind:'active',
     passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     unique_identifier:'urn:dpp:1',
@@ -285,6 +286,7 @@ test('public GET strips catalog-restricted nested fields even if upstream regres
         passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         unique_identifier:'urn:dpp:public-safe',
+        kind:'active',
         status:'active',
         public_payload:{
           model:{
