@@ -312,7 +312,7 @@ async function handler(req, res) {
         }
         const limit = Number(req.query && req.query.limit || 250);
         if (!Number.isInteger(limit) || limit < 1 || limit > 500) {
-          return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'limit must be 1..500.' } });
+          return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
         }
         const sharedListRateLimit=await enforceSharedRateLimit(req,res,'passport',authorization,{ruleName:'authenticated_read'});
         if(sharedListRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
@@ -340,7 +340,7 @@ async function handler(req, res) {
         }
         if (carrier != null && carrier !== '') {
           if (!['qr','nfc'].includes(String(carrier))) {
-            return send(res, 400, { error: { code: 'VALIDATION_ERROR', message: 'carrier must be qr or nfc.' } });
+            return send(res, 400, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
           }
           const scanned = await rpc('dpp_api_carrier_open', {
             p_unique_identifier: identifier.trim(),
