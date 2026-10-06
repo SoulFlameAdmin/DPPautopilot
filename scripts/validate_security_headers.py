@@ -14,9 +14,26 @@ assert policy.get("status") in {"partial", "green"}
 assert policy.get("deployment_config") == "vercel.json"
 
 entries = vercel.get("headers", [])
-global_rules = [r for r in entries if r.get("source") == "/(.*)"]
+global_rules = [r for r in entries if r.get("source") == policy["strict_route_source"]]
 assert len(global_rules) == 1, "R02 requires exactly one global header rule"
 actual = {h["key"]: h["value"] for h in global_rules[0].get("headers", [])}
+assert policy['strict_route_source']=='/((?!world(?:/|$)).*)'
+assert policy['world_route_source']=='/world/:path*'
+world_rules=[r for r in entries if r.get('source')==policy['world_route_source']]
+assert len(world_rules)==1, 'R02 world header exception missing'
+world_headers={h['key']:h['value'] for h in world_rules[0]['headers']}
+assert world_headers==policy['world_headers'], 'R02 world header exception drift'
+for path in ['/', '/api/passport', '/passport', '/live/passport', '/manufacturer', '/worldwide']:
+    assert re.fullmatch(policy['strict_route_source'],path), f'R02 core route lost strict CSP: {path}'
+for path in ['/world','/world/','/world/index.html','/world/world.js']:
+    assert not re.fullmatch(policy['strict_route_source'],path), f'R02 world exception overlaps core CSP: {path}'
+assert {r['source'] for r in entries if any(h['key']=='Content-Security-Policy' for h in r['headers'])}=={policy['strict_route_source'],policy['world_route_source']}
+for forbidden in ["'unsafe-inline'", "'unsafe-eval'", 'http://']:
+    assert forbidden not in world_headers['Content-Security-Policy']
+for key,value in actual.items():
+    if key!='Content-Security-Policy':
+        assert world_headers[key]==value, f'R02 world security header weakened: {key}'
+
 required = policy.get("global_headers", {})
 assert set(actual) == set(required), f"R02 header key drift: {set(actual)!r}"
 
