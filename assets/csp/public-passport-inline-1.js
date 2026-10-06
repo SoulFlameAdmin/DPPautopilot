@@ -353,15 +353,14 @@ function renderError(message,identifier=''){
   try{
     const carrierParam=(new URLSearchParams(location.search).get('carrier')||'').trim().toLowerCase();
     const carrier=['qr','nfc'].includes(carrierParam)?carrierParam:'';
-    const basePassportUrl='/api/passport?identifier='+encodeURIComponent(identifier);
     let [passportResponse,matrixResponse]=await Promise.all([
-      fetch(basePassportUrl+(carrier?'&carrier='+carrier:''),{cache:'no-store'}),
+      fetch('/api/passport?identifier='+encodeURIComponent(identifier)+(carrier?'&carrier='+carrier:''),{cache:'no-store'}),
       fetch('/data/lmt-battery-71-v2.json',{cache:'no-store'})
     ]);
     let body=null;
     try{body=await passportResponse.json()}catch{}
     if(!passportResponse.ok&&carrier&&body?.error?.code==='CARRIER_NOT_BOUND'){
-      passportResponse=await fetch(basePassportUrl,{cache:'no-store'});
+      passportResponse=await fetch('/api/passport?identifier='+encodeURIComponent(identifier),{cache:'no-store'});
       try{body=await passportResponse.json()}catch{body=null}
       document.body.dataset.carrierScan='unbound_fallback';
     }else if(carrier&&passportResponse.ok){
