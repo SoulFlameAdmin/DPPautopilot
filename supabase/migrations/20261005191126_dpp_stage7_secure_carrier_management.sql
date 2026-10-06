@@ -80,7 +80,14 @@ end
 $fn$;
 
 revoke all on function public.dpp_api_carrier_bind_secure(uuid,text,text,text) from public,anon;
-grant execute on function public.dpp_api_carrier_bind_secure(uuid,text,text,text) to authenticated,service_role;
+grant execute on function public.dpp_api_carrier_bind_secure(uuid,text,text,text) to authenticated;
+do $grant$
+begin
+  if exists (select 1 from pg_roles where rolname='service_role') then
+    grant execute on function public.dpp_api_carrier_bind_secure(uuid,text,text,text) to service_role;
+  end if;
+end
+$grant$;
 
 create or replace function public.dpp_api_carrier_scan_history(
   p_battery_item_id uuid default null,
@@ -141,7 +148,14 @@ end
 $fn$;
 
 revoke all on function public.dpp_api_carrier_scan_history(uuid,integer) from public,anon;
-grant execute on function public.dpp_api_carrier_scan_history(uuid,integer) to authenticated,service_role;
+grant execute on function public.dpp_api_carrier_scan_history(uuid,integer) to authenticated;
+do $grant$
+begin
+  if exists (select 1 from pg_roles where rolname='service_role') then
+    grant execute on function public.dpp_api_carrier_scan_history(uuid,integer) to service_role;
+  end if;
+end
+$grant$;
 
 create index if not exists dpp_carrier_scan_history_lookup_idx
   on public.dpp_carrier_scan_events(organization_id,battery_item_id,occurred_at desc,id desc);
