@@ -115,6 +115,16 @@
             </div>
 
             <div class="import-advanced">
+              <div class="mapping-toolbar">
+                <label><span>Saved mapping</span><select id="savedMappingSelect"><option value="">— Select profile —</option></select></label>
+                <label><span>Profile name</span><input id="mappingProfileName" maxlength="160" placeholder="ERP export v1"></label>
+                <div class="mapping-actions">
+                  <button class="btn" id="loadMappingProfile" type="button">Load</button>
+                  <button class="btn primary" id="saveMappingProfile" type="button">Save mapping</button>
+                  <button class="btn danger" id="deleteMappingProfile" type="button">Delete</button>
+                </div>
+                <div class="result mapping-status" id="mappingProfileStatus" role="status" aria-live="polite">Saved mappings are private to the active company tenant.</div>
+              </div>
               <div class="ops-toolbar">
                 <div class="group xlsx-sheet-group" id="xlsxSheetGroup" hidden><label for="xlsxSheet">Worksheet</label><select id="xlsxSheet" aria-label="Excel worksheet"></select></div>
                 <div class="group">
