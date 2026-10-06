@@ -12,33 +12,31 @@
 <main class="shell">
   <header class="topbar">
     <a class="brand" href="/">DPP AUTOPILOT</a>
-    <span class="badge">REAL CLIENT ONBOARDING · V1</span>
+    <span class="badge">REAL CLIENT ONBOARDING · V2</span>
   </header>
 
   <section class="hero">
     <div>
       <p class="eyebrow">ЗАЯВКА ЗА DPP</p>
       <h1>Регистрирайте фирмата си.</h1>
-      <p>Създавате защитен акаунт, потвърждавате служебния email и описвате фирмата, екипа и системите си. След преглед получавате индивидуална оферта за вашата DPP конфигурация.</p>
+      <p>Въвеждате служебния email. DPP Autopilot изпраща защитен регистрационен линк директно в пощата ви. След отварянето му описвате фирмата, екипа и системите си и заявявате индивидуална оферта.</p>
     </div>
     <div class="security-note">
       <strong>КАК РАБОТИ</strong>
-      <span>1 · Регистрация → 2 · Email потвърждение → 3 · Фирмени данни → 4 · Индивидуална оферта.</span>
+      <span>1 · Email → 2 · Линк в Gmail → 3 · Регистрация на фирма → 4 · Индивидуална оферта.</span>
     </div>
   </section>
 
   <section class="card" id="authCard">
     <div class="card-head">
-      <div><p class="eyebrow">1 · ACCOUNT</p><h2>Регистрация или вход</h2></div>
+      <div><p class="eyebrow">1 · EMAIL</p><h2>Получете линк за регистрация</h2></div>
       <span class="state" id="authState">Проверка…</span>
     </div>
-    <div class="form-grid">
+    <div class="form-grid single-field">
       <label><span>Служебен email</span><input id="email" type="email" autocomplete="email" placeholder="office@company.eu"></label>
-      <label><span>Парола</span><input id="password" type="password" minlength="8" autocomplete="current-password" placeholder="Минимум 8 символа"></label>
     </div>
     <div class="actions">
-      <button class="btn primary" id="signup" type="button">Създай фирмен акаунт</button>
-      <button class="btn" id="signin" type="button">Вход</button>
+      <button class="btn primary" id="sendLink" type="button">Изпрати регистрационен линк →</button>
       <button class="btn ghost" id="signout" type="button" hidden>Изход</button>
     </div>
     <div class="result" id="authResult" role="status" aria-live="polite">Зареждане…</div>
@@ -46,16 +44,16 @@
 
   <section class="card" id="verifyCard" hidden>
     <div class="card-head">
-      <div><p class="eyebrow">2 · EMAIL VERIFICATION</p><h2>Потвърдете email-а</h2></div>
+      <div><p class="eyebrow">2 · EMAIL LINK</p><h2>Отворете линка в Gmail</h2></div>
       <span class="state pending">PENDING</span>
     </div>
-    <p>Отворете писмото за потвърждение и натиснете линка. След това ще се върнете тук и ще попълните фирмената заявка.</p>
-    <div class="result" id="verifyResult">Очаква се потвърждение.</div>
+    <p>Системата изпраща защитен еднократен линк на въведения email. Натиснете го и ще се върнете автоматично тук като потвърден потребител, за да регистрирате фирмата.</p>
+    <div class="result" id="verifyResult">Очаква се отваряне на регистрационния линк.</div>
   </section>
 
   <section class="card" id="applicationCard" hidden>
     <div class="card-head">
-      <div><p class="eyebrow">3 · COMPANY PROFILE</p><h2>Разкажете ни за фирмата</h2></div>
+      <div><p class="eyebrow">3 · COMPANY REGISTRATION</p><h2>Регистрирайте фирмата</h2></div>
       <span class="state ok">VERIFIED</span>
     </div>
     <p class="muted">Тези данни се използват за индивидуалната техническа конфигурация и ценова оферта. Не въвеждайте пароли, API ключове или други тайни.</p>
@@ -114,7 +112,7 @@
     <div id="historyList" class="tenant-list"></div>
   </section>
 
-  <footer>Реален client onboarding · потвърден email · защитена заявка · индивидуална оферта.</footer>
+  <footer>Реален client onboarding · email link от системата · фирмена регистрация · индивидуална оферта.</footer>
 </main>
 <script src="/assets/csp/client-apply-inline-1.js"></script>
 </body>
