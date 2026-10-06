@@ -6,7 +6,7 @@ const CATEGORIES=new Set(["portable","light_means_of_transport","starting_lighti
 const FIELD_OPTIONS=[
  ["","— Ignore —"],
  ["model.identification.manufacturer.name","Manufacturer name"],
- ["model.identification.model_id","Model ID"],
+ ["model.identification.model_id","SKU / Model ID"],
  ["model.identification.category","Category"],
  ["model.rated_capacity_ah","Rated capacity (Ah)"],
  ["model.composition.chemistry","Chemistry"],
@@ -19,6 +19,8 @@ const DEFAULT_MAP={
  manufacturer:"model.identification.manufacturer.name",
  model_id:"model.identification.model_id",
  model_identifier:"model.identification.model_id",
+ sku:"model.identification.model_id",
+ product_sku:"model.identification.model_id",
  category:"model.identification.category",
  rated_capacity_ah:"model.rated_capacity_ah",
  chemistry:"model.composition.chemistry",
@@ -156,9 +158,11 @@ function buildPrintSheet(rows){
  const sheet=$("#printSheet");sheet.replaceChildren();
  for(const p of rows){
   const card=document.createElement("article");card.className="print-label";
+  const item=itemById(p.battery_item_id),model=itemModel(item);
+  const sku=model?.model_identifier||item?.canonical_data?.sku||"—";
   const img=document.createElement("img");img.alt="DPP QR";img.src="/api/qr?identifier="+encodeURIComponent(p.unique_identifier);
   const meta=document.createElement("div"),name=document.createElement("strong"),small=document.createElement("small");
-  name.textContent=p.unique_identifier;small.textContent="DPP Autopilot · ACTIVE battery passport";
+  name.textContent=p.unique_identifier;small.textContent="SKU "+sku+" · DPP Autopilot · ACTIVE";
   meta.append(name,small);card.append(img,meta);sheet.append(card);
  }
  return [...sheet.querySelectorAll("img")];
