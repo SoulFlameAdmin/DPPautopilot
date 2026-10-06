@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>DPP Autopilot · Manufacturer Dashboard</title>
-  <meta name="description" content="Production manufacturer dashboard backed by the DPP tenant, model, item and provisioning APIs.">
+  <title>DPP Autopilot · Company Workspace</title>
+  <meta name="description" content="Company workspace for creating, saving and managing DPP records inside the company tenant.">
   <link rel="stylesheet" href="/assets/csp/manufacturer.css">
   <link rel="stylesheet" href="/assets/csp/manufacturer-ops.css">
 </head>
 <body data-manufacturer-ready="false" data-manufacturer-auth="unknown" data-manufacturer-tenant="unknown" data-manufacturer-mode="unknown">
-<aside class="app-sidebar" aria-label="Manufacturer navigation">
+<aside class="app-sidebar" aria-label="Company workspace navigation">
   <a class="sidebar-brand" href="/manufacturer">
     <span class="sidebar-mark" aria-hidden="true"></span>
     <span><strong>SOULFLAME</strong><small>DPP AUTOPILOT</small></span>
@@ -34,19 +34,18 @@
       <input class="ops-search" id="passportSearch" type="search" placeholder="Search passports, battery ID, status…">
     </label>
     <div class="top-actions">
-      <a class="btn ghost" href="/battery-master">Battery Master</a>
       <a class="btn ghost" href="/company">Company</a>
       <button class="btn" id="refreshDashboard" type="button">Refresh</button>
-      <div class="profile"><span class="avatar">SF</span><span><strong>SOULFLAME</strong><span>Manufacturer Admin</span></span></div>
+      <div class="profile"><span class="avatar">SF</span><span><strong id="workspaceCompanyName">Company</strong><span>Company Admin</span></span></div>
     </div>
   </header>
 
   <section class="overview-layout">
     <div class="hero">
       <div>
-        <p class="eyebrow">PRODUCTION · REAL TENANT DATA</p>
+        <p class="eyebrow">COMPANY WORKSPACE · PRIVATE TENANT DATA</p>
         <h1>Welcome to SOULFLAME DPP AUTOPILOT</h1>
-        <p>Create, manage and distribute Digital Product Passports for your batteries from one production dashboard.</p>
+        <p>Create, save, edit and manage your company products, battery passports, QR/NFC carriers, imports and compliance data in one private workspace.</p>
       </div>
       <div class="tenant-box">
         <span class="mini-label">ACTIVE COMPANY</span>
@@ -247,7 +246,7 @@
 
   <section class="print-sheet" id="printSheet" aria-hidden="true"></section>
 
-  <footer>Manufacturer Dashboard V1 · bearer session · active tenant · production APIs · no browser-local product database.</footer>
+  <footer>Company Workspace V1 · private tenant · production APIs · company data is stored separately from the SoulFlame internal dashboard.</footer>
 </main>
 <script src="/assets/csp/manufacturer-inline-1.js"></script>
 <script src="/vendor/xlsx.full.min.js"></script>
