@@ -67,3 +67,7 @@ The live Supabase project contains unrelated non-DPP application tables. DPP mig
 - This affects only the audit copy; source business/regulatory rows are not modified.
 - The helper is not executable by `anon` or `authenticated`.
 - This does **not** define the final audit retention period or broader personal/confidential-field minimization policy.
+
+## Физически носители и сканирания
+
+`dpp_physical_carriers` и `dpp_carrier_scan_events` съдържат tenant идентификатори, QR/NFC данни, препратки към потребителски UUID и часове на сканиране. RLS е включен, директният клиентски достъп до таблиците е отнет, а историята се чете чрез tenant RPC. Няма реализирано автоматично изтриване; срокът за съхранение още изисква приемане.
