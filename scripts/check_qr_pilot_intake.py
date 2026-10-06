@@ -7,12 +7,23 @@ import sys
 from pathlib import Path
 
 FIELDS = ('manufacturer_name', 'model_id', 'category', 'unique_identifier')
+CATEGORIES = {'portable', 'light_means_of_transport', 'starting_lighting_ignition',
+              'industrial', 'electric_vehicle', 'other'}
+
+
+def unique_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError('Duplicate approval key')
+        result[key] = value
+    return result
 
 
 def check(csv_path, approval_path):
     errors = []
     with Path(csv_path).open(encoding='utf-8-sig', newline='') as handle:
-        reader = csv.DictReader(handle)
+        reader = csv.DictReader(handle, strict=True)
         headers = reader.fieldnames or []
         if len(headers) != len(set(headers)):
             errors.append('Duplicate CSV headers')
@@ -31,13 +42,21 @@ def check(csv_path, approval_path):
                 errors.append(f'Row {number}: missing {field}')
             elif value != value.strip():
                 errors.append(f'Row {number}: surrounding whitespace in {field}')
+        identifier = row.get('unique_identifier')
+        if isinstance(identifier, str) and (
+            len(identifier.encode('utf-16-le', errors='surrogatepass')) // 2 > 300
+            or any(ord(char) < 32 or ord(char) == 127 for char in identifier)
+        ):
+            errors.append(f'Row {number}: identifier must be 1..300 printable UTF-16 units')
+        if row.get('category') not in CATEGORIES:
+            errors.append(f'Row {number}: unsupported battery category')
     ids = [row.get('unique_identifier') for row in rows]
     if len(set(ids)) != len(ids):
         errors.append('Duplicate battery identifiers; model SKU is not a unit identifier')
     for field in ('manufacturer_name', 'model_id', 'category'):
         if len({row.get(field) for row in rows}) != 1:
             errors.append('Pilot must have one ' + field)
-    approval = json.loads(Path(approval_path).read_text(encoding='utf-8'))
+    approval = json.loads(Path(approval_path).read_text(encoding='utf-8-sig'), object_pairs_hook=unique_json_object)
     if not isinstance(approval, dict):
         return errors + ['Approval must be a JSON object']
     for field in ('company_name', 'reviewer_name', 'uat_contact', 'approval_reference', 'category_review_reference'):

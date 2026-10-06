@@ -580,3 +580,20 @@ test('M22 invalid passport pagination and carrier keep canonical public messages
     assert.deepEqual(JSON.parse(out.body).error,{code:'VALIDATION_ERROR',message:'The request failed validation.'});
   }
 });
+
+
+test('carrier scan rejects malformed successful RPC responses without exposing payloads',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  try{
+    for(const data of [null,[],{},'private-secret',publicPassportFixture({status:'revoked'}),publicPassportFixture({kind:'lifecycle'}),publicPassportFixture({passport_id:'invalid'}),publicPassportFixture({public_payload:null})]){
+      global.fetch=async()=>({ok:true,async json(){return data;}});
+      const out=makeRes();await handler(makeReq('GET',null,{identifier:'urn:dpp:scan:bad',carrier:'qr'},null),out);
+      assert.equal(out.statusCode,502);assert.equal(JSON.parse(out.body).error.code,'UPSTREAM_ERROR');
+      assert.equal(out.body.includes('private-secret'),false);
+    }
+    const data=publicPassportFixture({unique_identifier:'urn:dpp:scan:sql'});delete data.kind;delete data.battery_item_id;
+    global.fetch=async()=>({ok:true,async json(){return data;}});
+    const out=makeRes();await handler(makeReq('GET',null,{identifier:'urn:dpp:scan:sql',carrier:'qr'},null),out);
+    assert.equal(out.statusCode,200);assert.equal(JSON.parse(out.body).data.kind,'active');
+  }finally{global.fetch=original;restore();}
+});

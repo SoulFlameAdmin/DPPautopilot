@@ -57,6 +57,19 @@ function validPublicPassport(value) {
     validTimestamp(value.updated_at);
 }
 
+function validCarrierOpen(value) {
+  return plainObject(value) &&
+    (value.kind == null || value.kind === 'active') &&
+    validUuid(value.passport_id) &&
+    (value.battery_item_id == null || validUuid(value.battery_item_id)) &&
+    typeof value.unique_identifier === 'string' &&
+    value.unique_identifier.trim().length >= 1 &&
+    value.unique_identifier.trim().length <= 300 &&
+    value.status === 'active' &&
+    plainObject(value.public_payload) &&
+    validTimestamp(value.updated_at);
+}
+
 function validPublicResolve(value) {
   if (!plainObject(value) ||
       !validUuid(value.passport_id) ||
@@ -142,6 +155,7 @@ function validAuthorityEvidenceReceipt(value) {
 function validateRpcShape(name, data) {
   if (name === 'dpp_api_passport_public') return validPublicPassport(data);
   if (name === 'dpp_api_passport_public_resolve') return validPublicResolve(data);
+  if (name === 'dpp_api_carrier_open') return validCarrierOpen(data);
   if (name === 'dpp_api_scooter_passport_readiness') return validReadinessReport(data);
   if (name === 'dpp_api_scooter_completeness_by_identifier') return validCompletenessReport(data);
   if (name === 'dpp_api_scooter_authority_evidence_submit') return validAuthorityEvidenceReceipt(data);
