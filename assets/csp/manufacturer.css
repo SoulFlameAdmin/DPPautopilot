@@ -20,3 +20,9 @@ footer{padding:24px 0 0;text-align:center;color:#8491a2;font-size:8px}
 @media(max-width:1240px){.workspace{grid-template-columns:minmax(0,1fr) 330px}.import-grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}}
 @media(max-width:980px){.app-sidebar{display:none}.shell{margin-left:0}.workspace{grid-template-columns:1fr}.passport-detail{position:relative;top:auto}.passport-columns{display:none}.passport-rows .ops-row{grid-template-columns:30px 1fr 1fr}.passport-rows .ops-cell:nth-child(4),.passport-rows .ops-cell:nth-child(6){display:none}.top-search{width:55vw}}
 @media(max-width:650px){.shell{padding:0 9px 30px}.topbar{margin:0 -9px 12px;padding:8px 10px;height:auto;align-items:stretch;flex-direction:column}.top-search{width:100%}.top-actions{justify-content:space-between}.profile{border-left:0;padding-left:0}.stats,.grid.two,.ops-grid,.import-grid{grid-template-columns:1fr}.welcome h1{font-size:25px}.table-tools{width:100%;flex-direction:column}.section-head{flex-direction:column}.table-search{width:100%}.passport-body{grid-template-columns:1fr}.qr-wrap{text-align:left}.qr-wrap img{width:130px;height:130px}}
+
+.mapping-toolbar{display:grid;grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) auto;gap:9px;align-items:end;padding:11px;border:1px solid #dde5ee;border-radius:9px;background:#f9fbfd;margin-bottom:10px}
+.mapping-toolbar label{min-width:0}.mapping-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.mapping-status{grid-column:1/-1;margin:0}
+.btn.danger{border-color:#edc2c7;background:#fff7f8;color:#ae3845}
+@media(max-width:820px){.mapping-toolbar{grid-template-columns:1fr 1fr}.mapping-actions{grid-column:1/-1}}
+@media(max-width:520px){.mapping-toolbar{grid-template-columns:1fr}}
