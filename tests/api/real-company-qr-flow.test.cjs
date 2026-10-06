@@ -48,7 +48,7 @@ test('technical pilot binds QR and exposes print\/scan path',()=>{
   assert.match(dashboard,/\/qr\?identifier=/);
   assert.match(carriersApi,/dpp_api_carrier_bind_secure/);
   assert.match(qrApi,/passport/);
-  assert.match(ops,/Bind QR \+ Print selected/);
+  assert.match(html,/Bind QR \+ Print selected/);\n  assert.match(ops,/\\$\\("#printSelected"\\)\\.addEventListener/);\n  assert.match(ops,/printPassports\\(selectedPassports\\(\\),\\{bind:true\\}\\)/);
 });
 
 test('LMT remains separated from technical pilot shortcut',()=>{
