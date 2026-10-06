@@ -84,7 +84,7 @@ grant execute on function public.dpp_api_carrier_bind_secure(uuid,text,text,text
 do $grant$
 begin
   if exists (select 1 from pg_roles where rolname='service_role') then
-    grant execute on function public.dpp_api_carrier_bind_secure(uuid,text,text,text) to service_role;
+    execute 'grant execute on function public.dpp_api_carrier_bind_secure(uuid,text,text,text) to service_role';
   end if;
 end
 $grant$;
@@ -152,7 +152,7 @@ grant execute on function public.dpp_api_carrier_scan_history(uuid,integer) to a
 do $grant$
 begin
   if exists (select 1 from pg_roles where rolname='service_role') then
-    grant execute on function public.dpp_api_carrier_scan_history(uuid,integer) to service_role;
+    execute 'grant execute on function public.dpp_api_carrier_scan_history(uuid,integer) to service_role';
   end if;
 end
 $grant$;
