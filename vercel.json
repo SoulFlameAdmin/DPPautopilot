@@ -26,6 +26,14 @@
       "destination": "/live/qr"
     },
     {
+      "source": "/apply",
+      "destination": "/live/apply"
+    },
+    {
+      "source": "/apply/",
+      "destination": "/live/apply"
+    },
+    {
       "source": "/company",
       "destination": "/live/company"
     },
