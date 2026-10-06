@@ -11,8 +11,10 @@ function makeRes(){
     end(value){this.body=value||'';}
   };
 }
+let requestCounter=0;
 function makeReq(identifier){
-  return {method:'GET',query:{identifier},headers:{'x-forwarded-for':'203.0.113.'+Math.floor(Math.random()*200+1)}};
+  requestCounter+=1;
+  return {method:'GET',query:{identifier},headers:{'x-forwarded-for':'203.0.113.'+requestCounter}};
 }
 function env(){
   const old={
