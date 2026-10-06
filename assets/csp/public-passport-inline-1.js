@@ -396,6 +396,14 @@ function renderError(message,identifier=''){
     if(pilot)renderPilotSections(passport);
     else renderSections(passport,matrix);
     renderTechnical(passport,identifier);
+    if(pilot){
+      const trace=$('#traceabilityTrust');
+      if(trace){
+        const strong=trace.querySelector('strong'),small=trace.querySelector('small');
+        if(strong)strong.textContent='Traceable identifier';
+        if(small)small.textContent='QR сочи към индивидуалния публичен battery record.';
+      }
+    }
     $('#trustStrip').hidden=false;
 
     document.body.dataset.passportReady='true';
