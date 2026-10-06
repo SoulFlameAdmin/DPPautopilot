@@ -13,6 +13,7 @@ const passport=require('../../api/passport.js');
 const provision=require('../../api/provision.js');
 const batchProvision=require('../../api/batch-provision.js');
 const imports=require('../../api/imports.js');
+const carriers=require('../../api/carriers.js');
 const exportApi=require('../../api/export.js');
 
 function makeRes(){
@@ -222,6 +223,7 @@ test('all authenticated API surfaces emit correlated redacted 401 events',async(
       ['provision',provision,{method:'POST',headers:{},body:{secret:'must-not-appear'},query:{}}],
       ['batch-provision',batchProvision,{method:'POST',headers:{},body:{secret:'must-not-appear'},query:{}}],
       ['imports',imports,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
+      ['carrier',carriers,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
       ['export',exportApi,{method:'GET',headers:{},query:{secret:'must-not-appear'}}],
       ['passport',passport,{
         method:'GET',
