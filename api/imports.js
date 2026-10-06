@@ -77,6 +77,9 @@ function validateRpcShape(name,data){
   if(name==='dpp_api_import_get') return validImportGet(data);
   if(name==='dpp_api_import_validate') return validImportValidate(data);
   if(name==='dpp_api_import_commit') return validImportCommit(data);
+  if(name==='dpp_api_import_mapping_list') return Array.isArray(data)&&data.every(validMappingProfile);
+  if(name==='dpp_api_import_mapping_save') return validMappingProfile(data);
+  if(name==='dpp_api_import_mapping_delete') return validMappingDelete(data);
   return true;
 }
 
@@ -88,6 +91,31 @@ function validRows(rows){
     row.normalized_item&&typeof row.normalized_item==='object'&&!Array.isArray(row.normalized_item)&&
     (row.validation_errors==null||Array.isArray(row.validation_errors))
   );
+}
+
+function validMappingName(value){
+  return typeof value==='string'&&value.trim().length>=1&&value.trim().length<=160;
+}
+function validMappingFormat(value){return value==='csv'||value==='xlsx';}
+function validMappingHeaders(value){
+  return Array.isArray(value)&&value.length>=1&&value.length<=100&&
+    value.every(v=>typeof v==='string'&&v.trim().length>0)&&
+    new Set(value.map(v=>v.trim().toLowerCase())).size===value.length;
+}
+function validFieldMapping(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    Object.entries(value).every(([k,v])=>k.trim().length>0&&typeof v==='string');
+}
+function validMappingProfile(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    validUuid(value.id)&&validMappingName(value.name)&&validMappingFormat(value.source_format)&&
+    validMappingHeaders(value.source_headers)&&validFieldMapping(value.field_mapping)&&
+    Number.isInteger(value.revision)&&value.revision>=1&&
+    validTimestamp(value.created_at)&&validTimestamp(value.updated_at);
+}
+function validMappingDelete(value){
+  return value&&typeof value==='object'&&!Array.isArray(value)&&
+    validUuid(value.id)&&value.deleted===true;
 }
 
 function mapDatabaseError(data){
@@ -193,6 +221,10 @@ async function handler(req,res){
 
   try{
     if(method==='GET'){
+      if(String(req.query&&req.query.mappings||'')==='1'){
+        const value=await rpc('dpp_api_import_mapping_list',{},authorization);
+        return send(res,200,{data:value});
+      }
       const id=req.query&&req.query.id;
       if(!validUuid(id)){
         return send(res,400,{error:{code:'INVALID_IMPORT_ID',message:'A valid import UUID is required.'}});
@@ -202,6 +234,22 @@ async function handler(req,res){
     }
 
     if(method==='POST'){
+      if(body.action==='save_mapping'){
+        if(body.id!=null&&!validUuid(body.id)){
+          return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'The import mapping payload is invalid.'}});
+        }
+        if(!validMappingName(body.name)||!validMappingFormat(body.source_format)||!validMappingHeaders(body.source_headers)||!validFieldMapping(body.field_mapping)){
+          return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'The import mapping payload is invalid.'}});
+        }
+        const value=await rpc('dpp_api_import_mapping_save',{
+          p_id:body.id||null,
+          p_name:body.name.trim(),
+          p_source_format:body.source_format,
+          p_source_headers:body.source_headers.map(v=>v.trim()),
+          p_field_mapping:body.field_mapping
+        },authorization);
+        return send(res,200,{data:value});
+      }
       if(!validRows(body.rows)){
         return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'The import payload is invalid.'}});
       }
@@ -217,11 +265,18 @@ async function handler(req,res){
 
     const id=body.id||(req.query&&req.query.id);
     const action=body.action;
+    if(action==='delete_mapping'){
+      if(!validUuid(id)){
+        return send(res,400,{error:{code:'INVALID_IMPORT_MAPPING_ID',message:'A valid mapping UUID is required.'}});
+      }
+      const value=await rpc('dpp_api_import_mapping_delete',{p_id:id},authorization);
+      return send(res,200,{data:value});
+    }
     if(!validUuid(id)){
       return send(res,400,{error:{code:'INVALID_IMPORT_ID',message:'A valid import UUID is required.'}});
     }
     if(!['validate','commit'].includes(action)){
-      return send(res,422,{error:{code:'INVALID_IMPORT_ACTION',message:'action must be validate or commit.'}});
+      return send(res,422,{error:{code:'INVALID_IMPORT_ACTION',message:'action must be validate, commit, or delete_mapping.'}});
     }
 
     const rpcName=action==='validate'?'dpp_api_import_validate':'dpp_api_import_commit';
@@ -237,4 +292,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validUuid,validTimestamp,validNullableTimestamp,validNonNegativeInteger,validImportCreate,validImportGet,validImportValidate,validImportCommit,validateRpcShape,validRows,mapDatabaseError,rpc,IMPORT_STATUSES,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,validUuid,validTimestamp,validNullableTimestamp,validNonNegativeInteger,validImportCreate,validImportGet,validImportValidate,validImportCommit,validMappingName,validMappingFormat,validMappingHeaders,validFieldMapping,validMappingProfile,validMappingDelete,validateRpcShape,validRows,mapDatabaseError,rpc,IMPORT_STATUSES,DEFAULT_RPC_TIMEOUT_MS};
