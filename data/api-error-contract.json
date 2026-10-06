@@ -320,7 +320,23 @@
         "message": "The import mapping was not found."
       }
     },
-    "tenant": {},
+    "tenant": {
+      "23505": {
+        "http_status": 409,
+        "code": "API_CREDENTIAL_CONFLICT",
+        "message": "An API credential with the requested identity already exists."
+      },
+      "DP201": {
+        "http_status": 404,
+        "code": "API_CREDENTIAL_NOT_FOUND",
+        "message": "The API credential was not found."
+      },
+      "DP202": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The API credential request failed validation."
+      }
+    },
     "organizations": {
       "23505": {
         "http_status": 409,
