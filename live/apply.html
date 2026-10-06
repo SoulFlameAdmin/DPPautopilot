@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · Заявка за фирма</title>
+  <meta name="description" content="Реална фирмена регистрация, email verification и DPP onboarding заявка.">
+  <link rel="stylesheet" href="/assets/csp/company-auth.css">
+</head>
+<body data-company-auth-ready="false" data-company-session="anonymous">
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/">DPP AUTOPILOT</a>
+    <span class="badge">REAL CLIENT ONBOARDING · V1</span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">ЗАЯВКА ЗА DPP</p>
+      <h1>Регистрирайте фирмата си.</h1>
+      <p>Създавате защитен акаунт, потвърждавате служебния email и описвате фирмата, екипа и системите си. След преглед получавате индивидуална оферта за вашата DPP конфигурация.</p>
+    </div>
+    <div class="security-note">
+      <strong>КАК РАБОТИ</strong>
+      <span>1 · Регистрация → 2 · Email потвърждение → 3 · Фирмени данни → 4 · Индивидуална оферта.</span>
+    </div>
+  </section>
+
+  <section class="card" id="authCard">
+    <div class="card-head">
+      <div><p class="eyebrow">1 · ACCOUNT</p><h2>Регистрация или вход</h2></div>
+      <span class="state" id="authState">Проверка…</span>
+    </div>
+    <div class="form-grid">
+      <label><span>Служебен email</span><input id="email" type="email" autocomplete="email" placeholder="office@company.eu"></label>
+      <label><span>Парола</span><input id="password" type="password" minlength="8" autocomplete="current-password" placeholder="Минимум 8 символа"></label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="signup" type="button">Създай фирмен акаунт</button>
+      <button class="btn" id="signin" type="button">Вход</button>
+      <button class="btn ghost" id="signout" type="button" hidden>Изход</button>
+    </div>
+    <div class="result" id="authResult" role="status" aria-live="polite">Зареждане…</div>
+  </section>
+
+  <section class="card" id="verifyCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">2 · EMAIL VERIFICATION</p><h2>Потвърдете email-а</h2></div>
+      <span class="state pending">PENDING</span>
+    </div>
+    <p>Отворете писмото за потвърждение и натиснете линка. След това ще се върнете тук и ще попълните фирмената заявка.</p>
+    <div class="result" id="verifyResult">Очаква се потвърждение.</div>
+  </section>
+
+  <section class="card" id="applicationCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">3 · COMPANY PROFILE</p><h2>Разкажете ни за фирмата</h2></div>
+      <span class="state ok">VERIFIED</span>
+    </div>
+    <p class="muted">Тези данни се използват за индивидуалната техническа конфигурация и ценова оферта. Не въвеждайте пароли, API ключове или други тайни.</p>
+
+    <div class="form-grid">
+      <label><span>Име на фирмата *</span><input id="companyName" maxlength="200" placeholder="Example Batteries Ltd."></label>
+      <label><span>Лице за контакт</span><input id="contactName" maxlength="200" placeholder="Име и фамилия"></label>
+      <label><span>Държава</span><input id="country" maxlength="120" placeholder="Bulgaria"></label>
+      <label><span>Уебсайт</span><input id="website" maxlength="500" placeholder="https://company.eu"></label>
+      <label><span>Брой служители *</span><input id="employeesCount" type="number" min="1" max="1000000" inputmode="numeric" placeholder="120"></label>
+      <label><span>Хора, които ще работят с DPP</span><input id="dppUsersCount" type="number" min="1" max="1000000" inputmode="numeric" placeholder="8"></label>
+      <label><span>Производствени обекти</span><input id="productionSitesCount" type="number" min="0" max="100000" inputmode="numeric" placeholder="2"></label>
+      <label><span>Брой SKU / модели</span><input id="skuCount" type="number" min="0" max="100000000" inputmode="numeric" placeholder="45"></label>
+      <label><span>Приблизителни бройки / година</span><input id="annualUnits" type="number" min="0" max="1000000000000" inputmode="numeric" placeholder="250000"></label>
+      <label><span>Продуктови категории</span><input id="productCategories" maxlength="2000" placeholder="EV batteries, industrial batteries..."></label>
+    </div>
+
+    <div class="field-block">
+      <span class="field-title">Какви системи използвате? *</span>
+      <div class="systems-grid">
+        <label class="check"><input type="checkbox" name="systems" value="ERP"><span>ERP</span></label>
+        <label class="check"><input type="checkbox" name="systems" value="MES"><span>MES</span></label>
+        <label class="check"><input type="checkbox" name="systems" value="PLM"><span>PLM</span></label>
+        <label class="check"><input type="checkbox" name="systems" value="WMS"><span>WMS</span></label>
+        <label class="check"><input type="checkbox" name="systems" value="CRM"><span>CRM</span></label>
+        <label class="check"><input type="checkbox" name="systems" value="Excel / Google Sheets"><span>Excel / Sheets</span></label>
+        <label class="check"><input type="checkbox" name="systems" value="Custom API / internal software"><span>Custom / API</span></label>
+        <label class="check"><input type="checkbox" name="systems" value="No current system"><span>Нямаме система</span></label>
+      </div>
+      <label class="wide-label"><span>Друга система / интеграция</span><input id="systemsOther" maxlength="500" placeholder="SAP S/4HANA, Odoo, Microsoft Dynamics, custom MES..."></label>
+    </div>
+
+    <label class="wide-label"><span>Допълнителна информация</span><textarea id="notes" maxlength="5000" rows="5" placeholder="Как работите с данните днес, какво искате да автоматизираме, нужни интеграции и срокове."></textarea></label>
+
+    <div class="actions">
+      <button class="btn primary" id="submitApplication" type="button">Изпрати заявка за индивидуална оферта →</button>
+    </div>
+    <div class="result" id="applicationResult" role="status" aria-live="polite">Попълнете фирмените данни.</div>
+  </section>
+
+  <section class="card success-card" id="successCard" hidden>
+    <div class="ready-mark">✓</div>
+    <div>
+      <p class="eyebrow">APPLICATION RECEIVED</p>
+      <h2>Заявката е приета.</h2>
+      <p class="muted">Екипът на SoulFlame DPP ще прегледа фирмата, броя потребители, системите и нужните интеграции. Индивидуалната оферта ще бъде изпратена на потвърдения служебен email.</p>
+      <div class="result ok" id="successMeta"></div>
+    </div>
+  </section>
+
+  <section class="card" id="historyCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">STATUS</p><h2>Вашите заявки</h2></div>
+      <span class="state ok">LIVE</span>
+    </div>
+    <div id="historyList" class="tenant-list"></div>
+  </section>
+
+  <footer>Реален client onboarding · потвърден email · защитена заявка · индивидуална оферта.</footer>
+</main>
+<script src="/assets/csp/client-apply-inline-1.js"></script>
+</body>
+</html>
