@@ -1,6 +1,15 @@
 'use strict';
 
 const test = require('node:test');
+const {beforeEach,afterEach}=require('node:test');
+const originalFetch=global.fetch;
+beforeEach(()=>{global.fetch=async(url,options)=>{
+  assert.match(String(url),/dpp_api_passport_public_resolve$/);
+  const identifier=JSON.parse(options.body).p_unique_identifier;
+  return {ok:true,async json(){return {kind:'active',status:'active',unique_identifier:identifier};}};
+};});
+afterEach(()=>{global.fetch=originalFetch;});
+
 const assert = require('node:assert/strict');
 const handler = require('../../api/qr.js');
 
@@ -34,12 +43,12 @@ test('renders a standalone SVG QR carrier',()=>{
   assert.ok(svg.length>500);
 });
 
-test('GET returns SVG and exact canonical target header',()=>{
+test('GET returns SVG and exact canonical target header',async()=>{
   const old=process.env.DPP_PUBLIC_ORIGIN;
   process.env.DPP_PUBLIC_ORIGIN='https://dpp.example';
   try{
     const res=makeRes();
-    handler(makeReq('GET',{identifier:'BAT-001'}),res);
+    await handler(makeReq('GET',{identifier:'BAT-001'}),res);
     assert.equal(res.statusCode,200);
     assert.match(res.headers['content-type'],/^image\/svg\+xml/);
     assert.equal(res.headers['x-dpp-carrier'],'qr');
@@ -52,34 +61,34 @@ test('GET returns SVG and exact canonical target header',()=>{
   }
 });
 
-test('download mode sends attachment disposition',()=>{
+test('download mode sends attachment disposition',async()=>{
   const res=makeRes();
-  handler(makeReq('GET',{identifier:'BAT-001',download:'1'}),res);
+  await handler(makeReq('GET',{identifier:'BAT-001',download:'1'}),res);
   assert.equal(res.statusCode,200);
   assert.match(res.headers['content-disposition'],/^attachment;/);
 });
 
-test('invalid identifier and unsupported methods fail closed',()=>{
+test('invalid identifier and unsupported methods fail closed',async()=>{
   let res=makeRes();
-  handler(makeReq('GET',{}),res);
+  await handler(makeReq('GET',{}),res);
   assert.equal(res.statusCode,400);
   assert.equal(JSON.parse(res.body).error.code,'INVALID_IDENTIFIER');
 
   res=makeRes();
-  handler(makeReq('POST',{identifier:'BAT-001'}),res);
+  await handler(makeReq('POST',{identifier:'BAT-001'}),res);
   assert.equal(res.statusCode,405);
   assert.equal(res.headers.allow,'GET');
 });
 
 
-test('different battery identifiers produce different canonical targets and different QR carriers',()=>{
+test('different battery identifiers produce different canonical targets and different QR carriers',async()=>{
   const old=process.env.DPP_PUBLIC_ORIGIN;
   process.env.DPP_PUBLIC_ORIGIN='https://dpp.example';
   try{
     const a=makeRes();
     const b=makeRes();
-    handler(makeReq('GET',{identifier:'BAT-UNIQUE-0001'}),a);
-    handler(makeReq('GET',{identifier:'BAT-UNIQUE-0002'}),b);
+    await handler(makeReq('GET',{identifier:'BAT-UNIQUE-0001'}),a);
+    await handler(makeReq('GET',{identifier:'BAT-UNIQUE-0002'}),b);
     assert.equal(a.statusCode,200);
     assert.equal(b.statusCode,200);
     assert.equal(a.headers['x-dpp-identifier'],'BAT-UNIQUE-0001');
@@ -90,4 +99,14 @@ test('different battery identifiers produce different canonical targets and diff
     if(old===undefined) delete process.env.DPP_PUBLIC_ORIGIN;
     else process.env.DPP_PUBLIC_ORIGIN=old;
   }
+});
+
+
+test('QR generation denies missing active passport and verification errors',async()=>{
+  global.fetch=async()=>({ok:true,async json(){return {kind:'lifecycle',status:'revoked'};}});
+  let out=makeRes();await handler(makeReq('GET',{identifier:'NO-ACTIVE'}),out);
+  assert.equal(out.statusCode,404);assert.equal(JSON.parse(out.body).error.code,'PUBLIC_PASSPORT_NOT_FOUND');
+  global.fetch=async()=>{throw new Error('private transport detail');};
+  out=makeRes();await handler(makeReq('GET',{identifier:'FAILED-VERIFY'}),out);
+  assert.equal(out.statusCode,502);assert.equal(out.body.includes('private transport detail'),false);
 });
