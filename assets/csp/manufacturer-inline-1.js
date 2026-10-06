@@ -67,10 +67,17 @@ function setMode(){
   $("#writeRole").className="state "+(write?"ok":"readonly");
   $("#createModel").disabled=!write;
   $("#provisionBattery").disabled=!write;
+  $("#batchProvision").disabled=!write;
   $("#modelIdentifier").disabled=!write;
   $("#manufacturerName").disabled=!write;
   $("#provisionModel").disabled=!write;
   $("#batteryIdentifier").disabled=!write;
+  $("#batchModel").disabled=!write;
+  $("#batchKey").disabled=!write;
+  $("#batchPrefix").disabled=!write;
+  $("#batchQuantity").disabled=!write;
+  $("#batchSerialStart").disabled=!write;
+  $("#batchSerialWidth").disabled=!write;
 }
 function showGate(message){
   document.body.dataset.manufacturerTenant="missing";
@@ -87,9 +94,16 @@ function renderModels(){
   $("#modelsCount").textContent=String(models.length);
   $("#lmtModelsCount").textContent=String(lmt.length);
   const select=$("#provisionModel"),selected=select.value;
-  select.replaceChildren(new Option("Избери модел",""));
-  for(const model of lmt)select.append(new Option(model.model_identifier+" · "+model.manufacturer_name,model.id));
+  const batchSelect=$("#batchModel"),batchSelected=batchSelect.value;
+  select.replaceChildren(new Option("Избери SKU / модел",""));
+  batchSelect.replaceChildren(new Option("Избери SKU",""));
+  for(const model of lmt){
+    const label=model.model_identifier+" · "+model.manufacturer_name;
+    select.append(new Option(label,model.id));
+    batchSelect.append(new Option(label,model.id));
+  }
   if(lmt.some(m=>m.id===selected))select.value=selected;
+  if(lmt.some(m=>m.id===batchSelected))batchSelect.value=batchSelected;
 
   if(!models.length){const e=document.createElement("div");e.className="empty";e.textContent="Няма модели в активната фирма.";host.append(e);return}
   for(const model of models.slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))){
@@ -102,7 +116,11 @@ function renderModels(){
     side.append(pill);
     if(model.category==="light_means_of_transport"&&canWrite()){
       const use=document.createElement("button");use.className="btn";use.type="button";use.textContent="Избери за производство";
-      use.addEventListener("click",()=>{$("#provisionModel").value=model.id;$("#batteryIdentifier").focus()});
+      use.addEventListener("click",()=>{
+        $("#provisionModel").value=model.id;
+        $("#batchModel").value=model.id;
+        $("#batteryIdentifier").focus();
+      });
       side.append(use);
     }
     row.append(left,side);host.append(row);
@@ -244,7 +262,7 @@ async function loadData(){
 async function createModel(){
   if(!canWrite())return;
   const modelIdentifier=$("#modelIdentifier").value.trim(),manufacturer=$("#manufacturerName").value.trim();
-  if(!modelIdentifier||!manufacturer)return setResult($("#modelResult"),"Попълни Model identifier и Manufacturer.","bad");
+  if(!modelIdentifier||!manufacturer)return setResult($("#modelResult"),"Попълни SKU / Model ID и Manufacturer.","bad");
   $("#createModel").disabled=true;setResult($("#modelResult"),"Запис към production /api/models…");
   try{
     const created=(await api("/api/models",{method:"POST",body:{
@@ -295,6 +313,79 @@ async function provisionBattery(){
   }catch(e){setResult($("#provisionResult"),e.message,"bad")}
   finally{$("#provisionBattery").disabled=!canWrite()}
 }
+async function provisionBatch(){
+  if(!canWrite())return;
+  const model=models.find(m=>m.id===$("#batchModel").value);
+  const batchKey=$("#batchKey").value.trim();
+  const prefix=$("#batchPrefix").value.trim();
+  const quantity=Number($("#batchQuantity").value);
+  const serialStart=Number($("#batchSerialStart").value);
+  const serialWidth=Number($("#batchSerialWidth").value);
+  if(!model||model.category!=="light_means_of_transport"){
+    return setResult($("#batchResult"),"Избери валиден LMT SKU / модел.","bad");
+  }
+  if(!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(batchKey)){
+    return setResult($("#batchResult"),"Batch key трябва да съдържа само букви, цифри, . _ : - и да започва с буква/цифра.","bad");
+  }
+  if(!prefix||prefix.length>250){
+    return setResult($("#batchResult"),"Въведи Battery ID prefix.","bad");
+  }
+  if(!Number.isInteger(quantity)||quantity<1||quantity>250||
+     !Number.isSafeInteger(serialStart)||serialStart<0||
+     !Number.isInteger(serialWidth)||serialWidth<1||serialWidth>12){
+    return setResult($("#batchResult"),"Quantity 1–250, Serial start ≥ 0 и Serial width 1–12 са задължителни.","bad");
+  }
+  const lastSerial=serialStart+quantity-1;
+  if(!Number.isSafeInteger(lastSerial)||String(lastSerial).length>serialWidth){
+    return setResult($("#batchResult"),"Serial range не се побира в избраната ширина.","bad");
+  }
+
+  $("#batchProvision").disabled=true;
+  setResult($("#batchResult"),"Създаване на "+quantity+" DRAFT паспорта за SKU "+model.model_identifier+"…");
+  try{
+    const response=await api("/api/batch-provision",{method:"POST",body:{
+      model_id:model.id,
+      batch_key:batchKey,
+      generator:{
+        quantity,
+        serial_start:serialStart,
+        serial_width:serialWidth,
+        identifier_prefix:prefix,
+        item_canonical_data_template:{
+          sku:model.model_identifier,
+          source:"manufacturer_dashboard_batch"
+        },
+        public_payload_template:{
+          model:{identification:{
+            category:"light_means_of_transport",
+            model_id:model.model_identifier,
+            manufacturer:{name:model.manufacturer_name}
+          }},
+          item:{}
+        },
+        private_payload_template:{}
+      }
+    }});
+    const data=response.data||{},units=Array.isArray(data.units)?data.units:[];
+    const first=units[0]?.unique_identifier||"—";
+    const last=units[units.length-1]?.unique_identifier||"—";
+    await loadData();
+    $("#batchModel").value=model.id;
+    setResult(
+      $("#batchResult"),
+      (data.idempotent_replay?"Batch replay verified":"Batch created")+
+      " · SKU "+model.model_identifier+
+      " · "+units.length+" units · "+first+" → "+last+
+      ". Следва: completeness → ACTIVE → Bind QR + Print.",
+      "ok"
+    );
+  }catch(e){
+    setResult($("#batchResult"),e.message,"bad");
+  }finally{
+    $("#batchProvision").disabled=!canWrite();
+  }
+}
+
 async function init(){
   cfg=await fetch("/data/auth-config.json",{cache:"no-store"}).then(async r=>{if(!r.ok)throw new Error("Auth config unavailable.");return r.json()});
   if(cfg.supabaseUrl!==PROJECT_URL||!String(cfg.publishableKey||"").startsWith("sb_publishable_"))throw new Error("Invalid DPP auth configuration.");
@@ -318,5 +409,6 @@ $("#refreshDashboard").addEventListener("click",async()=>{
 });
 $("#createModel").addEventListener("click",createModel);
 $("#provisionBattery").addEventListener("click",provisionBattery);
+$("#batchProvision").addEventListener("click",provisionBatch);
 init().catch(e=>{document.body.dataset.manufacturerReady="false";showGate(e.message)});
 })();

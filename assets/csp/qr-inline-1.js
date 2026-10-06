@@ -70,8 +70,10 @@ function setState(kind, message) {
     document.body.dataset.qrKind = 'production-public-passport-url';
     document.body.dataset.qrIdentifier = identifier;
     if(printButton) printButton.disabled=false;
+    const sku=passport?.public_payload?.model?.identification?.model_id||'—';
     $('passportMeta').innerHTML =
-      '<strong>ACTIVE</strong> · passport ' + esc(passport.passport_id) +
+      '<strong>ACTIVE</strong> · SKU ' + esc(sku) +
+      ' · passport ' + esc(passport.passport_id) +
       ' · updated ' + esc(passport.updated_at);
     setState('ok','QR е готов за сканиране и печат. URL е проверен срещу активен public passport.');
   } catch (error) {

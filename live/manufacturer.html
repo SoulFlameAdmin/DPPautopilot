@@ -149,7 +149,7 @@
               <article class="card">
                 <div class="card-head"><div><p class="eyebrow">MODEL REGISTER</p><h2>Create LMT model</h2></div><span class="state" id="writeRole">ROLE</span></div>
                 <div class="form-grid">
-                  <label><span>Model identifier</span><input id="modelIdentifier" maxlength="128" placeholder="SF-48V20"></label>
+                  <label><span>SKU / Model ID</span><input id="modelIdentifier" maxlength="128" placeholder="SF-LMT-48V20AH"></label>
                   <label><span>Manufacturer</span><input id="manufacturerName" maxlength="250" placeholder="Company Ltd."></label>
                 </div>
                 <div class="actions"><button class="btn primary" id="createModel" type="button">Save model</button></div>
@@ -164,6 +164,20 @@
                 </div>
                 <div class="actions"><button class="btn primary" id="provisionBattery" type="button">Create DRAFT passport</button></div>
                 <div class="result" id="provisionResult" role="status" aria-live="polite">Select model and enter Battery ID.</div>
+              </article>
+
+              <article class="card">
+                <div class="card-head"><div><p class="eyebrow">BATCH PRODUCTION</p><h2>Create battery batch by SKU</h2></div><span class="state ok">1–250 UNITS</span></div>
+                <div class="form-grid">
+                  <label><span>SKU / LMT model</span><select id="batchModel"><option value="">Select SKU</option></select></label>
+                  <label><span>Batch key</span><input id="batchKey" maxlength="128" placeholder="BATCH-2026-001"></label>
+                  <label><span>Battery ID prefix</span><input id="batchPrefix" maxlength="250" placeholder="BAT-SF-"></label>
+                  <label><span>Quantity</span><input id="batchQuantity" type="number" min="1" max="250" step="1" value="10"></label>
+                  <label><span>Serial start</span><input id="batchSerialStart" type="number" min="0" step="1" value="1"></label>
+                  <label><span>Serial width</span><input id="batchSerialWidth" type="number" min="1" max="12" step="1" value="6"></label>
+                </div>
+                <div class="actions"><button class="btn primary" id="batchProvision" type="button">Create batch DRAFT passports</button></div>
+                <div class="result" id="batchResult" role="status" aria-live="polite">Select SKU and define the serial range. QR printing unlocks only after each passport is ACTIVE.</div>
               </article>
             </div>
 
