@@ -1,7 +1,9 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
 const STORAGE="dpp_company_session_v1";
+const REQUEST_STORAGE="dpp_registration_request_v1";
 const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
+const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 let cfg=null,session=null,refreshTimer=null,currentUser=null;
 
 function result(node,message,kind=""){node.textContent=message;node.className="result"+(kind?" "+kind:"")}
@@ -43,14 +45,22 @@ function restoreSession(){
   try{const value=JSON.parse(sessionStorage.getItem(STORAGE)||"null");if(value?.access_token){session=value;document.body.dataset.companySession="authenticated";return true}}catch{}
   return false;
 }
-function confirmationRedirect(){return new URL("/apply",location.origin).href}
+function registrationRequestFromUrl(){
+  const value=new URL(location.href).searchParams.get("request")||"";
+  return UUID_RE.test(value)?value:null;
+}
 function parseConfirmationFragment(){
   const p=new URLSearchParams(location.hash.replace(/^#/,""));
   if(!p.get("access_token"))return false;
   saveSession({access_token:p.get("access_token"),refresh_token:p.get("refresh_token"),expires_in:p.get("expires_in")});
-  const clean=new URL(location.href);clean.hash="";history.replaceState(null,"",clean.pathname+clean.search);
-  result($("#authResult"),"Email потвърден. Можете да попълните фирмената заявка.","ok");
+  result($("#authResult"),"Email линкът е потвърден. Свързваме регистрацията с този адрес…","ok");
   return true;
+}
+function cleanConfirmationUrl(){
+  const clean=new URL(location.href);
+  clean.hash="";
+  clean.searchParams.delete("request");
+  history.replaceState(null,"",clean.pathname+clean.search);
 }
 async function api(path,{method="GET",body}={}){
   if(!session?.access_token)throw new Error("Login required.");
@@ -60,16 +70,30 @@ async function api(path,{method="GET",body}={}){
   if(!r.ok)throw new Error(data?.error?.message||data?.error?.code||("HTTP "+r.status));
   return data;
 }
+async function publicApi(path,{method="POST",body}={}){
+  const r=await fetch(path,{method,headers:{"Content-Type":"application/json",Accept:"application/json"},body:body?JSON.stringify(body):undefined,cache:"no-store"});
+  let data={};try{data=await r.json()}catch{}
+  if(!r.ok)throw new Error(data?.error?.message||data?.error?.code||("HTTP "+r.status));
+  return data;
+}
 function syncAuthUi(){
   const on=!!session?.access_token;
   $("#signout").hidden=!on;
   $("#sendLink").disabled=on;
   $("#email").disabled=on;
-  $("#authState").textContent=on?"AUTHENTICATED":"NOT SIGNED IN";
+  $("#authState").textContent=on?"EMAIL VERIFIED":"AWAITING EMAIL";
   $("#authState").className="state"+(on?" ok":"");
 }
 async function getUser(){
   return authCall("/auth/v1/user",{token:session.access_token});
+}
+async function bindRegistrationRequest(){
+  const requestId=registrationRequestFromUrl()||sessionStorage.getItem(REQUEST_STORAGE);
+  if(!requestId||!UUID_RE.test(requestId)||!session?.access_token)return null;
+  const verified=(await api("/api/registration-link",{method:"PATCH",body:{request_id:requestId}})).data;
+  sessionStorage.setItem(REQUEST_STORAGE,requestId);
+  cleanConfirmationUrl();
+  return verified;
 }
 function numberValue(selector,min,max,required=false){
   const raw=$(selector).value.trim();
@@ -119,7 +143,8 @@ async function loadApplicationState(){
   if(!session?.access_token)return;
   try{
     currentUser=await getUser();
-    result($("#authResult"),"Вход успешен: "+(currentUser.email||"verified user"),"ok");
+    await bindRegistrationRequest().catch(()=>null);
+    result($("#authResult"),"Email потвърден: "+(currentUser.email||"verified user")+". Продължете с регистрацията на фирмата.","ok");
     $("#verifyCard").hidden=true;
     $("#applicationCard").hidden=false;
     const applications=(await api("/api/application")).data||[];
@@ -168,28 +193,31 @@ async function init(){
   cfg=await fetch("/data/auth-config.json",{cache:"no-store"}).then(async r=>{if(!r.ok)throw new Error("Auth config unavailable.");return r.json()});
   if(cfg.supabaseUrl!==PROJECT_URL||!String(cfg.publishableKey||"").startsWith("sb_publishable_"))throw new Error("Invalid DPP auth configuration.");
   document.body.dataset.companyAuthReady="true";
-  restoreSession();parseConfirmationFragment();syncAuthUi();
+  restoreSession();
+  parseConfirmationFragment();
+  syncAuthUi();
   if(session?.refresh_token){try{await refreshSession()}catch{clearSession()}}
   if(session?.access_token)await loadApplicationState();
-  else result($("#authResult"),"Въведете служебния email. Системата ще изпрати защитен регистрационен линк.","ok");
+  else result($("#authResult"),"Въведете който и да е валиден email. DPP Autopilot ще го запази и ще изпрати уникален еднократен регистрационен линк.","ok");
 }
 
 $("#sendLink").addEventListener("click",async()=>{
-  const e=$("#email").value.trim();
-  if(!validEmail(e))return result($("#authResult"),"Въведете валиден служебен email.","bad");
+  const e=$("#email").value.trim().toLowerCase();
+  if(!validEmail(e))return result($("#authResult"),"Въведете валиден email адрес.","bad");
   $("#sendLink").disabled=true;
   try{
-    const path="/auth/v1/otp?redirect_to="+encodeURIComponent(confirmationRedirect());
-    await authCall(path,{method:"POST",body:{email:e,create_user:true,data:{dpp_company_onboarding:true}}});
+    const response=await publicApi("/api/registration-link",{method:"POST",body:{email:e}});
+    const requestId=response?.data?.request_id;
+    if(requestId&&UUID_RE.test(requestId))sessionStorage.setItem(REQUEST_STORAGE,requestId);
     $("#verifyCard").hidden=false;
-    $("#verifyResult").textContent="Изпратихме регистрационен линк на "+e+". Проверете Inbox/Spam и натиснете линка.";
-    result($("#authResult"),"Линкът е заявен от DPP Autopilot. След отварянето му ще продължите с регистрацията на фирмата.","ok");
+    $("#verifyResult").textContent="Изпратихме уникален регистрационен линк на "+e+". Проверете Inbox/Spam и натиснете линка.";
+    result($("#authResult"),"Email адресът е записан. DPP Autopilot изпрати конкретен еднократен линк за тази регистрация.","ok");
   }catch(err){result($("#authResult"),err.message,"bad")}
   finally{if(!session?.access_token)$("#sendLink").disabled=false}
 });
 $("#signout").addEventListener("click",async()=>{
   try{if(session?.access_token)await authCall("/auth/v1/logout?scope=local",{method:"POST",token:session.access_token})}catch{}
-  clearSession();$("#applicationCard").hidden=true;$("#historyCard").hidden=true;$("#successCard").hidden=true;
+  clearSession();sessionStorage.removeItem(REQUEST_STORAGE);$("#applicationCard").hidden=true;$("#historyCard").hidden=true;$("#successCard").hidden=true;
   result($("#authResult"),"Излязохте от акаунта.","ok");
 });
 $("#submitApplication").addEventListener("click",()=>submitApplication().catch(e=>result($("#applicationResult"),e.message,"bad")));
