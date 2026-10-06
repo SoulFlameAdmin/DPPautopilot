@@ -7,6 +7,9 @@ const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const passport=require('../../api/passport.js');
 const exportApi=require('../../api/export.js');
+const limiter=require('../../api/_rate_limit.js');
+
+test.beforeEach(()=>limiter._test.resetForTests());
 
 function makeRes(){
   return {
