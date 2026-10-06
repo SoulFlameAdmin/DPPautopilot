@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "task": "R09",
   "status": "partial",
   "event_name": "dpp_http_request",
@@ -45,6 +45,7 @@
     "models",
     "items",
     "passport",
+    "carriers",
     "qr",
     "provision",
     "batch-provision",
