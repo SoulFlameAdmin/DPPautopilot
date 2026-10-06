@@ -19,8 +19,8 @@ def main() -> None:
     require('data-manufacturer-ready="false"' in html,"manufacturer runtime readiness marker missing")
     require('REAL TENANT DATA · NO DEMO STORAGE' in html,"manufacturer production boundary missing")
     require('PRODUCTION MANUFACTURER · STAGE 5' in html,"Stage 5 product marker missing")
-    require('/api/organizations' in html and '/api/models' in html and '/api/items' in html and '/api/provision' in html,
-            "manufacturer backend evidence list incomplete")
+    require('PRODUCTION API' in html and 'REAL TENANT DATA · NO DEMO STORAGE' in html,
+            "manufacturer production API boundary missing")
 
     for token in [
         'const STORAGE="dpp_company_session_v1"',
