@@ -148,7 +148,48 @@
     <div id="teamList" class="team-list"></div>
   </section>
 
-  <footer>Step 1 + 2 V2 · auth → verified company tenant → production RBAC team. Общият реален E2E тест остава за финалното acceptance.</footer>
+  <section class="card" id="apiCredentialsCard" hidden>
+    <div class="card-head">
+      <div><p class="eyebrow">STEP 38 · CUSTOMER API</p><h2>API credentials</h2></div>
+      <span class="state ok">HASHED · TENANT-SCOPED</span>
+    </div>
+    <p class="muted">Owner/Admin може да създава ключове за ERP/MES интеграции. Пълният API key се показва само веднъж; в базата се пази само SHA-256 hash и безопасен prefix.</p>
+
+    <div class="api-key-create">
+      <div class="form-grid">
+        <label><span>Key name</span><input id="apiCredentialName" maxlength="160" placeholder="ERP production"></label>
+        <label><span>Expires</span>
+          <select id="apiCredentialExpiry">
+            <option value="30">30 days</option>
+            <option value="90" selected>90 days</option>
+            <option value="180">180 days</option>
+            <option value="365">365 days</option>
+            <option value="0">No expiry</option>
+          </select>
+        </label>
+      </div>
+      <div class="scope-grid" id="apiScopeGrid">
+        <label><input type="checkbox" value="passports:read" checked><span>Passports read</span></label>
+        <label><input type="checkbox" value="passports:write"><span>Passports write</span></label>
+        <label><input type="checkbox" value="imports:write"><span>Imports write</span></label>
+        <label><input type="checkbox" value="exports:read"><span>Exports read</span></label>
+        <label><input type="checkbox" value="carriers:write"><span>Carriers write</span></label>
+        <label><input type="checkbox" value="webhooks:manage"><span>Webhooks manage</span></label>
+      </div>
+      <div class="actions"><button class="btn primary" id="createApiCredential" type="button">Create API key →</button></div>
+      <div class="result" id="apiCredentialResult" role="status" aria-live="polite">No API key created in this session.</div>
+    </div>
+
+    <div class="api-secret" id="apiSecretPanel" hidden>
+      <strong>Copy now — this secret will not be shown again.</strong>
+      <code id="apiSecretValue"></code>
+      <div class="actions"><button class="btn" id="copyApiSecret" type="button">Copy API key</button><button class="btn ghost" id="hideApiSecret" type="button">Hide</button></div>
+    </div>
+
+    <div id="apiCredentialsList" class="api-key-list"></div>
+  </section>
+
+  <footer>Step 1 + 2 + 38 V2 · auth → verified company tenant → production RBAC team. Общият реален E2E тест остава за финалното acceptance.</footer>
 </main>
 <script src="/assets/csp/company-auth-inline-1.js"></script>
 </body>
