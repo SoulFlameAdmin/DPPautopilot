@@ -62,6 +62,8 @@ test('PATCH revokes an active carrier',async()=>{
 test('NFC binding requires supported technology and invalid history limit fails locally',async()=>{
   let out=res();await handler(req('POST',{battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',carrier_kind:'nfc'}),out);
   assert.equal(out.statusCode,422);
+  assert.deepEqual(JSON.parse(out.body).error,{code:'VALIDATION_ERROR',message:'The request failed validation.'});
   out=res();await handler(req('GET',{}, {history:'1',limit:'999'}),out);
   assert.equal(out.statusCode,422);
+  assert.deepEqual(JSON.parse(out.body).error,{code:'VALIDATION_ERROR',message:'The request failed validation.'});
 });
