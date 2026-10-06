@@ -89,6 +89,31 @@ begin
 end
 $grant$;
 
+create table if not exists public.dpp_carrier_scan_events (
+  id bigint generated always as identity primary key,
+  organization_id uuid not null references public.dpp_organizations(id) on delete cascade,
+  battery_item_id uuid not null,
+  carrier_id uuid,
+  actor_id uuid,
+  source text not null default 'unknown' check (source in ('qr','nfc','unknown')),
+  result text not null check (result in ('opened','revoked')),
+  occurred_at timestamptz not null default now(),
+  constraint dpp_carrier_scan_battery_fk
+    foreign key (organization_id,battery_item_id)
+    references public.dpp_battery_items(organization_id,id)
+    on delete restrict,
+  constraint dpp_carrier_scan_carrier_fk
+    foreign key (organization_id,carrier_id)
+    references public.dpp_physical_carriers(organization_id,id)
+    on delete restrict
+);
+
+alter table public.dpp_carrier_scan_events enable row level security;
+revoke all on table public.dpp_carrier_scan_events from public,anon,authenticated;
+
+create index if not exists dpp_carrier_scan_org_time_idx
+  on public.dpp_carrier_scan_events(organization_id,occurred_at desc);
+
 create or replace function public.dpp_api_carrier_scan_history(
   p_battery_item_id uuid default null,
   p_limit integer default 100
