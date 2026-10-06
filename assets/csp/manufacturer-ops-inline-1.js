@@ -27,7 +27,7 @@ const DEFAULT_MAP={
  lifecycle_status:"item.lifecycle_status",
  state_of_health_percent:"item.state_of_health.percent"
 };
-let cfg=null,session=null,activeOrg=null,items=[],passports=[],csv={headers:[],rows:[],mapping:{},importId:null,validated:false,sourceType:null,sourceName:"",workbook:null,sheetNames:[],selectedSheet:null};
+let cfg=null,session=null,activeOrg=null,items=[],models=[],passports=[],carriers=[],selectedPassport=null,csv={headers:[],rows:[],mapping:{},importId:null,validated:false,sourceType:null,sourceName:"",workbook:null,sheetNames:[],selectedSheet:null};
 
 function setText(node,msg,kind=""){if(!node)return;node.textContent=msg;node.className="result"+(kind?" "+kind:"")}
 function readSession(){
@@ -61,15 +61,52 @@ function link(label,href,cls="btn"){const a=document.createElement("a");a.classN
 function option(text,value){return new Option(text,value)}
 function itemById(id){return items.find(x=>x.id===id)||null}
 function passportByItem(id){return passports.find(x=>x.battery_item_id===id)||null}
+function modelById(id){return models.find(x=>x.id===id)||null}
+function itemModel(item){return item?modelById(item.model_id):null}
+function safeText(v,fallback="—"){return v==null||v===""?fallback:String(v)}
+function setDetail(p){
+ selectedPassport=p||null;
+ document.querySelectorAll(".passport-rows .ops-row").forEach(row=>row.classList.toggle("selected",!!p&&row.dataset.passportId===p.passport_id));
+ const item=p?itemById(p.battery_item_id):null,model=itemModel(item);
+ const id=p?.unique_identifier||"Select a passport";
+ const status=(p?.status||"—").toUpperCase();
+ const chemistry=model?.canonical_data?.composition?.chemistry||model?.canonical_data?.chemistry||"—";
+ const capacity=model?.rated_capacity_ah!=null?model.rated_capacity_ah+" Ah":(model?.canonical_data?.rated_capacity_ah!=null?model.canonical_data.rated_capacity_ah+" Ah":"—");
+ const type=model?.category||"—";
+ const company=activeOrg?.name||"—";
+ const manufacturer=model?.manufacturer_name||company;
+ $("#detailBatteryId").textContent=id;
+ $("#detailUpdated").textContent=p?"Last updated: "+fmt(p.updated_at):"—";
+ $("#detailStatus").textContent=status;
+ $("#detailFieldBattery").textContent=id;
+ $("#detailFieldModel").textContent=model?.model_identifier||safeText(item?.model_id);
+ $("#detailFieldClient").textContent=company;
+ $("#detailFieldType").textContent=type;
+ $("#detailFieldChemistry").textContent=chemistry;
+ $("#detailFieldCapacity").textContent=capacity;
+ $("#detailFieldManufacturer").textContent=manufacturer;
+ $("#detailFieldStatus").textContent=status;
+ const qr=$("#detailQrImage"); if(p){qr.src="/api/qr?identifier="+encodeURIComponent(id);qr.hidden=false}else{qr.removeAttribute("src");qr.hidden=true}
+ const pub=$("#detailPublicLink");pub.href=p?"/passport?identifier="+encodeURIComponent(id):"#";
+ const print=$("#detailPrintButton");print.disabled=!p||p.status!=="active";
+}
+function syncSearchFields(source){
+ const mirror=$("#passportSearchMirror");
+ if(source===mirror)$("#passportSearch").value=mirror.value;
+ else if(mirror)mirror.value=$("#passportSearch").value;
+ renderPassports();
+}
 
 async function loadBase(){
- const [orgData,itemData,passportData]=await Promise.all([
-  api("/api/organizations"),api("/api/items"),api("/api/passport?list=1&limit=500")
+ const [orgData,itemData,modelData,passportData,carrierData]=await Promise.all([
+  api("/api/organizations"),api("/api/items"),api("/api/models"),api("/api/passport?list=1&limit=500"),api("/api/carriers")
  ]);
  const orgs=orgData.data||[];activeOrg=orgs.find(o=>o.active)||null;
  if(!activeOrg)throw new Error("Active company is required.");
- items=itemData.data||[];passports=passportData.data||[];
+ items=itemData.data||[];models=modelData.data||[];passports=passportData.data||[];carriers=carrierData.data||[];
+ const name=$("#workspaceCompanyName");if(name)name.textContent=activeOrg.name||"Company";
  renderPassportStats();renderPassports();renderCarrierItemOptions();
+ if(passports.length)setDetail(selectedPassport&&passports.find(p=>p.passport_id===selectedPassport.passport_id)||passports[0]);else setDetail(null);
  document.body.dataset.manufacturerOpsReady="true";
 }
 
@@ -77,27 +114,35 @@ function renderPassportStats(){
  const counts={all:passports.length,draft:0,active:0,terminal:0};
  for(const p of passports){if(p.status==="draft")counts.draft++;else if(p.status==="active")counts.active++;else counts.terminal++}
  $("#opsPassportCount").textContent=counts.all;$("#opsActiveCount").textContent=counts.active;$("#opsDraftCount").textContent=counts.draft;$("#opsTerminalCount").textContent=counts.terminal;
+ const printed=carriers.filter(c=>c.carrier_kind==="qr"&&c.status==="active").length;
+ const carrierNode=$("#printedCarrierCount");if(carrierNode)carrierNode.textContent=printed;
+ const countText=$("#passportCountText");if(countText)countText.textContent="Showing "+passports.length+" passports";
 }
 function renderPassports(){
  const host=$("#passportOpsList"),q=$("#passportSearch").value.trim().toLowerCase();host.replaceChildren();
- const rows=passports.filter(p=>!q||p.unique_identifier.toLowerCase().includes(q)||p.status.toLowerCase().includes(q));
- if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent="Няма паспорти за този филтър.";host.append(e);return}
+ const rows=passports.filter(p=>{
+  const item=itemById(p.battery_item_id),model=itemModel(item),company=activeOrg?.name||"";
+  const hay=[p.unique_identifier,p.status,model?.model_identifier,company].join(" ").toLowerCase();
+  return !q||hay.includes(q);
+ });
+ if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent="No passports match this filter.";host.append(e);return}
  for(const p of rows){
+  const item=itemById(p.battery_item_id),model=itemModel(item);
   const row=document.createElement("article");row.className="ops-row";row.dataset.passportId=p.passport_id;
-  const left=document.createElement("div");
-  const checkWrap=document.createElement("label");checkWrap.className="ops-check";
-  const check=document.createElement("input");check.type="checkbox";check.className="passport-print-check";check.dataset.itemId=p.battery_item_id;check.dataset.identifier=p.unique_identifier;check.disabled=p.status!=="active";
-  const strong=document.createElement("strong");strong.textContent=p.unique_identifier;
-  checkWrap.append(check,strong);
-  const small=document.createElement("small");small.textContent="passport "+p.passport_id+" · updated "+fmt(p.updated_at);
-  left.append(checkWrap,small);
-  const actions=document.createElement("div");actions.className="ops-actions";
-  const pill=document.createElement("span");pill.className="pill"+(p.status==="active"?" ok":"");pill.textContent=p.status.toUpperCase();
-  const completeness=link("Completeness","/manufacturer/completeness?identifier="+encodeURIComponent(p.unique_identifier),"btn");
-  const publicLink=link("Public","/passport?identifier="+encodeURIComponent(p.unique_identifier),"btn");publicLink.target="_blank";publicLink.rel="noopener";
-  const qr=link("QR","/qr?identifier="+encodeURIComponent(p.unique_identifier),"btn");qr.target="_blank";qr.rel="noopener";
-  actions.append(pill,completeness,publicLink,qr);row.append(left,actions);host.append(row);
+  const c0=document.createElement("div");c0.className="ops-cell";
+  const check=document.createElement("input");check.type="checkbox";check.className="passport-print-check";check.dataset.itemId=p.battery_item_id;check.dataset.identifier=p.unique_identifier;check.disabled=p.status!=="active";c0.append(check);
+  const c1=document.createElement("div");c1.className="ops-cell";const id=document.createElement("strong");id.textContent=p.unique_identifier;c1.append(id);
+  const c2=document.createElement("div");c2.className="ops-cell muted";c2.textContent=model?.model_identifier||safeText(item?.model_id);
+  const c3=document.createElement("div");c3.className="ops-cell muted";c3.textContent=activeOrg?.name||"—";
+  const c4=document.createElement("div");c4.className="ops-cell";const pill=document.createElement("span");pill.className="status-pill "+(p.status==="draft"?"pending":p.status==="active"?"":"terminal");pill.textContent=p.status.toUpperCase();c4.append(pill);
+  const c5=document.createElement("div");c5.className="ops-cell muted";c5.textContent=fmt(p.updated_at);
+  const c6=document.createElement("div");c6.className="ops-cell ops-actions";const menu=button("⋯","row-menu");c6.append(menu);
+  row.append(c0,c1,c2,c3,c4,c5,c6);
+  row.addEventListener("click",e=>{if(e.target.closest("input,button,a"))return;setDetail(p)});
+  menu.addEventListener("click",()=>setDetail(p));
+  host.append(row);
  }
+ if(selectedPassport)setDetail(selectedPassport);
 }
 async function carriersFor(itemId){return (await api("/api/carriers?battery_item_id="+encodeURIComponent(itemId))).data||[]}
 async function ensureQrCarrier(itemId){
@@ -449,7 +494,10 @@ async function init(){
  $("#opsRole").textContent=activeOrg.role.toUpperCase();$("#opsRole").className="state "+(canWrite()?"ok":"readonly");
  syncCarrierForm();renderCsvSummary();setText($("#opsStatus"),"Operations center е свързан към production tenant.","ok");
 }
-$("#passportSearch").addEventListener("input",renderPassports);
+$("#passportSearch").addEventListener("input",e=>syncSearchFields(e.currentTarget));
+const searchMirror=$("#passportSearchMirror");if(searchMirror)searchMirror.addEventListener("input",e=>syncSearchFields(e.currentTarget));
+const detailPrint=$("#detailPrintButton");if(detailPrint)detailPrint.addEventListener("click",async()=>{if(!selectedPassport)return;try{await printPassports([selectedPassport],{bind:true})}catch(e){setText($("#printResult"),e.message,"bad")}});
+const filterButton=$("#passportFilterButton");if(filterButton)filterButton.addEventListener("click",()=>{$("#passportSearch").focus()});
 $("#refreshOps").addEventListener("click",async()=>{try{setText($("#opsStatus"),"Refresh…");await loadBase();setText($("#opsStatus"),"Production data refreshed.","ok")}catch(e){setText($("#opsStatus"),e.message,"bad")}});
 $("#selectActivePassports").addEventListener("click",()=>document.querySelectorAll(".passport-print-check:not(:disabled)").forEach(x=>x.checked=true));
 $("#clearPassportSelection").addEventListener("click",()=>document.querySelectorAll(".passport-print-check").forEach(x=>x.checked=false));
