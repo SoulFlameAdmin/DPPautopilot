@@ -10,29 +10,75 @@
   <link rel="stylesheet" href="/assets/csp/manufacturer-ops.css">
 </head>
 <body data-manufacturer-ready="false" data-manufacturer-auth="unknown" data-manufacturer-tenant="unknown" data-manufacturer-mode="unknown">
-<main class="shell">
+<aside class="app-sidebar" aria-label="Manufacturer navigation">
+  <a class="sidebar-brand" href="/manufacturer">
+    <span class="sidebar-mark" aria-hidden="true"></span>
+    <span><strong>SOULFLAME</strong><small>DPP AUTOPILOT</small></span>
+  </a>
+  <nav class="side-nav">
+    <a class="active" href="#dashboardHome"><span class="ico">⌂</span>Dashboard</a>
+    <a href="#passportsProduction"><span class="ico">▤</span>Passports</a>
+    <a href="#productionOps"><span class="ico">＋</span>Create Passport</a>
+    <a href="#printCenterProduction"><span class="ico">▦</span>QR Carriers</a>
+    <a href="#csvImportProduction"><span class="ico">⇧</span>Imports</a>
+    <a href="#modelsList"><span class="ico">♙</span>Clients / Models</a>
+    <a href="/manufacturer/completeness"><span class="ico">◈</span>Compliance</a>
+    <a href="/company"><span class="ico">⚙</span>Settings</a>
+  </nav>
+  <div class="sidebar-foot">Clean energy<br>Longer life<br>Brighter tomorrow</div>
+</aside>
+<main class="shell" id="dashboardHome">
   <header class="topbar">
-    <div>
-      <a class="brand" href="/">DPP AUTOPILOT</a>
-      <span class="badge">PRODUCTION MANUFACTURER · STAGE 5</span>
-    </div>
+    <label class="top-search" aria-label="Search passports">
+      <span aria-hidden="true">⌕</span>
+      <input class="ops-search" id="passportSearch" type="search" placeholder="Search passports, battery ID, status…">
+    </label>
     <div class="top-actions">
-      <a class="btn ghost" href="/battery-master">Battery Master 1–100</a><a class="btn ghost" href="/company">Company access</a>
+      <a class="btn ghost" href="/battery-master">Battery Master</a>
+      <a class="btn ghost" href="/company">Company</a>
       <button class="btn" id="refreshDashboard" type="button">Refresh</button>
+      <div class="profile"><span class="avatar">SF</span><span><strong>SOULFLAME</strong><span>Manufacturer Admin</span></span></div>
     </div>
   </header>
 
-  <section class="hero">
-    <div>
-      <p class="eyebrow">REAL TENANT DATA · NO DEMO STORAGE</p>
-      <h1>Manufacturer Dashboard</h1>
-      <p>Модели, произведени батерии и provisioning се четат и записват през production DPP API за активната фирма.</p>
+  <section class="overview-layout">
+    <div class="hero">
+      <div>
+        <p class="eyebrow">PRODUCTION · REAL TENANT DATA</p>
+        <h1>Welcome to SOULFLAME DPP AUTOPILOT</h1>
+        <p>Create, manage and distribute Digital Product Passports for your batteries from one production dashboard.</p>
+      </div>
+      <div class="tenant-box">
+        <span class="mini-label">ACTIVE COMPANY</span>
+        <strong id="tenantName">—</strong>
+        <span id="tenantMeta">Проверка на фирмения tenant…</span>
+      </div>
     </div>
-    <div class="tenant-box">
-      <span class="mini-label">ACTIVE COMPANY</span>
-      <strong id="tenantName">—</strong>
-      <span id="tenantMeta">Проверка на фирмения tenant…</span>
-    </div>
+
+    <aside class="passport-preview" aria-label="Battery passport quick panel">
+      <div class="preview-title">
+        <div><p class="eyebrow">BATTERY PASSPORT</p><h2>Quick Passport</h2></div>
+        <span class="preview-status">LIVE</span>
+      </div>
+      <div class="preview-id">Tenant-scoped production data</div>
+      <div class="preview-card">
+        <div class="preview-logo">DPP SOULFLAME<span>Battery Passport</span></div>
+        <div class="preview-grid">
+          <div class="preview-fields">
+            <div><span>Source</span><b>Production API</b></div>
+            <div><span>Tenant</span><b>Active company</b></div>
+            <div><span>Carrier</span><b>QR / NFC</b></div>
+            <div><span>Status</span><b>Live</b></div>
+          </div>
+          <div class="qr-placeholder" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="preview-actions">
+        <a class="btn primary" href="#passportsProduction">View Passports →</a>
+        <a class="btn" href="#printCenterProduction">Print QR Carrier</a>
+        <a class="btn" href="#carrierProduction">QR / NFC Binding</a>
+      </div>
+    </aside>
   </section>
 
   <section class="gate card" id="authGate">
@@ -116,7 +162,7 @@
         <div class="ops-metric"><strong id="opsDraftCount">0</strong><span>DRAFT</span></div>
         <div class="ops-metric"><strong id="opsTerminalCount">0</strong><span>Lifecycle terminal</span></div>
       </div>
-      <div class="ops-toolbar"><input class="ops-search" id="passportSearch" type="search" placeholder="Търси по Battery ID или status"></div>
+      <div class="ops-toolbar passport-tools"><span class="muted">Use the search field at the top to filter passports by Battery ID or status.</span></div>
       <div class="ops-list" id="passportOpsList" aria-live="polite"></div>
     </section>
 
