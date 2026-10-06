@@ -11,6 +11,7 @@ const organizations=require('../../api/organizations.js');
 const members=require('../../api/members.js');
 const exportApi=require('../../api/export.js');
 const imports=require('../../api/imports.js');
+const carriers=require('../../api/carriers.js');
 const items=require('../../api/items.js');
 const provision=require('../../api/provision.js');
 const batchProvision=require('../../api/batch-provision.js');
@@ -144,6 +145,7 @@ test('31st anonymous public passport read is blocked before upstream',async()=>{
           passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
           battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
           unique_identifier:'urn:dpp:r05:public',
+          kind:'active',
           status:'active',
           public_payload:{},
           updated_at:'2026-09-19T00:00:00Z'
@@ -534,6 +536,7 @@ test('all authenticated API surfaces honor shared limiter 429 before business RP
       ['provision',provision,req('POST',{})],
       ['batch-provision',batchProvision,req('POST',{})],
       ['imports',imports,req('GET')],
+      ['carrier',carriers,req('GET')],
       ['export',exportApi,req('GET')],
       ['passport',passport,req('GET',null,{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'})]
     ];
