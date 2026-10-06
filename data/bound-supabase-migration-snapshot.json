@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-10-06T20:52:40.873Z",
+  "observed_at": "2026-10-06T20:58:04.944Z",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -248,6 +248,10 @@
     {
       "version": "20261006205209",
       "name": "dpp_public_resolve_anon_grant"
+    },
+    {
+      "version": "20261006205653",
+      "name": "dpp_passport_lifecycle_public_resolve_replay"
     }
   ],
   "note": "Read-only bound snapshot refreshed from the live Supabase migration history for the exact repository migration set; canonical migration name is the cross-system identity."
