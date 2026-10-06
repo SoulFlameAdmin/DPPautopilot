@@ -40,7 +40,50 @@ function renderQrSvg(targetUrl) {
   return qr.createSvgTag({ cellSize: 8, margin: 32, scalable: true });
 }
 
-function handler(req, res) {
+const DEFAULT_VERIFY_TIMEOUT_MS = 8000;
+
+async function verifyActivePassport(identifier, env = process.env, fetchImpl = fetch, timeoutMs = DEFAULT_VERIFY_TIMEOUT_MS) {
+  const base = String(env.DPP_SUPABASE_URL || env.SUPABASE_URL || PUBLIC.supabaseUrl || '').replace(/\/$/, '');
+  const key = env.DPP_SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY || PUBLIC.supabasePublishableKey;
+  if (!base || !key) throw new Error('SERVER_CONFIGURATION_MISSING');
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetchImpl(base + '/rest/v1/rpc/dpp_api_passport_public_resolve', {
+      method: 'POST',
+      headers: {
+        apikey: key,
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({ p_unique_identifier: identifier }),
+      signal: controller.signal
+    });
+
+    let data = null;
+    try { data = await response.json(); } catch {}
+
+    if (!response.ok) {
+      if (response.status >= 500) throw new Error('UPSTREAM_ERROR');
+      return false;
+    }
+
+    return !!data &&
+      data.kind === 'active' &&
+      data.status === 'active' &&
+      data.unique_identifier === identifier;
+  } catch (error) {
+    if (controller.signal.aborted || (error && error.name === 'AbortError')) {
+      throw new Error('UPSTREAM_TIMEOUT');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function handler(req, res) {
   startRequestObservability(req,res,'qr');
   const rateLimit = enforceRateLimit(req,res,'qr');
   if (!rateLimit.allowed) return sendJson(res,429,rateLimitBody());
@@ -54,6 +97,18 @@ function handler(req, res) {
   const identifier = normalizeIdentifier(req.query && (req.query.identifier || req.query.id));
   if (!identifier) {
     return sendJson(res,400,{error:{code:'INVALID_IDENTIFIER',message:'identifier must contain 1..300 printable characters.'}});
+  }
+
+  let active = false;
+  try {
+    active = await verifyActivePassport(identifier);
+  } catch (error) {
+    const code = error && error.message === 'UPSTREAM_TIMEOUT' ? 'UPSTREAM_TIMEOUT' : 'UPSTREAM_ERROR';
+    const status = code === 'UPSTREAM_TIMEOUT' ? 504 : 502;
+    return sendJson(res,status,{error:{code,message:'Public passport verification failed.'}});
+  }
+  if (!active) {
+    return sendJson(res,404,{error:{code:'PUBLIC_PASSPORT_NOT_FOUND',message:'An ACTIVE public passport is required before a QR can be generated.'}});
   }
 
   let targetUrl;
@@ -77,4 +132,11 @@ function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._test = { normalizeIdentifier, canonicalOrigin, buildPassportUrl, renderQrSvg };
+module.exports._test = {
+  normalizeIdentifier,
+  canonicalOrigin,
+  buildPassportUrl,
+  renderQrSvg,
+  verifyActivePassport,
+  DEFAULT_VERIFY_TIMEOUT_MS
+};
