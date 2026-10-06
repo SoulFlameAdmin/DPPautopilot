@@ -54,7 +54,7 @@ for sqlstate,entry in contract.get("common_sqlstate",{}).items():
     assert isinstance(entry["message"],str) and entry["message"].strip()
     seen_surface_entries+=1
 
-expected_surfaces={"models","items","passport","provision","batch-provision","export","imports","tenant","organizations","members"}
+expected_surfaces={"models","items","passport","provision","batch-provision","export","imports","tenant","organizations","members","carrier"}
 assert set(contract.get("surfaces",{}))==expected_surfaces, (
     f"M22 API surface drift: {sorted(contract.get('surfaces',{}))}"
 )
@@ -68,7 +68,7 @@ for surface,mapping in contract.get("surfaces",{}).items():
 
 assert seen_surface_entries>=20, "M22 API error catalog unexpectedly small"
 
-api_names=["models","items","passport","provision","batch-provision","export","imports","tenant","organizations","members"]
+api_names=["models","items","passport","provision","batch-provision","export","imports","tenant","organizations","members","carriers"]
 declared_codes={
     entry["code"]
     for entry in contract.get("common_sqlstate",{}).values()
@@ -107,7 +107,9 @@ for token in ["api-error-contract.json","mapDatabaseError","localError","errorBo
 for name in api_names:
     text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
     assert "require('./_errors.js')" in text, f"{name} API does not import shared M22 error helper"
-    assert f"mapSharedDatabaseError('{name}'" in text, f"{name} API does not declare its shared error surface"
+    surface="carrier" if name=="carriers" else name
+    mapper="mapDatabaseError" if name=="carriers" else "mapSharedDatabaseError"
+    assert f"{mapper}('{surface}'" in text, f"{name} API does not declare its shared error surface"
     assert "error.publicMessage" in text, f"{name} API does not preserve canonical public message"
     assert not re.search(r"if\s*\(\s*code\s*===?\s*['\"]DP\d{3}",text), f"{name} API still hardcodes DP SQLSTATE mapping"
 

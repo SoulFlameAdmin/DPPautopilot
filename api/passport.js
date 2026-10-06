@@ -57,6 +57,19 @@ function validPublicPassport(value) {
     validTimestamp(value.updated_at);
 }
 
+function validCarrierOpen(value) {
+  return plainObject(value) &&
+    (value.kind == null || value.kind === 'active') &&
+    validUuid(value.passport_id) &&
+    (value.battery_item_id == null || validUuid(value.battery_item_id)) &&
+    typeof value.unique_identifier === 'string' &&
+    value.unique_identifier.trim().length >= 1 &&
+    value.unique_identifier.trim().length <= 300 &&
+    value.status === 'active' &&
+    plainObject(value.public_payload) &&
+    validTimestamp(value.updated_at);
+}
+
 function validPublicResolve(value) {
   if (!plainObject(value) ||
       !validUuid(value.passport_id) ||
@@ -142,6 +155,7 @@ function validAuthorityEvidenceReceipt(value) {
 function validateRpcShape(name, data) {
   if (name === 'dpp_api_passport_public') return validPublicPassport(data);
   if (name === 'dpp_api_passport_public_resolve') return validPublicResolve(data);
+  if (name === 'dpp_api_carrier_open') return validCarrierOpen(data);
   if (name === 'dpp_api_scooter_passport_readiness') return validReadinessReport(data);
   if (name === 'dpp_api_scooter_completeness_by_identifier') return validCompletenessReport(data);
   if (name === 'dpp_api_scooter_authority_evidence_submit') return validAuthorityEvidenceReceipt(data);
@@ -312,7 +326,7 @@ async function handler(req, res) {
         }
         const limit = Number(req.query && req.query.limit || 250);
         if (!Number.isInteger(limit) || limit < 1 || limit > 500) {
-          return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'limit must be 1..500.' } });
+          return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
         }
         const sharedListRateLimit=await enforceSharedRateLimit(req,res,'passport',authorization,{ruleName:'authenticated_read'});
         if(sharedListRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
@@ -340,7 +354,7 @@ async function handler(req, res) {
         }
         if (carrier != null && carrier !== '') {
           if (!['qr','nfc'].includes(String(carrier))) {
-            return send(res, 400, { error: { code: 'VALIDATION_ERROR', message: 'carrier must be qr or nfc.' } });
+            return send(res, 400, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
           }
           const scanned = await rpc('dpp_api_carrier_open', {
             p_unique_identifier: identifier.trim(),

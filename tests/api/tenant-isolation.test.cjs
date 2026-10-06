@@ -167,6 +167,7 @@ test('public passport response strips private and tenant metadata on upstream dr
         passport_id:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
         battery_item_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         unique_identifier:'urn:dpp:r04:public',
+        kind:'active',
         status:'active',
         public_payload:{item:{unique_identifier:'urn:dpp:r04:public'}},
         updated_at:'2026-09-19T00:00:00Z',
@@ -182,7 +183,7 @@ test('public passport response strips private and tenant metadata on upstream dr
     const data=JSON.parse(res.body).data;
     assert.equal(res.statusCode,200);
     assert.deepEqual(Object.keys(data).sort(),[
-      'passport_id','public_payload','status','unique_identifier','updated_at'
+      'kind','passport_id','public_payload','status','unique_identifier','updated_at'
     ].sort());
     assert.equal(Object.prototype.hasOwnProperty.call(data,'private_payload'),false);
     assert.equal(Object.prototype.hasOwnProperty.call(data,'organization_id'),false);

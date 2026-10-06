@@ -18,6 +18,7 @@ function makeReq(method, body, query, auth='Bearer test-token') {
 }
 function publicPassportFixture(overrides={}) {
   return {
+    kind:'active',
     passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     unique_identifier:'urn:dpp:1',
@@ -285,6 +286,7 @@ test('public GET strips catalog-restricted nested fields even if upstream regres
         passport_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         battery_item_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         unique_identifier:'urn:dpp:public-safe',
+        kind:'active',
         status:'active',
         public_payload:{
           model:{
@@ -566,5 +568,32 @@ test('authenticated passport list uses one tenant-scoped management RPC', async 
     assert.match(seen.url,/dpp_api_passports_list$/);
     assert.deepEqual(JSON.parse(seen.options.body),{p_limit:100});
     assert.equal(JSON.parse(res.body).data.length,1);
+  }finally{global.fetch=original;restore();}
+});
+
+
+test('M22 invalid passport pagination and carrier keep canonical public messages', async () => {
+  for (const [query,status] of [[{list:'1',limit:'999'},422],[{identifier:'urn:dpp:1',carrier:'invalid'},400]]) {
+    const out=makeRes();
+    await handler(makeReq('GET',null,query,query.identifier?null:'Bearer test-token'),out);
+    assert.equal(out.statusCode,status);
+    assert.deepEqual(JSON.parse(out.body).error,{code:'VALIDATION_ERROR',message:'The request failed validation.'});
+  }
+});
+
+
+test('carrier scan rejects malformed successful RPC responses without exposing payloads',async()=>{
+  const restore=withEnv(),original=global.fetch;
+  try{
+    for(const data of [null,[],{},'private-secret',publicPassportFixture({status:'revoked'}),publicPassportFixture({kind:'lifecycle'}),publicPassportFixture({passport_id:'invalid'}),publicPassportFixture({public_payload:null})]){
+      global.fetch=async()=>({ok:true,async json(){return data;}});
+      const out=makeRes();await handler(makeReq('GET',null,{identifier:'urn:dpp:scan:bad',carrier:'qr'},null),out);
+      assert.equal(out.statusCode,502);assert.equal(JSON.parse(out.body).error.code,'UPSTREAM_ERROR');
+      assert.equal(out.body.includes('private-secret'),false);
+    }
+    const data=publicPassportFixture({unique_identifier:'urn:dpp:scan:sql'});delete data.kind;delete data.battery_item_id;
+    global.fetch=async()=>({ok:true,async json(){return data;}});
+    const out=makeRes();await handler(makeReq('GET',null,{identifier:'urn:dpp:scan:sql',carrier:'qr'},null),out);
+    assert.equal(out.statusCode,200);assert.equal(JSON.parse(out.body).data.kind,'active');
   }finally{global.fetch=original;restore();}
 });

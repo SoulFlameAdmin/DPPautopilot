@@ -69,7 +69,7 @@ test('all route-local identifier and action errors are canonical',()=>{
     INVALID_ITEM_ID:[400,'A valid item UUID is required.'],
     INVALID_IDENTIFIER:[400,'identifier must contain 1..300 characters.'],
     INVALID_PASSPORT_ID:[400,'A valid passport UUID is required.'],
-    INVALID_IMPORT_ACTION:[422,'action must be validate or commit.'],
+    INVALID_IMPORT_ACTION:[422,'action must be validate, commit, or delete_mapping.'],
     INVALID_IMPORT_ID:[400,'A valid import UUID is required.'],
     INVALID_ORGANIZATION_ID:[422,'organization_id must be a valid UUID.']
   };

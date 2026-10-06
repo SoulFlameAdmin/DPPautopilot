@@ -239,7 +239,7 @@
       "fields": "storage path, original filename, content type, size, SHA-256, metadata JSON, creator ID, timestamps; object bytes may contain documents/images",
       "retention": {
         "status": "pending_policy",
-        "current_behavior": "Metadata and private object bytes persist; deployed upload path verifies byte_size/SHA-256/content_type before Storage write. Final authenticated upload→download→delete lifecycle and accepted retention period remain pending."
+        "current_behavior": "Metadata and private object bytes persist; deployed upload path verifies byte_size/SHA-256/content_type before Storage write. Final authenticated upload\u2192download\u2192delete lifecycle and accepted retention period remain pending."
       },
       "controls": [
         "10 MiB/type policy",
@@ -312,13 +312,34 @@
         "shared consume RPC requires authenticated request-user context and validated pseudonymous key format",
         "canonical 429 behavior remains process-local until shared runtime wiring is accepted"
       ]
+    },
+    {
+      "id": "physical_carriers_and_scans",
+      "classification": "tenant-confidential technical records and user UUID references",
+      "purpose": "Bind QR/NFC carriers and attribute scan events to the owning battery",
+      "location": "Supabase Postgres public schema",
+      "processor": "Supabase",
+      "tables": [
+        "dpp_physical_carriers",
+        "dpp_carrier_scan_events"
+      ],
+      "fields": "Carrier URL, optional external UID, binding user UUID, optional scan actor UUID, item/carrier IDs, source, result and timestamps; no raw IP or bearer tokens",
+      "retention": {
+        "status": "pending_acceptance",
+        "current_behavior": "No automatic carrier or scan-event purge implemented; organization cascade and battery/carrier restrict constraints are defined; accepted retention period remains pending"
+      },
+      "controls": [
+        "RLS enabled; direct client table grants revoked",
+        "Tenant-scoped role-checked carrier management and scan-history RPCs",
+        "Anonymous scan open returns only public passport projection; scan history requires authenticated tenant membership"
+      ]
     }
   ],
   "out_of_scope_shared_project_data": "All non-dpp_* application tables in the shared Supabase project are owned by other applications and are not part of DPP Autopilot privacy inventory.",
   "green_blockers": [
     "M01-M13 declared dependencies are not all GREEN.",
     "Final regulatory/operational retention periods remain unaccepted for passports/history, registry submissions, evidence and audit snapshots; audit credential-key redaction is only a technical minimization precursor.",
-    "M13 real authenticated deployed upload→download→delete lifecycle acceptance remains incomplete despite deployed private Storage/Edge integrity controls.",
+    "M13 real authenticated deployed upload\u2192download\u2192delete lifecycle acceptance remains incomplete despite deployed private Storage/Edge integrity controls.",
     "External registry recipient terms and live payload scope are not accepted.",
     "R08 destructive organization/user deletion remains intentionally disabled pending accepted export/storage/audit/Auth lifecycle rules."
   ],

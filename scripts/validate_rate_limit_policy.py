@@ -41,7 +41,7 @@ for name,(limit,window) in expected_rules.items():
     assert rules[name]["window_seconds"]==window
 
 surfaces=policy.get("surfaces",{})
-assert set(surfaces)=={"tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr"}
+assert set(surfaces)=={"tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr","carriers"}
 api_surface_inventory={
     path.stem for path in (ROOT/"api").glob("*.js")
     if not path.name.startswith("_")
@@ -59,6 +59,7 @@ expected_surface_rules={
     "imports":{"GET":"authenticated_read","POST":"import_write","PATCH":"import_write"},
     "export":{"GET":"export_read"},
     "qr":{"GET":"public_passport_read"},
+    "carriers":{"GET":"authenticated_read","POST":"authenticated_write","PATCH":"authenticated_write"},
 }
 assert surfaces==expected_surface_rules, "R05 surface/method policy drift"
 
@@ -85,10 +86,11 @@ for token in [
 ]:
     assert token in helper, f"R05 helper missing {token}"
 
-for surface in ["tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr"]:
+for surface in ["tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr","carriers"]:
     text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
     assert "require('./_rate_limit.js')" in text, f"{surface} does not import R05 limiter"
-    call=f"enforceRateLimit(req,res,'{surface}')"
+    runtime_surface="carrier" if surface=="carriers" else surface
+    call=f"enforceRateLimit(req,res,'{runtime_surface}')"
     assert call in text, f"{surface} does not enforce R05 limiter"
     assert text.index(call) < text.index("await rpc(") if "await rpc(" in text else True
 
@@ -172,14 +174,15 @@ assert "feature-gated shared limiter consumes both pseudonymous buckets" in test
 assert "shared limiter fails closed when its backend is unavailable" in test_text
 assert "all authenticated API surfaces honor shared limiter 429 before business RPC" in test_text
 
-for surface in ["tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export"]:
+for surface in ["tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","carriers"]:
     surface_text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
     assert "enforceSharedRateLimit" in surface_text, f"{surface} does not import shared R05 limiter"
-    assert f"enforceSharedRateLimit(req,res,'{surface}'" in surface_text, f"{surface} does not wire shared R05 limiter"
+    runtime_surface="carrier" if surface=="carriers" else surface
+    assert f"enforceSharedRateLimit(req,res,'{runtime_surface}'" in surface_text, f"{surface} does not wire shared R05 limiter"
 
 limitations=policy.get("limitations",[])
 assert any("production enablement" in x for x in limitations)
 assert any("Anonymous public passport" in x for x in limitations)
 assert any("multi-isolate" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: eleven API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")
+print("R05_RATE_LIMIT_POLICY_PASS: twelve API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")

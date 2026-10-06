@@ -139,13 +139,14 @@ function backend(){
       };
       return ok(state.passport);
     }
-    if(rpc==='dpp_api_passport_public'){
+    if(rpc==='dpp_api_passport_public_resolve'){
       if(!state.passport||body.p_unique_identifier!==state.passport.unique_identifier) return fail('DP402');
       return ok({
         passport_id:IDS.passport,
         battery_item_id:IDS.item,
         unique_identifier:state.passport.unique_identifier,
         status:state.passport.status,
+        kind:'active',
         public_payload:state.passport.public_payload,
         updated_at:state.passport.updated_at
       });

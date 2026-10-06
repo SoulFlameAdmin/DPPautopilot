@@ -19,6 +19,20 @@ begin
     and p.prosecdef
     and not (
       coalesce(p.proconfig,'{}'::text[]) @> array['search_path=public, pg_temp']::text[]
+      or (
+        p.oid::regprocedure::text='dpp_api_scooter_battery_batch_provision(uuid,text,jsonb)'
+        and coalesce(p.proconfig,'{}'::text[]) @> array['search_path=public, extensions, pg_temp']::text[]
+        and not exists (
+          select 1 from pg_namespace ext
+          where ext.nspname='extensions'
+            and (has_schema_privilege('anon',ext.oid,'CREATE')
+                 or has_schema_privilege('authenticated',ext.oid,'CREATE')
+                 or exists (
+                   select 1 from aclexplode(coalesce(ext.nspacl,acldefault('n',ext.nspowner))) a
+                   where a.grantee=0 and a.privilege_type='CREATE'
+                 ))
+        )
+      )
     );
 
   if v_bad_path is not null then
@@ -46,7 +60,7 @@ begin
   where n.nspname='public'
     and p.proname like 'dpp\_%' escape '\'
     and has_function_privilege('anon',p.oid,'EXECUTE')
-    and p.oid::regprocedure::text <> 'dpp_api_passport_public(text)';
+    and p.oid::regprocedure::text not in ('dpp_api_passport_public(text)','dpp_api_carrier_open(text,text)');
 
   if v_anon_extra is not null then
     raise exception 'Unexpected anon DPP RPC exposure: %',v_anon_extra;
@@ -73,6 +87,15 @@ begin
     and has_function_privilege('authenticated',p.oid,'EXECUTE')
     and p.oid::regprocedure::text not in (
       'dpp_api_authorization_context()',
+      'dpp_api_carriers_list(uuid)',
+      'dpp_api_carrier_bind_secure(uuid,text,text,text)',
+      'dpp_api_carrier_revoke(uuid,text)',
+      'dpp_api_carrier_open(text,text)',
+      'dpp_api_carrier_scan_history(uuid,integer)',
+      'dpp_api_passports_list(integer)',
+      'dpp_api_import_mapping_list()',
+      'dpp_api_import_mapping_save(uuid,text,text,jsonb,jsonb)',
+      'dpp_api_import_mapping_delete(uuid)',
       'dpp_api_member_add_by_email(text,text)',
       'dpp_api_members_list_detail()',
       'dpp_api_members_add(uuid,text)',
@@ -124,6 +147,15 @@ begin
   with required(signature) as (
     values
       ('dpp_api_authorization_context()'),
+      ('dpp_api_carriers_list(uuid)'),
+      ('dpp_api_carrier_bind_secure(uuid,text,text,text)'),
+      ('dpp_api_carrier_revoke(uuid,text)'),
+      ('dpp_api_carrier_open(text,text)'),
+      ('dpp_api_carrier_scan_history(uuid,integer)'),
+      ('dpp_api_passports_list(integer)'),
+      ('dpp_api_import_mapping_list()'),
+      ('dpp_api_import_mapping_save(uuid,text,text,jsonb,jsonb)'),
+      ('dpp_api_import_mapping_delete(uuid)'),
       ('dpp_api_member_add_by_email(text,text)'),
       ('dpp_api_members_list_detail()'),
       ('dpp_api_members_add(uuid,text)'),
