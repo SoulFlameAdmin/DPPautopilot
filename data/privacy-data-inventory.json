@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
@@ -312,6 +312,52 @@
         "shared consume RPC requires authenticated request-user context and validated pseudonymous key format",
         "canonical 429 behavior remains process-local until shared runtime wiring is accepted"
       ]
+    },
+    {
+      "id": "physical_carriers_and_scans",
+      "classification": "business_device_and_pseudonymous_operational_metadata",
+      "purpose": "Bind QR/NFC carriers to battery items and record carrier scan events for operational/audit evidence",
+      "location": "Supabase Postgres public DPP namespace",
+      "processor": "Supabase",
+      "tables": [
+        "dpp_physical_carriers",
+        "dpp_carrier_scan_events"
+      ],
+      "fields": "organization_id, battery_item_id, carrier kind/technology, canonical public URL, optional external UID, status, binding/revocation actor and timestamps; scan source/result, optional authenticated actor_id and occurred_at",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "Carrier bindings and scan history persist with the tenant/battery lifecycle; no accepted time-based expiry is implemented. Public scans may have null actor_id and do not store raw IP addresses or bearer credentials."
+      },
+      "controls": [
+        "RLS enabled on carrier and scan tables",
+        "no direct anon/authenticated table grants",
+        "binding is tenant-scoped and server-derives canonical public_url",
+        "public carrier open returns public passport projection only",
+        "scan history is readable only through authenticated tenant-scoped RPC"
+      ],
+      "minimization_note": "external_uid must contain only carrier/device identifiers needed for operations; do not store personal data, raw network identifiers or authentication secrets."
+    },
+    {
+      "id": "passport_lifecycle_state",
+      "classification": "business_product_lifecycle_and_actor_metadata",
+      "purpose": "Persist terminal passport lifecycle disposition and replacement linkage for persistent public QR/NFC resolution",
+      "location": "Supabase Postgres public DPP namespace",
+      "processor": "Supabase",
+      "tables": [
+        "dpp_passport_lifecycle"
+      ],
+      "fields": "passport_id, organization_id, disposition, reason code/note, replacement_item_id, changed_by auth user ID, changed_at",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "Lifecycle metadata persists with passport history; no accepted time-based expiry is implemented."
+      },
+      "controls": [
+        "RLS enabled with no direct anon/authenticated table privileges",
+        "terminal transition requires active tenant owner/admin/editor authorization",
+        "public resolver exposes lifecycle-safe fields only and never reason_note or changed_by",
+        "replacement target must resolve to an active passport in the same organization"
+      ],
+      "minimization_note": "reason_note is bounded to 500 characters and should contain only operational lifecycle justification, not unnecessary personal data."
     }
   ],
   "out_of_scope_shared_project_data": "All non-dpp_* application tables in the shared Supabase project are owned by other applications and are not part of DPP Autopilot privacy inventory.",
