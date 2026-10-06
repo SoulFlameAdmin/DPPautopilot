@@ -164,13 +164,14 @@ function makeBackend(){
       if(!state.passport||body.p_id!==IDS.passport) return fail('DP403','private tenant detail');
       return ok({...state.passport,organization_id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'});
     }
-    if(rpc==='dpp_api_passport_public'){
+    if(rpc==='dpp_api_passport_public_resolve'){
       if(!state.passport||body.p_unique_identifier!==state.passport.unique_identifier) return fail('DP402');
       return ok({
         passport_id:state.passport.passport_id,
         battery_item_id:state.passport.battery_item_id,
         unique_identifier:state.passport.unique_identifier,
         status:state.passport.status,
+        kind:'active',
         public_payload:state.passport.public_payload,
         updated_at:state.passport.updated_at,
         private_payload:state.passport.private_payload,
