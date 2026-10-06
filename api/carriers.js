@@ -61,8 +61,8 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
 }
 
 async function handler(req,res){
-  startRequestObservability(req,res,'carrier');
-  const local=enforceRateLimit(req,res,'carrier');
+  startRequestObservability(req,res,'carriers');
+  const local=enforceRateLimit(req,res,'carriers');
   if(!local.allowed)return send(res,429,rateLimitBody());
   const authorization=bearer(req);
   if(!authorization)return send(res,401,{error:{code:'AUTH_REQUIRED',message:'Bearer authentication is required.'}});
@@ -71,7 +71,7 @@ async function handler(req,res){
     res.setHeader('Allow','GET, POST, PATCH');
     return send(res,405,{error:{code:'METHOD_NOT_ALLOWED',message:'Unsupported method.'}});
   }
-  const shared=await enforceSharedRateLimit(req,res,'carrier',authorization,{ruleName:method==='GET'?'authenticated_read':'authenticated_write'});
+  const shared=await enforceSharedRateLimit(req,res,'carriers',authorization,{ruleName:method==='GET'?'authenticated_read':'authenticated_write'});
   if(shared.error)return send(res,503,sharedRateLimitUnavailableBody());
   if(!shared.allowed)return send(res,429,rateLimitBody());
 
