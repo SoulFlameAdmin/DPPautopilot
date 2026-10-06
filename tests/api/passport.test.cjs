@@ -570,3 +570,13 @@ test('authenticated passport list uses one tenant-scoped management RPC', async 
     assert.equal(JSON.parse(res.body).data.length,1);
   }finally{global.fetch=original;restore();}
 });
+
+
+test('M22 invalid passport pagination and carrier keep canonical public messages', async () => {
+  for (const [query,status] of [[{list:'1',limit:'999'},422],[{identifier:'urn:dpp:1',carrier:'invalid'},400]]) {
+    const out=makeRes();
+    await handler(makeReq('GET',null,query,query.identifier?null:'Bearer test-token'),out);
+    assert.equal(out.statusCode,status);
+    assert.deepEqual(JSON.parse(out.body).error,{code:'VALIDATION_ERROR',message:'The request failed validation.'});
+  }
+});
