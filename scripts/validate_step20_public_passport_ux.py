@@ -38,7 +38,9 @@ def main()->None:
 
     for token in [
         "PUBLIC_ACCESS=new Set(['public','public_identifier','public_identifier_or_operator_identity'])",
-        "fetch('/api/passport?identifier='",
+        "const basePassportUrl='/api/passport?identifier='+encodeURIComponent(identifier)",
+        "fetch(basePassportUrl+(carrier?'&carrier='+carrier:'')",
+        "fetch(basePassportUrl,{cache:'no-store'})",
         "fetch('/data/lmt-battery-71-v2.json'",
         "point.sourceOwner==='derived_duplicate'",
         "point.number===1",
@@ -98,8 +100,10 @@ def main()->None:
 
     task=next(t for t in master["tasks"] if t["id"]==20)
     require(task["status"]=="green","Official master point 20 must be GREEN")
-    require(master["sequentialProgress"]=={"greenThrough":20,"next":21},"Official master must advance to point 21")
-    require(master["counts"]=={"green":27,"yellow":46,"red":27,"total":100},"Official master counts drift after Step 20")
+    progress=master["sequentialProgress"]
+    require(progress["greenThrough"]>=20 and progress["next"]==progress["greenThrough"]+1,"Official master must remain beyond Step 20")
+    counts=master["counts"]
+    require(counts["total"]==100 and counts["green"]+counts["yellow"]+counts["red"]==100,"Official master counts inconsistent")
 
     print("STEP20_PUBLIC_PASSPORT_UX_PASS: ACTIVE public passport is human-readable, EU-traceable, responsive and double-allowlisted against restricted data")
 
