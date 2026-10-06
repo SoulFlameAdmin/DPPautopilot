@@ -123,6 +123,16 @@
       "id": "invalid_generated_serial_range",
       "surface": "/api/batch-provision",
       "expected": "422 validation error before upstream"
+    },
+    {
+      "id": "oversize_parsed_carrier_body",
+      "surface": "/api/carriers",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "invalid_carrier_fields",
+      "surface": "/api/carriers",
+      "expected": "422 VALIDATION_ERROR before upstream"
     }
   ],
   "evidence_files": [
