@@ -6,7 +6,6 @@ let cfg=null,session=null,refreshTimer=null,currentUser=null;
 
 function result(node,message,kind=""){node.textContent=message;node.className="result"+(kind?" "+kind:"")}
 function validEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||"").trim())}
-function validPassword(value){return String(value||"").length>=8}
 function authHeaders(token){const h={apikey:cfg.publishableKey,"Content-Type":"application/json",Accept:"application/json"};if(token)h.Authorization="Bearer "+token;return h}
 async function authCall(path,{method="GET",body,token}={}){
   if(!cfg)throw new Error("Auth configuration is not ready.");
@@ -64,8 +63,8 @@ async function api(path,{method="GET",body}={}){
 function syncAuthUi(){
   const on=!!session?.access_token;
   $("#signout").hidden=!on;
-  $("#signup").disabled=on;$("#signin").disabled=on;
-  $("#email").disabled=on;$("#password").disabled=on;
+  $("#sendLink").disabled=on;
+  $("#email").disabled=on;
   $("#authState").textContent=on?"AUTHENTICATED":"NOT SIGNED IN";
   $("#authState").className="state"+(on?" ok":"");
 }
@@ -172,30 +171,21 @@ async function init(){
   restoreSession();parseConfirmationFragment();syncAuthUi();
   if(session?.refresh_token){try{await refreshSession()}catch{clearSession()}}
   if(session?.access_token)await loadApplicationState();
-  else result($("#authResult"),"Създайте нов акаунт или влезте със съществуващ.","ok");
+  else result($("#authResult"),"Въведете служебния email. Системата ще изпрати защитен регистрационен линк.","ok");
 }
 
-$("#signup").addEventListener("click",async()=>{
-  const e=$("#email").value.trim(),p=$("#password").value;
-  if(!validEmail(e)||!validPassword(p))return result($("#authResult"),"Въведете валиден служебен email и парола минимум 8 символа.","bad");
-  $("#signup").disabled=true;
+$("#sendLink").addEventListener("click",async()=>{
+  const e=$("#email").value.trim();
+  if(!validEmail(e))return result($("#authResult"),"Въведете валиден служебен email.","bad");
+  $("#sendLink").disabled=true;
   try{
-    const path="/auth/v1/signup?redirect_to="+encodeURIComponent(confirmationRedirect());
-    const data=await authCall(path,{method:"POST",body:{email:e,password:p}});
-    if(data.access_token){saveSession(data);await loadApplicationState();return}
+    const path="/auth/v1/otp?redirect_to="+encodeURIComponent(confirmationRedirect());
+    await authCall(path,{method:"POST",body:{email:e,create_user:true,data:{dpp_company_onboarding:true}}});
     $("#verifyCard").hidden=false;
-    $("#verifyResult").textContent="Проверете "+e+" (Inbox/Spam). Ако този email вече има акаунт, използвайте „Вход“.";
-    result($("#authResult"),"Регистрацията е приета. За нов акаунт е нужно email потвърждение.","ok");
+    $("#verifyResult").textContent="Изпратихме регистрационен линк на "+e+". Проверете Inbox/Spam и натиснете линка.";
+    result($("#authResult"),"Линкът е заявен от DPP Autopilot. След отварянето му ще продължите с регистрацията на фирмата.","ok");
   }catch(err){result($("#authResult"),err.message,"bad")}
-  finally{if(!session?.access_token)$("#signup").disabled=false}
-});
-$("#signin").addEventListener("click",async()=>{
-  const e=$("#email").value.trim(),p=$("#password").value;
-  if(!validEmail(e)||!validPassword(p))return result($("#authResult"),"Въведете валиден email и парола.","bad");
-  try{
-    const data=await authCall("/auth/v1/token?grant_type=password",{method:"POST",body:{email:e,password:p}});
-    saveSession(data);await loadApplicationState();
-  }catch(err){result($("#authResult"),err.message,"bad")}
+  finally{if(!session?.access_token)$("#sendLink").disabled=false}
 });
 $("#signout").addEventListener("click",async()=>{
   try{if(session?.access_token)await authCall("/auth/v1/logout?scope=local",{method:"POST",token:session.access_token})}catch{}
