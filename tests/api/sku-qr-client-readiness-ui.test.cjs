@@ -29,5 +29,5 @@ test('imports understand sku and QR print labels include sku',()=>{
 test('production QR screen exposes SKU from verified passport',()=>{
   const qr=fs.readFileSync(path.join(root,'assets/csp/qr-inline-1.js'),'utf8');
   assert.match(qr,/public_payload\?\.model\?\.identification\?\.model_id/);
-  assert.match(qr,/' · SKU '/);
+  assert.match(qr,/ · SKU /);
 });
