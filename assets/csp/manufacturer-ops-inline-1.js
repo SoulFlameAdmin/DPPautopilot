@@ -27,7 +27,7 @@ const DEFAULT_MAP={
  lifecycle_status:"item.lifecycle_status",
  state_of_health_percent:"item.state_of_health.percent"
 };
-let cfg=null,session=null,activeOrg=null,items=[],models=[],passports=[],carriers=[],selectedPassport=null,csv={headers:[],rows:[],mapping:{},importId:null,validated:false,sourceType:null,sourceName:"",workbook:null,sheetNames:[],selectedSheet:null};
+let cfg=null,session=null,activeOrg=null,items=[],models=[],passports=[],carriers=[],mappingProfiles=[],selectedMappingId=null,selectedPassport=null,csv={headers:[],rows:[],mapping:{},mappingProfileId:null,importId:null,validated:false,sourceType:null,sourceName:"",workbook:null,sheetNames:[],selectedSheet:null};
 
 function setText(node,msg,kind=""){if(!node)return;node.textContent=msg;node.className="result"+(kind?" "+kind:"")}
 function readSession(){
@@ -318,11 +318,88 @@ function renderXlsxSheetOptions(){
  for(const name of csv.sheetNames)select.append(option(name,name));
  select.value=csv.selectedSheet||csv.sheetNames[0]||"";
 }
+function renderMappingProfiles(){
+ const select=$("#savedMappingSelect");if(!select)return;
+ const previous=selectedMappingId||select.value;
+ select.replaceChildren(option("— Select profile —",""));
+ for(const p of mappingProfiles)select.append(option(p.name+" · r"+p.revision,p.id));
+ if(mappingProfiles.some(p=>p.id===previous)){select.value=previous;selectedMappingId=previous}else{select.value="";selectedMappingId=null}
+ $("#deleteMappingProfile").disabled=!selectedMappingId||!canWrite();
+}
+async function loadMappingProfiles(){
+ const response=await api("/api/import-mappings");
+ mappingProfiles=Array.isArray(response.data)?response.data:[];
+ renderMappingProfiles();
+}
+function selectedMappingProfile(){return mappingProfiles.find(p=>p.id===selectedMappingId)||null}
+function selectMappingProfile(id){
+ selectedMappingId=id||null;
+ const profile=selectedMappingProfile();
+ $("#mappingProfileName").value=profile?.name||"";
+ $("#deleteMappingProfile").disabled=!profile||!canWrite();
+ setText($("#mappingProfileStatus"),profile?"Selected "+profile.name+" · revision "+profile.revision:"Saved mappings are private to the active company tenant.",profile?"ok":"");
+}
+function applyMappingProfile(){
+ const profile=selectedMappingProfile();
+ if(!profile)return setText($("#mappingProfileStatus"),"Select a saved mapping first.","bad");
+ if(!csv.headers.length)return setText($("#mappingProfileStatus"),"Load a CSV or XLSX file before applying a mapping.","bad");
+ if(csv.sourceType&&profile.source_format!==csv.sourceType)return setText($("#mappingProfileStatus"),"This profile is for "+profile.source_format.toUpperCase()+", but the loaded file is "+csv.sourceType.toUpperCase()+".","bad");
+ let matched=0;
+ for(const h of csv.headers){
+  const value=profile.field_mapping&&typeof profile.field_mapping[h]==="string"?profile.field_mapping[h]:"";
+  csv.mapping[h]=value;
+  if(value)matched++;
+ }
+ csv.mappingProfileId=profile.id;csv.importId=null;csv.validated=false;
+ renderCsvMapping();renderCsvSummary();
+ setText($("#mappingProfileStatus"),"Applied "+profile.name+" · "+matched+" mapped columns.","ok");
+}
+async function saveCurrentMappingProfile(){
+ if(!canWrite())return;
+ const name=$("#mappingProfileName").value.trim();
+ if(!name)return setText($("#mappingProfileStatus"),"Enter a mapping profile name.","bad");
+ if(!csv.headers.length||!csv.sourceType)return setText($("#mappingProfileStatus"),"Load a CSV or XLSX file before saving a mapping.","bad");
+ const profile=selectedMappingProfile();
+ $("#saveMappingProfile").disabled=true;
+ setText($("#mappingProfileStatus"),"Saving mapping profile…");
+ try{
+  const response=await api("/api/import-mappings",{method:"POST",body:{
+   id:profile?.id||null,
+   name,
+   source_format:csv.sourceType,
+   source_headers:csv.headers,
+   field_mapping:csv.mapping
+  }});
+  const saved=response.data;
+  await loadMappingProfiles();
+  selectMappingProfile(saved.id);
+  csv.mappingProfileId=saved.id;
+  setText($("#mappingProfileStatus"),"Saved "+saved.name+" · revision "+saved.revision+".","ok");
+ }catch(e){setText($("#mappingProfileStatus"),e.message,"bad")}
+ finally{$("#saveMappingProfile").disabled=!canWrite()}
+}
+async function deleteCurrentMappingProfile(){
+ const profile=selectedMappingProfile();
+ if(!profile||!canWrite())return;
+ if(!confirm("Delete saved mapping "+profile.name+"?"))return;
+ $("#deleteMappingProfile").disabled=true;
+ setText($("#mappingProfileStatus"),"Deleting mapping profile…");
+ try{
+  await api("/api/import-mappings?id="+encodeURIComponent(profile.id),{method:"DELETE"});
+  if(csv.mappingProfileId===profile.id)csv.mappingProfileId=null;
+  selectedMappingId=null;
+  await loadMappingProfiles();
+  $("#mappingProfileName").value="";
+  setText($("#mappingProfileStatus"),"Mapping profile deleted.","ok");
+ }catch(e){setText($("#mappingProfileStatus"),e.message,"bad");$("#deleteMappingProfile").disabled=false}
+}
+
 function setImportData(parsed,meta={}){
  csv={
   headers:parsed.headers,
   rows:parsed.rows,
   mapping:{},
+  mappingProfileId:null,
   importId:null,
   validated:false,
   sourceType:meta.sourceType||null,
@@ -344,7 +421,7 @@ function renderCsvMapping(){
   const select=document.createElement("select");select.dataset.column=h;select.setAttribute("aria-label","Map "+h);
   for(const [value,label] of FIELD_OPTIONS)select.append(option(label,value));
   select.value=csv.mapping[h]||"";
-  select.addEventListener("change",()=>{csv.mapping[h]=select.value;csv.importId=null;csv.validated=false;renderCsvSummary()});
+  select.addEventListener("change",()=>{csv.mapping[h]=select.value;csv.mappingProfileId=null;csv.importId=null;csv.validated=false;renderCsvSummary()});
   row.append(name,select);host.append(row);
  }
 }
@@ -452,7 +529,7 @@ async function switchXlsxSheet(sheetName){
 async function stageImport(){
  try{
   const rows=buildImportRows();$("#stageImport").disabled=true;setText($("#csvResult"),"Staging "+rows.length+" "+importSourceLabel()+" rows към production import API…");
-  const data=(await api("/api/imports",{method:"POST",body:{rows}})).data;
+  const data=(await api("/api/imports",{method:"POST",body:{rows,mapping_id:csv.mappingProfileId||null}})).data;
   csv.importId=data.import_id;csv.validated=false;renderCsvSummary();setText($("#csvResult"),"STAGED · "+data.staged_rows+" rows · "+data.import_id,"ok");
  }catch(e){setText($("#csvResult"),e.message,"bad");renderCsvSummary()}
 }
@@ -491,7 +568,9 @@ async function init(){
  if(cfg.supabaseUrl!==PROJECT_URL)throw new Error("Unexpected auth project.");
  if(!readSession()){setText($("#opsStatus"),"Влез през Company Access, за да използваш production operations.","bad");return}
  await loadBase();
+ await loadMappingProfiles();
  $("#opsRole").textContent=activeOrg.role.toUpperCase();$("#opsRole").className="state "+(canWrite()?"ok":"readonly");
+ $("#saveMappingProfile").disabled=!canWrite();$("#deleteMappingProfile").disabled=!canWrite()||!selectedMappingId;
  syncCarrierForm();renderCsvSummary();setText($("#opsStatus"),"Operations center е свързан към production tenant.","ok");
 }
 $("#passportSearch").addEventListener("input",e=>syncSearchFields(e.currentTarget));
@@ -506,6 +585,10 @@ $("#carrierItem").addEventListener("change",()=>{syncCarrierForm();loadCarrierPa
 $("#carrierKind").addEventListener("change",syncCarrierForm);
 $("#bindCarrier").addEventListener("click",bindCarrier);
 $("#refreshCarriers").addEventListener("click",loadCarrierPanel);
+$("#savedMappingSelect").addEventListener("change",e=>selectMappingProfile(e.target.value));
+$("#loadMappingProfile").addEventListener("click",applyMappingProfile);
+$("#saveMappingProfile").addEventListener("click",saveCurrentMappingProfile);
+$("#deleteMappingProfile").addEventListener("click",deleteCurrentMappingProfile);
 $("#csvFile").addEventListener("change",async e=>{try{await loadCsvFile(e.target.files?.[0])}catch(err){setText($("#csvResult"),err.message,"bad")}});
 $("#xlsxFile").addEventListener("change",async e=>{try{await loadXlsxFile(e.target.files?.[0])}catch(err){setText($("#csvResult"),err.message,"bad")}});
 $("#xlsxSheet").addEventListener("change",async e=>{try{await switchXlsxSheet(e.target.value)}catch(err){setText($("#csvResult"),err.message,"bad")}});
