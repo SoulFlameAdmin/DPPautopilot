@@ -1,39 +1,51 @@
-# First customer QR pilot — intake and acceptance
+# Първи клиентски пилот с QR — данни и приемане
 
-Technical validation only. DEMO / SAMPLE / APPROVAL materials are not legal compliance evidence. This package does not alter production, activate passports, or bypass the LMT readiness route.
+Пакетът е за техническа проверка. Материалите с означения DEMO / SAMPLE / APPROVAL не са доказателство за правно съответствие. Пакетът не променя работещата система, не активира паспорти и не заобикаля проверките за готовност на батериите за лек транспорт (LMT).
 
-## Customer handoff / Entrega del cliente / Клиентски данни
+## Данни от клиента
 
-One company, one model, ten individually identified battery units. A shared model SKU is not a unique unit ID. Fill `client-intake-template.csv`; additional technical columns and supporting source documents should be agreed with the operator. This four-column intake is an identification checklist, **not** a complete import dataset or Annex XIII passport.
+Искаме разрешени данни за една фирма, един модел и десет батерии с отделен идентификатор за всяка. Общият артикулен код на модела не е уникален идентификатор на отделна батерия.
 
-ES: Solicitamos datos autorizados de un modelo y diez baterías, con un identificador único por unidad. Para empezar no necesitamos baterías físicas, API, NFC ni acceso a producción. Indiquen qué campos pueden publicarse y quién aprobará el piloto.
+Попълнете `client-intake-template.csv`. Допълнителните технически колони и документите за произхода на данните трябва да се уточнят с оператора. Четирите колони в шаблона служат за идентификация; **не представляват пълен набор за импорт или паспорт по приложение XIII**.
 
-BG: Искаме разрешени данни за един модел и десет батерии с отделен идентификатор за всяка. За начало не са нужни физически батерии, API, NFC или production достъп. Уточнете кои полета могат да са публични и кой ще одобри пилота.
+За начало не са нужни физически батерии, достъп до програмния интерфейс (API), NFC или достъп до производствените системи на клиента. Уточнете кои полета могат да са публични и кой ще одобри пилота.
 
-Fill `client-approval-template.json` with a real approval reference, category review reference, exact identifiers, public-column allowlist, and UAT contact. Keep approvals and customer data in an authorized private location, **never commit completed files to this repository**. Empty templates intentionally fail validation. Permission to use data does not mean permission to publish all fields. This approval format is an internal handoff; existing production access policy remains authoritative.
+Попълнете `client-approval-template.json` с:
+- фирмата и лицето, което одобрява използването на данните;
+- контакт за клиентското приемане;
+- препратка към действителното разрешение и проверката на категорията;
+- точния модел, категорията и десетте разрешени идентификатора;
+- изрично разрешение за използване на изходните данни;
+- списък само на колоните, разрешени за публикуване.
 
-Run offline, without API or database access:
+Съхранявайте попълнените разрешения и клиентските данни на одобрено място с ограничен достъп; **не ги записвайте в това хранилище**. Празните шаблони умишлено не преминават проверката. Разрешението за използване не означава разрешение за публикуване на всички полета. Форматът е за вътрешна подготовка; действащите правила за достъп в системата остават задължителни.
+
+## Проверка без мрежова връзка
+
+Изпълнете без достъп до API или база данни, като замените примерните пътища с действителните:
 
 ```sh
 python3 scripts/check_qr_pilot_intake.py /private/customer.csv /private/approval.json
 ```
 
-A preflight PASS checks structure and matching supplied approval only. A human must confirm authorization authenticity, actual battery category, required model fields and public/private projection before existing import mapping/validation. Never infer LMT from the word scooter; never send LMT through the non-LMT technical-pilot path. Missing compliance fields remain missing, never fabricated.
+Успешният резултат проверява само структурата и съответствието с подаденото разрешение. Отговорно лице трябва да потвърди автентичността на разрешението, действителната категория, необходимите полета за модела и разделянето на публични и ограничени данни преди съществуващото съпоставяне и валидиране при импорт.
 
-## Evidence gates
+Не определяйте категория LMT само по думата „скутер“. Не използвайте пътя за технически пилот на други категории за LMT батерии. Липсващите данни за съответствие се отбелязват като липсващи и не се измислят.
 
-Record accepted git commit, deployed environment, tenant, operator, time, expected result, actual result and evidence reference for each step. Keep the customer's private evidence outside the public repository.
+## Доказателства за приемане
 
-| Gate | Required evidence | Initial state |
+За всяка стъпка запишете приетата версия на кода, средата, фирмения контекст, оператора, часа, очаквания и действителния резултат и препратка към доказателството. Частните клиентски доказателства се пазят извън публичното хранилище.
+
+| Проверка | Необходимо доказателство | Начален статус |
 |---|---|---|
-| Release | Relevant CI green on accepted commit; deployed commit and smoke verified | NOT RUN |
-| Authorization | Data-use permission, public field allowlist, category review | NOT RUN |
-| Isolation | Own company context; unauthorized user/other tenant denied | NOT RUN |
-| Import | Agreed mapping, validation, ten units; no silent row loss | NOT RUN |
-| Passport/QR | Ten distinct unit passports and ten matching QR targets | NOT RUN |
-| Physical print | Real size, legible unit ID, no clipped QR; phone opens exact passport | NOT RUN |
-| Update/rescan | Authorized update; same printed QR returns updated unit; audit entry | NOT RUN |
-| Negative cases | Unknown ID, duplicate ID and invalid input rejected clearly | NOT RUN |
-| UAT | Named customer reviewer accepts results and documents missing data | NOT RUN |
+| Версия на системата | Успешни автоматични проверки за приетата версия; потвърдени внедрена версия и основни функции | НЕ Е ИЗПЪЛНЕНО |
+| Разрешения | Разрешение за използване, списък на публичните полета и проверка на категорията | НЕ Е ИЗПЪЛНЕНО |
+| Изолация | Отделен фирмен контекст; отказ за неупълномощен потребител или друга фирма | НЕ Е ИЗПЪЛНЕНО |
+| Импорт | Съгласувано съпоставяне, валидиране и десет единици без незабелязано отпаднали редове | НЕ Е ИЗПЪЛНЕНО |
+| Паспорт и QR | Десет отделни паспорта и десет QR кода към съответните единици | НЕ Е ИЗПЪЛНЕНО |
+| Физически печат | Реален размер, четим идентификатор, неизрязан QR; телефонът отваря точния паспорт | НЕ Е ИЗПЪЛНЕНО |
+| Обновяване и повторно сканиране | Разрешена промяна; същият отпечатан QR показва обновената единица; запис в историята | НЕ Е ИЗПЪЛНЕНО |
+| Невалидни случаи | Ясен отказ за неизвестен идентификатор, повторен идентификатор и невалидни данни | НЕ Е ИЗПЪЛНЕНО |
+| Клиентско приемане | Посочено лице от клиента одобрява резултатите и описва липсващите данни | НЕ Е ИЗПЪЛНЕНО |
 
-First customer is accepted only with actual customer data and physical scan evidence. Test-batch success is not customer UAT. No automatic acceptance, legal certification, EU Registry submission, or second-customer rollout is implied.
+Първият клиент се приема само след проверка с действителни клиентски данни и доказателства от физическо сканиране. Успехът с тестов набор не е клиентско приемане. Пакетът не означава автоматично одобрение, правна сертификация, подаване към регистъра на ЕС или започване на втори клиент.
