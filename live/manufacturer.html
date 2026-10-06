@@ -4,252 +4,233 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>DPP Autopilot · Company Workspace</title>
-  <meta name="description" content="Company workspace for creating, saving and managing DPP records inside the company tenant.">
+  <title>SOULFLAME DPP AUTOPILOT · Company Dashboard</title>
+  <meta name="description" content="Private company workspace for creating, saving and managing Digital Product Passports.">
   <link rel="stylesheet" href="/assets/csp/manufacturer.css">
   <link rel="stylesheet" href="/assets/csp/manufacturer-ops.css">
 </head>
 <body data-manufacturer-ready="false" data-manufacturer-auth="unknown" data-manufacturer-tenant="unknown" data-manufacturer-mode="unknown">
-<aside class="app-sidebar" aria-label="Company workspace navigation">
-  <a class="sidebar-brand" href="/manufacturer">
-    <span class="sidebar-mark" aria-hidden="true"></span>
-    <span><strong>SOULFLAME</strong><small>DPP AUTOPILOT</small></span>
-  </a>
-  <nav class="side-nav">
-    <a class="active" href="#dashboardHome"><span class="ico">⌂</span>Dashboard</a>
-    <a href="#passportsProduction"><span class="ico">▤</span>Passports</a>
-    <a href="#productionOps"><span class="ico">＋</span>Create Passport</a>
-    <a href="#printCenterProduction"><span class="ico">▦</span>QR Carriers</a>
-    <a href="#csvImportProduction"><span class="ico">⇧</span>Imports</a>
-    <a href="#modelsList"><span class="ico">♙</span>Clients / Models</a>
-    <a href="/manufacturer/completeness"><span class="ico">◈</span>Compliance</a>
-    <a href="/company"><span class="ico">⚙</span>Settings</a>
-  </nav>
-  <div class="sidebar-foot">Clean energy<br>Longer life<br>Brighter tomorrow</div>
-</aside>
-<main class="shell" id="dashboardHome">
-  <header class="topbar">
-    <label class="top-search" aria-label="Search passports">
-      <span aria-hidden="true">⌕</span>
-      <input class="ops-search" id="passportSearch" type="search" placeholder="Search passports, battery ID, status…">
-    </label>
-    <div class="top-actions">
-      <a class="btn ghost" href="/company">Company</a>
-      <button class="btn" id="refreshDashboard" type="button">Refresh</button>
-      <div class="profile"><span class="avatar">SF</span><span><strong id="workspaceCompanyName">Company</strong><span>Company Admin</span></span></div>
+  <aside class="app-sidebar" aria-label="Company navigation">
+    <a class="sidebar-brand" href="/manufacturer">
+      <span class="flame" aria-hidden="true">◒</span>
+      <span><strong>SOULFLAME</strong><small>DPP AUTOPILOT</small></span>
+    </a>
+    <nav class="side-nav">
+      <a class="active" href="#dashboardHome"><span class="ico">⌂</span>Dashboard</a>
+      <a href="#passportsProduction"><span class="ico">▤</span>Passports</a>
+      <a href="#productionOps"><span class="ico">＋</span>Create Passport</a>
+      <a href="#printCenterProduction"><span class="ico">▦</span>QR Carriers</a>
+      <a href="#csvImportProduction"><span class="ico">⇧</span>Imports</a>
+      <a href="#modelsList"><span class="ico">♙</span>Clients</a>
+      <a href="/manufacturer/completeness"><span class="ico">◇</span>Compliance</a>
+      <a href="/company"><span class="ico">⚙</span>Settings</a>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="leaf">♧</span>
+      <span>CLEAN ENERGY<br>LONGER LIFE<br>BRIGHTER TOMORROW</span>
+      <small>v1.0.0</small>
     </div>
-  </header>
+  </aside>
 
-  <section class="overview-layout">
-    <div class="hero">
-      <div>
-        <p class="eyebrow">COMPANY WORKSPACE · PRIVATE TENANT DATA</p>
-        <h1>Welcome to SOULFLAME DPP AUTOPILOT</h1>
-        <p>Create, save, edit and manage your company products, battery passports, QR/NFC carriers, imports and compliance data in one private workspace.</p>
+  <main class="shell" id="dashboardHome">
+    <header class="topbar">
+      <label class="top-search" aria-label="Search passports">
+        <span aria-hidden="true">⌕</span>
+        <input id="passportSearch" type="search" placeholder="Search passports, battery ID, client…">
+      </label>
+      <div class="top-actions">
+        <span class="notification" aria-hidden="true">♟<i></i></span>
+        <button class="btn compact" id="refreshDashboard" type="button">Refresh</button>
+        <div class="profile">
+          <span class="avatar">SF</span>
+          <span><strong id="workspaceCompanyName">Company</strong><small>Manufacturer Admin</small></span>
+        </div>
       </div>
-      <div class="tenant-box">
-        <span class="mini-label">ACTIVE COMPANY</span>
-        <strong id="tenantName">—</strong>
-        <span id="tenantMeta">Проверка на фирмения tenant…</span>
+    </header>
+
+    <section class="gate card" id="authGate">
+      <p class="eyebrow">COMPANY ACCESS</p>
+      <h2>Нужен е фирмен вход.</h2>
+      <p>Този dashboard се показва само след фирмен вход и активен company tenant.</p>
+      <div class="actions"><a class="btn primary" href="/company">Вход / фирма →</a></div>
+      <div class="result" id="gateResult" role="status" aria-live="polite">Проверка на сесията…</div>
+    </section>
+
+    <div id="dashboard" hidden>
+      <div class="workspace">
+        <section class="workspace-main">
+          <div class="welcome">
+            <p class="eyebrow">PRIVATE COMPANY WORKSPACE</p>
+            <h1>Welcome to SOULFLAME DPP AUTOPILOT</h1>
+            <p>Create, manage and distribute Digital Product Passports for your batteries.</p>
+            <div class="tenant-line"><strong id="tenantName">—</strong><span id="tenantMeta">Проверка на фирмения tenant…</span></div>
+          </div>
+
+          <section class="stats" aria-label="Passport summary">
+            <article class="metric blue"><span class="metric-icon">▤</span><div><small>Total Passports</small><strong id="opsPassportCount">0</strong><em>Company total</em></div></article>
+            <article class="metric green"><span class="metric-icon">✓</span><div><small>Active Passports</small><strong id="opsActiveCount">0</strong><em>Published / active</em></div></article>
+            <article class="metric amber"><span class="metric-icon">◷</span><div><small>Pending Data</small><strong id="opsDraftCount">0</strong><em>Needs completion</em></div></article>
+            <article class="metric purple"><span class="metric-icon">▦</span><div><small>Printed QR Carriers</small><strong id="printedCarrierCount">0</strong><em>Active QR carriers</em></div></article>
+            <span id="opsTerminalCount" hidden>0</span>
+          </section>
+
+          <section class="passport-table card" id="passportsProduction">
+            <div class="section-head">
+              <h2>Battery Passports</h2>
+              <div class="table-tools">
+                <label class="table-search"><span>⌕</span><input id="passportSearchMirror" type="search" placeholder="Search by ID, model, client…"></label>
+                <button class="btn" type="button" id="passportFilterButton">⚱ Filter</button>
+              </div>
+            </div>
+            <div class="passport-columns" aria-hidden="true">
+              <span></span><span>Battery ID</span><span>Model</span><span>Client</span><span>Status</span><span>Updated</span><span>Actions</span>
+            </div>
+            <div class="ops-list passport-rows" id="passportOpsList" aria-live="polite"></div>
+            <div class="table-footer"><span id="passportCountText">Showing passports</span><span>Production tenant data</span></div>
+          </section>
+
+          <section class="import-overview card" id="csvImportProduction">
+            <div class="import-title"><span class="upload-icon">⇧</span><div><h2>Import Passports</h2><p>Create multiple battery passports from your existing data.</p></div></div>
+            <div class="import-grid">
+              <label class="import-box">
+                <span class="file-icon">▧</span>
+                <span><strong>Upload CSV file</strong><small>Drop and upload your file here</small></span>
+                <input id="csvFile" type="file" accept=".csv,text/csv">
+              </label>
+              <label class="import-box">
+                <span class="file-icon">X</span>
+                <span><strong>Upload Excel XLSX</strong><small>Import spreadsheet data</small></span>
+                <input id="xlsxFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+              </label>
+              <div class="import-box api-box">
+                <span class="file-icon">&lt;/&gt;</span>
+                <span><strong>Import via API</strong><small>Integrate with your production systems.</small></span>
+                <button class="btn" type="button">View API Documentation</button>
+              </div>
+              <div class="access-box">
+                <span class="shield">◇</span>
+                <div><strong>Data Access & Visibility</strong><p>Manufacturers manage full battery data. Public passports show only approved non-sensitive information.</p></div>
+              </div>
+            </div>
+
+            <div class="import-advanced">
+              <div class="ops-toolbar">
+                <div class="group xlsx-sheet-group" id="xlsxSheetGroup" hidden><label for="xlsxSheet">Worksheet</label><select id="xlsxSheet" aria-label="Excel worksheet"></select></div>
+                <div class="group">
+                  <span class="pill" id="importSourcePill">NO FILE</span>
+                  <span class="pill"><b id="csvRows">0</b> rows</span>
+                  <span class="pill"><b id="csvColumns">0</b> columns</span>
+                  <span class="pill"><b id="csvMapped">0</b> mapped</span>
+                </div>
+              </div>
+              <div class="csv-map" id="csvMappings"></div>
+              <div class="csv-preview" id="csvPreview"></div>
+              <div class="ops-toolbar">
+                <div class="group"><button class="btn" id="stageImport" type="button" disabled>1 · Stage</button><button class="btn" id="validateImport" type="button" disabled>2 · Validate</button><button class="btn primary" id="commitImport" type="button" disabled>3 · Commit</button></div>
+                <div class="result" id="csvResult" role="status" aria-live="polite">Зареди CSV или XLSX файл.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="advanced-workspace" id="productionOps">
+            <div class="section-head"><div><p class="eyebrow">CREATE & SAVE</p><h2>Create Passport / Product</h2></div><span class="state" id="opsRole">ROLE</span></div>
+            <div class="grid two">
+              <article class="card">
+                <div class="card-head"><div><p class="eyebrow">MODEL REGISTER</p><h2>Create LMT model</h2></div><span class="state" id="writeRole">ROLE</span></div>
+                <div class="form-grid">
+                  <label><span>Model identifier</span><input id="modelIdentifier" maxlength="128" placeholder="SF-48V20"></label>
+                  <label><span>Manufacturer</span><input id="manufacturerName" maxlength="250" placeholder="Company Ltd."></label>
+                </div>
+                <div class="actions"><button class="btn primary" id="createModel" type="button">Save model</button></div>
+                <div class="result" id="modelResult" role="status" aria-live="polite">Ready.</div>
+              </article>
+
+              <article class="card">
+                <div class="card-head"><div><p class="eyebrow">PASSPORT CREATION</p><h2>Create battery passport</h2></div><span class="state ok">PRODUCTION API</span></div>
+                <div class="form-grid">
+                  <label><span>LMT model</span><select id="provisionModel"><option value="">Select model</option></select></label>
+                  <label><span>Battery / serial ID</span><input id="batteryIdentifier" maxlength="300" placeholder="BAT-SF-000001"></label>
+                </div>
+                <div class="actions"><button class="btn primary" id="provisionBattery" type="button">Create DRAFT passport</button></div>
+                <div class="result" id="provisionResult" role="status" aria-live="polite">Select model and enter Battery ID.</div>
+              </article>
+            </div>
+
+            <section class="grid two">
+              <article class="card"><div class="card-head"><div><p class="eyebrow">MODELS</p><h2>Saved Models</h2></div><span class="state ok">LIVE</span></div><div id="modelsList" class="list" aria-live="polite"></div></article>
+              <article class="card"><div class="card-head"><div><p class="eyebrow">BATTERIES</p><h2>Saved Products</h2></div><span class="state ok">LIVE</span></div><div id="itemsList" class="list" aria-live="polite"></div></article>
+            </section>
+
+            <div class="ops-toolbar"><div class="group"><button class="btn" id="refreshOps" type="button">Refresh operations</button></div><div class="result" id="opsStatus" role="status" aria-live="polite">Checking production operations…</div></div>
+          </section>
+
+          <section class="card" id="printCenterProduction">
+            <div class="card-head"><div><p class="eyebrow">QR / PRINT CENTER</p><h2>Print QR Carriers</h2></div><span class="state ok">ACTIVE PASSPORTS</span></div>
+            <div class="ops-toolbar">
+              <div class="group"><button class="btn" id="selectActivePassports" type="button">Select ACTIVE</button><button class="btn" id="clearPassportSelection" type="button">Clear</button><button class="btn primary" id="printSelected" type="button">Bind QR + Print selected</button></div>
+              <div class="result" id="printResult" role="status" aria-live="polite">No labels selected.</div>
+            </div>
+          </section>
+
+          <section class="ops-grid">
+            <article class="card" id="carrierProduction">
+              <div class="card-head"><div><p class="eyebrow">PHYSICAL CARRIERS</p><h2>QR / NFC Binding</h2></div><span class="state ok">LIVE</span></div>
+              <div class="ops-form">
+                <label class="wide"><span>Battery item</span><select id="carrierItem"><option value="">Select battery item</option></select></label>
+                <label><span>Carrier</span><select id="carrierKind"><option value="qr">QR</option><option value="nfc">NFC</option></select></label>
+                <div id="nfcFields" hidden><label><span>NFC technology</span><select id="carrierNfcTech"><option value="ntag213">NTAG213</option><option value="ntag215">NTAG215</option><option value="ntag216">NTAG216</option><option value="ntag424_dna">NTAG424 DNA</option><option value="other">Other</option></select></label></div>
+                <label class="wide"><span>External UID</span><input id="carrierExternalUid" maxlength="256" placeholder="chip/tag UID"></label>
+              </div>
+              <div class="ops-toolbar"><div class="group"><button class="btn primary" id="bindCarrier" type="button">Bind / Reissue</button><button class="btn" id="refreshCarriers" type="button">Refresh</button></div></div>
+              <div class="result" id="carrierResult" role="status" aria-live="polite">Select battery item.</div>
+              <div class="ops-list" id="carrierList"></div>
+            </article>
+
+            <article class="card" id="scanHistoryProduction">
+              <div class="card-head"><div><p class="eyebrow">SCAN HISTORY</p><h2>QR / NFC Opens</h2></div><span class="state ok">TENANT</span></div>
+              <div class="scan-list" id="scanHistory"></div>
+            </article>
+          </section>
+        </section>
+
+        <aside class="passport-detail" id="passportDetail">
+          <div class="detail-head">
+            <div><h2>Battery Passport</h2><strong id="detailBatteryId">Select a passport</strong><small id="detailUpdated">—</small></div>
+            <span class="preview-status" id="detailStatus">—</span>
+          </div>
+          <div class="detail-tabs"><button class="active" type="button">Overview</button><button type="button">Raw Data</button><button type="button">History</button></div>
+          <div class="passport-card">
+            <div class="passport-logo"><span class="mini-flame">◒</span><div><strong>DPP SOULFLAME</strong><small>Battery Passport</small></div></div>
+            <div class="passport-body">
+              <dl>
+                <div><dt>Battery ID</dt><dd id="detailFieldBattery">—</dd></div>
+                <div><dt>Model</dt><dd id="detailFieldModel">—</dd></div>
+                <div><dt>Client</dt><dd id="detailFieldClient">—</dd></div>
+                <div><dt>Type</dt><dd id="detailFieldType">—</dd></div>
+                <div><dt>Chemistry</dt><dd id="detailFieldChemistry">—</dd></div>
+                <div><dt>Capacity</dt><dd id="detailFieldCapacity">—</dd></div>
+                <div><dt>Manufacturer</dt><dd id="detailFieldManufacturer">—</dd></div>
+                <div><dt>Status</dt><dd id="detailFieldStatus">—</dd></div>
+              </dl>
+              <div class="qr-wrap"><img id="detailQrImage" alt="Digital Product Passport QR"><small>Scan for Digital<br>Product Passport</small></div>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <a class="btn primary big" id="detailPublicLink" href="#" target="_blank" rel="noopener">↗ View Public Passport <span>→</span></a>
+            <button class="btn big" id="detailPrintButton" type="button">▣ Print QR Carrier</button>
+            <a class="btn big" id="detailExportLink" href="/api/export" target="_blank" rel="noopener">▧ Export Data</a>
+            <a class="btn big" id="detailEditLink" href="#productionOps">✎ Edit Data</a>
+          </div>
+        </aside>
       </div>
     </div>
 
-    <aside class="passport-preview" aria-label="Battery passport quick panel">
-      <div class="preview-title">
-        <div><p class="eyebrow">BATTERY PASSPORT</p><h2>Quick Passport</h2></div>
-        <span class="preview-status">LIVE</span>
-      </div>
-      <div class="preview-id">Tenant-scoped production data</div>
-      <div class="preview-card">
-        <div class="preview-logo">DPP SOULFLAME<span>Battery Passport</span></div>
-        <div class="preview-grid">
-          <div class="preview-fields">
-            <div><span>Source</span><b>Production API</b></div>
-            <div><span>Tenant</span><b>Active company</b></div>
-            <div><span>Carrier</span><b>QR / NFC</b></div>
-            <div><span>Status</span><b>Live</b></div>
-          </div>
-          <div class="qr-placeholder" aria-hidden="true"></div>
-        </div>
-      </div>
-      <div class="preview-actions">
-        <a class="btn primary" href="#passportsProduction">View Passports →</a>
-        <a class="btn" href="#printCenterProduction">Print QR Carrier</a>
-        <a class="btn" href="#carrierProduction">QR / NFC Binding</a>
-      </div>
-    </aside>
-  </section>
+    <section class="print-sheet" id="printSheet" aria-hidden="true"></section>
+    <footer>Company Workspace · private tenant · production APIs · SOULFLAME DPP AUTOPILOT</footer>
+  </main>
 
-  <section class="gate card" id="authGate">
-    <p class="eyebrow">AUTH REQUIRED</p>
-    <h2>Нужен е фирмен вход.</h2>
-    <p>Dashboard-ът не използва demo данни. Влез през Company Access и активирай фирмения tenant.</p>
-    <div class="actions"><a class="btn primary" href="/company">Вход / фирма →</a></div>
-    <div class="result" id="gateResult" role="status" aria-live="polite">Проверка на сесията…</div>
-  </section>
-
-  <div id="dashboard" hidden>
-    <section class="stats" aria-label="Manufacturer summary">
-      <article class="metric"><strong id="modelsCount">0</strong><span>Battery models</span></article>
-      <article class="metric"><strong id="lmtModelsCount">0</strong><span>LMT models</span></article>
-      <article class="metric"><strong id="itemsCount">0</strong><span>Battery items</span></article>
-      <article class="metric"><strong id="originalItemsCount">0</strong><span>Original lifecycle</span></article>
-    </section>
-
-    <section class="grid two">
-      <article class="card">
-        <div class="card-head">
-          <div><p class="eyebrow">MODEL REGISTER</p><h2>Създай LMT модел</h2></div>
-          <span class="state" id="writeRole">ROLE</span>
-        </div>
-        <p class="muted">Записът се създава през <code>POST /api/models</code> в активния tenant.</p>
-        <div class="form-grid">
-          <label><span>Model identifier</span><input id="modelIdentifier" maxlength="128" placeholder="VR-48V-20AH"></label>
-          <label><span>Manufacturer</span><input id="manufacturerName" maxlength="250" placeholder="Company Ltd."></label>
-        </div>
-        <div class="actions">
-          <button class="btn primary" id="createModel" type="button">Създай LMT модел →</button>
-        </div>
-        <div class="result" id="modelResult" role="status" aria-live="polite">Готово за production запис.</div>
-      </article>
-
-      <article class="card">
-        <div class="card-head">
-          <div><p class="eyebrow">ATOMIC PROVISIONING</p><h2>Произведи батерия</h2></div>
-          <span class="state ok">STAGE 4 API</span>
-        </div>
-        <p class="muted">Една операция: Battery → unique ID → DRAFT Passport. След това Completeness затваря липсващите данни и отключва ACTIVE/public QR.</p>
-        <div class="form-grid">
-          <label><span>LMT model</span><select id="provisionModel"><option value="">Избери модел</option></select></label>
-          <label><span>Battery / serial ID</span><input id="batteryIdentifier" maxlength="300" placeholder="BAT-2026-000001"></label>
-        </div>
-        <div class="actions">
-          <button class="btn primary" id="provisionBattery" type="button">Provision DRAFT Passport →</button>
-        </div>
-        <div class="result" id="provisionResult" role="status" aria-live="polite">Избери LMT модел и въведи уникален Battery ID.</div>
-      </article>
-    </section>
-
-    <section class="grid two">
-      <article class="card">
-        <div class="card-head"><div><p class="eyebrow">BACKEND MODELS</p><h2>Модели</h2></div><span class="state ok">LIVE API</span></div>
-        <div id="modelsList" class="list" aria-live="polite"></div>
-      </article>
-      <article class="card">
-        <div class="card-head"><div><p class="eyebrow">BACKEND ITEMS</p><h2>Последни батерии</h2></div><span class="state ok">TENANT SCOPED</span></div>
-        <div id="itemsList" class="list" aria-live="polite"></div>
-      </article>
-    </section>
-
-
-    <section class="card ops-card" id="productionOps">
-      <div class="card-head">
-        <div><p class="eyebrow">STAGES 6–7 · PRODUCTION OPERATIONS</p><h2>Passports · Print · Carriers · Import</h2></div>
-        <span class="state" id="opsRole">ROLE</span>
-      </div>
-      <div class="ops-toolbar">
-        <div class="group"><button class="btn" id="refreshOps" type="button">Refresh operations</button></div>
-        <div class="result" id="opsStatus" role="status" aria-live="polite">Проверка на production operations…</div>
-      </div>
-    </section>
-
-    <section class="card ops-card" id="passportsProduction">
-      <div class="card-head"><div><p class="eyebrow">29 · PASSPORTS TAB PRODUCTION</p><h2>Passports</h2></div><span class="state ok">LIVE TENANT API</span></div>
-      <div class="ops-summary">
-        <div class="ops-metric"><strong id="opsPassportCount">0</strong><span>All passports</span></div>
-        <div class="ops-metric"><strong id="opsActiveCount">0</strong><span>ACTIVE</span></div>
-        <div class="ops-metric"><strong id="opsDraftCount">0</strong><span>DRAFT</span></div>
-        <div class="ops-metric"><strong id="opsTerminalCount">0</strong><span>Lifecycle terminal</span></div>
-      </div>
-      <div class="ops-toolbar passport-tools"><span class="muted">Use the search field at the top to filter passports by Battery ID or status.</span></div>
-      <div class="ops-list" id="passportOpsList" aria-live="polite"></div>
-    </section>
-
-    <section class="card ops-card" id="printCenterProduction">
-      <div class="card-head"><div><p class="eyebrow">30 · QR / PRINT CENTER</p><h2>Bulk QR labels</h2></div><span class="state ok">SCAN-AWARE QR</span></div>
-      <p class="ops-note">Избираш ACTIVE passports отгоре. При печат системата гарантира активен QR carrier за всяка бройка и генерира отделен QR към точния public passport.</p>
-      <div class="ops-toolbar">
-        <div class="group"><button class="btn" id="selectActivePassports" type="button">Select ACTIVE</button><button class="btn" id="clearPassportSelection" type="button">Clear</button><button class="btn primary" id="printSelected" type="button">Bind QR + Print selected</button></div>
-        <div class="result" id="printResult" role="status" aria-live="polite">Няма избрани labels.</div>
-      </div>
-    </section>
-
-    <section class="ops-grid">
-      <article class="card ops-card" id="carrierProduction">
-        <div class="card-head"><div><p class="eyebrow">31–32 · PHYSICAL CARRIERS</p><h2>QR / NFC binding</h2></div><span class="state ok">SERVER-DERIVED URL</span></div>
-        <div class="ops-form">
-          <label class="wide"><span>Battery item</span><select id="carrierItem"><option value="">Избери battery item</option></select></label>
-          <label><span>Carrier</span><select id="carrierKind"><option value="qr">QR</option><option value="nfc">NFC</option></select></label>
-          <div id="nfcFields" hidden>
-            <label><span>NFC technology</span><select id="carrierNfcTech"><option value="ntag213">NTAG213</option><option value="ntag215">NTAG215</option><option value="ntag216">NTAG216</option><option value="ntag424_dna">NTAG424 DNA</option><option value="other">Other</option></select></label>
-          </div>
-          <label class="wide"><span>External UID (optional, NFC)</span><input id="carrierExternalUid" maxlength="256" placeholder="chip/tag UID"></label>
-        </div>
-        <div class="ops-toolbar"><div class="group"><button class="btn primary" id="bindCarrier" type="button">Bind / Reissue</button><button class="btn" id="refreshCarriers" type="button">Refresh</button></div></div>
-        <div class="result" id="carrierResult" role="status" aria-live="polite">Избери battery item.</div>
-        <div class="ops-list" id="carrierList"></div>
-      </article>
-
-      <article class="card ops-card" id="scanHistoryProduction">
-        <div class="card-head"><div><p class="eyebrow">33 · SCAN HISTORY</p><h2>QR / NFC opens</h2></div><span class="state ok">TENANT SCOPED</span></div>
-        <p class="ops-note">Scan event се записва при отваряне на bound QR/NFC URL. Показват се source, Battery ID и timestamp.</p>
-        <div class="scan-list" id="scanHistory"></div>
-      </article>
-    </section>
-
-    <section class="card ops-card" id="csvImportProduction">
-      <div class="card-head"><div><p class="eyebrow">34–36 · CSV / XLSX PRODUCTION IMPORT</p><h2>Upload → Sheet → Mapping → Validate → Atomic Commit</h2></div><span class="state ok">CSV + EXCEL</span></div>
-      <p class="ops-note">CSV до 2 MiB или Excel .xlsx до 5 MiB. До 1000 data rows и 100 колони. XLSX се чете локално в браузъра; към production backend се изпращат само normalized DPP rows. Commit остава transaction-safe и idempotent.</p>
-      <div class="import-source-grid">
-        <label class="import-source">
-          <span>CSV</span>
-          <input id="csvFile" type="file" accept=".csv,text/csv">
-        </label>
-        <label class="import-source">
-          <span>Excel XLSX</span>
-          <input id="xlsxFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-        </label>
-      </div>
-      <div class="ops-toolbar">
-        <div class="group xlsx-sheet-group" id="xlsxSheetGroup" hidden>
-          <label for="xlsxSheet">Worksheet</label>
-          <select id="xlsxSheet" aria-label="Excel worksheet"></select>
-        </div>
-        <div class="group">
-          <span class="pill" id="importSourcePill">NO FILE</span>
-          <span class="pill"><b id="csvRows">0</b> rows</span>
-          <span class="pill"><b id="csvColumns">0</b> columns</span>
-          <span class="pill"><b id="csvMapped">0</b> mapped</span>
-        </div>
-      </div>
-      <div class="csv-map" id="csvMappings"></div>
-      <div class="csv-preview" id="csvPreview"></div>
-      <div class="ops-toolbar">
-        <div class="group"><button class="btn" id="stageImport" type="button" disabled>1 · Stage</button><button class="btn" id="validateImport" type="button" disabled>2 · Validate</button><button class="btn primary" id="commitImport" type="button" disabled>3 · Commit + replay test</button></div>
-        <div class="result" id="csvResult" role="status" aria-live="polite">Зареди CSV или XLSX файл.</div>
-      </div>
-    </section>
-
-    <section class="card evidence">
-      <div>
-        <p class="eyebrow">STAGE 5 ACCEPTANCE</p>
-        <h2>Този екран работи с production backend.</h2>
-      </div>
-      <div class="evidence-grid">
-        <span><b>/api/organizations</b> active company</span>
-        <span><b>/api/models</b> live model data</span>
-        <span><b>/api/items</b> live battery data</span>
-        <span><b>/api/provision</b> atomic production flow</span>
-      </div>
-    </section>
-  </div>
-
-  <section class="print-sheet" id="printSheet" aria-hidden="true"></section>
-
-  <footer>Company Workspace V1 · private tenant · production APIs · company data is stored separately from the SoulFlame internal dashboard.</footer>
-</main>
-<script src="/assets/csp/manufacturer-inline-1.js"></script>
-<script src="/vendor/xlsx.full.min.js"></script>
-<script src="/assets/csp/manufacturer-ops-inline-1.js"></script>
+  <script src="/assets/csp/manufacturer-inline-1.js"></script>
+  <script src="/vendor/xlsx.full.min.js"></script>
+  <script src="/assets/csp/manufacturer-ops-inline-1.js"></script>
 </body>
 </html>
