@@ -70,6 +70,18 @@ function setMode(){
   $("#batchProvision").disabled=!write;
   $("#modelIdentifier").disabled=!write;
   $("#manufacturerName").disabled=!write;
+  $("#modelCategory").disabled=!write;
+  $("#manufacturerContact").disabled=!write;
+  $("#manufacturerAddress").disabled=!write;
+  $("#manufacturePlace").disabled=!write;
+  $("#manufactureMonth").disabled=!write;
+  $("#batteryWeightKg").disabled=!write;
+  $("#batteryCapacityAh").disabled=!write;
+  $("#batteryChemistry").disabled=!write;
+  $("#batteryVoltageV").disabled=!write;
+  $("#pilotModel").disabled=!write;
+  $("#pilotBatteryIdentifier").disabled=!write;
+  $("#publishTechnicalPilot").disabled=!write;
   $("#provisionModel").disabled=!write;
   $("#batteryIdentifier").disabled=!write;
   $("#batchModel").disabled=!write;
@@ -91,19 +103,28 @@ function showDashboard(){
 function renderModels(){
   const host=$("#modelsList");host.replaceChildren();
   const lmt=models.filter(m=>m.category==="light_means_of_transport");
-  $("#modelsCount").textContent=String(models.length);
-  $("#lmtModelsCount").textContent=String(lmt.length);
+  const pilot=models.filter(m=>m.category!=="light_means_of_transport");
+  const modelsCount=$("#modelsCount"),lmtModelsCount=$("#lmtModelsCount");
+  if(modelsCount)modelsCount.textContent=String(models.length);
+  if(lmtModelsCount)lmtModelsCount.textContent=String(lmt.length);
   const select=$("#provisionModel"),selected=select.value;
   const batchSelect=$("#batchModel"),batchSelected=batchSelect.value;
-  select.replaceChildren(new Option("Избери SKU / модел",""));
-  batchSelect.replaceChildren(new Option("Избери SKU",""));
+  const pilotSelect=$("#pilotModel"),pilotSelected=pilotSelect.value;
+  select.replaceChildren(new Option("Избери LMT SKU / модел",""));
+  batchSelect.replaceChildren(new Option("Избери LMT SKU",""));
+  pilotSelect.replaceChildren(new Option("Избери non-LMT SKU / модел",""));
   for(const model of lmt){
     const label=model.model_identifier+" · "+model.manufacturer_name;
     select.append(new Option(label,model.id));
     batchSelect.append(new Option(label,model.id));
   }
+  for(const model of pilot){
+    const label=model.model_identifier+" · "+model.manufacturer_name+" · "+model.category;
+    pilotSelect.append(new Option(label,model.id));
+  }
   if(lmt.some(m=>m.id===selected))select.value=selected;
   if(lmt.some(m=>m.id===batchSelected))batchSelect.value=batchSelected;
+  if(pilot.some(m=>m.id===pilotSelected))pilotSelect.value=pilotSelected;
 
   if(!models.length){const e=document.createElement("div");e.className="empty";e.textContent="Няма модели в активната фирма.";host.append(e);return}
   for(const model of models.slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))){
@@ -114,13 +135,22 @@ function renderModels(){
     const side=document.createElement("div");side.className="row-side";
     const pill=document.createElement("span");pill.className="pill"+(model.category==="light_means_of_transport"?" ok":"");pill.textContent=model.category;
     side.append(pill);
-    if(model.category==="light_means_of_transport"&&canWrite()){
-      const use=document.createElement("button");use.className="btn";use.type="button";use.textContent="Избери за производство";
-      use.addEventListener("click",()=>{
-        $("#provisionModel").value=model.id;
-        $("#batchModel").value=model.id;
-        $("#batteryIdentifier").focus();
-      });
+    if(canWrite()){
+      const use=document.createElement("button");use.className="btn";use.type="button";
+      if(model.category==="light_means_of_transport"){
+        use.textContent="Избери за LMT";
+        use.addEventListener("click",()=>{
+          $("#provisionModel").value=model.id;
+          $("#batchModel").value=model.id;
+          $("#batteryIdentifier").focus();
+        });
+      }else{
+        use.textContent="Избери за QR pilot";
+        use.addEventListener("click",()=>{
+          $("#pilotModel").value=model.id;
+          $("#pilotBatteryIdentifier").focus();
+        });
+      }
       side.append(use);
     }
     row.append(left,side);host.append(row);
@@ -256,24 +286,92 @@ async function loadData(){
   const [modelData,itemData]=await Promise.all([api("/api/models"),api("/api/items")]);
   models=modelData.data||[];items=itemData.data||[];
   renderModels();renderItems();
-  setResult($("#modelResult"),canWrite()?"Production model API е готов за запис.":"Read-only role: моделите са видими, записът е забранен.","ok");
-  setResult($("#provisionResult"),canWrite()?"Избери LMT модел и въведи уникален Battery ID.":"Read-only role: production provisioning е забранен.","ok");
+  setResult($("#modelResult"),canWrite()?"Production model API е готов за реални фирмени данни.":"Read-only role: моделите са видими, записът е забранен.","ok");
+  setResult($("#provisionResult"),canWrite()?"LMT: избери модел и въведи уникален Battery ID.":"Read-only role: production provisioning е забранен.","ok");
+  setResult($("#pilotResult"),canWrite()?"Non-LMT: избери модел и създай ACTIVE Technical QR Pilot.":"Read-only role: QR pilot publishing е забранен.","ok");
+}
+function optionalNumber(selector){
+  const raw=$(selector).value.trim();
+  if(!raw)return null;
+  const value=Number(raw);
+  return Number.isFinite(value)&&value>=0?value:null;
+}
+function compactObject(value){
+  const out={};
+  for(const [key,item] of Object.entries(value||{})){
+    if(item==null||item==="")continue;
+    if(item&&typeof item==="object"&&!Array.isArray(item)){
+      const child=compactObject(item);
+      if(Object.keys(child).length)out[key]=child;
+    }else out[key]=item;
+  }
+  return out;
+}
+function modelCanonicalFromForm(modelIdentifier,manufacturer,category){
+  return compactObject({
+    identification:{
+      model_id:modelIdentifier,
+      category,
+      manufacturer:{
+        name:manufacturer,
+        contact:$("#manufacturerContact").value.trim(),
+        postal_address:$("#manufacturerAddress").value.trim()
+      },
+      place_of_manufacture:$("#manufacturePlace").value.trim(),
+      date_of_manufacture:$("#manufactureMonth").value.trim()
+    },
+    physical:{weight_kg:optionalNumber("#batteryWeightKg")},
+    rated_capacity_ah:optionalNumber("#batteryCapacityAh"),
+    composition:{chemistry:$("#batteryChemistry").value.trim()},
+    voltage:{nominal_v:optionalNumber("#batteryVoltageV")}
+  });
+}
+function technicalPilotPublicPayload(model,identifier){
+  const source=model?.canonical_data&&typeof model.canonical_data==="object"?model.canonical_data:{};
+  const identification=source.identification&&typeof source.identification==="object"?source.identification:{};
+  const manufacturer=identification.manufacturer&&typeof identification.manufacturer==="object"?identification.manufacturer:{};
+  return compactObject({
+    model:{
+      identification:{
+        model_id:model.model_identifier,
+        category:model.category,
+        manufacturer:{
+          name:model.manufacturer_name,
+          contact:manufacturer.contact||"",
+          postal_address:manufacturer.postal_address||""
+        },
+        place_of_manufacture:identification.place_of_manufacture||"",
+        date_of_manufacture:identification.date_of_manufacture||""
+      },
+      physical:{weight_kg:source.physical?.weight_kg??null},
+      rated_capacity_ah:source.rated_capacity_ah??null,
+      composition:{chemistry:source.composition?.chemistry||""},
+      voltage:source.voltage&&typeof source.voltage==="object"?source.voltage:{}
+    },
+    item:{unique_identifier:identifier}
+  });
 }
 async function createModel(){
   if(!canWrite())return;
-  const modelIdentifier=$("#modelIdentifier").value.trim(),manufacturer=$("#manufacturerName").value.trim();
-  if(!modelIdentifier||!manufacturer)return setResult($("#modelResult"),"Попълни SKU / Model ID и Manufacturer.","bad");
-  $("#createModel").disabled=true;setResult($("#modelResult"),"Запис към production /api/models…");
+  const modelIdentifier=$("#modelIdentifier").value.trim(),manufacturer=$("#manufacturerName").value.trim(),category=$("#modelCategory").value;
+  if(!modelIdentifier||!manufacturer||!category)return setResult($("#modelResult"),"Попълни SKU / Model ID, Manufacturer и category.","bad");
+  $("#createModel").disabled=true;setResult($("#modelResult"),"Запис на реалния модел към production /api/models…");
   try{
+    const canonical=modelCanonicalFromForm(modelIdentifier,manufacturer,category);
     const created=(await api("/api/models",{method:"POST",body:{
       model_identifier:modelIdentifier,
       manufacturer_name:manufacturer,
-      category:"light_means_of_transport",
-      canonical_data:{identification:{model_id:modelIdentifier,category:"light_means_of_transport",manufacturer:{name:manufacturer}}}
+      category,
+      canonical_data:canonical
     }})).data;
     $("#modelIdentifier").value="";$("#manufacturerName").value="";
-    await loadData();$("#provisionModel").value=created.id;
-    setResult($("#modelResult"),"LMT моделът е създаден в production backend: "+created.model_identifier,"ok");
+    $("#manufacturerContact").value="";$("#manufacturerAddress").value="";$("#manufacturePlace").value="";
+    $("#manufactureMonth").value="";$("#batteryWeightKg").value="";$("#batteryCapacityAh").value="";
+    $("#batteryChemistry").value="";$("#batteryVoltageV").value="";
+    await loadData();
+    if(created.category==="light_means_of_transport")$("#provisionModel").value=created.id;
+    else $("#pilotModel").value=created.id;
+    setResult($("#modelResult"),"Моделът е записан в real company tenant: "+created.model_identifier+" · "+created.category,"ok");
   }catch(e){setResult($("#modelResult"),e.message,"bad")}
   finally{$("#createModel").disabled=!canWrite()}
 }
@@ -290,6 +388,60 @@ function showProvision(data){
   }
   host.append(line,links);
 }
+async function ensurePilotQrCarrier(itemId){
+  const response=await api("/api/carriers?battery_item_id="+encodeURIComponent(itemId));
+  const active=(response.data||[]).find(carrier=>carrier.carrier_kind==="qr"&&carrier.status==="active");
+  if(active)return active;
+  return (await api("/api/carriers",{method:"POST",body:{battery_item_id:itemId,carrier_kind:"qr"}})).data;
+}
+function showPilotSuccess(model,item,passport){
+  const host=$("#pilotResult");host.replaceChildren();host.className="result ok";
+  const line=document.createElement("div");
+  line.textContent="REAL QR PILOT READY · "+item.unique_identifier+" · "+model.model_identifier+" · ACTIVE · regulatory_compliance=false";
+  const actions=document.createElement("div");actions.className="actions";
+  const passportLink=document.createElement("a");passportLink.className="btn primary";passportLink.href="/passport?identifier="+encodeURIComponent(item.unique_identifier)+"&carrier=qr";passportLink.target="_blank";passportLink.rel="noopener";passportLink.textContent="Open + record QR scan";
+  const qrLink=document.createElement("a");qrLink.className="btn";qrLink.href="/qr?identifier="+encodeURIComponent(item.unique_identifier);qrLink.target="_blank";qrLink.rel="noopener";qrLink.textContent="Open QR / Print";
+  actions.append(passportLink,qrLink);
+  host.append(line,actions);
+}
+async function publishTechnicalPilot(){
+  if(!canWrite())return;
+  const model=models.find(m=>m.id===$("#pilotModel").value);
+  const identifier=$("#pilotBatteryIdentifier").value.trim();
+  if(!model||model.category==="light_means_of_transport"){
+    return setResult($("#pilotResult"),"Technical QR Pilot е само за non-LMT model. За LMT използвай strict readiness flow.","bad");
+  }
+  if(!identifier||identifier.length>300){
+    return setResult($("#pilotResult"),"Въведи уникален Battery / serial ID.","bad");
+  }
+  $("#publishTechnicalPilot").disabled=true;
+  setResult($("#pilotResult"),"Създаване на real battery item → ACTIVE technical passport → QR carrier…");
+  try{
+    let item=items.find(i=>i.unique_identifier===identifier&&i.model_id===model.id);
+    if(!item){
+      item=(await api("/api/items",{method:"POST",body:{
+        model_id:model.id,
+        unique_identifier:identifier,
+        lifecycle_status:"original",
+        canonical_data:{serial:identifier,sku:model.model_identifier,source:"manufacturer_dashboard_technical_pilot"}
+      }})).data;
+    }
+    const publicPayload=technicalPilotPublicPayload(model,identifier);
+    const published=(await api("/api/passport",{method:"POST",body:{
+      action:"publish_technical_pilot",
+      battery_item_id:item.id,
+      public_payload:publicPayload,
+      private_payload:{}
+    }})).data;
+    await ensurePilotQrCarrier(item.id);
+    $("#pilotBatteryIdentifier").value="";
+    await loadData();
+    $("#pilotModel").value=model.id;
+    showPilotSuccess(model,item,published);
+  }catch(e){setResult($("#pilotResult"),e.message,"bad")}
+  finally{$("#publishTechnicalPilot").disabled=!canWrite()}
+}
+
 async function provisionBattery(){
   if(!canWrite())return;
   const model=models.find(m=>m.id===$("#provisionModel").value);
@@ -408,6 +560,7 @@ $("#refreshDashboard").addEventListener("click",async()=>{
   try{if(await loadTenant())await loadData()}catch(e){showGate(e.message)}
 });
 $("#createModel").addEventListener("click",createModel);
+$("#publishTechnicalPilot").addEventListener("click",publishTechnicalPilot);
 $("#provisionBattery").addEventListener("click",provisionBattery);
 $("#batchProvision").addEventListener("click",provisionBatch);
 init().catch(e=>{document.body.dataset.manufacturerReady="false";showGate(e.message)});
