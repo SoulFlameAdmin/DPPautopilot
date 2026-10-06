@@ -22,7 +22,12 @@ assert repo, 'no repository migrations'
 assert len(repo)==len(set(repo))
 applied=[m['name'] for m in snapshot['applied_migrations']]
 missing=sorted(set(repo)-set(applied))
-assert not missing, f'bound Supabase snapshot missing repo migrations: {missing}'
+assert len(applied)==len(set(applied)), 'duplicate migration names in historical snapshot'
+assert all(isinstance(name,str) and name for name in applied), 'invalid historical migration name'
+# Candidate migrations need not already be deployed while a PR is reviewed.
+# verify_migration_gate_evidence.py still denies release without complete live coverage.
+if missing:
+    print('C04_RELEASE_BLOCKED: historical snapshot does not cover candidate migrations: '+','.join(missing))
 
 gate=policy['gate']
 assert gate['default']=='deny'
@@ -39,4 +44,4 @@ for script in ['scripts/generate_migration_release_manifest.py','scripts/verify_
 remaining=' '.join(policy['remaining'])
 assert 'C03 must be GREEN' in remaining
 assert 'release-time database snapshot' in remaining
-print(f'C04_MIGRATION_GATE_POLICY_PASS: {len(repo)} repository migrations are covered by the read-only bound Supabase snapshot; release manifest/gate are fail-closed')
+print(f'C04_MIGRATION_GATE_POLICY_PASS: {len(repo)} repository migrations inventoried; historical snapshot is not release acceptance; exact release manifest/gate remain fail-closed')
