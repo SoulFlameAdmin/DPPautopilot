@@ -2,3 +2,4 @@
 
 .demo-label{font-size:12px;font-weight:900;line-height:1.5;border:2px solid #9b6a00;background:#fff7df;color:#614300;padding:10px;border-radius:8px}.qr-placeholder{text-align:center;line-height:1.6;font-weight:800;color:#465a73}@media print{.demo-label{display:block!important;color:#000;background:#fff;border:2px solid #000}.notice{display:block!important}.hero h1{font-size:28px}}
 .approval-preview{display:block;width:100%;height:auto}@media print{.approval-preview{max-height:80vh;width:auto;max-width:100%;margin:auto}.doc-card{break-inside:avoid}}
+.low-ink-preview{display:block;width:160px;height:160px;max-width:100%}@media print{.low-ink-preview{width:30mm;height:30mm}}
