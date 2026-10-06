@@ -12,7 +12,12 @@
         1103,
         1426
       ],
-      "qr_decode": "not tested"
+      "qr_decode": [
+        {
+          "text": "https://dpp-autopilot.vercel.app/passport?identifier=BAT-SF-NFC-0001",
+          "format": "QR Code"
+        }
+      ]
     },
     {
       "name": "дигитален_паспорт_на_батерия.png",
@@ -22,7 +27,12 @@
         1426,
         1103
       ],
-      "qr_decode": "not tested"
+      "qr_decode": [
+        {
+          "text": "https://dpp-autopilot.vercel.app/passport?identifier=BAT-SF-NFC-0001",
+          "format": "QR Code"
+        }
+      ]
     },
     {
       "name": "професионална_фактура_soulflame_с_qr_код.png",
@@ -32,7 +42,7 @@
         1103,
         1426
       ],
-      "qr_decode": "not tested"
+      "qr_decode": "NOT DECODED — destination unverified"
     },
     {
       "name": "табло_soulflame_за_батерийни_паспорти.png",
@@ -42,7 +52,7 @@
         1672,
         941
       ],
-      "qr_decode": "not tested"
+      "qr_decode": "NOT DECODED — destination unverified"
     }
   ]
 }
