@@ -204,6 +204,8 @@ jobs:
         run: node --test tests/api/completeness-workflow.test.cjs
       - name: Run QR production carrier unit tests
         run: node --test tests/api/qr.test.cjs
+      - name: Run real company QR acceptance contract
+        run: node --test tests/api/real-company-qr-flow.test.cjs
       - name: Run M20 imports HTTP contract unit tests
         run: node --test tests/api/imports.test.cjs
       - name: Run M21 export HTTP contract unit tests
