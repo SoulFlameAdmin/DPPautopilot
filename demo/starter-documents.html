@@ -22,18 +22,25 @@
   <section class="hero">
     <div>
       <p class="eyebrow">DEMO / APPROVAL PACKAGE · v0.1</p>
-      <h1>DPP STARTER DOCUMENTS</h1>
+      <h1>DPP STARTER DOCUMENTS v0.1</h1>
       <p class="lead">Първият официален визуален пакет за одобрение преди production. Тези материали са демо и не представляват самостоятелно правно доказателство за съответствие.</p>
     </div>
     <div class="approval">
       <strong>STATUS</strong>
       <span>WAITING FOR MITKO APPROVAL</span>
-      <small>След одобрение дизайнът може да се заключи като production template.</small>
+      <small>Одобрението на дизайн не е legal/compliance доказателство и не активира production.</small>
     </div>
   </section>
 
   <section class="notice">
     <strong>Важно:</strong> Реалният DPP е електронният запис зад QR кода. Фактурата е допълнителна commercial функция. Production данните трябва да идват от реалния производител/икономически оператор.
+  </section>
+
+  <section class="notice" aria-label="Package import status">
+    <strong>DEMO / SAMPLE / APPROVAL — частичен импорт.</strong>
+    Четирите оригинални PNG файла от ZIP пакета още не са импортирани или проверени.
+    Показаните по-долу HTML концепции са примерни възстановки, а не оригиналните визуали на Митко.
+    <a href="/demo/starter-documents/v0.1/README_DPP_STARTER_DOCUMENTS_v0.1.txt">Прочети оригиналния README</a>.
   </section>
 
   <section class="doc-grid">
@@ -43,21 +50,22 @@
         <span class="tag">REQUIRED CORE</span>
       </div>
       <div class="sheet carrier-sheet">
+        <p class="demo-label">DEMO / SAMPLE / APPROVAL · HTML concept · Не е legal/compliance доказателство</p>
         <div class="wordmark">SOULFLAME <small>DPP AUTOPILOT</small></div>
         <h3>Battery Digital Product Passport</h3>
-        <p class="subhead">VERIFIED QR CARRIER · DEMO</p>
+        <p class="subhead">QR CARRIER CONCEPT · DEMO / SAMPLE / APPROVAL</p>
         <div class="qr-frame">
-          <img src="/api/qr?identifier=BAT-SF-NFC-0001" alt="QR carrier for BAT-SF-NFC-0001">
+          <p class="qr-placeholder">DEMO QR PREVIEW<br>Оригиналният PNG предстои да бъде импортиран.<br>Няма активен QR в тази концепция.</p>
         </div>
         <dl class="rows">
-          <div><dt>Battery / DPP identifier</dt><dd>BAT-SF-NFC-0001</dd></div>
-          <div><dt>Status</dt><dd><b class="active">ACTIVE</b></dd></div>
+          <div><dt>Battery / DPP identifier</dt><dd>DEMO-BAT-SF-0001</dd></div>
+          <div><dt>Status</dt><dd><b class="active">SAMPLE — NOT LIVE</b></dd></div>
           <div><dt>Encoded public URL</dt><dd>/passport?identifier=BAT-SF-NFC-0001</dd></div>
         </dl>
-        <p class="scan-note">Scan the QR code to open the active public passport.</p>
+        <p class="scan-note">SAMPLE carrier only — no live passport or verified status.</p>
       </div>
       <div class="doc-actions">
-        <a class="btn primary" href="/qr?identifier=BAT-SF-NFC-0001">Отвори live QR</a>
+        <span>DEMO / SAMPLE / APPROVAL — без live QR заявка.</span>
         <span>Цел: печат върху етикет / carrier.</span>
       </div>
     </article>
@@ -68,6 +76,7 @@
         <span class="tag">PUBLIC VIEW</span>
       </div>
       <div class="sheet passport-sheet">
+        <p class="demo-label">DEMO / SAMPLE / APPROVAL · HTML concept · Не е legal/compliance доказателство</p>
         <div class="wordmark">SOULFLAME <small>DPP AUTOPILOT</small></div>
         <div class="sheet-title"><h3>Battery Passport</h3><span>DEMO DATA FOR APPROVAL</span></div>
         <div class="passport-layout">
@@ -82,7 +91,7 @@
               <div><dt>Energy</dt><dd>960 Wh</dd></div>
               <div><dt>Serial</dt><dd>2026-000001</dd></div>
               <div><dt>Manufacturer</dt><dd>Sample Client Ltd.</dd></div>
-              <div><dt>Status</dt><dd><b class="active">ACTIVE</b></dd></div>
+              <div><dt>Status</dt><dd><b class="active">SAMPLE — NOT LIVE</b></dd></div>
             </dl>
             <div class="summary-box">
               <strong>Sustainability & compliance summary</strong>
@@ -90,14 +99,14 @@
             </div>
           </div>
           <div class="passport-qr">
-            <img src="/api/qr?identifier=BAT-SF-NFC-0001" alt="DPP QR">
-            <strong>Scan for DPP</strong>
-            <span>Public passport access</span>
+            <p class="qr-placeholder">DEMO QR PREVIEW<br>Оригиналният PNG предстои да бъде импортиран.<br>Няма активен QR в тази концепция.</p>
+            <strong>QR asset pending</strong>
+            <span>Sample passport concept</span>
           </div>
         </div>
       </div>
       <div class="doc-actions">
-        <a class="btn primary" href="/passport?identifier=BAT-SF-NFC-0001">Отвори public passport</a>
+        <span>DEMO / SAMPLE / APPROVAL — примерни данни, без live паспорт.</span>
         <span>Цел: визуална preview версия на електронния паспорт.</span>
       </div>
     </article>
@@ -108,6 +117,7 @@
         <span class="tag optional">COMMERCIAL ADD-ON</span>
       </div>
       <div class="sheet invoice-sheet">
+        <p class="demo-label">DEMO / SAMPLE / APPROVAL · HTML concept · Не е legal/compliance доказателство</p>
         <div class="invoice-top">
           <div><div class="wordmark">SOULFLAME <small>DPP AUTOPILOT</small></div><h3>Invoice</h3><p>DEMO / SAMPLE COMMERCIAL DOCUMENT</p></div>
           <dl>
@@ -129,7 +139,7 @@
             <p>Battery ID: SF-BAT-000001</p>
             <p>DPP Reference: DPP-SF-000001</p>
           </div>
-          <div class="mini-qr"><img src="/api/qr?identifier=BAT-SF-NFC-0001" alt="DPP QR on invoice"><span>Open DPP passport</span></div>
+          <div class="mini-qr"><p class="qr-placeholder">DEMO QR PREVIEW<br>Оригиналният PNG предстои да бъде импортиран.<br>Няма активен QR в тази концепция.</p><span>Sample QR asset pending</span></div>
         </div>
       </div>
       <div class="doc-actions">
@@ -148,6 +158,7 @@
           <b>Dashboard</b><span>Passports</span><span>Create Passport</span><span>QR Carriers</span><span>Imports</span><span>Clients</span><span>Compliance</span>
         </aside>
         <div class="dash-main">
+          <p class="demo-label">DEMO / SAMPLE / APPROVAL · HTML concept · Не е legal/compliance доказателство</p>
           <h3>Manufacturer dashboard · demo</h3>
           <div class="metrics">
             <div><strong>248</strong><span>Total Passports</span></div>
@@ -157,15 +168,15 @@
           </div>
           <div class="demo-table">
             <div class="thead"><span>Battery ID</span><span>Model</span><span>Status</span></div>
-            <div><span>BAT-SF-NFC-0001</span><span>SF-48V20</span><span class="active">ACTIVE</span></div>
-            <div><span>BAT-SF-NFC-0002</span><span>SF-60V30</span><span class="active">ACTIVE</span></div>
-            <div><span>BAT-SF-NFC-0003</span><span>SF-48V20</span><span>PENDING</span></div>
+            <div><span>BAT-SF-NFC-0001</span><span>SF-48V20</span><span class="active">SAMPLE</span></div>
+            <div><span>DEMO-BAT-SF-0002</span><span>SF-60V30</span><span class="active">SAMPLE</span></div>
+            <div><span>DEMO-BAT-SF-0003</span><span>SF-48V20</span><span>PENDING</span></div>
           </div>
           <p class="synthetic">Illustrative metrics only · production dashboard uses real tenant/API data.</p>
         </div>
       </div>
       <div class="doc-actions">
-        <a class="btn primary" href="/manufacturer">Отвори Manufacturer Dashboard</a>
+        <span>DEMO / SAMPLE / APPROVAL — illustrative dashboard only.</span>
         <a class="btn" href="/demo/import.html?sample=1">CSV Import Demo</a>
       </div>
     </article>
