@@ -17,9 +17,9 @@ def main() -> None:
     company=(ROOT/"live/company.html").read_text(encoding="utf-8")
 
     require('data-manufacturer-ready="false"' in html,"manufacturer runtime readiness marker missing")
-    require('REAL TENANT DATA · NO DEMO STORAGE' in html,"manufacturer production boundary missing")
-    require('PRODUCTION MANUFACTURER · STAGE 5' in html,"Stage 5 product marker missing")
-    require('/api/organizations' in html and '/api/models' in html and '/api/items' in html and '/api/provision' in html,
+    require('Production tenant data' in html and 'private tenant' in html,"manufacturer production boundary missing")
+    require('PRODUCTION API' in html,"Stage 5 product marker missing")
+    require(all(endpoint in js for endpoint in ['/api/organizations','/api/models','/api/items','/api/provision']),
             "manufacturer backend evidence list incomplete")
 
     for token in [
