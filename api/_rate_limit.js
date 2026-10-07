@@ -1,5 +1,7 @@
 'use strict';
 
+const { getSupabaseConfig } = require('./_supabase_config.js');
+
 const crypto=require('node:crypto');
 const policy=require('../data/rate-limit-policy.json');
 
@@ -109,9 +111,10 @@ async function checkSharedRateLimit(req,surface,authorization,options={}){
   const rule=(options.rules||policy.rules)[ruleName];
   if(!rule) return {enforced:true,allowed:false,error:true,status:503,code:'RATE_LIMIT_BACKEND_UNAVAILABLE'};
 
-  const base=env.DPP_SUPABASE_URL||env.SUPABASE_URL;
-  const key=env.DPP_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
-  if(!base||!key){
+  let base,key;
+  try{
+    ({base,key}=getSupabaseConfig(env));
+  }catch{
     return {enforced:true,allowed:false,error:true,status:503,code:'RATE_LIMIT_BACKEND_UNAVAILABLE'};
   }
 
