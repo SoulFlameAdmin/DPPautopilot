@@ -12,6 +12,7 @@ def require(condition: bool, message: str) -> None:
 
 def main() -> None:
     migration=(ROOT/"supabase/migrations/20261004053000_dpp_scooter_single_item_provisioning.sql").read_text(encoding="utf-8")
+    generic=(ROOT/"supabase/migrations/20261007052000_dpp_generic_battery_provisioning_v1.sql").read_text(encoding="utf-8")
     activation=(ROOT/"supabase/migrations/20261004160000_dpp_lmt_passport_activation_gate.sql").read_text(encoding="utf-8")
     api=(ROOT/"api/provision.js").read_text(encoding="utf-8")
     api_test=(ROOT/"tests/api/provision.test.cjs").read_text(encoding="utf-8")
@@ -38,7 +39,7 @@ def main() -> None:
         "startRequestObservability(req,res,'provision')",
         "enforceRateLimit(req,res,'provision')",
         "enforceSharedRateLimit(req,res,'provision'",
-        "dpp_api_scooter_battery_provision",
+        "dpp_api_battery_provision",
         "findRestrictedPublicPaths",
         "findAuthorityOnlyPaths",
         "passport_url",
@@ -49,11 +50,22 @@ def main() -> None:
         require(token in api, f"Stage 4 API missing: {token}")
 
     for token in [
+        "create or replace function public.dpp_api_battery_provision",
+        "public model category must match the selected battery model",
+        "public model id must match the selected battery model",
+        "public manufacturer must match the selected battery model",
+        "'activation_required',true",
+    ]:
+        require(token.lower() in generic.lower(),f"Manufacturer generic provision migration missing: {token}")
+
+    for token in [
         "atomically provisions a draft battery passport",
         "identical retry returns the same provisioned identity",
         "public payload must carry the exact individual battery identifier",
         "restricted fields cannot enter public payload",
         "database provisioning conflicts map to stable public errors",
+        "supported non-LMT battery categories are accepted by the manufacturer API boundary",
+        "unknown public battery category is rejected locally",
     ]:
         require(token in api_test, f"Stage 4 API test missing: {token}")
 
@@ -77,7 +89,7 @@ def main() -> None:
 
     for token in ["status<>'draft'","'draft',p_public_payload","'activation_required',true"]:
         require(token.lower() in activation.lower(),f"Step 18 activation override missing: {token}")
-    print("STAGE4_PROVISIONING_CONTRACT_PASS: authenticated atomic LMT item -> DRAFT passport provisioning is idempotent and cannot publish before readiness activation")
+    print("STAGE4_PROVISIONING_CONTRACT_PASS: authenticated atomic battery item -> DRAFT passport provisioning supports manufacturer categories while legacy LMT compatibility remains intact")
 
 if __name__=="__main__":
     main()

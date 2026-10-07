@@ -1,7 +1,7 @@
 {
   "version": 2,
   "task": "R02",
-  "status": "green",
+  "status": "partial",
   "deployment_config": "vercel.json",
   "scope": "all routes including static app, data files and API responses",
   "global_headers": {
@@ -45,7 +45,8 @@
         ],
         "connect-src": [
           "'self'",
-          "https://frhletkiuupgksmgxoxc.supabase.co"
+          "https://frhletkiuupgksmgxoxc.supabase.co",
+          "https://soulflame-twins.vercel.app"
         ],
         "worker-src": [
           "'self'",
@@ -68,7 +69,7 @@
         "style_attributes": false,
         "dynamic_style_writes": false
       },
-      "known_gap": null
+      "known_gap": "Runtime CSP evidence must be re-verified after adding the explicit SoulFlame dashboard-link API origin."
     },
     "Strict-Transport-Security": "max-age=31536000",
     "X-Content-Type-Options": "nosniff",
@@ -82,9 +83,9 @@
     "value": "no-store, max-age=0"
   },
   "tls": {
-    "runtime_verified": true,
-    "preview_runtime_verified": true,
-    "claim": "R02 production acceptance is verified on canonical main: exact-head CI and READY preview passed, production deployment is READY, and live HTTPS responses on the canonical hostname match the strict committed header policy without unsafe-inline/unsafe-eval.",
+    "runtime_verified": false,
+    "preview_runtime_verified": false,
+    "claim": "Static R02 policy is synchronized with the current application network contract; preview and production runtime verification must be refreshed before R02 returns to green.",
     "required_before_green": [
       "Exact-head CI validates the de-inlined browser surfaces and security-header policy",
       "Exact hardened commit receives a READY Vercel deployment",
