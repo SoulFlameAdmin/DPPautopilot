@@ -13,6 +13,8 @@ const provision=require('../../api/provision.js');
 const batchProvision=require('../../api/batch-provision.js');
 const imports=require('../../api/imports.js');
 const carriers=require('../../api/carriers.js');
+const application=require('../../api/application.js');
+const registrationLink=require('../../api/registration-link.js');
 const request=require('../../api/_request.js');
 
 function makeRes(){
@@ -58,7 +60,7 @@ test('shared parser rejects malformed JSON and unserializable objects',()=>{
   );
 });
 
-for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['provision',provision],['batch-provision',batchProvision],['imports',imports],['carriers',carriers]]){
+for(const [name,handler] of [['tenant',tenant],['organizations',organizations],['members',members],['models',models],['items',items],['passport',passport],['provision',provision],['batch-provision',batchProvision],['imports',imports],['carriers',carriers],['application',application],['registration-link',registrationLink]]){
   test(`${name} rejects >1 MiB parsed object before upstream DB access`,async()=>{
     const original=global.fetch;
     let called=false;
@@ -337,6 +339,54 @@ test('provision rejects malformed JSON and invalid provisioning fields locally b
       public_payload:{item:{unique_identifier:'BAT-R03-WRONG'}}
     }),res);
     assertError(res,422,'VALIDATION_ERROR');
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
+});
+
+
+test('application rejects malformed JSON and invalid intake fields locally before business RPC',async()=>{
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('upstream must not be called');};
+  try{
+    let res=makeRes();
+    await application(req('POST','{"bad":'),res);
+    assertError(res,400,'INVALID_JSON');
+
+    res=makeRes();
+    await application(req('POST',{
+      company_name:'',
+      contact_name:'',
+      country:'',
+      website:null,
+      product_categories:'',
+      notes:'',
+      systems:[],
+      employees_count:1,
+      dpp_users_count:1,
+      production_sites_count:0,
+      sku_count:0,
+      annual_units:0
+    }),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
+});
+
+test('registration link rejects malformed JSON and invalid email locally before registration RPC',async()=>{
+  const original=global.fetch;
+  let called=false;
+  global.fetch=async()=>{called=true;throw new Error('upstream must not be called');};
+  try{
+    let res=makeRes();
+    await registrationLink(req('POST','{"bad":',{},null),res);
+    assertError(res,400,'INVALID_JSON');
+
+    res=makeRes();
+    await registrationLink(req('POST',{email:'not-an-email'}, {}, null),res);
+    assertError(res,422,'VALIDATION_ERROR');
+
     assert.equal(called,false);
   }finally{global.fetch=original;}
 });
