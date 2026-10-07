@@ -7,6 +7,11 @@ const { startRequestObservability } = require('./_observability.js');
 const { findRestrictedPublicPaths, findAuthorityOnlyPaths } = require('./_access_policy.js');
 const PUBLIC = require('./_public_config.js');
 
+const CATEGORIES=new Set([
+  'portable','light_means_of_transport','starting_lighting_ignition',
+  'industrial','electric_vehicle','other'
+]);
+
 const BATCH_KEY_RE=/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const MAX_UNITS=250;
 
@@ -47,7 +52,7 @@ function validateUnit(unit){
   if(!plainObject(item)||!plainObject(pub)||!plainObject(priv))return null;
   if(!plainObject(pub.item)||pub.item.unique_identifier!==identifier)return null;
   const category=pub.model&&pub.model.identification&&pub.model.identification.category;
-  if(category!=null&&category!=='light_means_of_transport')return null;
+  if(category!=null&&!CATEGORIES.has(category))return null;
   if(findRestrictedPublicPaths(pub).length)return null;
   if(findAuthorityOnlyPaths(priv).length)return {forbidden:true};
   return {unique_identifier:identifier,item_canonical_data:item,public_payload:pub,private_payload:priv};
@@ -145,7 +150,7 @@ async function rpc(payload,authorization,env=process.env,fetchImpl=fetch,timeout
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),timeoutMs);
   let response,data=null;
   try{
-    response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/dpp_api_scooter_battery_batch_provision`,{
+    response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/dpp_api_battery_batch_provision`,{
       method:'POST',
       headers:{apikey:key,Authorization:authorization,'Content-Type':'application/json',Accept:'application/json'},
       body:JSON.stringify(payload),signal:controller.signal
