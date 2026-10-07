@@ -114,7 +114,7 @@ begin
   denied := false;
   begin
     perform public.dpp_api_manufacturer_onboarding_get();
-  exception when sqlstate 'DP103' then denied := true;
+  exception when sqlstate 'DP104' then denied := true;
   end;
   if not denied then raise exception 'Revoked viewer retained onboarding access'; end if;
 
