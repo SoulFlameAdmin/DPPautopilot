@@ -1,44 +1,159 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    {"source":"/starter-documents","destination":"/demo/starter-documents.html"},
-    {"source":"/starter-documents/","destination":"/demo/starter-documents.html"},
-    {"source":"/world","destination":"/world/index.html"},
-    {"source":"/world/","destination":"/world/index.html"},
-    {"source":"/passport","destination":"/live/passport"},
-    {"source":"/qr","destination":"/live/qr"},
-    {"source":"/dashboard","destination":"/live/dashboard"},
-    {"source":"/dashboard/","destination":"/live/dashboard"},
-    {"source":"/apply","destination":"/live/apply"},
-    {"source":"/apply/","destination":"/live/apply"},
-    {"source":"/company","destination":"/live/company"},
-    {"source":"/company/","destination":"/live/company"},
-    {"source":"/manufacturer-early","destination":"/live/manufacturer-early"},
-    {"source":"/manufacturer-early/","destination":"/live/manufacturer-early"},
-    {"source":"/manufacturer","destination":"/live/manufacturer"},
-    {"source":"/manufacturer/","destination":"/live/manufacturer"},
-    {"source":"/battery-master/","destination":"/live/battery-master"},
-    {"source":"/battery-master","destination":"/live/battery-master"},
-    {"source":"/manufacturer/completeness/","destination":"/live/completeness"},
-    {"source":"/manufacturer/completeness","destination":"/live/completeness"},
-    {"source":"/((?!data/|api/).*)","destination":"/index.html"}
+    {
+      "source": "/starter-documents",
+      "destination": "/demo/starter-documents.html"
+    },
+    {
+      "source": "/starter-documents/",
+      "destination": "/demo/starter-documents.html"
+    },
+    {
+      "source": "/world",
+      "destination": "/world/index.html"
+    },
+    {
+      "source": "/world/",
+      "destination": "/world/index.html"
+    },
+    {
+      "source": "/passport",
+      "destination": "/live/passport"
+    },
+    {
+      "source": "/qr",
+      "destination": "/live/qr"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/live/dashboard"
+    },
+    {
+      "source": "/dashboard/",
+      "destination": "/live/dashboard"
+    },
+    {
+      "source": "/apply",
+      "destination": "/live/apply"
+    },
+    {
+      "source": "/apply/",
+      "destination": "/live/apply"
+    },
+    {
+      "source": "/company",
+      "destination": "/live/company"
+    },
+    {
+      "source": "/company/",
+      "destination": "/live/company"
+    },
+    {
+      "source": "/manufacturer-early",
+      "destination": "/live/manufacturer-early"
+    },
+    {
+      "source": "/manufacturer-early/",
+      "destination": "/live/manufacturer-early"
+    },
+    {
+      "source": "/manufacturer",
+      "destination": "/live/manufacturer"
+    },
+    {
+      "source": "/manufacturer/",
+      "destination": "/live/manufacturer"
+    },
+    {
+      "source": "/battery-master/",
+      "destination": "/live/battery-master"
+    },
+    {
+      "source": "/battery-master",
+      "destination": "/live/battery-master"
+    },
+    {
+      "source": "/manufacturer/completeness/",
+      "destination": "/live/completeness"
+    },
+    {
+      "source": "/manufacturer/completeness",
+      "destination": "/live/completeness"
+    },
+    {
+      "source": "/register",
+      "destination": "/live/register"
+    },
+    {
+      "source": "/register/",
+      "destination": "/live/register"
+    },
+    {
+      "source": "/login",
+      "destination": "/live/login"
+    },
+    {
+      "source": "/login/",
+      "destination": "/live/login"
+    },
+    {
+      "source": "/forgot-password",
+      "destination": "/live/forgot-password"
+    },
+    {
+      "source": "/forgot-password/",
+      "destination": "/live/forgot-password"
+    },
+    {
+      "source": "/((?!data/|api/).*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {"key":"Content-Security-Policy","value":"default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://frhletkiuupgksmgxoxc.supabase.co https://soulflame-twins.vercel.app; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"},
-        {"key":"Strict-Transport-Security","value":"max-age=31536000"},
-        {"key":"X-Content-Type-Options","value":"nosniff"},
-        {"key":"X-Frame-Options","value":"DENY"},
-        {"key":"Referrer-Policy","value":"no-referrer"},
-        {"key":"Permissions-Policy","value":"camera=(), microphone=(), geolocation=(), payment=(), usb=()"}
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://frhletkiuupgksmgxoxc.supabase.co https://soulflame-twins.vercel.app; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        }
       ]
     },
     {
-      "source":"/data/(.*)",
-      "headers":[{"key":"Cache-Control","value":"no-store, max-age=0"}]
+      "source": "/data/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
     }
   ],
-  "git":{"deploymentEnabled":{"fix/r02-strict-csp-20260922":false,"main":true}}
+  "git": {
+    "deploymentEnabled": {
+      "fix/r02-strict-csp-20260922": false,
+      "main": true
+    }
+  }
 }
