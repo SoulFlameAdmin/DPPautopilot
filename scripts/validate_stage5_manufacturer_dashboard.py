@@ -45,7 +45,8 @@ def main() -> None:
     rewrites={(row.get("source"),row.get("destination")) for row in vercel.get("rewrites",[])}
     require(("/manufacturer","/live/manufacturer") in rewrites,"clean /manufacturer route missing")
     require(("/manufacturer/","/live/manufacturer") in rewrites,"clean /manufacturer/ route missing")
-    require('href="/manufacturer">Отвори Manufacturer Dashboard' in company,"company flow does not enter manufacturer dashboard")
+    require('href="/dashboard">Настрой DPP системата' in company,
+            "company flow must enter manufacturer onboarding before operations")
 
     require(".stats" in css and ".list" in css and "@media" in css,"manufacturer responsive styling incomplete")
 
