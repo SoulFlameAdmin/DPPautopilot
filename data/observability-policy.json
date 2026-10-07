@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "task": "R09",
   "status": "partial",
   "event_name": "dpp_http_request",
@@ -50,7 +50,10 @@
     "provision",
     "batch-provision",
     "imports",
-    "export"
+    "export",
+    "application",
+    "registration-link",
+    "manufacturer-onboarding"
   ],
   "runtime_gap": "Production/runtime log aggregation and deployed request-correlation evidence remain pending full M17-M19 acceptance plus production logging-backend and retention evidence.",
   "failure_mode": {

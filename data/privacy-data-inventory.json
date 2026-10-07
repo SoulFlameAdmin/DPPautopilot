@@ -1,11 +1,12 @@
 {
-  "version": 8,
+  "version": 9,
   "task": "R07",
   "status": "partial",
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
   "data_subjects": [
     "DPP organization users represented by Supabase Auth user IDs and organization memberships",
-    "Business organizations operating DPP records"
+    "Business organizations operating DPP records",
+    "Prospective clients submitting registration email and free-text business intake answers"
   ],
   "processors_and_recipients": [
     {
@@ -358,6 +359,88 @@
         "replacement target must resolve to an active passport in the same organization"
       ],
       "minimization_note": "reason_note is bounded to 500 characters and should contain only operational lifecycle justification, not unnecessary personal data."
+    },
+    {
+      "id": "client_applications",
+      "tables": [
+        "dpp_client_applications"
+      ],
+      "classification": "personal_business_data",
+      "fields": "user_id, email, contact/company/country/website, workforce and production counts, systems, product categories, free-text notes, status, quotes, optional organization_id, timestamps",
+      "purpose": "Review client business requirements and prepare an offer",
+      "location": "Supabase Postgres public DPP namespace; repository schema, deployed state not verified",
+      "processor": "Supabase",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "No scheduled purge in the reviewed migrations. Auth-user deletion cascades; organization deletion sets organization_id null. This does not establish a complete erasure policy."
+      },
+      "controls": [
+        "RLS enabled; direct anon/authenticated table grants revoked",
+        "Authenticated submit/list RPCs scope records to request user",
+        "Free-text inputs can contain personal data; avoid unnecessary sensitive details"
+      ]
+    },
+    {
+      "id": "registration_requests",
+      "tables": [
+        "dpp_registration_requests"
+      ],
+      "classification": "personal_business_data",
+      "fields": "email, status, user_id, application_id, requested/verified/completed/updated timestamps",
+      "purpose": "Track email registration and verification",
+      "location": "Supabase Postgres public DPP namespace; repository schema, deployed state not verified",
+      "processor": "Supabase",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "No expiry column or scheduled purge in reviewed migrations; referenced user/application deletion sets linkage null and leaves email. Retention/deletion work remains required."
+      },
+      "controls": [
+        "RLS enabled; direct anon/authenticated table grants revoked",
+        "Anonymous create RPC; authenticated verification compares request email with current Auth user email",
+        "Authenticated list scopes to request user"
+      ]
+    },
+    {
+      "id": "early_access_link_sessions",
+      "tables": [
+        "dpp_early_access_sessions"
+      ],
+      "classification": "personal_business_data",
+      "fields": "email, token_hash, status, country, company_name, manufacturer, free-text request_text, created/opened/submitted/expires/updated timestamps",
+      "purpose": "Early-access email-link session and business intake",
+      "location": "Supabase Postgres public DPP namespace; repository schema, deployed state not verified",
+      "processor": "Supabase",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "expires_at defaults to 30 days; expiry is not deletion. This repository migration supplies no purge job, and expiry enforcement in the external SoulFlame service has not been verified."
+      },
+      "controls": [
+        "RLS enabled; direct public/anon/authenticated table grants revoked",
+        "Unique token hash stored instead of raw dashboard-link token",
+        "External dashboard-link service runtime access, expiry and retention remain unverified"
+      ]
+    },
+    {
+      "id": "manufacturer_onboarding",
+      "tables": [
+        "dpp_manufacturer_onboarding_answers",
+        "dpp_manufacturer_configurations"
+      ],
+      "classification": "personal_business_data",
+      "fields": "organization_id, question_key, user_id, raw_answer, structured_value, company identity and defaults, battery/serial/batch/volume/import/QR preferences, configured_by, revision and timestamps",
+      "purpose": "Persist eight onboarding answers and derive manufacturer configuration",
+      "location": "Supabase Postgres public DPP namespace; repository schema, deployed state not verified",
+      "processor": "Supabase",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "No time-based purge. Organization deletion cascades; user/configured_by references restrict deletion. Free-text and derived JSON need inclusion in an approved export/erasure process."
+      },
+      "controls": [
+        "RLS enabled; direct public/anon/authenticated table grants revoked",
+        "Read RPC requires active organization membership; writes/configure require owner/admin/editor",
+        "Answer key and length/JSON shape constraints in schema",
+        "Deployment and live tenant-isolation acceptance remain unverified"
+      ]
     }
   ],
   "out_of_scope_shared_project_data": "All non-dpp_* application tables in the shared Supabase project are owned by other applications and are not part of DPP Autopilot privacy inventory.",
@@ -366,7 +449,8 @@
     "Final regulatory/operational retention periods remain unaccepted for passports/history, registry submissions, evidence and audit snapshots; audit credential-key redaction is only a technical minimization precursor.",
     "M13 real authenticated deployed upload→download→delete lifecycle acceptance remains incomplete despite deployed private Storage/Edge integrity controls.",
     "External registry recipient terms and live payload scope are not accepted.",
-    "R08 destructive organization/user deletion remains intentionally disabled pending accepted export/storage/audit/Auth lifecycle rules."
+    "R08 destructive organization/user deletion remains intentionally disabled pending accepted export/storage/audit/Auth lifecycle rules.",
+    "Intake/onboarding retention, export and erasure coverage plus external email-link service expiry/access evidence remain unaccepted; inventory coverage alone does not close these gaps."
   ],
   "deletion_export_precursor": {
     "retention_status_rpc": "dpp_api_retention_status()",

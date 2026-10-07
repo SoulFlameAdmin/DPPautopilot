@@ -17,13 +17,19 @@ The shared Supabase helper rejects malformed keys before issuing a request. Exis
 
 The manufacturer onboarding RPC test exercises both canonical DPP environment names and legacy aliases. CI now runs this previously unlisted test suite. The existing QR label source assertion accepts the label after the ACTIVE markup rather than requiring a quote immediately before it.
 
+## Intake security inventory follow-up
+
+R03, R05 and R09 now inventory application, registration-link and manufacturer-onboarding. Seventeen added local tests cover body limits, malformed/invalid input, rate-limit denial and log redaction; CI runs them before C04. Registration-link GET/POST/PATCH explicitly use the 40/minute write budget; its anonymous POST does not imply authentication or proven distributed email-abuse protection.
+
+R07 now inventories all five intake/onboarding tables, including actual source-level access and deletion behavior. The early-access session default expiry is 30 days, not automatic deletion. Retention, erasure/export, external-service access enforcement and deployed database controls remain unverified; policy maturity remains partial. No API runtime behavior or SQL changed in this follow-up.
+
 ## Verification
 
-- `node --test tests/api/*.test.cjs`: **312 passed, 0 failed** (mocked/local API tests; no live database evidence).
+- `node --test tests/api/*.test.cjs`: **329 passed, 0 failed** (mocked/local API tests; no live database evidence).
 - R01 environment/secret validator: PASS.
 - R02 CSP/header validator: PASS.
 - Stage 5 manufacturer validator and Step 20 public passport validator: PASS.
-- Of the 60 single-command `python scripts/validate_*` checks extracted from CI: 55 pass, 5 fail below.
+- Of the 60 single-command `python scripts/validate_*` checks extracted from CI: 59 pass; only C04 fails below.
 - No migrations applied; no production deployment or physical scan performed.
 
 ## Remaining release gates
@@ -31,10 +37,6 @@ The manufacturer onboarding RPC test exercises both canonical DPP environment na
 | Gate | Current evidence / required action |
 | --- | --- |
 | C04 migration snapshot | Repository migrations missing from the recorded bound snapshot: client application onboarding, early access dashboard details, Gmail dashboard link sessions, specific registration link flow, manufacturer onboarding engine v1. Obtain a current authorized database snapshot and verify actual application before changing evidence. The Supabase `list_migrations` connector returned permission denied during this checkpoint. |
-| R03 input validation inventory | `application.js`, `registration-link.js`, `manufacturer-onboarding.js` are missing from the body-parser coverage inventory. Add negative input coverage and update the matrix/validator together. |
-| R05 rate-limit inventory | The same three API surfaces are missing from the policy inventory. Verify their actual method/auth behavior and abuse tests before updating the policy. |
-| R07 privacy inventory | Missing tables: `dpp_client_applications`, `dpp_early_access_sessions`, `dpp_registration_requests`, `dpp_manufacturer_onboarding_answers`, `dpp_manufacturer_configurations`. Document actual fields, access and retention; do not invent a retention implementation. |
-| R09 observability inventory | The same three new API surfaces need policy inventory and redaction test coverage. |
 
 ## UI/Engine boundary still open
 

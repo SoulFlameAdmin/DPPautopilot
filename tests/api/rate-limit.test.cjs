@@ -37,7 +37,7 @@ function json(res){return JSON.parse(res.body);}
 test.beforeEach(()=>limiter._test.resetForTests());
 
 test('versioned policy explicitly covers organization discovery GET',()=>{
-  assert.equal(limiter.policy.version,11);
+  assert.equal(limiter.policy.version,12);
   assert.equal(limiter.policy.surfaces.organizations.GET,'authenticated_read');
   assert.equal(limiter.policy.surfaces.organizations.POST,'authenticated_write');
 });

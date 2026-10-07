@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "task": "R03",
   "status": "partial",
   "max_body_bytes": 1048576,
@@ -133,12 +133,58 @@
       "id": "invalid_carrier_fields",
       "surface": "/api/carriers",
       "expected": "400/422 validation error before upstream"
+    },
+    {
+      "id": "oversize_parsed_application_body",
+      "surface": "/api/application",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "malformed_application_body",
+      "surface": "/api/application",
+      "expected": "400 INVALID_JSON before upstream"
+    },
+    {
+      "id": "invalid_application_body",
+      "surface": "/api/application",
+      "expected": "422 VALIDATION_ERROR before upstream"
+    },
+    {
+      "id": "oversize_parsed_registration_link_body",
+      "surface": "/api/registration-link",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "malformed_registration_link_body",
+      "surface": "/api/registration-link",
+      "expected": "400 INVALID_JSON before upstream"
+    },
+    {
+      "id": "invalid_registration_link_body",
+      "surface": "/api/registration-link",
+      "expected": "422 VALIDATION_ERROR before upstream"
+    },
+    {
+      "id": "oversize_parsed_manufacturer_onboarding_body",
+      "surface": "/api/manufacturer-onboarding",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "malformed_manufacturer_onboarding_body",
+      "surface": "/api/manufacturer-onboarding",
+      "expected": "400 INVALID_JSON before upstream"
+    },
+    {
+      "id": "invalid_manufacturer_onboarding_body",
+      "surface": "/api/manufacturer-onboarding",
+      "expected": "422 VALIDATION_ERROR before upstream"
     }
   ],
   "evidence_files": [
     "tests/api/input-validation.test.cjs",
     "tests/db/test_import_negative_validation_subset.sql",
-    "data/evidence-file-policy.json"
+    "data/evidence-file-policy.json",
+    "tests/api/intake-security.test.cjs"
   ],
   "remaining": [
     "M13 real authenticated Storage API byte upload/download/delete validation remains required; SQL/RLS metadata tests do not substitute for byte-path acceptance."
