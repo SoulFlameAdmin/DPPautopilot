@@ -13,14 +13,18 @@ from eu_conformance import (
     ConformanceError,
     access_allowed,
     assert_not_demo_uid,
+    build_registry_upload_request,
     evaluate_final_gate,
     load_json,
+    record_registry_registration,
     resolve_exact_passport,
     run_repository_gate,
     validate_71_matrix,
+    validate_evidence_pack,
     validate_harmonised_standards_inventory,
     validate_lifecycle_transition,
     validate_model_item_separation,
+    validate_registry_adapter_contract,
     validate_uid_bindings,
     transition_registry_state,
 )
@@ -31,6 +35,8 @@ class EuDppConformanceTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.matrix = load_json("data/lmt-battery-71-eu-conformance-v1.json")
         cls.standards = load_json("data/eu-dpp-harmonised-standards-v1.json")
+        cls.evidence_pack = load_json("data/eu-dpp-evidence-pack-template-v1.json")
+        cls.registry_adapter = load_json("data/eu-dpp-registry-adapter-v1.json")
 
     def test_71_point_matrix_is_complete_and_traceable(self) -> None:
         result = validate_71_matrix(self.matrix)
@@ -181,6 +187,95 @@ class EuDppConformanceTests(unittest.TestCase):
             "provenance_complete": True,
         }
         self.assertEqual(evaluate_final_gate(eu), "EU_CONFORMANCE_EVIDENCE_COMPLETE")
+
+
+    def test_evidence_pack_has_71_traceable_rows_and_starts_blocked(self) -> None:
+        result = validate_evidence_pack(self.evidence_pack, self.matrix)
+        self.assertEqual(result["total"], 71)
+        self.assertEqual(result["mandatoryMissing"], 50)
+        self.assertEqual(result["conditionalUnassessed"], 8)
+        self.assertEqual(result["readiness"], "EVIDENCE_COLLECTION_REQUIRED")
+
+    def test_verified_point_requires_evidence_provenance_and_verification(self) -> None:
+        broken = copy.deepcopy(self.evidence_pack)
+        row = broken["pointEvidence"][0]
+        row["evidenceStatus"] = "VERIFIED"
+        row["evidenceIds"] = ["doc-1"]
+        row["provenanceRefs"] = []
+        row["verificationRef"] = "review-1"
+        with self.assertRaises(ConformanceError):
+            validate_evidence_pack(broken, self.matrix)
+
+    def test_conditional_not_applicable_requires_basis(self) -> None:
+        broken = copy.deepcopy(self.evidence_pack)
+        row = next(
+            row for row in broken["pointEvidence"]
+            if row["applicabilityAt2027Launch"] == "if_applicable"
+        )
+        row["evidenceStatus"] = "NOT_APPLICABLE_WITH_BASIS"
+        row["notes"] = ""
+        with self.assertRaises(ConformanceError):
+            validate_evidence_pack(broken, self.matrix)
+
+    def test_fully_verified_pack_only_becomes_ready_for_final_gate(self) -> None:
+        pack = copy.deepcopy(self.evidence_pack)
+        for row in pack["pointEvidence"]:
+            applicability = row["applicabilityAt2027Launch"]
+            if applicability == "mandatory":
+                row["evidenceStatus"] = "VERIFIED"
+                row["evidenceIds"] = [f"doc-{row['number']}"]
+                row["provenanceRefs"] = [f"prov-{row['number']}"]
+                row["verificationRef"] = f"verify-{row['number']}"
+            elif applicability == "if_applicable":
+                row["evidenceStatus"] = "NOT_APPLICABLE_WITH_BASIS"
+                row["notes"] = "Manufacturer applicability assessment recorded."
+        for section in pack["externalSections"]:
+            section["status"] = "VERIFIED"
+            section["evidenceRefs"] = [f"evidence-{section['id']}"]
+
+        result = validate_evidence_pack(pack, self.matrix)
+        self.assertEqual(result["mandatoryMissing"], 0)
+        self.assertEqual(result["conditionalUnassessed"], 0)
+        self.assertEqual(result["externalUnverified"], 0)
+        self.assertEqual(result["readiness"], "EVIDENCE_PACK_READY_FOR_FINAL_GATE")
+
+    def test_registry_adapter_models_operational_registry_without_claiming_compliance(self) -> None:
+        result = validate_registry_adapter_contract(self.registry_adapter)
+        self.assertEqual(result["status"], "REGISTRY_ADAPTER_CONTRACT_VALID")
+        self.assertEqual(result["operationalSince"], "2026-07-20")
+
+        request = build_registry_upload_request(
+            "01:1234567890123:BAT-0001",
+            {"battery_category": "light_means_of_transport"},
+        )
+        self.assertFalse(request["networkSubmissionAllowed"])
+
+        receipt = record_registry_registration(
+            request,
+            {
+                "unique_registration_identifier": "REG-TEST-0001",
+                "receipt_reference": "registry-receipt-0001",
+            },
+        )
+        self.assertEqual(receipt["state"], "registered")
+        self.assertTrue(receipt["registryEvidenceComplete"])
+        self.assertFalse(receipt["complianceProven"])
+
+    def test_registry_adapter_rejects_demo_uid_secrets_and_incomplete_receipt(self) -> None:
+        with self.assertRaises(ConformanceError):
+            build_registry_upload_request("urn:dpp:demo:battery:LMT-A:000001")
+        with self.assertRaises(ConformanceError):
+            build_registry_upload_request(
+                "01:1234567890123:BAT-0001",
+                {"access_token": "secret"},
+            )
+
+        request = build_registry_upload_request("01:1234567890123:BAT-0001")
+        with self.assertRaises(ConformanceError):
+            record_registry_registration(
+                request,
+                {"unique_registration_identifier": "REG-TEST-0001"},
+            )
 
     def test_repository_gate_is_non_certification_gate(self) -> None:
         result = run_repository_gate()
