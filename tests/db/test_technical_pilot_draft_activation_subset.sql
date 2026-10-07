@@ -110,7 +110,7 @@ begin
   begin
     perform public.dpp_api_technical_pilot_publish(
       (provisioned->>'item_id')::uuid,
-      payload || '{"extra":"different"}'::jsonb,
+      jsonb_set(payload,'{model,physical}','{"weight_kg":12}'::jsonb,true),
       '{}'::jsonb
     );
   exception when sqlstate 'DP605' then denied:=true;
