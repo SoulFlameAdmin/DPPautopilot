@@ -78,6 +78,8 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch){
 async function requestMagicLink(email,requestId,env=process.env,fetchImpl=fetch){
   const {base,key}=authConfig(env);
   const redirect=new URL('https://soulflame-twins.vercel.app/');
+  redirect.searchParams.set('dpp','1');
+  redirect.searchParams.set('request',requestId);
   const endpoint=base+'/auth/v1/otp?redirect_to='+encodeURIComponent(redirect.toString());
   const {response,data}=await jsonFetch(endpoint,{
     method:'POST',
