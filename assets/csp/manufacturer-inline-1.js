@@ -90,6 +90,7 @@ function setMode(){
   $("#createModel").disabled=!write;
   $("#provisionBattery").disabled=!write;
   $("#batchProvision").disabled=!write;
+  const activateBatchPilot=$("#activateBatchPilot");if(activateBatchPilot)activateBatchPilot.disabled=!write;
   $("#modelIdentifier").disabled=!write;
   $("#manufacturerName").disabled=!write;
   $("#modelCategory").disabled=!write;
@@ -534,6 +535,90 @@ async function provisionBattery(){
   }catch(e){setResult($("#provisionResult"),e.message,"bad")}
   finally{$("#provisionBattery").disabled=!canWrite()}
 }
+function currentBatchIdentifiers(){
+  const prefix=$("#batchPrefix").value.trim();
+  const quantity=Number($("#batchQuantity").value);
+  const serialStart=Number($("#batchSerialStart").value);
+  const serialWidth=Number($("#batchSerialWidth").value);
+  if(!prefix||!Number.isInteger(quantity)||quantity<1||quantity>250||
+     !Number.isSafeInteger(serialStart)||serialStart<0||
+     !Number.isInteger(serialWidth)||serialWidth<1||serialWidth>12){
+    return [];
+  }
+  const out=[];
+  for(let i=0;i<quantity;i++){
+    out.push(prefix+String(serialStart+i).padStart(serialWidth,"0"));
+  }
+  return out;
+}
+async function activateCurrentBatchTechnicalPilot(){
+  if(!canWrite())return;
+  const button=$("#activateBatchPilot");
+  const model=models.find(m=>m.id===$("#batchModel").value);
+  if(!model)return setResult($("#batchResult"),"Избери SKU / модел за batch activation.","bad");
+  if(model.category==="light_means_of_transport"){
+    return setResult($("#batchResult"),"LMT batch не може да се активира като technical pilot. Използвай strict readiness activation.","bad");
+  }
+  const identifiers=currentBatchIdentifiers();
+  if(!identifiers.length)return setResult($("#batchResult"),"Въведи валиден serial range за batch activation.","bad");
+
+  button.disabled=true;
+  setResult($("#batchResult"),"Проверка на "+identifiers.length+" DRAFT паспорта за този batch…");
+  try{
+    const list=(await api("/api/passport?list=1&limit=500")).data||[];
+    const wanted=new Set(identifiers);
+    const batchPassports=list.filter(p=>wanted.has(p.unique_identifier));
+    const foundIds=new Set(batchPassports.map(p=>p.unique_identifier));
+    const missing=identifiers.filter(id=>!foundIds.has(id));
+    if(missing.length){
+      throw new Error("Липсват DPP записи за "+missing.length+" serial units: "+missing.slice(0,3).join(", ")+(missing.length>3?"…":""));
+    }
+
+    let activated=0,alreadyActive=0,qrReady=0;
+    for(let index=0;index<batchPassports.length;index++){
+      const p=batchPassports[index];
+      setResult($("#batchResult"),"Technical pilot activation "+(index+1)+"/"+batchPassports.length+" · "+p.unique_identifier+"…");
+      const item=items.find(i=>i.id===p.battery_item_id);
+      if(!item||item.model_id!==model.id){
+        throw new Error("Batch item/model mismatch for "+p.unique_identifier);
+      }
+      if(p.status==="active"){
+        alreadyActive++;
+        await ensurePilotQrCarrier(p.battery_item_id);
+        qrReady++;
+        continue;
+      }
+      if(p.status!=="draft"){
+        throw new Error(p.unique_identifier+" is "+p.status+"; only DRAFT/ACTIVE pilot passports are allowed.");
+      }
+      const full=(await api("/api/passport?id="+encodeURIComponent(p.passport_id))).data;
+      const published=(await api("/api/passport",{method:"POST",body:{
+        action:"publish_technical_pilot",
+        battery_item_id:p.battery_item_id,
+        public_payload:full.public_payload||{},
+        private_payload:full.private_payload||{}
+      }})).data;
+      if(published.passport_id!==p.passport_id||published.status!=="active"||published.regulatory_compliance!==false){
+        throw new Error("Unexpected technical pilot state for "+p.unique_identifier);
+      }
+      activated++;
+      await ensurePilotQrCarrier(p.battery_item_id);
+      qrReady++;
+    }
+
+    await loadData();
+    setResult(
+      $("#batchResult"),
+      "TECHNICAL PILOT READY · "+identifiers.length+" units · "+activated+" activated · "+alreadyActive+" already ACTIVE · "+qrReady+" QR carriers ready · regulatory_compliance=false. Следва: Select all ACTIVE → Print.",
+      "ok"
+    );
+    location.hash="printCenterProduction";
+  }catch(e){
+    setResult($("#batchResult"),e.message,"bad");
+  }finally{
+    button.disabled=!canWrite();
+  }
+}
 async function provisionBatch(){
   if(!canWrite())return;
   const model=models.find(m=>m.id===$("#batchModel").value);
@@ -632,5 +717,6 @@ $("#createModel").addEventListener("click",createModel);
 $("#publishTechnicalPilot").addEventListener("click",publishTechnicalPilot);
 $("#provisionBattery").addEventListener("click",provisionBattery);
 $("#batchProvision").addEventListener("click",provisionBatch);
+const activateBatchPilot=$("#activateBatchPilot");if(activateBatchPilot)activateBatchPilot.addEventListener("click",activateCurrentBatchTechnicalPilot);
 init().catch(e=>{document.body.dataset.manufacturerReady="false";showGate(e.message)});
 })();
