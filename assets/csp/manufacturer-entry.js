@@ -18,8 +18,14 @@ function readEarlyClient(){
   return null;
 }
 function readProductionSession(){
+  const key="dpp_company_session_v1";
   try{
-    const value=JSON.parse(sessionStorage.getItem("dpp_company_session_v1")||"null");
+    let raw=localStorage.getItem(key);
+    if(!raw){
+      raw=sessionStorage.getItem(key);
+      if(raw){localStorage.setItem(key,raw);sessionStorage.removeItem(key);}
+    }
+    const value=JSON.parse(raw||"null");
     return !!value?.access_token;
   }catch{}
   return false;
