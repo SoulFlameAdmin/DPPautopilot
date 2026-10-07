@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · Регистрация</title>
+  <meta name="description" content="Регистрация на фирма за SoulFlame DPP / Battery Passport pilot.">
+  <link rel="stylesheet" href="/assets/csp/company-auth.css">
+</head>
+<body data-auth-page="register" data-company-auth-ready="false">
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/">DPP AUTOPILOT</a>
+    <span class="badge">COMPANY REGISTRATION</span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">STEP 1 · REGISTER</p>
+      <h1>Създай фирмен акаунт.</h1>
+      <p>Регистрацията използва реален Supabase Auth. След потвърждение на email-а продължаваш към фирмения tenant и DPP dashboard.</p>
+    </div>
+    <div class="security-note">
+      <strong>REAL AUTH · NO DEMO SESSION</strong>
+      <span>Email verification · protected session · company tenant after verification.</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div><p class="eyebrow">COMPANY DETAILS</p><h2>Регистрация</h2></div>
+      <span class="state" id="pageState">READY</span>
+    </div>
+
+    <div class="form-grid">
+      <label><span>Име / лице за контакт</span><input id="contactName" autocomplete="name" maxlength="120" placeholder="Иван Иванов"></label>
+      <label><span>Име на фирмата</span><input id="companyName" autocomplete="organization" maxlength="200" placeholder="Example Batteries Ltd."></label>
+      <label><span>Служебен email</span><input id="email" type="email" autocomplete="email" maxlength="254" placeholder="office@company.eu"></label>
+      <label><span>Телефон</span><input id="phone" type="tel" autocomplete="tel" maxlength="40" placeholder="+359..."></label>
+      <label><span>ЕИК / VAT / Registration ID</span><input id="registrationId" maxlength="40" placeholder="BG123456789"></label>
+      <label><span>Парола</span><input id="password" type="password" minlength="8" autocomplete="new-password" placeholder="Минимум 8 символа"></label>
+      <label><span>Повтори паролата</span><input id="confirmPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Повтори паролата"></label>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="registerSubmit" type="button">Регистрирай фирмата →</button>
+      <a class="btn" href="/login">Вече имам акаунт</a>
+    </div>
+    <div class="result" id="pageResult" role="status" aria-live="polite">Зареждане на защитената auth конфигурация…</div>
+  </section>
+
+  <footer>Register → email verification → company tenant → dashboard.</footer>
+</main>
+<script src="/assets/csp/company-auth-pages.js"></script>
+</body>
+</html>
