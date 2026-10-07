@@ -2,12 +2,19 @@
   "schemaVersion": "1.0.0",
   "profileId": "scooter-battery-dpp-v1",
   "batteryCategory": "light_means_of_transport",
-  "catalogVersion": "2026-09-18",
+  "catalogVersion": "2026-10-07-eu-trace-v1",
   "sourceCatalog": "data/dpp-field-catalog.json",
-  "requiredFieldCount": 41,
-  "requiredModelFieldCount": 33,
+  "requiredFieldCount": 42,
+  "requiredModelFieldCount": 34,
   "requiredItemFieldCount": 8,
   "requiredFields": [
+    {
+      "path": "model.responsible_economic_operator",
+      "type": "object",
+      "access": "public_identifier",
+      "source": "Regulation (EU) 2023/1542 Article 77(3); Commission Battery Passport data point 2",
+      "uiTarget": "modelForm.responsibleEconomicOperator"
+    },
     {
       "path": "model.identification.manufacturer.name",
       "type": "string",
