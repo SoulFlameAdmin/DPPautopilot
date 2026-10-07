@@ -61,7 +61,7 @@ assert import_store["retention"]["status"]=="implemented_precursor"
 assert "30 days" in import_store["retention"]["current_behavior"]
 
 audit_store=next(s for s in stores if s["id"]=="audit_history")
-assert "credential-bearing" in audit_store["retention"]["current_behavior"]
+assert "credential-bearing" in audit_store["retention"]["current_behavior"].lower()
 assert any("recursive audit-only credential-key redaction" in x for x in audit_store["controls"])
 assert any("source rows are not modified" in x for x in audit_store["controls"])
 
