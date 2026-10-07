@@ -8,6 +8,7 @@
   <title>SOULFLAME DPP AUTOPILOT · Early Access Dashboard</title>
   <link rel="stylesheet" href="/assets/csp/manufacturer.css">
   <link rel="stylesheet" href="/assets/csp/manufacturer-ops.css">
+  <link rel="stylesheet" href="/assets/csp/manufacturer-early.css">
 </head>
 <body data-manufacturer-ready="true" data-manufacturer-auth="early-access" data-manufacturer-tenant="pending" data-manufacturer-mode="early-access">
   <aside class="app-sidebar" aria-label="Company navigation">
@@ -26,39 +27,56 @@
     <div class="sidebar-foot"><span class="leaf">♧</span><span>CLEAN ENERGY<br>LONGER LIFE<br>BRIGHTER TOMORROW</span><small>EARLY ACCESS</small></div>
   </aside>
 
-  <main class="shell" id="dashboardHome">
+  <main class="shell early-shell" id="dashboardHome">
     <header class="topbar">
       <label class="top-search" aria-label="Search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search passports, battery ID, client…" disabled></label>
-      <div class="top-actions"><span class="notification" aria-hidden="true">♟<i></i></span><div class="profile"><span class="avatar">SF</span><span><strong id="workspaceCompanyName">Early Access</strong><small>Manufacturer Applicant</small></span></div></div>
+      <div class="top-actions"><span class="notification" aria-hidden="true">♟<i></i></span><div class="profile"><span class="avatar">SF</span><span><strong>Early Access</strong><small>Manufacturer Applicant</small></span></div></div>
     </header>
 
     <div id="dashboard">
-      <div class="workspace">
-        <section class="workspace-main">
+      <div class="early-layout">
+        <section class="early-main">
           <div class="welcome">
             <p class="eyebrow">DPP EARLY ACCESS</p>
-            <span class="state ok">NEW CLIENT · REVIEWING</span>
+            <span class="state ok">NEW CLIENT · INTAKE</span>
             <h1>Welcome to SOULFLAME DPP AUTOPILOT</h1>
-            <p>Вашият Early Access dashboard е създаден. Скоро ще се свържем с вас, за да уточним фирмата, нуждите, интеграциите и активирането на системата.</p>
-            <div class="tenant-line"><strong id="tenantName">Early Access Company</strong><span id="tenantMeta">Очаква преглед от SoulFlame</span></div>
+            <p>Влезли сте с вашия email. Този достъп се пази на устройството, за да не се регистрирате отново всеки път.</p>
+            <div class="tenant-line"><strong id="clientEmailTop">—</strong><span id="tenantMeta">Login saved on this device</span></div>
           </div>
 
           <section class="stats" aria-label="Early Access status">
             <article class="metric blue"><span class="metric-icon">▤</span><div><small>Total Passports</small><strong>0</strong><em>Ще се активира след одобрение</em></div></article>
-            <article class="metric green"><span class="metric-icon">✓</span><div><small>Status</small><strong>Review</strong><em>Заявката е получена</em></div></article>
-            <article class="metric amber"><span class="metric-icon">◷</span><div><small>Next Step</small><strong>Contact</strong><em>SoulFlame ще се свърже с вас</em></div></article>
+            <article class="metric green"><span class="metric-icon">✓</span><div><small>Status</small><strong id="statusMetric">Intake</strong><em>Първо минаваме през въпросите</em></div></article>
+            <article class="metric amber"><span class="metric-icon">◷</span><div><small>Next Step</small><strong>AI Chat</strong><em>Отговорете на въпросите вдясно</em></div></article>
             <article class="metric purple"><span class="metric-icon">▦</span><div><small>Payment</small><strong>Locked</strong><em>До индивидуална оферта</em></div></article>
           </section>
 
           <section class="passport-table card">
-            <div class="section-head"><div><p class="eyebrow">APPLICATION STATUS</p><h2>Early Access registration received</h2></div><span class="state ok">REVIEWING</span></div>
+            <div class="section-head"><div><p class="eyebrow">EARLY ACCESS STATUS</p><h2>Вашият достъп е активен</h2></div><span class="state ok" id="reviewBadge">INTAKE</span></div>
             <div class="result" id="earlyStatus" role="status" aria-live="polite">Проверяваме достъпа…</div>
-            <div style="display:grid;gap:12px;margin-top:18px">
-              <div class="access-box"><span class="shield">◇</span><div><strong>Вашият email</strong><p id="clientEmail">—</p></div></div>
-              <div class="access-box"><span class="shield">✓</span><div><strong>Какво следва</strong><p>Ще получите обратна връзка от SoulFlame. След уточняване на фирмата и условията ще отключим реалния manufacturer workspace и плащането.</p></div></div>
+            <div class="early-info-grid">
+              <div class="access-box"><span class="shield">◇</span><div><strong>Влезли сте с email</strong><p id="clientEmail">—</p><small>Login-ът се пази локално на това устройство.</small></div></div>
+              <div class="access-box"><span class="shield">✓</span><div><strong>Какво следва</strong><p>Завършете въпросите в 24/7 AI Support. След това SoulFlame ще прегледа реалния ви бизнес и ще подготви точния dashboard, услуги и оферта.</p></div></div>
             </div>
           </section>
         </section>
+
+        <aside class="ai-panel card" aria-label="24/7 AI Support">
+          <div class="ai-head">
+            <div><p class="eyebrow">24/7 AI SUPPORT</p><h2>DPP Intake Assistant</h2></div>
+            <span class="ai-live"><i></i> ONLINE</span>
+          </div>
+          <p class="ai-note">Това е автоматизиран помощник за първоначалните въпроси. Не е свободен AI агент. Ако зададете въпрос извън този процес, ще го изпратим към SoulFlame.</p>
+          <div class="chat-log" id="chatLog" aria-live="polite"></div>
+          <form class="chat-form" id="chatForm">
+            <textarea id="chatInput" rows="3" maxlength="1800" placeholder="Напишете отговора си…"></textarea>
+            <div class="chat-actions">
+              <span id="chatProgress">0 / 10</span>
+              <button class="btn primary" id="chatSend" type="submit">Изпрати →</button>
+            </div>
+          </form>
+          <div class="result" id="chatResult">Отговорите не се записват към фирмата, докато не завършите целия въпросник.</div>
+        </aside>
       </div>
     </div>
   </main>
