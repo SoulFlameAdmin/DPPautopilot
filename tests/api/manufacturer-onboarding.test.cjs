@@ -102,3 +102,15 @@ test('RPC forwards bearer token and exact answer payload',async()=>{
   });
   assert.equal(result.question_key,'onboardingQ7');
 });
+
+test('incomplete configure maps DP501 to stable validation error',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const fetchImpl=async()=>({
+    ok:false,
+    async json(){return {code:'DP501',message:'all eight onboarding answers are required'}}
+  });
+  await assert.rejects(
+    ()=>api.rpc('dpp_api_manufacturer_onboarding_configure',{},'Bearer real-user',env,fetchImpl),
+    error=>error.status===422&&error.publicCode==='VALIDATION_ERROR'
+  );
+});
