@@ -20,7 +20,11 @@ expected_fields={
     "event","timestamp_ms","request_id","surface","method","status","outcome","duration_ms","auth_present","error_code"
 }
 assert set(policy.get("logged_fields",[]))==expected_fields
-assert policy.get("surfaces")==["tenant","organizations","members","models","items","passport","carriers","qr","provision","batch-provision","imports","export"]
+expected_surfaces=[
+    "tenant","organizations","members","models","items","passport","carriers","qr",
+    "provision","batch-provision","imports","export","application","manufacturer-onboarding","registration-link"
+]
+assert policy.get("surfaces")==expected_surfaces
 api_surface_inventory={
     path.stem for path in (ROOT/"api").glob("*.js")
     if not path.name.startswith("_")
@@ -55,8 +59,9 @@ for surface in policy["surfaces"]:
     assert "require('./_observability.js')" in source, f"{surface} missing observability helper import"
     call=f"startRequestObservability(req,res,'{surface}')"
     assert call in source, f"{surface} missing observability start"
-    rate=f"enforceRateLimit(req,res,'{surface}')"
-    assert source.index(call)<source.index(rate), f"{surface} correlation must start before rate limiting"
+    rate_prefix=f"enforceRateLimit(req,res,'{surface}'"
+    assert rate_prefix in source, f"{surface} missing local rate limiting"
+    assert source.index(call)<source.index(rate_prefix), f"{surface} correlation must start before rate limiting"
 
 test=(ROOT/"tests/api/observability.test.cjs").read_text(encoding="utf-8")
 for token in [
@@ -75,4 +80,4 @@ assert "M17-M19" in runtime_gap
 assert "production" in runtime_gap.lower()
 assert "F08" not in runtime_gap
 assert "M02" not in runtime_gap
-print("R09_OBSERVABILITY_POLICY_PASS: twelve inventoried API surfaces emit correlated structured metadata with explicit secret/payload redaction; deployed runtime evidence remains intentionally unclaimed")
+print("R09_OBSERVABILITY_POLICY_PASS: fifteen inventoried API surfaces emit correlated structured metadata with explicit secret/payload redaction; deployed runtime evidence remains intentionally unclaimed")
