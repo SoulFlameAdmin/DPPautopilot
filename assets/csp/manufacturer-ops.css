@@ -51,7 +51,8 @@
 .quickstart-head p{margin:4px 0 0;color:#748195}
 .quick-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .quick-action{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;min-height:92px;padding:16px;border:1px solid #dce4ee;border-radius:14px;background:#fff;text-decoration:none;color:inherit;box-shadow:0 10px 28px rgba(23,52,88,.06);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
-.quick-action:hover,.quick-action:focus-visible{transform:translateY(-2px);border-color:#9ab1ca;box-shadow:0 14px 32px rgba(23,52,88,.11);outline:none}
+.quick-action:hover{transform:translateY(-2px);border-color:#9ab1ca;box-shadow:0 14px 32px rgba(23,52,88,.11)}
+.quick-action:focus-visible{transform:translateY(-2px);border-color:#5688bd;box-shadow:0 0 0 3px rgba(21,103,200,.18),0 14px 32px rgba(23,52,88,.11);outline:2px solid transparent}
 .quick-action-index{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#edf3f9;color:#173458;font-size:.78rem;font-weight:900}
 .quick-action-copy{display:grid;gap:3px}
 .quick-action-copy strong{font-size:.96rem;color:#173458}
@@ -59,12 +60,18 @@
 .quick-action-arrow{font-size:1.25rem;color:#59718d}
 .manufacturer-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding:10px;border:1px solid #e0e6ee;border-radius:13px;background:#f8fafc}
 .manufacturer-flow a{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:center;min-height:54px;padding:10px;border-radius:10px;text-decoration:none;color:#415673;background:#fff;border:1px solid #e7ecf2}
-.manufacturer-flow a:hover,.manufacturer-flow a:focus-visible{border-color:#a8bad0;outline:none}
+.manufacturer-flow a:hover{border-color:#a8bad0}
+.manufacturer-flow a:focus-visible{border-color:#5688bd;box-shadow:0 0 0 3px rgba(21,103,200,.16);outline:2px solid transparent}
 .manufacturer-flow b{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:#173458;color:#fff;font-size:.72rem}
 .manufacturer-flow span{font-size:.76rem;font-weight:800;line-height:1.25}
 .flow-note{margin:0;color:#7b8798;font-size:.75rem}
 .workflow-card{position:relative;overflow:hidden}
 .workflow-card::before{content:attr(data-flow-step);position:absolute;right:12px;top:10px;font-size:.66rem;font-weight:900;letter-spacing:.08em;color:#8a98aa;text-transform:uppercase}
+#productionOps,#modelRegisterCard,#batchProductionCard,#csvImportProduction,#passportCreationCard,#printCenterProduction{scroll-margin-top:84px}
+#modelRegisterCard{order:1}
+#batchProductionCard{order:2}
+#passportCreationCard{order:3}
+#technicalPilotCard{order:4}
 .product-wizard{display:grid;gap:12px}
 .wizard-group{display:grid;gap:10px;padding:14px;border:1px solid #e2e8f0;border-radius:12px;background:#fbfcfe}
 .wizard-group-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -99,7 +106,14 @@
   .quick-action{min-height:78px;padding:13px}
   .quickstart-head{align-items:flex-start}
   .flow-next-row{justify-content:stretch}
-  .flow-next-row .btn{width:100%}
+  .flow-next-row .btn{width:100%;min-height:44px}
+  .print-final .ops-toolbar .group{width:100%}
+  .print-final .ops-toolbar .group>*{width:100%;min-height:44px}
+  #productionOps,#modelRegisterCard,#batchProductionCard,#csvImportProduction,#passportCreationCard,#printCenterProduction{scroll-margin-top:132px}
+}
+@media(prefers-reduced-motion:reduce){
+  .quick-action{transition:none}
+  .quick-action:hover,.quick-action:focus-visible{transform:none}
 }
 @media print{
   body>*{display:none!important}
