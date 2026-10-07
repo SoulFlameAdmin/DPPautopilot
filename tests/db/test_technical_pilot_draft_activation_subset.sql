@@ -10,7 +10,7 @@ declare
   published jsonb;
   replay jsonb;
   public_row jsonb;
-  passport_id uuid;
+  v_passport_id uuid;
   versions_before integer;
   versions_after integer;
   denied boolean;
@@ -40,7 +40,7 @@ begin
     payload,
     '{}'::jsonb
   );
-  passport_id:=(provisioned->>'passport_id')::uuid;
+  v_passport_id:=(provisioned->>'passport_id')::uuid;
 
   if provisioned->>'passport_status'<>'draft' then
     raise exception 'Generic provision did not create DRAFT technical-pilot candidate';
@@ -48,7 +48,7 @@ begin
 
   select count(*)::integer into versions_before
   from public.dpp_passport_versions
-  where passport_id=passport_id;
+  where v.passport_id=v_passport_id;
 
   -- A DRAFT must not be publicly resolvable before explicit publication.
   denied:=false;
@@ -64,7 +64,7 @@ begin
     '{}'::jsonb
   );
 
-  if published->>'passport_id'<>passport_id::text
+  if published->>'passport_id'<>v_passport_id::text
      or published->>'status'<>'active'
      or published->>'technical_pilot'<>'true'
      or published->>'regulatory_compliance'<>'false'
@@ -81,14 +81,14 @@ begin
 
   select count(*)::integer into versions_after
   from public.dpp_passport_versions v
-  where v.passport_id=passport_id;
+  where v.passport_id=v_passport_id;
 
   if versions_after<>versions_before+1 then
     raise exception 'DRAFT activation did not append exactly one passport version';
   end if;
 
   public_row:=public.dpp_api_passport_public('urn:dpp:technical-pilot:draft:000001');
-  if public_row->>'passport_id'<>passport_id::text
+  if public_row->>'passport_id'<>v_passport_id::text
      or public_row->>'status'<>'active'
      or public_row#>>'{public_payload,pilot,mode}'<>'technical_pilot' then
     raise exception 'Activated technical pilot did not resolve publicly on the same identifier';
@@ -99,7 +99,7 @@ begin
     payload,
     '{}'::jsonb
   );
-  if replay->>'passport_id'<>passport_id::text
+  if replay->>'passport_id'<>v_passport_id::text
      or replay->>'idempotent_replay'<>'true'
      or replay->>'activated_from_draft'<>'false' then
     raise exception 'Technical pilot replay was not idempotent';
