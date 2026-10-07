@@ -32,12 +32,20 @@ test('each onboarding answer is persisted before moving forward',()=>{
   assert.match(js,/saveLocalDraft\(\)/);
 });
 
+test('edited answers are persisted before navigating back',()=>{
+  const js=read('assets/csp/manufacturer-early.js');
+  assert.match(js,/async function back\(\)/);
+  assert.match(js,/if\(current!==saved\)/);
+  assert.match(js,/if\(!await saveCurrent\(\)\)return/);
+  assert.match(js,/\$\("backQuestion"\)\.addEventListener\("click",\(\)=>back\(\)\)/);
+});
+
 test('completion auto-configures and only then opens the dashboard',()=>{
   const js=read('assets/csp/manufacturer-early.js');
   assert.match(js,/api\("questionnaire_submit",\{answers\}\)/);
   assert.match(js,/animateConfiguration/);
   assert.match(js,/setTimeout\(\(\)=>showDashboard\(\),500\)/);
-  assert.match(js,/profile\.status==="configured"/);
+  assert.match(js,/profile\.configuration&&Object\.keys\(profile\.configuration\)\.length/);
 });
 
 test('dashboard is hidden until onboarding/configuration is complete',()=>{
