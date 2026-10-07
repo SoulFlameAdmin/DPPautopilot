@@ -273,8 +273,12 @@
                   <label><span>Serial start</span><input id="batchSerialStart" type="number" min="0" step="1" value="1"></label>
                   <label><span>Serial width</span><input id="batchSerialWidth" type="number" min="1" max="12" step="1" value="6"></label>
                 </div>
-                <div class="actions"><button class="btn primary" id="batchProvision" type="button">Create batch DRAFT passports</button></div>
+                <div class="actions">
+                  <button class="btn primary" id="batchProvision" type="button">Create batch DRAFT passports</button>
+                  <button class="btn" id="activateBatchPilot" type="button">Activate this batch as TECHNICAL PILOT + QR</button>
+                </div>
                 <div class="result" id="batchResult" role="status" aria-live="polite">Select SKU and define the serial range. QR printing unlocks only after each passport is ACTIVE.</div>
+                <p class="muted"><strong>Pilot activation:</strong> keeps the same DPP identities, marks each passport <code>regulatory_compliance=false</code>, and binds a QR carrier. This is not regulatory certification.</p>
                 <div class="flow-next-row"><a class="btn" href="#csvImportProduction">Next · Add Batteries / Serials →</a></div>
               </article>
             </div>
