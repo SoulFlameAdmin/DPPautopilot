@@ -94,6 +94,11 @@ async function loadTenantState(){
   let user;
   try{user=await getUser()}catch(e){clearSession();result($("#authResult"),e.message,"bad");return}
   currentUser=user;
+  const metadata=user&&user.user_metadata&&typeof user.user_metadata==="object"?user.user_metadata:{};
+  if($("#companyName")&&!$("#companyName").value&&typeof metadata.company_name==="string"&&metadata.company_name.trim()){
+    $("#companyName").value=metadata.company_name.trim();
+    $("#companySlug").value=slugify(metadata.company_name);
+  }
   result($("#authResult"),"Вход успешен: "+(user.email||"verified user"),"ok");
   $("#verifyCard").hidden=true;
   try{
