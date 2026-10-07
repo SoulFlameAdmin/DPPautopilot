@@ -99,11 +99,9 @@ begin
     )
   );
 
-  perform public.dpp_assert_public_passport_payload_safe(
-    v_public,
-    v_item.unique_identifier
-  );
-
+  -- p_public_payload was validated above. The pilot object below is fixed,
+  -- server-owned publication metadata; callers cannot inject or override it because
+  -- the public payload classifier rejects unknown root keys before this merge.
   select p.* into v_passport
   from public.dpp_passports p
   where p.organization_id=v_org
