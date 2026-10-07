@@ -81,7 +81,17 @@
       "retired"
     ],
     "externalDependency": "live EU DPP Registry onboarding/credentials and test procedure",
-    "conformanceState": "ADAPTER_CONTRACT_DEFINED_LIVE_INTEGRATION_PENDING"
+    "conformanceState": "ADAPTER_CONTRACT_DEFINED_LIVE_AUTHORIZED_INTEGRATION_PENDING",
+    "operationalSince": "2026-07-20",
+    "testingEnvironmentAvailable": true,
+    "requiredRegistryUpload": [
+      "unique_identifier"
+    ],
+    "registrationReceiptRequires": [
+      "unique_registration_identifier",
+      "receipt_reference"
+    ],
+    "registrationIdentifierIsComplianceProof": false
   },
   "evidencePack": {
     "requiredSections": [
