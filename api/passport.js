@@ -170,6 +170,7 @@ function validateRpcShape(name, data) {
   if (name === 'dpp_api_passport_private' ||
       name === 'dpp_api_passport_create' ||
       name === 'dpp_api_passport_update_checked' ||
+      name === 'dpp_api_technical_pilot_update_capacity' ||
       name === 'dpp_api_scooter_passport_activate' ||
       name === 'dpp_api_scooter_passport_transition') return validPrivatePassport(data);
   return true;
@@ -476,27 +477,9 @@ async function handler(req, res) {
         return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'capacity_ah must be a positive number.' } });
       }
 
-      const current = await rpc('dpp_api_passport_private', { p_id: id }, authorization);
-      if (current.status !== 'active' ||
-          current.public_payload?.pilot?.mode !== 'technical_pilot' ||
-          current.public_payload?.pilot?.regulatory_compliance !== false) {
-        return send(res, 409, { error: { code: 'TECHNICAL_PILOT_REQUIRED', message: 'Only ACTIVE technical-pilot passports can use this update action.' } });
-      }
-
-      const publicPayload = JSON.parse(JSON.stringify(current.public_payload || {}));
-      if (!plainObject(publicPayload.model)) publicPayload.model = {};
-      publicPayload.model.rated_capacity_ah = capacityAh;
-
-      const publicAccessProblem = validatePublicPayloadAccess(publicPayload);
-      if (publicAccessProblem) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
-      }
-
-      const passport = await rpc('dpp_api_passport_update_checked', {
+      const passport = await rpc('dpp_api_technical_pilot_update_capacity', {
         p_id: id,
-        p_status: 'active',
-        p_public_payload: publicPayload,
-        p_private_payload: current.private_payload || {},
+        p_capacity_ah: capacityAh,
         p_expected_updated_at: body.expected_updated_at
       }, authorization);
 
