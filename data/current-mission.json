@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-07T19:05:00Z",
+  "title": "Battery Client Pilot v1",
+  "objective": "1 real manufacturer → 1 battery model → real data → ~10 serial units → DPP + QR → physical UAT → willingness to pay",
+  "rule": "Do not claim regulatory compliance or certification from technical-pilot evidence alone.",
+  "steps": [
+    {
+      "id": "P01",
+      "title": "Core technical E2E",
+      "status": "green",
+      "detail": "Google login → company tenant → onboarding → Product/SKU → Batch → 10 serial units → 10 DPP → QR print → phone scan → same DPP update → same QR shows updated public record.",
+      "evidence": "BAT-EV-001 / BAT-SF000010; capacity update to 101 Ah; public passport remains ACTIVE TECHNICAL PILOT."
+    },
+    {
+      "id": "P02",
+      "title": "Hardening + clean rerun",
+      "status": "yellow",
+      "detail": "Close current CI/U07/tenant/UI consistency issues, then repeat the entire flow with a fresh test account/company without manual database repair.",
+      "evidence": "Stage 4/5 + Steps 18/19/20 + Cross-browser are green on current head; U07 determinism still needs closure."
+    },
+    {
+      "id": "P03",
+      "title": "Real client intake",
+      "status": "red",
+      "detail": "Create the real customer tenant, capture company roles, product scope, systems, files, data responsibility and pilot success criteria.",
+      "evidence": "Waiting for first selected manufacturer."
+    },
+    {
+      "id": "P04",
+      "title": "Real battery model + units",
+      "status": "red",
+      "detail": "Load customer-approved model data, create one real battery model and approximately 10 serialized units/passports with physical QR carriers.",
+      "evidence": "Requires customer-approved real data."
+    },
+    {
+      "id": "P05",
+      "title": "Customer UAT",
+      "status": "red",
+      "detail": "Customer scans, verifies, updates and signs off that the DPP flow works for their operational process.",
+      "evidence": "Requires physical pilot with customer."
+    },
+    {
+      "id": "P06",
+      "title": "Commercial conversion + core freeze",
+      "status": "red",
+      "detail": "Confirm willingness to pay / commercial next step, freeze Battery v1 core, then continue the remaining canonical master plan in priority order.",
+      "evidence": "Requires successful UAT and commercial decision."
+    }
+  ]
+}
