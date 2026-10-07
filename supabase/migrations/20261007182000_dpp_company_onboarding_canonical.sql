@@ -66,6 +66,9 @@ begin
 end
 $$;
 
+-- Trigger-only helper. Keep it out of the PostgREST/RPC execution surface.
+revoke execute on function public.dpp_prefill_early_access_from_company() from public, anon, authenticated;
+
 drop trigger if exists dpp_prefill_early_access_from_company_trg
 on public.dpp_early_access_sessions;
 
@@ -94,6 +97,9 @@ begin
   return new;
 end
 $$;
+
+-- Trigger-only helper. Keep it out of the PostgREST/RPC execution surface.
+revoke execute on function public.dpp_protect_completed_company_onboarding() from public, anon, authenticated;
 
 drop trigger if exists dpp_protect_completed_company_onboarding_trg
 on public.dpp_manufacturer_onboarding_answers;
