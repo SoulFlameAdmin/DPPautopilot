@@ -1192,7 +1192,7 @@
         "light_means_of_transport"
       ],
       "applicabilityAt2027Launch": "mandatory",
-      "accessClassNormalized": "legitimate_interest_and_authorities",
+      "accessClassNormalized": "legitimate_interest",
       "sourceType": "manufacturer_supplier_assertion",
       "evidenceRequirement": "source document or supplier/manufacturer record + provenance metadata",
       "provenanceRequired": true,
@@ -1217,7 +1217,7 @@
         "light_means_of_transport"
       ],
       "applicabilityAt2027Launch": "mandatory",
-      "accessClassNormalized": "legitimate_interest_and_authorities",
+      "accessClassNormalized": "legitimate_interest",
       "sourceType": "manufacturer_assertion",
       "evidenceRequirement": "authoritative source record + provenance metadata; no invented technical value",
       "provenanceRequired": true,
@@ -1242,7 +1242,7 @@
         "light_means_of_transport"
       ],
       "applicabilityAt2027Launch": "mandatory",
-      "accessClassNormalized": "legitimate_interest_and_authorities",
+      "accessClassNormalized": "legitimate_interest",
       "sourceType": "manufacturer_assertion",
       "evidenceRequirement": "authoritative source record + provenance metadata; no invented technical value",
       "provenanceRequired": true,
@@ -1267,7 +1267,7 @@
         "light_means_of_transport"
       ],
       "applicabilityAt2027Launch": "mandatory",
-      "accessClassNormalized": "legitimate_interest_and_authorities",
+      "accessClassNormalized": "legitimate_interest",
       "sourceType": "manufacturer_assertion",
       "evidenceRequirement": "authoritative source record + provenance metadata; no invented technical value",
       "provenanceRequired": true,
@@ -1292,7 +1292,7 @@
         "light_means_of_transport"
       ],
       "applicabilityAt2027Launch": "mandatory",
-      "accessClassNormalized": "legitimate_interest_and_authorities",
+      "accessClassNormalized": "legitimate_interest",
       "sourceType": "manufacturer_assertion",
       "evidenceRequirement": "authoritative source record + provenance metadata; no invented technical value",
       "provenanceRequired": true,
