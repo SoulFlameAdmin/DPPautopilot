@@ -196,6 +196,31 @@ function copyGoogleToCompanySession(google){
   sessionStorage.setItem(COMPANY_SESSION_KEY,JSON.stringify(session));
   return session;
 }
+let publicAuthConfig=null;
+async function getPublicAuthConfig(){
+  if(publicAuthConfig)return publicAuthConfig;
+  const response=await fetch("/data/auth-config.json",{cache:"no-store"});
+  if(!response.ok)throw new Error("Auth config unavailable.");
+  publicAuthConfig=await response.json();
+  return publicAuthConfig;
+}
+async function organizationRpc(name,payload,accessToken){
+  const auth=await getPublicAuthConfig();
+  const response=await fetch(auth.supabaseUrl.replace(/\/$/,"")+"/rest/v1/rpc/"+name,{
+    method:"POST",
+    headers:{
+      apikey:auth.publishableKey,
+      Authorization:"Bearer "+accessToken,
+      "Content-Type":"application/json",
+      Accept:"application/json"
+    },
+    body:JSON.stringify(payload||{}),
+    cache:"no-store"
+  });
+  const data=await response.json().catch(()=>null);
+  if(!response.ok)throw new Error(data?.message||data?.error||"Tenant request failed.");
+  return data;
+}
 async function productionApi(path,{method="GET",body,token:accessToken}={}){
   const response=await fetch(path,{
     method,
@@ -216,7 +241,8 @@ async function ensureProductionTenant(){
   if(!google?.access_token)throw new Error("Няма запазена Google сесия. Влезте отново през /register.");
   copyGoogleToCompanySession(google);
 
-  let organizations=(await productionApi("/api/organizations",{token:google.access_token})).data||[];
+  let organizations=await organizationRpc("dpp_api_organizations_list",{},google.access_token);
+  if(!Array.isArray(organizations))organizations=[];
   let active=organizations.find(org=>org&&org.active)||null;
   if(active)return active;
 
@@ -229,11 +255,10 @@ async function ensureProductionTenant(){
     ?globalThis.crypto.randomUUID().replace(/-/g,"").slice(0,8)
     :String(Date.now()).slice(-8));
   const slug=(slugify(company).slice(0,80)+"-"+suffix).slice(0,120).replace(/-+$/,"");
-  active=(await productionApi("/api/organizations",{
-    method:"POST",
-    token:google.access_token,
-    body:{name:String(company).slice(0,200),slug}
-  })).data;
+  active=await organizationRpc("dpp_api_organization_create",{
+    p_name:String(company).slice(0,200),
+    p_slug:slug
+  },google.access_token);
   return active;
 }
 function setProductEntryReady(active){
