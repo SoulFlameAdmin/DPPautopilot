@@ -368,7 +368,7 @@ async function createModel(){
   }catch(e){setResult($("#modelResult"),e.message,"bad")}
   finally{$("#createModel").disabled=!canWrite()}
 }
-function showProvision(data){
+function showProvision(data,model){
   const host=$("#provisionResult");host.replaceChildren();host.className="result ok";
   const line=document.createElement("div");line.textContent=(data.idempotent_replay?"Idempotent replay":"Created")+" · "+data.unique_identifier+" · passport "+data.passport_status;
   const links=document.createElement("div");links.className="actions";
@@ -378,8 +378,43 @@ function showProvision(data){
     const p=document.createElement("a");p.className="btn";p.href=data.passport_url;p.target="_blank";p.rel="noopener";p.textContent="Отвори Passport";
     const q=document.createElement("a");q.className="btn";q.href=data.qr_url;q.target="_blank";q.rel="noopener";q.textContent="Отвори QR";
     links.append(p,q);
+  }else if(model&&model.category!=="light_means_of_transport"&&data.passport_status==="draft"){
+    const publish=document.createElement("button");publish.className="btn";publish.type="button";
+    publish.textContent="Publish technical pilot →";
+    publish.title="Publishes this non-LMT DRAFT as an ACTIVE technical pilot with regulatory_compliance=false.";
+    publish.addEventListener("click",()=>activateProvisionedTechnicalPilot(model,data,publish));
+    links.append(publish);
   }
   host.append(line,links);
+}
+async function activateProvisionedTechnicalPilot(model,data,button){
+  if(!canWrite()||!model||model.category==="light_means_of_transport")return;
+  button.disabled=true;
+  setResult($("#provisionResult"),"Publishing existing DRAFT passport as technical pilot…");
+  try{
+    const published=(await api("/api/passport",{method:"POST",body:{
+      action:"publish_technical_pilot",
+      battery_item_id:data.item_id,
+      public_payload:data.public_payload,
+      private_payload:{}
+    }})).data;
+    if(published.passport_id!==data.passport_id||published.status!=="active"||published.regulatory_compliance!==false){
+      throw new Error("Technical pilot activation returned an unexpected passport identity/state.");
+    }
+    await ensurePilotQrCarrier(data.item_id);
+    await loadData();
+    const host=$("#provisionResult");host.replaceChildren();host.className="result ok";
+    const line=document.createElement("div");
+    line.textContent="TECHNICAL PILOT ACTIVE · "+data.unique_identifier+" · same passport "+data.passport_id+" · regulatory_compliance=false";
+    const links=document.createElement("div");links.className="actions";
+    const p=document.createElement("a");p.className="btn primary";p.href="/passport?identifier="+encodeURIComponent(data.unique_identifier)+"&carrier=qr";p.target="_blank";p.rel="noopener";p.textContent="Open Passport";
+    const q=document.createElement("a");q.className="btn";q.href="/qr?identifier="+encodeURIComponent(data.unique_identifier);q.target="_blank";q.rel="noopener";q.textContent="Open QR / Print";
+    links.append(p,q);host.append(line,links);
+  }catch(e){
+    setResult($("#provisionResult"),e.message,"bad");
+  }finally{
+    button.disabled=false;
+  }
 }
 async function ensurePilotQrCarrier(itemId){
   const response=await api("/api/carriers?battery_item_id="+encodeURIComponent(itemId));
@@ -454,7 +489,7 @@ async function provisionBattery(){
     }});
     $("#batteryIdentifier").value="";
     await loadData();
-    showProvision(response.data);
+    showProvision(response.data,model);
   }catch(e){setResult($("#provisionResult"),e.message,"bad")}
   finally{$("#provisionBattery").disabled=!canWrite()}
 }
