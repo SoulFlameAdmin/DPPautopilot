@@ -217,7 +217,7 @@ $("answerInput").addEventListener("keydown",event=>{
     }
     if(!/^[a-f0-9]{64}$/i.test(token))throw new Error("Няма валиден Early Access dashboard access.");
     profile=(await api("open")).data||{};
-    if(profile.status==="configured"&&profile.configuration&&Object.keys(profile.configuration).length){
+    if(profile.configuration&&Object.keys(profile.configuration).length){
       showDashboard();
     }else{
       showWizard();
