@@ -474,7 +474,7 @@ async function handler(req, res) {
     if (body.action === 'update_technical_pilot') {
       const capacityAh = Number(body.capacity_ah);
       if (!Number.isFinite(capacityAh) || capacityAh <= 0 || capacityAh > 100000) {
-        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'capacity_ah must be a positive number.' } });
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
       }
 
       const passport = await rpc('dpp_api_technical_pilot_update_capacity', {
