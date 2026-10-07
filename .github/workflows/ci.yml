@@ -102,6 +102,8 @@ jobs:
         run: node --test tests/api/manufacturer-onboarding-client.test.cjs
       - name: Test manufacturer onboarding entry gate
         run: node --test tests/api/manufacturer-onboarding-gate.test.cjs
+      - name: Test manufacturer production golden-path binding
+        run: node --test tests/api/manufacturer-production-flow.test.cjs
       - name: Validate R11 backup policy
         run: python scripts/validate_backup_policy.py
       - name: Validate R14 supply-chain policy
