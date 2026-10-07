@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "data/lmt-battery-71-eu-conformance-v1.json"
+      - "data/dpp-field-catalog.json"
       - "data/eu-dpp-harmonised-standards-v1.json"
       - "data/eu-dpp-system-contracts-v1.json"
       - "data/eu-dpp-evidence-pack-template-v1.json"
