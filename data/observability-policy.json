@@ -50,7 +50,10 @@
     "provision",
     "batch-provision",
     "imports",
-    "export"
+    "export",
+    "application",
+    "manufacturer-onboarding",
+    "registration-link"
   ],
   "runtime_gap": "Production/runtime log aggregation and deployed request-correlation evidence remain pending full M17-M19 acceptance plus production logging-backend and retention evidence.",
   "failure_mode": {

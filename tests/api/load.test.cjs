@@ -252,7 +252,7 @@ test('synthetic multi-surface concurrency, import volume and overload budgets pa
             env:{
               DPP_SHARED_RATE_LIMIT_ENABLED:'true',
               DPP_SUPABASE_URL:'https://example.supabase.co',
-              DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+              DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_t07_test'
             },
             fetchImpl:sharedFetch,
             nowMs:1_800_000_000_000,

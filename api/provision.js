@@ -7,6 +7,11 @@ const { startRequestObservability } = require('./_observability.js');
 const { findRestrictedPublicPaths, findAuthorityOnlyPaths } = require('./_access_policy.js');
 const PUBLIC = require('./_public_config.js');
 
+const CATEGORIES=new Set([
+  'portable','light_means_of_transport','starting_lighting_ignition',
+  'industrial','electric_vehicle','other'
+]);
+
 function send(res,status,body){
   res.statusCode=status;
   res.setHeader('Content-Type','application/json; charset=utf-8');
@@ -63,7 +68,7 @@ function validateBody(body){
     return {status:422,code:'VALIDATION_ERROR'};
   }
   const category=publicPayload.model && publicPayload.model.identification && publicPayload.model.identification.category;
-  if(category != null && category!=='light_means_of_transport'){
+  if(category != null && !CATEGORIES.has(category)){
     return {status:422,code:'VALIDATION_ERROR'};
   }
 
@@ -133,7 +138,7 @@ async function rpc(payload,authorization,env=process.env,fetchImpl=fetch,timeout
   let response;
   let data=null;
   try{
-    response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/dpp_api_scooter_battery_provision`,{
+    response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/dpp_api_battery_provision`,{
       method:'POST',
       headers:{
         apikey:key,
@@ -240,5 +245,5 @@ async function handler(req,res){
 module.exports=handler;
 module.exports._test={
   bearer,validUuid,plainObject,validTimestamp,normalizeIdentifier,canonicalOrigin,
-  validateBody,validProvisionResult,mapDatabaseError,rpc,DEFAULT_RPC_TIMEOUT_MS
+  CATEGORIES,validateBody,validProvisionResult,mapDatabaseError,rpc,DEFAULT_RPC_TIMEOUT_MS
 };

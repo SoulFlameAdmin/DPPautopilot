@@ -3,7 +3,7 @@
 const { getSupabaseConfig } = require('./_supabase_config.js');
 
 const { parseBody, bodyErrorResponse } = require('./_request.js');
-const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
+const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
 
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -158,6 +158,14 @@ async function handler(req,res){
   if(!authorization){
     return send(res,401,{error:{code:'AUTH_REQUIRED',message:'Bearer authentication is required.'}});
   }
+
+  // Registration creation is intentionally anonymous and remains protected by
+  // the process-local network budget. Authenticated GET/PATCH additionally use
+  // the shared Supabase limiter so multi-isolate bearer/network budgets cannot
+  // be bypassed after the magic-link session is established.
+  const shared=await enforceSharedRateLimit(req,res,'registration-link',authorization,{ruleName:'authenticated_write'});
+  if(shared.error) return send(res,503,sharedRateLimitUnavailableBody());
+  if(!shared.allowed) return send(res,429,rateLimitBody());
 
   if(method==='PATCH'){
     const requestId=String(body.request_id||'');

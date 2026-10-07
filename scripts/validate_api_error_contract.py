@@ -54,7 +54,7 @@ for sqlstate,entry in contract.get("common_sqlstate",{}).items():
     assert isinstance(entry["message"],str) and entry["message"].strip()
     seen_surface_entries+=1
 
-expected_surfaces={"models","items","passport","provision","batch-provision","export","imports","tenant","organizations","members","carrier"}
+expected_surfaces={"models","items","passport","provision","batch-provision","export","imports","tenant","organizations","members","carrier","manufacturer-onboarding"}
 assert set(contract.get("surfaces",{}))==expected_surfaces, (
     f"M22 API surface drift: {sorted(contract.get('surfaces',{}))}"
 )
@@ -68,7 +68,7 @@ for surface,mapping in contract.get("surfaces",{}).items():
 
 assert seen_surface_entries>=20, "M22 API error catalog unexpectedly small"
 
-api_surfaces={"models":"models","items":"items","passport":"passport","provision":"provision","batch-provision":"batch-provision","export":"export","imports":"imports","tenant":"tenant","organizations":"organizations","members":"members","carrier":"carriers"}
+api_surfaces={"models":"models","items":"items","passport":"passport","provision":"provision","batch-provision":"batch-provision","export":"export","imports":"imports","tenant":"tenant","organizations":"organizations","members":"members","carrier":"carriers","manufacturer-onboarding":"manufacturer-onboarding"}
 api_names=list(api_surfaces)
 declared_codes={
     entry["code"]
@@ -117,5 +117,6 @@ assert contract["surfaces"]["organizations"]["23505"]["code"]=="ORGANIZATION_CON
 assert contract["surfaces"]["members"]["DP502"]["code"]=="MEMBER_TARGET_NOT_FOUND"
 assert contract["surfaces"]["members"]["DP503"]["code"]=="MEMBER_NOT_FOUND"
 assert contract["surfaces"]["members"]["DP505"]["code"]=="MEMBER_CONFLICT"
+assert contract["surfaces"]["manufacturer-onboarding"]["DP501"]["code"]=="VALIDATION_ERROR"
 
 print(f"M22_API_ERROR_CONTRACT_PASS: {seen_surface_entries} SQLSTATE mappings centralized across {len(api_names)} API surfaces")

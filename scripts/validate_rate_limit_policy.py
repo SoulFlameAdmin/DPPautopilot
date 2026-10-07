@@ -41,13 +41,13 @@ for name,(limit,window) in expected_rules.items():
     assert rules[name]["window_seconds"]==window
 
 surfaces=policy.get("surfaces",{})
-assert set(surfaces)=={"tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr","carriers"}
-api_surface_inventory={
-    path.stem for path in (ROOT/"api").glob("*.js")
-    if not path.name.startswith("_")
-}
-assert set(surfaces)==api_surface_inventory, f"R05 uncovered public API surface(s): {sorted(api_surface_inventory-set(surfaces))}"
 expected_surface_rules={
+    "application":{"GET":"authenticated_read","POST":"authenticated_write"},
+    "manufacturer-onboarding":{"GET":"authenticated_read","POST":"authenticated_write"},
+    # Registration request creation is anonymous but intentionally consumes the
+    # stricter write budget locally. Authenticated GET/PATCH use the same write
+    # budget in both local and shared layers.
+    "registration-link":{"GET":"authenticated_write","POST":"authenticated_write","PATCH":"authenticated_write"},
     "tenant":{"GET":"authenticated_read","POST":"authenticated_write"},
     "organizations":{"GET":"authenticated_read","POST":"authenticated_write"},
     "members":{"GET":"authenticated_read","POST":"authenticated_write","PATCH":"authenticated_write","DELETE":"authenticated_write"},
@@ -62,6 +62,11 @@ expected_surface_rules={
     "qr":{"GET":"public_passport_read"},
 }
 assert surfaces==expected_surface_rules, "R05 surface/method policy drift"
+api_surface_inventory={
+    path.stem for path in (ROOT/"api").glob("*.js")
+    if not path.name.startswith("_")
+}
+assert set(surfaces)==api_surface_inventory, f"R05 uncovered public API surface(s): {sorted(api_surface_inventory-set(surfaces))}"
 
 response=policy.get("response",{})
 assert response.get("http_status")==429
@@ -86,12 +91,21 @@ for token in [
 ]:
     assert token in helper, f"R05 helper missing {token}"
 
-for surface in ["tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr","carriers"]:
+# Every public API surface must consume the process-local network budget before
+# business RPCs. Most use classifier defaults; registration-link deliberately
+# applies the stricter write budget to all three methods because POST is public.
+for surface in sorted(set(surfaces)-{"registration-link"}):
     text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
     assert "require('./_rate_limit.js')" in text, f"{surface} does not import R05 limiter"
     call=f"enforceRateLimit(req,res,'{surface}')"
     assert call in text, f"{surface} does not enforce R05 limiter"
     assert text.index(call) < text.index("await rpc(") if "await rpc(" in text else True
+
+registration=(ROOT/"api/registration-link.js").read_text(encoding="utf-8")
+registration_local="enforceRateLimit(req,res,'registration-link',{ruleName:'authenticated_write'})"
+assert "require('./_rate_limit.js')" in registration
+assert registration_local in registration, "registration-link does not enforce the strict local write budget"
+assert registration.index(registration_local) < registration.index("await rpc(")
 
 contract=json.loads((ROOT/"data/api-error-contract.json").read_text(encoding="utf-8"))
 assert contract["local_codes"]["RATE_LIMITED"]=={
@@ -133,6 +147,7 @@ assert "10 minutes" in shared.get("stale_row_retention","")
 assert shared.get("runtime_gate")=="DPP_SHARED_RATE_LIMIT_ENABLED=true"
 assert shared.get("failure_mode")=="fail_closed_503"
 assert "public passport" in shared.get("public_anonymous_scope","")
+assert "registration-link POST" in shared.get("public_anonymous_scope","")
 
 migration=(ROOT/"supabase/migrations/20260920152000_dpp_shared_rate_limit_backend.sql").read_text(encoding="utf-8")
 for token in [
@@ -173,14 +188,29 @@ assert "feature-gated shared limiter consumes both pseudonymous buckets" in test
 assert "shared limiter fails closed when its backend is unavailable" in test_text
 assert "all authenticated API surfaces honor shared limiter 429 before business RPC" in test_text
 
-for surface in ["tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","carriers"]:
+# Every fully-authenticated API surface must wire the shared limiter. Public QR
+# and anonymous registration-link POST remain local-only by design; the same
+# registration handler must still apply shared protection after bearer auth for
+# GET/PATCH.
+shared_surfaces=[
+    "application","manufacturer-onboarding","tenant","organizations","members",
+    "models","items","passport","provision","batch-provision","imports","export","carriers"
+]
+for surface in shared_surfaces:
     surface_text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
     assert "enforceSharedRateLimit" in surface_text, f"{surface} does not import shared R05 limiter"
     assert f"enforceSharedRateLimit(req,res,'{surface}'" in surface_text, f"{surface} does not wire shared R05 limiter"
 
+registration_shared="enforceSharedRateLimit(req,res,'registration-link',authorization,{ruleName:'authenticated_write'})"
+assert "enforceSharedRateLimit" in registration, "registration-link does not import shared R05 limiter"
+assert registration_shared in registration, "registration-link authenticated methods do not wire shared R05 limiter"
+assert registration.index("if(method==='POST')") < registration.index("const authorization=bearer(req)")
+assert registration.index("const authorization=bearer(req)") < registration.index(registration_shared)
+
 limitations=policy.get("limitations",[])
 assert any("production enablement" in x for x in limitations)
 assert any("Anonymous public passport" in x for x in limitations)
+assert any("anonymous registration-link" in x for x in limitations)
 assert any("multi-isolate" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: twelve API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")
+print("R05_RATE_LIMIT_POLICY_PASS: fifteen API surfaces keep local abuse budgets; all authenticated surfaces wire the atomic shared Supabase backend behind an explicit fail-closed feature gate; anonymous public passport and registration creation remain local-only pending safe distributed identity acceptance")

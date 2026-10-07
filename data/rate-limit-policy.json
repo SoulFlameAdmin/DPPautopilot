@@ -27,6 +27,19 @@
     }
   },
   "surfaces": {
+    "application": {
+      "GET": "authenticated_read",
+      "POST": "authenticated_write"
+    },
+    "manufacturer-onboarding": {
+      "GET": "authenticated_read",
+      "POST": "authenticated_write"
+    },
+    "registration-link": {
+      "GET": "authenticated_write",
+      "POST": "authenticated_write",
+      "PATCH": "authenticated_write"
+    },
     "models": {
       "GET": "authenticated_read",
       "POST": "authenticated_write",
@@ -95,7 +108,7 @@
   },
   "limitations": [
     "Shared authenticated runtime enforcement is implemented behind DPP_SHARED_RATE_LIMIT_ENABLED=true; production enablement/deployed verification is not yet proven.",
-    "Anonymous public passport traffic remains process-local until a safe distributed identity path is available without exposing a directly abusable anonymous consume RPC.",
+    "Anonymous public passport traffic and anonymous registration-link creation remain process-local until safe distributed identity paths are available without exposing directly abusable anonymous consume RPCs.",
     "Production acceptance still requires deployed multi-isolate/real-network abuse and load evidence."
   ],
   "memory_safety": {
@@ -126,6 +139,6 @@
     "application_key_contract": "surface|rule|network:<32 hex> or surface|rule|credential:<24 hex>",
     "runtime_gate": "DPP_SHARED_RATE_LIMIT_ENABLED=true",
     "failure_mode": "fail_closed_503",
-    "public_anonymous_scope": "not_shared; local limiter remains authoritative for public passport identifier GET"
+    "public_anonymous_scope": "not_shared; local limiter remains authoritative for public passport identifier GET and anonymous registration-link POST"
   }
 }

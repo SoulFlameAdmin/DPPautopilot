@@ -68,7 +68,28 @@ function showEarlyAccess(client){
   addEarlyAccessNotice(client);
   disableEarlyAccessControls();
 }
+function companySession(){
+  try{
+    const value=JSON.parse(sessionStorage.getItem("dpp_company_session_v1")||"null");
+    return value?.access_token?value:null;
+  }catch{return null}
+}
+async function ensureOnboardingConfigured(){
+  const active=companySession();
+  if(!active)return true;
+  const response=await fetch("/api/manufacturer-onboarding",{
+    headers:{Authorization:"Bearer "+active.access_token,Accept:"application/json"},
+    cache:"no-store"
+  });
+  if(response.status===401)return true;
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data?.error?.message||data?.error?.code||("HTTP "+response.status));
+  if(data?.data?.configuration?.status==="configured")return true;
+  location.replace("/dashboard");
+  return false;
+}
 async function loadProductionDashboard(){
+  if(!await ensureOnboardingConfigured())return;
   await loadScript("/assets/csp/manufacturer-inline-1.js");
   await loadScript("/vendor/xlsx.full.min.js");
   await loadScript("/assets/csp/manufacturer-ops-inline-1.js");
