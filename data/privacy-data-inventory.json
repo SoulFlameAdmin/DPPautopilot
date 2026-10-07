@@ -5,45 +5,34 @@
   "scope": "DPP Autopilot only. Unrelated tables in the shared Supabase project are explicitly out of scope.",
   "data_subjects": [
     "DPP organization users represented by Supabase Auth user IDs and organization memberships",
+    "Prospective client and manufacturer contacts submitting DPP onboarding or early-access data",
     "Business organizations operating DPP records"
   ],
   "processors_and_recipients": [
     {
       "name": "Supabase",
       "role": "processor/platform",
-      "services": [
-        "Auth",
-        "Postgres",
-        "Storage",
-        "Edge Functions"
-      ],
-      "data": "identity/auth, DPP database records, evidence metadata and private dpp-evidence object bytes",
-      "status": "Auth/Postgres active; private dpp-evidence Storage + caller-JWT dpp-evidence-object Edge Function deployed; final authenticated lifecycle acceptance remains incomplete"
+      "services": ["Auth", "Postgres", "Storage", "Edge Functions"],
+      "data": "identity/auth, DPP database records, onboarding/application records, evidence metadata and private dpp-evidence object bytes",
+      "status": "Auth/Postgres active; private dpp-evidence Storage and caller-JWT evidence Edge Function deployed; final lifecycle acceptance remains incomplete"
     },
     {
       "name": "Vercel",
       "role": "application runtime/processor",
-      "services": [
-        "Serverless API hosting"
-      ],
+      "services": ["Serverless API hosting"],
       "data": "HTTP request metadata and DPP API payloads when deployed",
-      "status": "preview/production deployment evidence exists, but final production acceptance is blocked by Vercel SSO/build constraints and incomplete dependent gates"
+      "status": "preview/production deployment evidence exists; final production acceptance remains dependent on remaining gates"
     },
     {
       "name": "GitHub",
       "role": "development/CI processor",
-      "services": [
-        "repository",
-        "Actions"
-      ],
+      "services": ["repository", "Actions"],
       "data": "source code and synthetic test fixtures only; production personal data is prohibited by project policy"
     },
     {
       "name": "EU DPP registry provider",
       "role": "planned external recipient",
-      "services": [
-        "registry submission"
-      ],
+      "services": ["registry submission"],
       "data": "approved DPP registry request payload and technical submission metadata",
       "status": "provider/live integration not yet accepted"
     }
@@ -55,19 +44,13 @@
       "purpose": "Account authentication, recovery, security and identity linkage",
       "location": "Supabase Auth managed auth schema",
       "processor": "Supabase",
-      "tables": [
-        "auth.users"
-      ],
+      "tables": ["auth.users"],
       "fields": "email/phone when configured, password hash, confirmation/recovery/security metadata, timestamps and provider metadata",
       "retention": {
         "status": "pending_policy",
         "current_behavior": "Managed by Supabase Auth account lifecycle; DPP deletion/retention policy not yet accepted"
       },
-      "controls": [
-        "publishable-key-only browser config",
-        "memory-only demo tokens",
-        "R06 fixed recovery redirect and fragment consumption"
-      ]
+      "controls": ["publishable-key-only browser config", "memory-only demo tokens", "R06 recovery redirect and fragment consumption"]
     },
     {
       "id": "tenant_identity_authorization",
@@ -75,20 +58,13 @@
       "purpose": "Tenant membership, roles and active organization authorization",
       "location": "Supabase Postgres public DPP namespace",
       "processor": "Supabase",
-      "tables": [
-        "dpp_organization_members",
-        "dpp_user_tenant_context"
-      ],
+      "tables": ["dpp_organization_members", "dpp_user_tenant_context"],
       "fields": "user_id, organization_id, role, active_organization_id, timestamps",
       "retention": {
         "status": "pending_policy",
         "current_behavior": "Rows persist until membership/user/organization lifecycle deletion or cascade; no time-based expiry"
       },
-      "controls": [
-        "RLS",
-        "active-tenant RBAC",
-        "foreign keys to auth.users/membership"
-      ]
+      "controls": ["RLS", "active-tenant RBAC", "foreign keys to auth.users/membership"]
     },
     {
       "id": "organization_metadata",
@@ -96,18 +72,55 @@
       "purpose": "Identify tenant organizations and route tenant-scoped records",
       "location": "Supabase Postgres public DPP namespace",
       "processor": "Supabase",
-      "tables": [
-        "dpp_organizations"
-      ],
+      "tables": ["dpp_organizations"],
       "fields": "organization name, slug, timestamps",
       "retention": {
         "status": "pending_policy",
         "current_behavior": "Persists until organization deletion; dependent DPP records use foreign-key lifecycle rules"
       },
-      "controls": [
-        "tenant/RBAC APIs",
-        "RLS"
-      ]
+      "controls": ["tenant/RBAC APIs", "RLS"]
+    },
+    {
+      "id": "client_application_intake",
+      "classification": "personal_and_business_sales_onboarding",
+      "purpose": "Collect authenticated prospective-client details needed to assess a DPP pilot, prepare a quote and bind an accepted application to an organization",
+      "location": "Supabase Postgres public DPP namespace",
+      "processor": "Supabase",
+      "tables": ["dpp_client_applications"],
+      "fields": "auth user ID, email, company/contact name, country, website, employee/user/site counts, systems, product categories, SKU and annual-unit estimates, notes, quote values, status, organization linkage and timestamps",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "Applications persist while pilot/commercial review is active and currently have no accepted time-based expiry; user deletion cascades the application."
+      },
+      "controls": ["RLS enabled", "direct anon/authenticated table privileges revoked", "authenticated submission RPC", "bounded text and count inputs", "application ownership derived from authenticated user context"]
+    },
+    {
+      "id": "registration_and_early_access",
+      "classification": "personal_contact_and_business_lead_data",
+      "purpose": "Support registration requests and time-bounded early-access dashboard links before or during client onboarding",
+      "location": "Supabase Postgres public DPP namespace",
+      "processor": "Supabase",
+      "tables": ["dpp_registration_requests", "dpp_early_access_sessions"],
+      "fields": "email, registration/application/user linkage, registration status and timestamps; token hash, company/manufacturer/country/request text, session status, open/submission/expiry timestamps",
+      "retention": {
+        "status": "pending_policy_with_expiry_precursor",
+        "current_behavior": "Registration requests currently have no accepted time-based purge. Early-access sessions carry a server-side expires_at default of 30 days, but automated deletion after expiry is not yet accepted or evidenced."
+      },
+      "controls": ["RLS enabled", "direct client table privileges revoked", "registration verification binds authenticated user email", "early-access link secrets are represented by token hashes", "bounded email and business text fields"]
+    },
+    {
+      "id": "manufacturer_onboarding_configuration",
+      "classification": "personal_actor_and_business_workflow_configuration",
+      "purpose": "Persist the eight manufacturer onboarding answers and derive tenant-scoped company/workflow defaults without fabricating product technical data",
+      "location": "Supabase Postgres public DPP namespace",
+      "processor": "Supabase",
+      "tables": ["dpp_manufacturer_onboarding_answers", "dpp_manufacturer_configurations"],
+      "fields": "organization/user IDs, question key, raw and structured answer values, company/manufacturer defaults, battery preferences, serial/batch workflow, production scale, import and QR-print methods, revision and timestamps",
+      "retention": {
+        "status": "pending_policy",
+        "current_behavior": "Answers and configuration persist with the tenant lifecycle; organization deletion cascades both stores and no separate time-based expiry is implemented."
+      },
+      "controls": ["RLS enabled", "direct anon/authenticated table privileges revoked", "active-tenant RBAC RPCs", "fixed eight-question key allowlist", "bounded raw answers", "structured values must be JSON objects", "configuration derivation excludes fabricated product technical characteristics"]
     },
     {
       "id": "battery_product_records",
@@ -115,25 +128,13 @@
       "purpose": "Maintain canonical battery model/item records required for DPP workflows",
       "location": "Supabase Postgres public DPP namespace",
       "processor": "Supabase",
-      "tables": [
-        "dpp_battery_models",
-        "dpp_battery_items",
-        "dpp_provision_batches",
-        "dpp_provision_batch_items"
-      ],
-      "fields": "model/manufacturer/category, battery unique identifier, lifecycle status, canonical_data JSON, production batch key/request fingerprint/quantity, batch-to-item/passport membership, creator user ID, timestamps",
+      "tables": ["dpp_battery_models", "dpp_battery_items", "dpp_provision_batches", "dpp_provision_batch_items"],
+      "fields": "model/manufacturer/category, battery unique identifier, lifecycle status, canonical_data JSON, production batch key/request fingerprint/quantity, batch membership, creator user ID and timestamps",
       "retention": {
         "status": "pending_policy",
-        "current_behavior": "Battery/model records and committed provisioning batch metadata persist until authorized lifecycle/deletion; no automatic time-based expiry. Batch metadata contains business production identifiers and cryptographic request fingerprints, not raw authentication secrets."
+        "current_behavior": "Battery/model records and committed provisioning batch metadata persist until authorized lifecycle/deletion; no automatic time-based expiry."
       },
-      "controls": [
-        "tenant scope",
-        "field validation",
-        "lifecycle rules",
-        "created_by actor linkage",
-        "batch provisioning tables deny direct client table access and are written through tenant/RBAC RPC only"
-      ],
-      "minimization_note": "canonical_data must remain product/business data; personal data should not be placed in flexible JSON without an approved catalog purpose"
+      "controls": ["tenant scope", "field validation", "lifecycle rules", "created_by actor linkage", "batch provisioning direct client access denied"]
     },
     {
       "id": "passport_records",
@@ -141,21 +142,13 @@
       "purpose": "Create versioned DPP passport projections with explicit public/private split",
       "location": "Supabase Postgres public DPP namespace",
       "processor": "Supabase",
-      "tables": [
-        "dpp_passports",
-        "dpp_passport_versions"
-      ],
+      "tables": ["dpp_passports", "dpp_passport_versions"],
       "fields": "public_payload, private_payload, status, battery linkage, creator/change actor IDs, version timestamps",
       "retention": {
         "status": "pending_policy",
         "current_behavior": "Current passport plus version history persists; version history is append-oriented and has no accepted time-based retention"
       },
-      "controls": [
-        "M10 public/private policy",
-        "public response allowlist",
-        "tenant/RBAC private access",
-        "version history"
-      ]
+      "controls": ["M10 public/private policy", "public response allowlist", "tenant/RBAC private access", "version history"]
     },
     {
       "id": "authority_only_regulatory_evidence",
@@ -163,22 +156,13 @@
       "purpose": "Hold LMT authority-only evidence needed for passport readiness without exposing its payload through organization/public APIs",
       "location": "Supabase Postgres public DPP namespace with deny-by-default direct client access",
       "processor": "Supabase",
-      "tables": [
-        "dpp_authority_evidence"
-      ],
+      "tables": ["dpp_authority_evidence"],
       "fields": "organization_id, model_id, regulatory field number, authority-only evidence JSON, creator user ID, timestamps",
       "retention": {
         "status": "pending_policy",
-        "current_behavior": "Persists with the tenant/model lifecycle. Direct anon/authenticated table access is revoked; final authority access and retention policy are pending."
+        "current_behavior": "Persists with the tenant/model lifecycle; final authority access and retention policy are pending."
       },
-      "controls": [
-        "RLS enabled",
-        "no direct anon/authenticated table grants",
-        "Step 18 readiness reads only existence for field 50 and never returns evidence payload",
-        "Step 19 owner/admin/editor may submit or replace field-50 evidence through a write-only RPC; the organization/public API receives receipt metadata only and never reads the stored evidence payload",
-        "authority read access remains deferred to the dedicated authority-access stage"
-      ],
-      "minimization_note": "Authority-only payload must not be copied into public_payload, organization private_payload, logs, or public exports."
+      "controls": ["RLS enabled", "no direct anon/authenticated table grants", "readiness reads existence only", "write-only evidence RPC", "authority read access deferred"]
     },
     {
       "id": "import_staging",
@@ -186,22 +170,13 @@
       "purpose": "Map, validate and transactionally commit imported DPP product data",
       "location": "Supabase Postgres public DPP namespace",
       "processor": "Supabase",
-      "tables": [
-        "dpp_import_mappings",
-        "dpp_import_runs",
-        "dpp_import_rows"
-      ],
+      "tables": ["dpp_import_mappings", "dpp_import_runs", "dpp_import_rows"],
       "fields": "source headers/mapping, normalized model/item JSON, validation errors, creator ID, processing timestamps",
       "retention": {
         "status": "implemented_precursor",
         "current_behavior": "Terminal invalid/committed import runs may be purged only after 30 days through owner/admin dpp_api_purge_import_staging(); staged/validated runs are preserved; final accepted policy remains pending."
       },
-      "controls": [
-        "tenant/RBAC API",
-        "transactional validation/commit",
-        "request size/input validation",
-        "R08 owner/admin terminal staging purge with immutable audit DELETE evidence"
-      ]
+      "controls": ["tenant/RBAC API", "transactional validation/commit", "request size/input validation", "R08 owner/admin terminal staging purge with immutable audit DELETE evidence"]
     },
     {
       "id": "registry_submission",
@@ -209,22 +184,13 @@
       "purpose": "Track DPP registry request/response state, retries, external references and idempotency",
       "location": "Supabase Postgres public DPP namespace; approved payload may later be transmitted to external registry provider",
       "processor": "Supabase; planned external registry recipient",
-      "tables": [
-        "dpp_registry_submissions"
-      ],
-      "fields": "request/response payloads, external reference, provider/environment/status, errors/retries, creator ID, timestamps",
+      "tables": ["dpp_registry_submissions"],
+      "fields": "request/response payloads, external reference, provider/environment/status, errors/retries, creator ID and timestamps",
       "retention": {
         "status": "pending_policy",
-        "current_behavior": "Submission history persists; obvious credential-bearing JSON keys are technically blocked from request/response payload storage. Legal/operational retention and external-recipient terms are not yet accepted."
+        "current_behavior": "Submission history persists; obvious credential-bearing JSON keys are technically blocked from request/response payload storage."
       },
-      "controls": [
-        "test/live environment flag",
-        "idempotency",
-        "retry contract",
-        "tenant linkage",
-        "recursive fail-closed credential-key guard on request_payload/response_payload",
-        "guard helper and trigger function not client-executable"
-      ],
+      "controls": ["test/live environment flag", "idempotency", "retry contract", "tenant linkage", "recursive credential-key guard", "credential-key guard helper and trigger function not client-executable"],
       "minimization_note": "Registry request/response JSON must not persist obvious credential-bearing keys. Provider/legal payload scope and retention terms still require acceptance before live delivery."
     },
     {
@@ -233,23 +199,13 @@
       "purpose": "Attach evidence to DPP records with integrity metadata",
       "location": "Metadata in Supabase Postgres; private object bytes in Supabase Storage bucket dpp-evidence via caller-JWT Edge Function dpp-evidence-object",
       "processor": "Supabase",
-      "tables": [
-        "dpp_evidence_attachments"
-      ],
-      "fields": "storage path, original filename, content type, size, SHA-256, metadata JSON, creator ID, timestamps; object bytes may contain documents/images",
+      "tables": ["dpp_evidence_attachments"],
+      "fields": "storage path, original filename, content type, size, SHA-256, metadata JSON, creator ID, timestamps and object bytes",
       "retention": {
         "status": "pending_policy",
-        "current_behavior": "Metadata and private object bytes persist; deployed upload path verifies byte_size/SHA-256/content_type before Storage write. Final authenticated upload→download→delete lifecycle and accepted retention period remain pending."
+        "current_behavior": "Metadata and private object bytes persist; deployed upload path verifies byte_size/SHA-256/content_type before Storage write. Final retention period remains pending."
       },
-      "controls": [
-        "10 MiB/type policy",
-        "private dpp-evidence Storage bucket with tenant RLS",
-        "caller-JWT dpp-evidence-object Edge Function verify_jwt=true",
-        "pre-upload byte_size/SHA-256/content_type verification",
-        "no-overwrite Storage upload",
-        "tenant-scoped evidence registration"
-      ],
-      "minimization_note": "filenames, metadata and evidence files may contain personal data and require explicit minimization/redaction rules before production"
+      "controls": ["10 MiB/type policy", "private dpp-evidence Storage bucket with tenant RLS", "caller-JWT dpp-evidence-object Edge Function verify_jwt=true", "SHA-256 integrity verification", "no-overwrite Storage upload"]
     },
     {
       "id": "audit_history",
@@ -257,22 +213,13 @@
       "purpose": "Maintain immutable accountability trail for DPP record changes",
       "location": "Supabase Postgres public DPP namespace",
       "processor": "Supabase",
-      "tables": [
-        "dpp_audit_log"
-      ],
-      "fields": "actor_id, organization_id, action, target identifiers, before/after JSON snapshots, timestamp",
+      "tables": ["dpp_audit_log"],
+      "fields": "actor_id, organization_id, action, target identifiers, before/after JSON snapshots and timestamp",
       "retention": {
         "status": "pending_policy_with_audit_exception",
-        "current_behavior": "Audit rows remain append-only/immutable. Before/after snapshots now recursively redact values under obvious credential-bearing JSON keys before insertion; accepted retention period and broader minimization/deletion exceptions remain pending."
+        "current_behavior": "Audit rows remain append-only/immutable. Credential-bearing JSON keys are recursively redacted in audit copies before insertion; accepted retention period remains pending."
       },
-      "controls": [
-        "immutable audit contract",
-        "tenant isolation",
-        "recursive audit-only credential-key redaction before immutable insert",
-        "source rows are not modified by audit redaction",
-        "redaction helper has no anon/authenticated EXECUTE"
-      ],
-      "retention_risk": "Credential-like JSON keys are technically redacted from audit copies, but broader personal/confidential-field minimization and accepted audit retention/deletion exceptions still require policy review."
+      "controls": ["immutable audit contract", "tenant isolation", "recursive audit-only credential-key redaction before immutable insert", "source rows are not modified by audit redaction", "redaction helper has no anon/authenticated EXECUTE"]
     },
     {
       "id": "app_binding",
@@ -280,38 +227,27 @@
       "purpose": "Bind DPP app/repository namespace and prevent cross-project confusion",
       "location": "Supabase Postgres public DPP namespace",
       "processor": "Supabase",
-      "tables": [
-        "dpp_app_binding"
-      ],
-      "fields": "app key, repository name, binding mode, notes, timestamp",
+      "tables": ["dpp_app_binding"],
+      "fields": "app key, repository name, binding mode, notes and timestamp",
       "retention": {
         "status": "configuration_lifetime",
         "current_behavior": "Retained while the DPP application binding exists"
       },
-      "controls": [
-        "single canonical DPP binding"
-      ]
+      "controls": ["single canonical DPP binding"]
     },
     {
       "id": "rate_limit_transient",
       "classification": "pseudonymous_security_metadata",
-      "purpose": "Abuse prevention before upstream API work, with shared authenticated budgets prepared for distributed enforcement",
+      "purpose": "Abuse prevention before upstream API work with shared authenticated budgets",
       "location": "Process-local serverless memory plus Supabase Postgres DPP namespace for authenticated shared buckets",
       "processor": "Application runtime/Vercel when deployed; Supabase for shared authenticated counters",
-      "tables": [
-        "dpp_rate_limit_buckets"
-      ],
-      "fields": "truncated SHA-256 network/Authorization-derived bucket digests, surface/rule namespace, request counters and fixed-window timestamps; raw IP addresses and bearer credentials are not stored",
+      "tables": ["dpp_rate_limit_buckets"],
+      "fields": "truncated SHA-256 digest values derived from network and Authorization identities, surface/rule namespace, counters and timestamps; raw IP addresses and bearer credentials are not stored",
       "retention": {
         "status": "implemented_precursor",
-        "current_behavior": "Process-local entries are pruned/capped; shared authenticated rows are opportunistically deleted after their reset time is older than 10 minutes. Final deployed distributed/public-endpoint policy remains unaccepted."
+        "current_behavior": "Process-local entries are pruned/capped; shared authenticated rows are opportunistically deleted after their reset time is older than 10 minutes."
       },
-      "controls": [
-        "raw IP and bearer token are never stored in bucket keys",
-        "direct anon/authenticated table privileges revoked with RLS enabled",
-        "shared consume RPC requires authenticated request-user context and validated pseudonymous key format",
-        "canonical 429 behavior remains process-local until shared runtime wiring is accepted"
-      ]
+      "controls": ["raw IP and bearer token are never stored in bucket keys", "direct anon/authenticated table privileges revoked with RLS enabled", "shared consume RPC requires authenticated user context"]
     },
     {
       "id": "physical_carriers_and_scans",
@@ -319,23 +255,13 @@
       "purpose": "Bind QR/NFC carriers to battery items and record carrier scan events for operational/audit evidence",
       "location": "Supabase Postgres public DPP namespace",
       "processor": "Supabase",
-      "tables": [
-        "dpp_physical_carriers",
-        "dpp_carrier_scan_events"
-      ],
-      "fields": "organization_id, battery_item_id, carrier kind/technology, canonical public URL, optional external UID, status, binding/revocation actor and timestamps; scan source/result, optional authenticated actor_id and occurred_at",
+      "tables": ["dpp_physical_carriers", "dpp_carrier_scan_events"],
+      "fields": "organization_id, battery_item_id, carrier kind/technology, public URL, optional external UID, status, actor IDs and timestamps; scan source/result and optional actor_id",
       "retention": {
         "status": "pending_policy",
-        "current_behavior": "Carrier bindings and scan history persist with the tenant/battery lifecycle; no accepted time-based expiry is implemented. Public scans may have null actor_id and do not store raw IP addresses or bearer credentials."
+        "current_behavior": "Carrier bindings and scan history persist with the tenant/battery lifecycle; no accepted time-based expiry is implemented."
       },
-      "controls": [
-        "RLS enabled on carrier and scan tables",
-        "no direct anon/authenticated table grants",
-        "binding is tenant-scoped and server-derives canonical public_url",
-        "public carrier open returns public passport projection only",
-        "scan history is readable only through authenticated tenant-scoped RPC"
-      ],
-      "minimization_note": "external_uid must contain only carrier/device identifiers needed for operations; do not store personal data, raw network identifiers or authentication secrets."
+      "controls": ["RLS enabled", "no direct anon/authenticated table grants", "tenant-scoped binding", "public projection only", "authenticated tenant-scoped scan history"]
     },
     {
       "id": "passport_lifecycle_state",
@@ -343,28 +269,20 @@
       "purpose": "Persist terminal passport lifecycle disposition and replacement linkage for persistent public QR/NFC resolution",
       "location": "Supabase Postgres public DPP namespace",
       "processor": "Supabase",
-      "tables": [
-        "dpp_passport_lifecycle"
-      ],
-      "fields": "passport_id, organization_id, disposition, reason code/note, replacement_item_id, changed_by auth user ID, changed_at",
+      "tables": ["dpp_passport_lifecycle"],
+      "fields": "passport_id, organization_id, disposition, reason code/note, replacement_item_id, changed_by auth user ID and changed_at",
       "retention": {
         "status": "pending_policy",
         "current_behavior": "Lifecycle metadata persists with passport history; no accepted time-based expiry is implemented."
       },
-      "controls": [
-        "RLS enabled with no direct anon/authenticated table privileges",
-        "terminal transition requires active tenant owner/admin/editor authorization",
-        "public resolver exposes lifecycle-safe fields only and never reason_note or changed_by",
-        "replacement target must resolve to an active passport in the same organization"
-      ],
-      "minimization_note": "reason_note is bounded to 500 characters and should contain only operational lifecycle justification, not unnecessary personal data."
+      "controls": ["RLS enabled with no direct anon/authenticated table privileges", "tenant owner/admin/editor transition authorization", "lifecycle-safe public resolver", "same-organization replacement target"]
     }
   ],
   "out_of_scope_shared_project_data": "All non-dpp_* application tables in the shared Supabase project are owned by other applications and are not part of DPP Autopilot privacy inventory.",
   "green_blockers": [
     "M01-M13 declared dependencies are not all GREEN.",
-    "Final regulatory/operational retention periods remain unaccepted for passports/history, registry submissions, evidence and audit snapshots; audit credential-key redaction is only a technical minimization precursor.",
-    "M13 real authenticated deployed upload→download→delete lifecycle acceptance remains incomplete despite deployed private Storage/Edge integrity controls.",
+    "Final regulatory/operational retention periods remain unaccepted for passports/history, registry submissions, evidence and audit snapshots.",
+    "M13 real authenticated deployed evidence lifecycle acceptance remains incomplete.",
     "External registry recipient terms and live payload scope are not accepted.",
     "R08 destructive organization/user deletion remains intentionally disabled pending accepted export/storage/audit/Auth lifecycle rules."
   ],
