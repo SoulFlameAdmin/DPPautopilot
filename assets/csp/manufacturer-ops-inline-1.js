@@ -33,12 +33,16 @@ let cfg=null,session=null,activeOrg=null,items=[],models=[],passports=[],carrier
 
 function setText(node,msg,kind=""){if(!node)return;node.textContent=msg;node.className="result"+(kind?" "+kind:"")}
 function readSession(){
- try{const v=JSON.parse(sessionStorage.getItem(STORAGE)||"null");if(v?.access_token){session=v;return true}}catch{}
+ try{
+  let raw=localStorage.getItem(STORAGE);
+  if(!raw){raw=sessionStorage.getItem(STORAGE);if(raw){localStorage.setItem(STORAGE,raw);sessionStorage.removeItem(STORAGE)}}
+  const v=JSON.parse(raw||"null");if(v?.access_token){session=v;return true}
+ }catch{}
  session=null;return false;
 }
 function saveSession(v){
- if(v?.access_token){session={access_token:v.access_token,refresh_token:v.refresh_token||session?.refresh_token||"",expires_in:Number(v.expires_in)||3600};sessionStorage.setItem(STORAGE,JSON.stringify(session))}
- else{session=null;sessionStorage.removeItem(STORAGE)}
+ if(v?.access_token){session={access_token:v.access_token,refresh_token:v.refresh_token||session?.refresh_token||"",expires_in:Number(v.expires_in)||3600};localStorage.setItem(STORAGE,JSON.stringify(session));sessionStorage.removeItem(STORAGE)}
+ else{session=null;localStorage.removeItem(STORAGE);sessionStorage.removeItem(STORAGE)}
 }
 async function authCall(path,body){
  const r=await fetch(cfg.supabaseUrl+path,{method:"POST",headers:{apikey:cfg.publishableKey,"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(body)});
