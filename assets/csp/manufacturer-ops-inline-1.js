@@ -139,6 +139,9 @@ async function saveSelectedPassportPilotUpdate(){
   button.disabled=!canWrite()||!selectedPassport||selectedPassport.status!=="active";
  }
 }
+const detailSavePilotUpdate=$("#detailSavePilotUpdate");
+if(detailSavePilotUpdate)detailSavePilotUpdate.addEventListener("click",saveSelectedPassportPilotUpdate);
+
 function syncSearchFields(source){
  const mirror=$("#passportSearchMirror");
  if(source===mirror)$("#passportSearch").value=mirror.value;
