@@ -20,7 +20,7 @@ async function withEnvFetch(fetchImpl,fn){
   const oldUrl=process.env.SUPABASE_URL;
   const oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.SUPABASE_ANON_KEY='sb_publishable_test_only';
   global.fetch=fetchImpl;
   try{return await fn();}
   finally{
@@ -152,7 +152,7 @@ test('failed non-member tenant switch cannot change discovered active tenant',as
 });
 
 test('organization RPC network failure maps to stable 502 without leaking transport detail',async()=>{
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_only'};
   await assert.rejects(
     ()=>handler._test.rpc('dpp_api_organizations_list',{},'Bearer onboarding-token',env,async()=>{throw new Error('socket reset private transport detail');},50),
     error=>{
@@ -166,7 +166,7 @@ test('organization RPC network failure maps to stable 502 without leaking transp
 });
 
 test('organization RPC aborts with a stable timeout error when Supabase stalls',async()=>{
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_only'};
   const fetchImpl=async(_url,options)=>new Promise((_resolve,reject)=>{
     options.signal.addEventListener('abort',()=>{
       const error=new Error('aborted');
@@ -186,7 +186,7 @@ test('organization RPC aborts with a stable timeout error when Supabase stalls',
 });
 
 test('organization RPC timeout remains active while Supabase response body stalls',async()=>{
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_only'};
   const fetchImpl=async(_url,options)=>({
     ok:true,
     json:()=>new Promise((_resolve,reject)=>{
@@ -209,7 +209,7 @@ test('organization RPC timeout remains active while Supabase response body stall
 });
 
 test('organization RPC rejects malformed successful upstream JSON',async()=>{
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_only'};
   const fetchImpl=async()=>({
     ok:true,
     async json(){throw new SyntaxError('malformed json');}

@@ -9,6 +9,71 @@ permissions:
   contents: read
 
 jobs:
+  manufacturer-db:
+    name: Manufacturer isolated database checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dpp_manufacturer_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dpp_manufacturer_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGPASSWORD: postgres
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # This independent job uses only a disposable local service. The validate
+      # job still requires C04 live evidence; no deployment gate is skipped.
+      - name: Replay repository migrations in isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSQL=(psql -h 127.0.0.1 -U postgres -d dpp_manufacturer_test -v ON_ERROR_STOP=1)
+          "${PSQL[@]}" <<'SQL'
+          create extension if not exists pgcrypto;
+          create role anon nologin;
+          create role authenticated nologin;
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          SQL
+          for file in supabase/migrations/*.sql; do
+            echo "Replaying $file"
+            "${PSQL[@]}" -f "$file"
+          done
+      - name: Test manufacturer persistence and tenant security
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSQL=(psql -h 127.0.0.1 -U postgres -d dpp_manufacturer_test -v ON_ERROR_STOP=1)
+          result=0
+          for file in \
+            tests/db/test_manufacturer_onboarding_subset.sql \
+            tests/db/test_organization_onboarding_subset.sql \
+            tests/db/test_active_tenant_api_isolation_subset.sql \
+            tests/db/test_membership_revocation_isolation.sql \
+            tests/db/test_public_private_runtime_subset.sql \
+            tests/db/test_global_rls_grants_guard.sql \
+            tests/db/test_security_definer_rpc_guard.sql \
+            tests/db/test_internal_rpc_surface_subset.sql; do
+            echo "Testing $file"
+            if "${PSQL[@]}" -c BEGIN -f "$file" -c ROLLBACK; then
+              printf -- '- PASS: `%s`\n' "$file" >> "$GITHUB_STEP_SUMMARY"
+            else
+              printf -- '- FAIL: `%s`\n' "$file" >> "$GITHUB_STEP_SUMMARY"
+              result=1
+            fi
+          done
+          exit "$result"
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -96,6 +161,12 @@ jobs:
         run: python scripts/validate_env_secret_management.py
       - name: Validate R02 security header policy
         run: python scripts/validate_security_headers.py
+      - name: Test manufacturer onboarding API contract
+        run: node --test tests/api/manufacturer-onboarding.test.cjs
+      - name: Test XLSX parser and production loader
+        run: node --test tests/unit/xlsx-import.test.cjs
+      - name: Test intake validation, rate limits and log redaction
+        run: node --test tests/api/intake-security.test.cjs
       - name: Validate R11 backup policy
         run: python scripts/validate_backup_policy.py
       - name: Validate R14 supply-chain policy

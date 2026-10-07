@@ -1,5 +1,5 @@
 {
-  "version": 11,
+  "version": 12,
   "task": "R05",
   "status": "partial",
   "strategy": "dual_layer_local_plus_feature_gated_shared_authenticated_runtime",
@@ -80,6 +80,19 @@
       "GET": "authenticated_read",
       "POST": "authenticated_write",
       "PATCH": "authenticated_write"
+    },
+    "application": {
+      "GET": "authenticated_read",
+      "POST": "authenticated_write"
+    },
+    "manufacturer-onboarding": {
+      "GET": "authenticated_read",
+      "POST": "authenticated_write"
+    },
+    "registration-link": {
+      "GET": "authenticated_write",
+      "POST": "authenticated_write",
+      "PATCH": "authenticated_write"
     }
   },
   "response": {
@@ -96,7 +109,8 @@
   "limitations": [
     "Shared authenticated runtime enforcement is implemented behind DPP_SHARED_RATE_LIMIT_ENABLED=true; production enablement/deployed verification is not yet proven.",
     "Anonymous public passport traffic remains process-local until a safe distributed identity path is available without exposing a directly abusable anonymous consume RPC.",
-    "Production acceptance still requires deployed multi-isolate/real-network abuse and load evidence."
+    "Production acceptance still requires deployed multi-isolate/real-network abuse and load evidence.",
+    "registration-link uses the 40/min authenticated_write budget name for all methods, including anonymous POST; it is process-local only and the name does not imply authentication. Distributed email-request abuse protection is not proven."
   ],
   "memory_safety": {
     "max_buckets": 10000,

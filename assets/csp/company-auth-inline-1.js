@@ -2,6 +2,7 @@
 const $=s=>document.querySelector(s);
 const STORAGE="dpp_company_session_v1";
 const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
+const RECOVERY_COOLDOWN_KEY="dpp_recovery_cooldown_v1",RECOVERY_COOLDOWN_MS=60000;
 let cfg=null,session=null,refreshTimer=null,currentUser=null,activeOrg=null,recoveryMode=false;
 
 function result(node,message,kind=""){node.textContent=message;node.className="result"+(kind?" "+kind:"")}
@@ -26,13 +27,13 @@ function scheduleRefresh(expiresIn){
 }
 function saveSession(value){
   session=value&&value.access_token?{access_token:value.access_token,refresh_token:value.refresh_token||"",expires_in:Number(value.expires_in)||3600}:null;
-  if(session){sessionStorage.setItem(STORAGE,JSON.stringify(session));document.body.dataset.companySession="authenticated";scheduleRefresh(session.expires_in)}
+  if(session){localStorage.setItem(STORAGE,JSON.stringify(session));sessionStorage.removeItem(STORAGE);document.body.dataset.companySession="authenticated";scheduleRefresh(session.expires_in)}
   else clearSession(false);
   syncAuthUi();
 }
 function clearSession(sync=true){
   if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null}
-  session=null;sessionStorage.removeItem(STORAGE);document.body.dataset.companySession="anonymous";
+  session=null;localStorage.removeItem(STORAGE);sessionStorage.removeItem(STORAGE);document.body.dataset.companySession="anonymous";
   if(sync)syncAuthUi();
 }
 async function refreshSession(){
@@ -41,11 +42,11 @@ async function refreshSession(){
   saveSession(data);return true;
 }
 function restoreSession(){
-  try{const value=JSON.parse(sessionStorage.getItem(STORAGE)||"null");if(value?.access_token){session=value;document.body.dataset.companySession="authenticated";return true}}catch{}
+  try{const raw=localStorage.getItem(STORAGE)||sessionStorage.getItem(STORAGE);const value=JSON.parse(raw||"null");if(value?.access_token){session=value;localStorage.setItem(STORAGE,JSON.stringify(value));sessionStorage.removeItem(STORAGE);document.body.dataset.companySession="authenticated";return true}}catch{}
   return false;
 }
-function confirmationRedirect(){return new URL("/company",location.origin).href}
-function recoveryRedirect(){return new URL("/company",location.origin).href}
+function confirmationRedirect(){return new URL("/email-confirmed",location.origin).href}
+function recoveryRedirect(){return new URL("/reset-password",location.origin).href}
 function parseConfirmationFragment(){
   const p=new URLSearchParams(location.hash.replace(/^#/,""));
   if(!p.get("access_token"))return false;
@@ -73,6 +74,21 @@ async function api(path,{method="GET",body}={}){
   if(r.status===401&&session?.refresh_token){await refreshSession();return api(path,{method,body})}
   if(!r.ok)throw new Error(data?.error?.message||data?.error?.code||("HTTP "+r.status));
   return data;
+}
+async function verifyRegistrationRequest(){
+  if(!session?.access_token||recoveryMode)return null;
+  const url=new URL(location.href),requestId=url.searchParams.get("request");
+  if(!requestId)return null;
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)){
+    result($("#authResult"),"Невалиден registration request.","bad");return null;
+  }
+  try{
+    const verified=(await api("/api/registration-link",{method:"PATCH",body:{request_id:requestId}})).data;
+    url.searchParams.delete("request");
+    history.replaceState(null,"",url.pathname+url.search+url.hash);
+    result($("#authResult"),"DPP registration verified. Продължаваме към фирмения tenant.","ok");
+    return verified;
+  }catch(e){result($("#authResult"),"Registration verification: "+e.message,"bad");return null}
 }
 function syncAuthUi(){
   const on=!!session?.access_token;
@@ -132,6 +148,12 @@ function showReady(org){
   $("#readyCompany").textContent=org.name+" е активна.";
   $("#readyMeta").textContent="Role: "+org.role+" · tenant: "+org.slug+" · "+org.organization_id;
   loadTeam().catch(e=>result($("#teamResult"),e.message,"bad"));
+  const params=new URLSearchParams(location.search);
+  if(!recoveryMode&&(params.get("dpp")==="1"||params.get("request"))){
+    const target=new URL("/manufacturer",location.origin);
+    target.searchParams.set("onboarding","1");
+    location.replace(target.href);
+  }
 }
 
 function canManageTarget(targetRole){
@@ -202,7 +224,7 @@ async function init(){
   restoreSession();parseConfirmationFragment();syncAuthUi();
   if(recoveryMode)return;
   if(session?.refresh_token){try{await refreshSession()}catch{clearSession()}}
-  if(session?.access_token)await loadTenantState();
+  if(session?.access_token){await verifyRegistrationRequest();await loadTenantState();}
   else result($("#authResult"),"Готово. Създай акаунт или влез.","ok");
 }
 $("#companyName").addEventListener("input",()=>{if(!$("#companySlug").dataset.manual)$("#companySlug").value=slugify($("#companyName").value)});
@@ -214,17 +236,20 @@ $("#signup").addEventListener("click",async()=>{
     const path="/auth/v1/signup?redirect_to="+encodeURIComponent(confirmationRedirect());
     const data=await authCall(path,{method:"POST",body:{email:e,password:p}});
     if(data.access_token){saveSession(data);await loadTenantState();return}
-    $("#verifyCard").hidden=false;$("#verifyResult").textContent="Confirmation email requested for "+e+". След потвърждение отвори /company.";
-    result($("#authResult"),"Регистрацията е приета. Нужно е email потвърждение.","ok");
+    $("#verifyCard").hidden=false;$("#verifyResult").textContent="Нов акаунт: провери email-а за потвърждение. Съществуващ акаунт: натисни „Вход“ със същия email и парола.";
+    result($("#authResult"),"Заявката е приета. Ако акаунтът вече съществува, използвай „Вход“.","ok");
   }catch(err){result($("#authResult"),err.message,"bad")}
 });
 $("#forgotPassword").addEventListener("click",async()=>{
   const e=$("#email").value.trim();
+  const last=Number(localStorage.getItem(RECOVERY_COOLDOWN_KEY)||0),remaining=RECOVERY_COOLDOWN_MS-(Date.now()-last);
+  if(remaining>0)return result($("#authResult"),"Изчакай "+Math.ceil(remaining/1000)+" сек. преди нов recovery email.","bad");
   if(!validEmail(e))return result($("#authResult"),"Въведи валиден email за recovery.","bad");
   $("#forgotPassword").disabled=true;
   try{
     await authCall("/auth/v1/recover?redirect_to="+encodeURIComponent(recoveryRedirect()),{method:"POST",body:{email:e}});
-    result($("#authResult"),"Ако акаунтът съществува, recovery линкът е изпратен на email-а.","ok");
+    localStorage.setItem(RECOVERY_COOLDOWN_KEY,String(Date.now()));
+    result($("#authResult"),"Recovery заявката е изпратена. Изчакай email-а; нов опит е блокиран за 60 сек.","ok");
   }catch(err){result($("#authResult"),err.message,"bad")}
   finally{$("#forgotPassword").disabled=false}
 });

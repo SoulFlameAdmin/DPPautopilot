@@ -37,7 +37,7 @@ function json(res){return JSON.parse(res.body);}
 test.beforeEach(()=>limiter._test.resetForTests());
 
 test('versioned policy explicitly covers organization discovery GET',()=>{
-  assert.equal(limiter.policy.version,11);
+  assert.equal(limiter.policy.version,12);
   assert.equal(limiter.policy.surfaces.organizations.GET,'authenticated_read');
   assert.equal(limiter.policy.surfaces.organizations.POST,'authenticated_write');
 });
@@ -158,7 +158,7 @@ test('31st anonymous public passport read is blocked before upstream',async()=>{
   const oldUrl=process.env.SUPABASE_URL;
   const oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.SUPABASE_ANON_KEY='sb_publishable_test_only';
   try{
     for(let i=1;i<=30;i++){
       const res=makeRes();
@@ -350,7 +350,7 @@ test('feature-gated shared limiter consumes both pseudonymous buckets',async()=>
       env:{
         DPP_SHARED_RATE_LIMIT_ENABLED:'true',
         DPP_SUPABASE_URL:'https://example.supabase.co',
-        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+        DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only'
       },
       fetchImpl,
       nowMs:1000
@@ -392,7 +392,7 @@ test('shared limiter times out stalled backend and fails closed',async()=>{
       env:{
         DPP_SHARED_RATE_LIMIT_ENABLED:'true',
         DPP_SUPABASE_URL:'https://example.supabase.co',
-        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+        DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only'
       },
       fetchImpl,
       timeoutMs:5
@@ -427,7 +427,7 @@ test('shared limiter timeout remains active while backend response body stalls',
       env:{
         DPP_SHARED_RATE_LIMIT_ENABLED:'true',
         DPP_SUPABASE_URL:'https://example.supabase.co',
-        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+        DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only'
       },
       fetchImpl,
       timeoutMs:5
@@ -450,7 +450,7 @@ test('shared limiter fails closed when its backend is unavailable',async()=>{
       env:{
         DPP_SHARED_RATE_LIMIT_ENABLED:'true',
         DPP_SUPABASE_URL:'https://example.supabase.co',
-        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+        DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only'
       },
       fetchImpl:async()=>({ok:false,async json(){return {message:'nope'};}})
     }
@@ -484,7 +484,7 @@ test('shared limiter is inert unless explicitly enabled and skips public anonymo
       env:{
         DPP_SHARED_RATE_LIMIT_ENABLED:'true',
         DPP_SUPABASE_URL:'https://example.supabase.co',
-        DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+        DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only'
       },
       fetchImpl
     }
@@ -504,7 +504,7 @@ test('all authenticated API surfaces honor shared limiter 429 before business RP
   };
   process.env.DPP_SHARED_RATE_LIMIT_ENABLED='true';
   process.env.DPP_SUPABASE_URL='https://example.supabase.co';
-  process.env.DPP_SUPABASE_PUBLISHABLE_KEY='publishable';
+  process.env.DPP_SUPABASE_PUBLISHABLE_KEY='sb_publishable_test_only';
 
   let sharedCalls=0;
   let businessCalls=0;

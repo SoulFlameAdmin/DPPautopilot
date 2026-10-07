@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==11
+assert policy.get("version")==12
 assert policy.get("task")=="R05"
 assert policy.get("status")=="partial"
 assert policy.get("strategy")=="dual_layer_local_plus_feature_gated_shared_authenticated_runtime"
@@ -41,13 +41,16 @@ for name,(limit,window) in expected_rules.items():
     assert rules[name]["window_seconds"]==window
 
 surfaces=policy.get("surfaces",{})
-assert set(surfaces)=={"tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr","carriers"}
+assert set(surfaces)=={"application","registration-link","manufacturer-onboarding","tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr","carriers"}
 api_surface_inventory={
     path.stem for path in (ROOT/"api").glob("*.js")
     if not path.name.startswith("_")
 }
 assert set(surfaces)==api_surface_inventory, f"R05 uncovered public API surface(s): {sorted(api_surface_inventory-set(surfaces))}"
 expected_surface_rules={
+    "application":{"GET":"authenticated_read","POST":"authenticated_write"},
+    "manufacturer-onboarding":{"GET":"authenticated_read","POST":"authenticated_write"},
+    "registration-link":{"GET":"authenticated_write","POST":"authenticated_write","PATCH":"authenticated_write"},
     "tenant":{"GET":"authenticated_read","POST":"authenticated_write"},
     "organizations":{"GET":"authenticated_read","POST":"authenticated_write"},
     "members":{"GET":"authenticated_read","POST":"authenticated_write","PATCH":"authenticated_write","DELETE":"authenticated_write"},
@@ -86,10 +89,10 @@ for token in [
 ]:
     assert token in helper, f"R05 helper missing {token}"
 
-for surface in ["tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr","carriers"]:
+for surface in ["application","registration-link","manufacturer-onboarding","tenant","organizations","members","models","items","passport","provision","batch-provision","imports","export","qr","carriers"]:
     text=(ROOT/f"api/{surface}.js").read_text(encoding="utf-8")
     assert "require('./_rate_limit.js')" in text, f"{surface} does not import R05 limiter"
-    call=f"enforceRateLimit(req,res,'{surface}')"
+    call=f"enforceRateLimit(req,res,'{surface}'"
     assert call in text, f"{surface} does not enforce R05 limiter"
     assert text.index(call) < text.index("await rpc(") if "await rpc(" in text else True
 
@@ -183,4 +186,4 @@ assert any("production enablement" in x for x in limitations)
 assert any("Anonymous public passport" in x for x in limitations)
 assert any("multi-isolate" in x for x in limitations)
 
-print("R05_RATE_LIMIT_POLICY_PASS: twelve API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")
+print("R05_RATE_LIMIT_POLICY_PASS: fifteen API surfaces keep local abuse budgets and wire the atomic shared authenticated Supabase backend behind an explicit fail-closed feature gate; deployed/public distributed acceptance remains explicit")

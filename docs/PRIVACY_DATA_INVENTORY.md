@@ -67,3 +67,9 @@ The live Supabase project contains unrelated non-DPP application tables. DPP mig
 - This affects only the audit copy; source business/regulatory rows are not modified.
 - The helper is not executable by `anon` or `authenticated`.
 - This does **not** define the final audit retention period or broader personal/confidential-field minimization policy.
+
+## Intake and manufacturer onboarding inventory (2026-10-07)
+
+R07 v9 includes client applications, registration requests, early-access link sessions and manufacturer answers/configurations. These contain email, user/organization identifiers and potentially personal free-text data. The JSON inventory records the actual schema controls and deletion relationships.
+
+The early-access session has a 30-day default expiry timestamp; this is not a purge implementation or proof that the external dashboard-link service enforces expiry. Registration requests retain email after user unlinking. Manufacturer user references can restrict deletion. No scheduled purge or complete intake export/erasure implementation is claimed. The inventory stays PARTIAL until these retention and runtime gaps are verified.

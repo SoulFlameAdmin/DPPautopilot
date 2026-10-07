@@ -165,7 +165,7 @@ test('new org -> member -> model/item -> import validate/commit -> public passpo
   const oldKey=process.env.SUPABASE_ANON_KEY;
   const b=backend();
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.SUPABASE_ANON_KEY='sb_publishable_test_only';
   global.fetch=b.fetchImpl;
   console.warn=()=>{};
   try{

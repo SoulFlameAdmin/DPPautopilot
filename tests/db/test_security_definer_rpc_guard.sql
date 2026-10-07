@@ -49,7 +49,8 @@ begin
     and p.oid::regprocedure::text not in (
       'dpp_api_passport_public(text)',
       'dpp_api_passport_public_resolve(text)',
-      'dpp_api_carrier_open(text,text)'
+      'dpp_api_carrier_open(text,text)',
+      'dpp_api_registration_request_create(text)'
     );
 
   if v_anon_extra is not null then
@@ -153,7 +154,14 @@ begin
       'dpp_api_supplier_reminders_list(uuid)',
       'dpp_api_suppliers_list()',
       'dpp_api_technical_pilot_publish(uuid,jsonb,jsonb)',
-      'dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)'
+      'dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)',
+      'dpp_api_client_applications_mine()',
+      'dpp_api_client_application_submit(text,text,text,text,integer,integer,integer,jsonb,text,integer,bigint,text)',
+      'dpp_api_registration_request_verify(uuid)',
+      'dpp_api_registration_requests_mine()',
+      'dpp_api_manufacturer_onboarding_answer_upsert(text,text,jsonb)',
+      'dpp_api_manufacturer_onboarding_get()',
+      'dpp_api_manufacturer_onboarding_configure()'
     );
 
   if v_auth_extra is not null then
@@ -216,7 +224,14 @@ begin
       ('dpp_api_passports_list(integer)'),
       ('dpp_api_scooter_passport_transition(uuid,text,text,text,text,timestamp with time zone)'),
       ('dpp_api_technical_pilot_publish(uuid,jsonb,jsonb)'),
-      ('dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)')
+      ('dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)'),
+      ('dpp_api_client_applications_mine()'),
+      ('dpp_api_client_application_submit(text,text,text,text,integer,integer,integer,jsonb,text,integer,bigint,text)'),
+      ('dpp_api_registration_request_verify(uuid)'),
+      ('dpp_api_registration_requests_mine()'),
+      ('dpp_api_manufacturer_onboarding_answer_upsert(text,text,jsonb)'),
+      ('dpp_api_manufacturer_onboarding_get()'),
+      ('dpp_api_manufacturer_onboarding_configure()')
   )
   select string_agg(r.signature,', ' order by r.signature)
     into v_auth_missing

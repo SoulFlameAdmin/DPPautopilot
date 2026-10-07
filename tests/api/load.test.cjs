@@ -52,7 +52,7 @@ async function pool(tasks,concurrency){
 function withEnv(){
   const oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.SUPABASE_ANON_KEY='sb_publishable_test_only';
   return ()=>{
     if(oldUrl===undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL=oldUrl;
     if(oldKey===undefined) delete process.env.SUPABASE_ANON_KEY; else process.env.SUPABASE_ANON_KEY=oldKey;
@@ -252,7 +252,7 @@ test('synthetic multi-surface concurrency, import volume and overload budgets pa
             env:{
               DPP_SHARED_RATE_LIMIT_ENABLED:'true',
               DPP_SUPABASE_URL:'https://example.supabase.co',
-              DPP_SUPABASE_PUBLISHABLE_KEY:'publishable'
+              DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only'
             },
             fetchImpl:sharedFetch,
             nowMs:1_800_000_000_000,

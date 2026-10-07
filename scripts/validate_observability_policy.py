@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 policy=json.loads((ROOT/"data/observability-policy.json").read_text(encoding="utf-8"))
 
-assert policy.get("version")==7
+assert policy.get("version")==8
 assert policy.get("task")=="R09"
 assert policy.get("status")=="partial"
 assert policy.get("event_name")=="dpp_http_request"
@@ -20,7 +20,7 @@ expected_fields={
     "event","timestamp_ms","request_id","surface","method","status","outcome","duration_ms","auth_present","error_code"
 }
 assert set(policy.get("logged_fields",[]))==expected_fields
-assert policy.get("surfaces")==["tenant","organizations","members","models","items","passport","carriers","qr","provision","batch-provision","imports","export"]
+assert policy.get("surfaces")==["tenant","organizations","members","models","items","passport","carriers","qr","provision","batch-provision","imports","export","application","registration-link","manufacturer-onboarding"]
 api_surface_inventory={
     path.stem for path in (ROOT/"api").glob("*.js")
     if not path.name.startswith("_")
@@ -55,7 +55,7 @@ for surface in policy["surfaces"]:
     assert "require('./_observability.js')" in source, f"{surface} missing observability helper import"
     call=f"startRequestObservability(req,res,'{surface}')"
     assert call in source, f"{surface} missing observability start"
-    rate=f"enforceRateLimit(req,res,'{surface}')"
+    rate=f"enforceRateLimit(req,res,'{surface}'"
     assert source.index(call)<source.index(rate), f"{surface} correlation must start before rate limiting"
 
 test=(ROOT/"tests/api/observability.test.cjs").read_text(encoding="utf-8")
@@ -75,4 +75,4 @@ assert "M17-M19" in runtime_gap
 assert "production" in runtime_gap.lower()
 assert "F08" not in runtime_gap
 assert "M02" not in runtime_gap
-print("R09_OBSERVABILITY_POLICY_PASS: twelve inventoried API surfaces emit correlated structured metadata with explicit secret/payload redaction; deployed runtime evidence remains intentionally unclaimed")
+print("R09_OBSERVABILITY_POLICY_PASS: fifteen inventoried API surfaces emit correlated structured metadata with explicit secret/payload redaction; deployed runtime evidence remains intentionally unclaimed")
