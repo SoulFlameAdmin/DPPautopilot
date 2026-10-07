@@ -110,11 +110,11 @@ function renderModels(){
   const select=$("#provisionModel"),selected=select.value;
   const batchSelect=$("#batchModel"),batchSelected=batchSelect.value;
   const pilotSelect=$("#pilotModel"),pilotSelected=pilotSelect.value;
-  select.replaceChildren(new Option("Избери LMT SKU / модел",""));
-  batchSelect.replaceChildren(new Option("Избери LMT SKU",""));
-  pilotSelect.replaceChildren(new Option("Избери non-LMT SKU / модел",""));
-  for(const model of lmt){
-    const label=model.model_identifier+" · "+model.manufacturer_name;
+  select.replaceChildren(new Option("Избери SKU / модел",""));
+  batchSelect.replaceChildren(new Option("Избери SKU / модел",""));
+  pilotSelect.replaceChildren(new Option("Избери non-LMT technical pilot модел",""));
+  for(const model of models){
+    const label=model.model_identifier+" · "+model.manufacturer_name+" · "+model.category;
     select.append(new Option(label,model.id));
     batchSelect.append(new Option(label,model.id));
   }
@@ -122,8 +122,8 @@ function renderModels(){
     const label=model.model_identifier+" · "+model.manufacturer_name+" · "+model.category;
     pilotSelect.append(new Option(label,model.id));
   }
-  if(lmt.some(m=>m.id===selected))select.value=selected;
-  if(lmt.some(m=>m.id===batchSelected))batchSelect.value=batchSelected;
+  if(models.some(m=>m.id===selected))select.value=selected;
+  if(models.some(m=>m.id===batchSelected))batchSelect.value=batchSelected;
   if(pilot.some(m=>m.id===pilotSelected))pilotSelect.value=pilotSelected;
 
   if(!models.length){const e=document.createElement("div");e.className="empty";e.textContent="Няма модели в активната фирма.";host.append(e);return}
@@ -136,21 +136,13 @@ function renderModels(){
     const pill=document.createElement("span");pill.className="pill"+(model.category==="light_means_of_transport"?" ok":"");pill.textContent=model.category;
     side.append(pill);
     if(canWrite()){
-      const use=document.createElement("button");use.className="btn";use.type="button";
-      if(model.category==="light_means_of_transport"){
-        use.textContent="Избери за LMT";
-        use.addEventListener("click",()=>{
-          $("#provisionModel").value=model.id;
-          $("#batchModel").value=model.id;
-          $("#batteryIdentifier").focus();
-        });
-      }else{
-        use.textContent="Избери за QR pilot";
-        use.addEventListener("click",()=>{
-          $("#pilotModel").value=model.id;
-          $("#pilotBatteryIdentifier").focus();
-        });
-      }
+      const use=document.createElement("button");use.className="btn";use.type="button";use.textContent="Избери за производство";
+      use.addEventListener("click",()=>{
+        $("#provisionModel").value=model.id;
+        $("#batchModel").value=model.id;
+        if(model.category!=="light_means_of_transport")$("#pilotModel").value=model.id;
+        $("#batteryIdentifier").focus();
+      });
       side.append(use);
     }
     row.append(left,side);host.append(row);
@@ -369,8 +361,9 @@ async function createModel(){
     $("#manufactureMonth").value="";$("#batteryWeightKg").value="";$("#batteryCapacityAh").value="";
     $("#batteryChemistry").value="";$("#batteryVoltageV").value="";
     await loadData();
-    if(created.category==="light_means_of_transport")$("#provisionModel").value=created.id;
-    else $("#pilotModel").value=created.id;
+    $("#provisionModel").value=created.id;
+    $("#batchModel").value=created.id;
+    if(created.category!=="light_means_of_transport")$("#pilotModel").value=created.id;
     setResult($("#modelResult"),"Моделът е записан в real company tenant: "+created.model_identifier+" · "+created.category,"ok");
   }catch(e){setResult($("#modelResult"),e.message,"bad")}
   finally{$("#createModel").disabled=!canWrite()}
@@ -446,7 +439,7 @@ async function provisionBattery(){
   if(!canWrite())return;
   const model=models.find(m=>m.id===$("#provisionModel").value);
   const identifier=$("#batteryIdentifier").value.trim();
-  if(!model||model.category!=="light_means_of_transport"||!identifier)return setResult($("#provisionResult"),"Избери LMT модел и въведи уникален Battery ID.","bad");
+  if(!model||!identifier)return setResult($("#provisionResult"),"Избери модел и въведи уникален Battery ID.","bad");
   $("#provisionBattery").disabled=true;setResult($("#provisionResult"),"Atomic provisioning към production backend…");
   try{
     const response=await api("/api/provision",{method:"POST",body:{
@@ -454,7 +447,7 @@ async function provisionBattery(){
       unique_identifier:identifier,
       item_canonical_data:{serial:identifier,source:"manufacturer_dashboard"},
       public_payload:{
-        model:{identification:{category:"light_means_of_transport",model_id:model.model_identifier,manufacturer:{name:model.manufacturer_name}}},
+        model:{identification:{category:model.category,model_id:model.model_identifier,manufacturer:{name:model.manufacturer_name}}},
         item:{unique_identifier:identifier}
       },
       private_payload:{}
@@ -473,8 +466,8 @@ async function provisionBatch(){
   const quantity=Number($("#batchQuantity").value);
   const serialStart=Number($("#batchSerialStart").value);
   const serialWidth=Number($("#batchSerialWidth").value);
-  if(!model||model.category!=="light_means_of_transport"){
-    return setResult($("#batchResult"),"Избери валиден LMT SKU / модел.","bad");
+  if(!model){
+    return setResult($("#batchResult"),"Избери валиден SKU / модел.","bad");
   }
   if(!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(batchKey)){
     return setResult($("#batchResult"),"Batch key трябва да съдържа само букви, цифри, . _ : - и да започва с буква/цифра.","bad");
@@ -509,7 +502,7 @@ async function provisionBatch(){
         },
         public_payload_template:{
           model:{identification:{
-            category:"light_means_of_transport",
+            category:model.category,
             model_id:model.model_identifier,
             manufacturer:{name:model.manufacturer_name}
           }},
