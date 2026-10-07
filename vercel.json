@@ -2,6 +2,38 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/email-confirmed/",
+      "destination": "/live/email-confirmed"
+    },
+    {
+      "source": "/email-confirmed",
+      "destination": "/live/email-confirmed"
+    },
+    {
+      "source": "/forgot-password/",
+      "destination": "/live/forgot-password"
+    },
+    {
+      "source": "/forgot-password",
+      "destination": "/live/forgot-password"
+    },
+    {
+      "source": "/register/",
+      "destination": "/live/register"
+    },
+    {
+      "source": "/register",
+      "destination": "/live/register"
+    },
+    {
+      "source": "/login/",
+      "destination": "/live/login"
+    },
+    {
+      "source": "/login",
+      "destination": "/live/login"
+    },
+    {
       "source": "/starter-documents",
       "destination": "/demo/starter-documents.html"
     },
