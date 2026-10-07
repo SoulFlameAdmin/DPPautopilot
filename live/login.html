@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DPP Autopilot · Вход</title>
+  <meta name="description" content="Фирмен вход в SoulFlame DPP / Battery Passport.">
+  <link rel="stylesheet" href="/assets/csp/company-auth.css">
+</head>
+<body data-auth-page="login" data-company-auth-ready="false">
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/">DPP AUTOPILOT</a>
+    <span class="badge">SECURE COMPANY LOGIN</span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">STEP 1 · LOGIN</p>
+      <h1>Вход в DPP системата.</h1>
+      <p>Влез със служебния email. Ако фирменият tenant вече е активен, системата те отвежда директно в dashboard.</p>
+    </div>
+    <div class="security-note">
+      <strong>SESSION + TENANT CHECK</strong>
+      <span>Bearer session · organization discovery · dashboard only after a valid authenticated session.</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div><p class="eyebrow">ACCOUNT</p><h2>Вход</h2></div>
+      <span class="state" id="pageState">READY</span>
+    </div>
+    <div class="form-grid">
+      <label><span>Служебен email</span><input id="email" type="email" autocomplete="email" maxlength="254" placeholder="office@company.eu"></label>
+      <label><span>Парола</span><input id="password" type="password" minlength="8" autocomplete="current-password" placeholder="Парола"></label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="loginSubmit" type="button">Вход →</button>
+      <a class="btn ghost" href="/forgot-password">Забравена парола</a>
+      <a class="btn" href="/register">Нова регистрация</a>
+    </div>
+    <div class="result" id="pageResult" role="status" aria-live="polite">Зареждане на защитената auth конфигурация…</div>
+  </section>
+
+  <footer>Valid session → active tenant → dashboard. No active tenant → company setup.</footer>
+</main>
+<script src="/assets/csp/company-auth-pages.js"></script>
+</body>
+</html>
