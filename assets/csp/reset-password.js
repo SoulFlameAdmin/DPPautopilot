@@ -1,0 +1,12 @@
+(()=>{"use strict";
+const $=s=>document.querySelector(s),STORAGE="dpp_company_session_v1",PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";let cfg=null,session=null;
+function result(m,k=""){const n=$("#resetResult");n.textContent=m;n.className="result"+(k?" "+k:"")}
+function headers(token){const h={apikey:cfg.publishableKey,"Content-Type":"application/json",Accept:"application/json"};if(token)h.Authorization="Bearer "+token;return h}
+async function call(path,{method="GET",body,token}={}){const r=await fetch(cfg.supabaseUrl+path,{method,headers:headers(token),body:body?JSON.stringify(body):undefined});const t=await r.text();let d={};try{d=t?JSON.parse(t):{}}catch{}if(!r.ok)throw new Error(d.message||d.msg||d.error_description||d.error||("HTTP "+r.status));return d}
+function valid(v){return String(v||"").length>=8}
+async function init(){cfg=await fetch("/data/auth-config.json",{cache:"no-store"}).then(r=>r.json());if(cfg.supabaseUrl!==PROJECT_URL)throw new Error("Invalid auth configuration.");
+const p=new URLSearchParams(location.hash.replace(/^#/,""));if(!p.get("access_token")||p.get("type")!=="recovery")throw new Error("Recovery линкът липсва или е изтекъл.");
+session={access_token:p.get("access_token"),refresh_token:p.get("refresh_token")||""};const user=await call("/auth/v1/user",{token:session.access_token});$("#resetEmail").textContent="Нова парола за "+(user.email||"този акаунт");$("#resetState").textContent="VERIFIED";$("#resetState").className="state ok";$("#updatePassword").disabled=false;history.replaceState(null,"",location.pathname)}
+$("#updatePassword").addEventListener("click",async()=>{const p=$("#newPassword").value,c=$("#confirmNewPassword").value;if(!valid(p))return result("Паролата трябва да е минимум 8 символа.","bad");if(p!==c)return result("Двете пароли не съвпадат.","bad");$("#updatePassword").disabled=true;try{const updated=await call("/auth/v1/user",{method:"PUT",body:{password:p},token:session.access_token});const kept={access_token:session.access_token,refresh_token:session.refresh_token,expires_in:3600};localStorage.setItem(STORAGE,JSON.stringify(kept));sessionStorage.removeItem(STORAGE);result("Паролата е сменена. Влизаме в DPP акаунта…","ok");setTimeout(()=>location.replace("/company"),500)}catch(e){result(e.message,"bad");$("#updatePassword").disabled=false}});
+init().catch(e=>{result(e.message,"bad");$("#resetState").textContent="INVALID";$("#resetState").className="state"});
+})();
