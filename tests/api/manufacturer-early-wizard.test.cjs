@@ -40,9 +40,17 @@ test('edited answers are persisted before navigating back',()=>{
   assert.match(js,/\$\("backQuestion"\)\.addEventListener\("click",\(\)=>back\(\)\)/);
 });
 
-test('completion auto-configures and only then opens the dashboard',()=>{
+test('server answers win over stale local draft data',()=>{
+  const js=read('assets/csp/manufacturer-early.js');
+  assert.match(js,/const serverValue=String\(answers\[q\.key\]\|\|""\)\.trim\(\)/);
+  assert.match(js,/const draftValue=String\(draft\[q\.key\]\|\|""\)\.trim\(\)/);
+  assert.match(js,/if\(!serverValue&&draftValue\)answers\[q\.key\]=draft\[q\.key\]/);
+});
+
+test('completion requires a real configuration before opening dashboard',()=>{
   const js=read('assets/csp/manufacturer-early.js');
   assert.match(js,/api\("questionnaire_submit",\{answers\}\)/);
+  assert.match(js,/if\(!profile\.configuration\|\|!Object\.keys\(profile\.configuration\)\.length\)/);
   assert.match(js,/animateConfiguration/);
   assert.match(js,/setTimeout\(\(\)=>showDashboard\(\),500\)/);
   assert.match(js,/profile\.configuration&&Object\.keys\(profile\.configuration\)\.length/);
