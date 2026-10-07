@@ -74,7 +74,7 @@ function renderQuestion(){
   $("backQuestion").disabled=step===0;
   $("nextQuestion").textContent=step===QUESTIONS.length-1?"Завърши и настрой системата →":"Запази и продължи →";
   $("answerInput").focus();
-  setMessage("Всеки отговор се записва защитено. Можете да затворите страницата и да продължите по-късно.");
+  setMessage("След „Запази и продължи“ отговорът се записва защитено и можете да продължите по-късно.");
 }
 async function saveCurrent(){
   const q=QUESTIONS[step];
@@ -110,9 +110,21 @@ async function next(){
   if(step>=QUESTIONS.length)await submitAndConfigure();
   else renderQuestion();
 }
-function back(){
+async function back(){
   if(step<=0)return;
+  const q=QUESTIONS[step];
+  const current=String($("answerInput").value||"").trim();
+  const saved=String(answers[q.key]||"").trim();
+  if(current!==saved){
+    if(!current){
+      setMessage("Текущият отговор е изтрит. Въведете отговор или възстановете записания текст, преди да се върнете назад.","bad");
+      $("answerInput").focus();
+      return;
+    }
+    if(!await saveCurrent())return;
+  }
   step--;
+  saveLocalDraft();
   renderQuestion();
 }
 function setConfigureStep(key,state){
@@ -201,7 +213,7 @@ $("answerInput").addEventListener("input",()=>{
   $("answerState").textContent="НЕЗАПИСАНО";
 });
 $("nextQuestion").addEventListener("click",()=>next());
-$("backQuestion").addEventListener("click",back);
+$("backQuestion").addEventListener("click",()=>back());
 $("answerInput").addEventListener("keydown",event=>{
   if((event.ctrlKey||event.metaKey)&&event.key==="Enter"){event.preventDefault();next();}
 });
