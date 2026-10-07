@@ -19,6 +19,7 @@ begin
   perform set_config('request.jwt.claim.sub',owner_id::text,true);
   result := public.dpp_api_organization_create('Onboarding Test A','onboarding-test-a');
   org_a := (result->>'organization_id')::uuid;
+  perform public.dpp_api_tenant_context_set(org_a);
   perform public.dpp_api_members_add(viewer_id,'viewer');
   perform public.dpp_api_members_add(editor_id,'editor');
 
@@ -95,6 +96,7 @@ begin
   perform set_config('request.jwt.claim.sub',outsider_id::text,true);
   result := public.dpp_api_organization_create('Onboarding Test B','onboarding-test-b');
   org_b := (result->>'organization_id')::uuid;
+  perform public.dpp_api_tenant_context_set(org_b);
   state := public.dpp_api_manufacturer_onboarding_get();
   if state->>'organization_id' <> org_b::text or (state->>'answered_count')::integer <> 0
      or state->'configuration' <> 'null'::jsonb then
