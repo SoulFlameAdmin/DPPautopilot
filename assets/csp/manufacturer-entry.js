@@ -17,6 +17,13 @@ function readEarlyClient(){
   }catch{}
   return null;
 }
+function readProductionSession(){
+  try{
+    const value=JSON.parse(sessionStorage.getItem("dpp_company_session_v1")||"null");
+    return !!value?.access_token;
+  }catch{}
+  return false;
+}
 function text(selector,value){const node=document.querySelector(selector);if(node)node.textContent=value;}
 function disableEarlyAccessControls(){
   document.querySelectorAll("#dashboard button,#dashboard input,#dashboard select,#dashboard textarea").forEach(node=>{node.disabled=true});
@@ -76,9 +83,18 @@ async function loadProductionDashboard(){
 
 const params=new URLSearchParams(location.search);
 const client=readEarlyClient();
-if(params.get("early")==="1"&&client){
+const productionSession=readProductionSession();
+// A real authenticated company session always wins over stale early-access state.
+// This keeps refresh/re-entry on the operational Manufacturer Home instead of
+// accidentally falling back to the read-only early-access shell.
+if(params.get("early")==="1"&&client&&!productionSession){
   showEarlyAccess(client);
 }else{
+  if(productionSession&&params.has("early")){
+    params.delete("early");
+    const query=params.toString();
+    history.replaceState(null,"",location.pathname+(query?"?"+query:"")+location.hash);
+  }
   loadProductionDashboard().catch(error=>{
     const gate=document.querySelector("#authGate");
     const result=document.querySelector("#gateResult");
