@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-10-06T21:20:57.266Z",
+  "observed_at": "2026-10-07T08:44:05.664875Z",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -256,6 +256,22 @@
     {
       "version": "20261006212024",
       "name": "dpp_qr_pilot_security_and_fk_hardening"
+    },
+    {
+      "version": "20261006233214",
+      "name": "dpp_client_application_onboarding"
+    },
+    {
+      "version": "20261006235507",
+      "name": "dpp_specific_registration_link_flow"
+    },
+    {
+      "version": "20261007001855",
+      "name": "dpp_early_access_dashboard_details"
+    },
+    {
+      "version": "20261007004858",
+      "name": "dpp_gmail_dashboard_link_sessions"
     }
   ],
   "note": "Read-only bound snapshot refreshed from the live Supabase migration history for the exact repository migration set; canonical migration name is the cross-system identity."
