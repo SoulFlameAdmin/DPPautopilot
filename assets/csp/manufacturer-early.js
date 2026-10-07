@@ -51,7 +51,12 @@ function restoreLocalDraft(){
   try{
     const data=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");
     if(!data||data.email!==profile?.email)return;
-    answers={...answers,...(data.answers&&typeof data.answers==="object"?data.answers:{})};
+    const draft=data.answers&&typeof data.answers==="object"?data.answers:{};
+    for(const q of QUESTIONS){
+      const serverValue=String(answers[q.key]||"").trim();
+      const draftValue=String(draft[q.key]||"").trim();
+      if(!serverValue&&draftValue)answers[q.key]=draft[q.key];
+    }
   }catch{}
 }
 function firstIncomplete(){
@@ -150,6 +155,9 @@ async function submitAndConfigure(){
   try{
     const result=await api("questionnaire_submit",{answers});
     profile={...profile,...(result.data||{})};
+    if(!profile.configuration||!Object.keys(profile.configuration).length){
+      throw new Error("Системата не върна готова pilot конфигурация. Отговорите са запазени, но workspace-ът няма да бъде отворен преждевременно.");
+    }
     await animateConfiguration(profile.configuration?.steps||[]);
     $("configureMessage").textContent="Готово. Workspace-ът е конфигуриран. Отваряме dashboard-а…";
     localStorage.removeItem(DRAFT_KEY);
@@ -189,7 +197,7 @@ function showDashboard(){
   document.body.dataset.manufacturerTenant="configured";
   $("clientEmail").textContent=profile?.email||"—";
   $("clientEmailTop").textContent=profile?.email||"—";
-  $("profileCompany").textContent=profile?.companyName||"Configured";
+  $("profileCompany").textContent=profile?.companyName||profile?.configuration?.company?.name||"Configured";
   $("tenantMeta").textContent="Google session · Auto-configured DPP pilot";
   $("earlyStatus").textContent="Onboarding 8/8 е завършен. Pilot workspace-ът е конфигуриран автоматично от вашите отговори. Следва: реален Product / SKU.";
   renderConfiguration();
