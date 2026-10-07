@@ -131,7 +131,7 @@ async function register(){
       return;
     }
     setState("VERIFY EMAIL","pending");
-    setResult("Регистрацията е приета. Отвори confirmation email-а и продължи от линка.","ok");
+    setResult("Ако email-ът е нов, confirmation link е изпратен. Ако вече е използван, няма да получиш нов confirmation — използвай Вход или Забравена парола. За чист E2E тест използвай нов email адрес.","ok");
   }catch(error){
     setState("ERROR");
     setResult(error.message,"bad");
