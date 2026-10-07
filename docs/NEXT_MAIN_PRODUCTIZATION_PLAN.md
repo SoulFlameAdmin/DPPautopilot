@@ -50,3 +50,32 @@ This chain creates the fastest path from the current backend to a real customer-
 - `SoulFlameAdmin/soulflame-twins` PR #160 merged the full demo company workspace into main after Deployment Safety SUCCESS.
 - Vercel deployment statuses for both main commits are rate-limited (`retry in 24 hours`), so no live deployment claim is made yet.
 - Demo company workspace routes are `/dpp-autopilot/company` and `/dpp-autopilot/company/passport` once the SoulFlame deployment is available.
+
+
+## 2026-10-07 physical Battery pilot overlay
+
+This section records current physical production evidence without retroactively marking canonical task IDs GREEN before their own acceptance/evidence requirements are reconciled.
+
+### Proven physical flow
+- Google-only login and persistent company session.
+- Company-specific onboarding stored to the tenant.
+- Real production tenant path through Manufacturer Dashboard.
+- Product/SKU creation: `BAT-EV-001`.
+- Batch provisioning for 10 serialized units: `BAT-SF000001` → `BAT-SF000010`.
+- Technical-pilot activation with `regulatory_compliance=false`.
+- One DPP per unit and physical QR carriers.
+- Real printed QR sheet.
+- Public scan from a separate phone without admin login.
+- Same DPP update for `BAT-SF000010`: rated capacity 100 → 101 Ah.
+- Public API and same printed QR expose the updated record while preserving the same passport identity.
+
+### Current interpretation
+The Battery core flow is physically proven as a **technical pilot**, but the full product is not yet declared PILOT READY or production/compliance complete.
+
+Before the first real client:
+1. close remaining current-head CI/U07/tenant/UI hardening;
+2. repeat a clean full E2E with a fresh test account/company and no manual DB repair;
+3. execute `docs/BATTERY_CLIENT_PILOT_V1.md` with one real manufacturer.
+
+### Main-page tracker rule
+The canonical percentage on the home page remains derived from `data/master-plan.json`. Recent physical evidence must be reconciled task-by-task before changing canonical GREEN counts; the client-pilot mission is shown separately so product progress is visible without weakening the evidence rule.
