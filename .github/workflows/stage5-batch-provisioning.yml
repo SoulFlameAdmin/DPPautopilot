@@ -35,6 +35,8 @@ jobs:
 
       - name: Run Stage 5 API tests
         run: node --test tests/api/batch-provision.test.cjs
+      - name: Run Manufacturer production flow contract
+        run: node --test tests/api/manufacturer-production-flow.test.cjs
 
       - name: Replay migrations and run Stage 5 DB acceptance
         env:
