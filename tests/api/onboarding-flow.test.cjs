@@ -162,10 +162,10 @@ test('new org -> member -> model/item -> import validate/commit -> public passpo
   const original=global.fetch;
   const originalWarn=console.warn;
   const oldUrl=process.env.SUPABASE_URL;
-  const oldKey=process.env.SUPABASE_ANON_KEY;
+  const oldKey=process.env.DPP_SUPABASE_PUBLISHABLE_KEY;
   const b=backend();
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.DPP_SUPABASE_PUBLISHABLE_KEY='sb_publishable_test_key';
   global.fetch=b.fetchImpl;
   console.warn=()=>{};
   try{
@@ -258,6 +258,6 @@ test('new org -> member -> model/item -> import validate/commit -> public passpo
     global.fetch=original;
     console.warn=originalWarn;
     if(oldUrl===undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL=oldUrl;
-    if(oldKey===undefined) delete process.env.SUPABASE_ANON_KEY; else process.env.SUPABASE_ANON_KEY=oldKey;
+    if(oldKey===undefined) delete process.env.DPP_SUPABASE_PUBLISHABLE_KEY; else process.env.DPP_SUPABASE_PUBLISHABLE_KEY=oldKey;
   }
 });
