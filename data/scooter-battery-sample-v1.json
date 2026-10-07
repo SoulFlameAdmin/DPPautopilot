@@ -150,7 +150,12 @@
         "synthetic": true,
         "result": "DEMO-PASS-NOT-A-REAL-CONFORMITY-RESULT"
       }
-    ]
+    ],
+    "responsible_economic_operator": {
+      "name": "Northstar Demo Cells (Synthetic)",
+      "role": "manufacturer_responsible_for_passport",
+      "operator_identifier": "DEMO-EO-LMT-001"
+    }
   },
   "items": [
     {
