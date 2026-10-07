@@ -15,6 +15,7 @@ def main()->None:
     api=(ROOT/"api/batch-provision.js").read_text(encoding="utf-8")
     api_test=(ROOT/"tests/api/batch-provision.test.cjs").read_text(encoding="utf-8")
     db_test=(ROOT/"tests/db/test_scooter_batch_provisioning_subset.sql").read_text(encoding="utf-8")
+    onboarding_db=(ROOT/"tests/db/test_manufacturer_onboarding_subset.sql").read_text(encoding="utf-8")
     generic_db=(ROOT/"tests/db/test_generic_battery_provisioning_subset.sql").read_text(encoding="utf-8")
     pilot_db=(ROOT/"tests/db/test_technical_pilot_draft_activation_subset.sql").read_text(encoding="utf-8")
     contract=json.loads((ROOT/"data/api-error-contract.json").read_text(encoding="utf-8"))
@@ -96,6 +97,16 @@ def main()->None:
         "LMT passports require the regulatory readiness activation route",
     ]:
         require(token.lower() in pilot_activation.lower(),f"Technical pilot draft activation migration missing: {token}")
+
+    for token in [
+        "MANUFACTURER_ONBOARDING_DB_PASS",
+        "Incomplete onboarding configured successfully",
+        "Viewer gained onboarding write access",
+        "Onboarding data leaked across tenants",
+        "Revoked viewer retained onboarding access",
+        "Onboarding configuration fabricated product records",
+    ]:
+        require(token in onboarding_db,f"Manufacturer onboarding DB acceptance missing: {token}")
 
     for token in [
         "GENERIC_BATTERY_PROVISIONING_PASS",
