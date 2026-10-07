@@ -5,119 +5,63 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
   <title>DPP Autopilot · Early Access</title>
-  <meta name="description" content="SoulFlame DPP Autopilot early-access onboarding for battery and electric-mobility manufacturers.">
+  <meta name="description" content="SoulFlame DPP Autopilot Early Access. Въведете email и получете личен линк към вашия DPP dashboard.">
   <link rel="stylesheet" href="/assets/csp/company-auth.css">
 </head>
-<body data-company-auth-ready="false" data-company-session="anonymous">
+<body data-company-auth-ready="true" data-company-session="anonymous">
 <main class="shell">
   <header class="topbar">
     <a class="brand" href="/">DPP AUTOPILOT</a>
-    <span class="badge">EARLY ACCESS · REAL CLIENT FLOW</span>
+    <span class="badge">EARLY ACCESS · EMAIL → DASHBOARD</span>
   </header>
 
   <section class="hero">
     <div>
       <p class="eyebrow">SOULFLAME DPP AUTOPILOT</p>
-      <h1>Регистрация за производители.</h1>
-      <p>Първо потвърждавате email-а си. След това избирате държавата и производителя и ни описвате накратко какво искате от DPP системата. На този етап няма цена и няма плащане.</p>
+      <h1>Получете вашия DPP Dashboard.</h1>
+      <p>Напишете email адреса си. <strong>soulflame.dpp@gmail.com</strong> ще ви изпрати личен линк към вашия Early Access dashboard.</p>
     </div>
     <div class="security-note">
-      <strong>SECURE EMAIL LOGIN</strong>
-      <span>Ще получите еднократен sign-in link от Supabase Auth — authentication услугата, която използваме за сигурен достъп. Линкът е краткотраен и може да се използва само веднъж.</span>
+      <strong>БЕЗ SUPABASE AUTH EMAIL</strong>
+      <span>Този flow не използва Supabase Magic Link. Email-ът идва директно от SoulFlame DPP Gmail и води към вашия DPP dashboard.</span>
     </div>
   </section>
 
-  <section class="card" id="authCard">
+  <section class="card" id="emailCard">
     <div class="card-head">
-      <div><p class="eyebrow">1 · EMAIL</p><h2>Получете защитен регистрационен линк</h2></div>
-      <span class="state" id="authState">Проверка…</span>
+      <div><p class="eyebrow">1 · EMAIL</p><h2>Къде да изпратим dashboard link-а?</h2></div>
+      <span class="state">EARLY ACCESS</span>
     </div>
+
     <div class="form-grid single-field">
-      <label><span>Email (Gmail или друг)</span><input id="email" type="email" autocomplete="email" placeholder="name@gmail.com или office@company.eu"></label>
-    </div>
-    <div class="actions">
-      <button class="btn primary" id="sendLink" type="button">Изпрати регистрационен линк →</button>
-      <button class="btn ghost" id="signout" type="button" hidden>Изход</button>
-    </div>
-    <div class="result" id="authResult" role="status" aria-live="polite">Зареждане…</div>
-  </section>
-
-  <section class="card" id="verifyCard" hidden>
-    <div class="card-head">
-      <div><p class="eyebrow">2 · SUPABASE AUTH</p><h2>Проверете пощата си</h2></div>
-      <span class="state pending">EMAIL SENT</span>
-    </div>
-    <p>Писмото идва от <strong>Supabase Auth</strong>. Натиснете <strong>Sign in</strong>. След потвърждението ще бъдете върнати автоматично в DPP Autopilot, а не в SoulFlame Home.</p>
-    <div class="result" id="verifyResult">Очаква се отваряне на еднократния линк.</div>
-  </section>
-
-  <section class="card onboarding-card" id="applicationCard" hidden>
-    <div class="card-head">
-      <div><p class="eyebrow">3 · EARLY ACCESS</p><h2>Коя е вашата фирма?</h2></div>
-      <span class="state ok">EMAIL VERIFIED</span>
-    </div>
-    <p class="muted">Изберете вашата държава и фирма. Списъкът е каталог за по-бързо попълване и не означава, че изброените компании са партньори на SoulFlame.</p>
-
-    <div class="choice-grid">
-      <label class="choice">
-        <span>Държава *</span>
-        <select id="countrySelect">
-          <option value="">Изберете държава…</option>
-        </select>
-      </label>
-      <label class="choice">
-        <span>Производител / фирма *</span>
-        <select id="manufacturerSelect" disabled>
-          <option value="">Първо изберете държава…</option>
-        </select>
+      <label>
+        <span>Email (Gmail или друг)</span>
+        <input id="email" type="email" autocomplete="email" placeholder="name@gmail.com или office@company.eu">
       </label>
     </div>
 
-    <label class="wide-label" id="customManufacturerWrap" hidden>
-      <span>Име на фирмата</span>
-      <input id="customManufacturer" maxlength="200" placeholder="Въведете точното име на фирмата">
-    </label>
-
-    <div class="question-box">
-      <p class="field-title">Кажете ни накратко какво ви трябва</p>
-      <p class="question-help">Може да отговорите свободно. Полезно е да включите: какви батерии/скутери произвеждате, приблизително колко модели/SKU имате, годишен обем, колко души ще работят със системата, какви ERP/MES/BMS/Excel/API системи използвате и какво искате да автоматизираме.</p>
-      <textarea id="requestText" maxlength="5000" rows="9" placeholder="Пример: Произвеждаме 12 модела батерии за електрически скутери, около 80 000 броя годишно. 6 души ще работят със системата. Използваме Odoo + Excel. Искаме автоматично създаване на DPP, QR и импорт от ERP..."></textarea>
-    </div>
-
     <div class="actions">
-      <button class="btn primary big-submit" id="submitApplication" type="button">Изпрати Early Access заявка →</button>
+      <button class="btn primary big-submit" id="sendDashboardLink" type="button">Изпрати линк към моя Dashboard →</button>
     </div>
-    <div class="result" id="applicationResult" role="status" aria-live="polite">Няма да ви показваме цена на този етап. Първо преглеждаме нуждите ви.</div>
+
+    <div class="result" id="result" role="status" aria-live="polite">
+      След клика ще получите email от soulflame.dpp@gmail.com с личен линк към dashboard-а.
+    </div>
   </section>
 
-  <section class="card dashboard-card" id="dashboardCard" hidden>
+  <section class="card dashboard-card" id="sentCard" hidden>
     <div class="dashboard-status">
       <span class="ready-mark">✓</span>
       <div>
-        <p class="eyebrow">YOUR DPP DASHBOARD</p>
-        <h2>Заявката е получена.</h2>
-        <p>Скоро ще се свържем с вас, за да разгледаме условията, броя потребители, интеграциите и нужния DPP процес. След това ще активираме следващия етап.</p>
+        <p class="eyebrow">EMAIL SENT</p>
+        <h2>Проверете пощата си.</h2>
+        <p>Изпратихме личния DPP dashboard link. Отворете писмото от <strong>soulflame.dpp@gmail.com</strong> и натиснете линка.</p>
       </div>
-      <span class="state pending">EARLY ACCESS · REVIEWING</span>
-    </div>
-
-    <div class="dashboard-grid">
-      <article><span>Фирма</span><strong id="dashCompany">—</strong></article>
-      <article><span>Държава</span><strong id="dashCountry">—</strong></article>
-      <article><span>Email</span><strong id="dashEmail">—</strong></article>
-      <article><span>Плащане</span><strong>Заключено до индивидуална оферта</strong></article>
-    </div>
-
-    <div class="next-steps">
-      <strong>Какво следва</strong>
-      <span>1 · SoulFlame преглежда заявката.</span>
-      <span>2 · Уточняваме хора, системи, обем и интеграции.</span>
-      <span>3 · След договорена оферта ще отключим плащане.</span>
-      <span>4 · След успешно плащане се активира производственият DPP workspace.</span>
+      <span class="state ok">READY</span>
     </div>
   </section>
 
-  <footer>Early Access · без цена на този етап · реален email verification · реално записана заявка.</footer>
+  <footer>Early Access · Gmail dashboard link · без Supabase Auth login.</footer>
 </main>
 <script src="/assets/csp/client-apply-inline-1.js"></script>
 </body>
