@@ -112,15 +112,10 @@ async function saveSelectedPassportPilotUpdate(){
  setText($("#detailEditResult"),"Updating "+selectedPassport.unique_identifier+" without changing its QR…");
  try{
   const full=(await api("/api/passport?id="+encodeURIComponent(selectedPassport.passport_id))).data;
-  const publicPayload=JSON.parse(JSON.stringify(full.public_payload||{}));
-  if(!publicPayload.item||typeof publicPayload.item!=="object"||Array.isArray(publicPayload.item))publicPayload.item={};
-  publicPayload.item.unique_identifier=selectedPassport.unique_identifier;
-  publicPayload.item.capacity_ah=capacity;
   const updated=(await api("/api/passport",{method:"PATCH",body:{
    id:full.passport_id,
-   status:"active",
-   public_payload:publicPayload,
-   private_payload:full.private_payload||{},
+   action:"update_technical_pilot",
+   capacity_ah:capacity,
    expected_updated_at:full.updated_at
   }})).data;
   if(updated.passport_id!==full.passport_id)throw new Error("Passport identity changed unexpectedly.");
