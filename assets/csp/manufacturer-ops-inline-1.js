@@ -177,7 +177,9 @@ function renderPassports(){
   const item=itemById(p.battery_item_id),model=itemModel(item);
   const row=document.createElement("article");row.className="ops-row";row.dataset.passportId=p.passport_id;
   const c0=document.createElement("div");c0.className="ops-cell";
-  const check=document.createElement("input");check.type="checkbox";check.className="passport-print-check";check.dataset.itemId=p.battery_item_id;check.dataset.identifier=p.unique_identifier;check.disabled=p.status!=="active";c0.append(check);
+  const check=document.createElement("input");check.type="checkbox";check.className="passport-print-check";check.dataset.itemId=p.battery_item_id;check.dataset.identifier=p.unique_identifier;check.disabled=p.status!=="active";
+  check.addEventListener("change",()=>{if(check.checked)setDetail(p)});
+  c0.append(check);
   const c1=document.createElement("div");c1.className="ops-cell";const id=document.createElement("strong");id.textContent=p.unique_identifier;c1.append(id);
   const c2=document.createElement("div");c2.className="ops-cell muted";c2.textContent=model?.model_identifier||safeText(item?.model_id);
   const c3=document.createElement("div");c3.className="ops-cell muted";c3.textContent=activeOrg?.name||"—";
