@@ -20,9 +20,9 @@ assert not (public & restricted), "M10 public/restricted classes overlap"
 assert public | restricted == allowed, "M10 policy does not classify every allowed access class"
 
 counts = validate_access_catalog(catalog, policy)
-assert sum(counts.values()) == len(catalog["fields"]) == 42, "M10 every field must carry exactly one valid access class"
+assert sum(counts.values()) == len(catalog["fields"]) == 44, "M10 every field must carry exactly one valid access class"
 
 print(
-    "M10_ACCESS_POLICY_PASS: 42/42 catalog fields have explicit allowed access classes; "
+    "M10_ACCESS_POLICY_PASS: 44/44 catalog fields have explicit allowed access classes; "
     "public projection classes are disjoint from legitimate-interest/authority-only classes"
 )

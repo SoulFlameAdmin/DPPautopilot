@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "2026-09-18",
+  "catalogVersion": "2026-10-07-eu-trace-v1",
   "scope": "Battery DPP engineering contract based on the current consolidated Regulation (EU) 2023/1542 and current Commission DPP guidance. This is not legal advice.",
   "sources": [
     "Regulation (EU) 2023/1542, current consolidated version 2026-08-13",
@@ -11,6 +11,20 @@
     "Battery-specific implementing act on detailed access rights is indicated by the Commission timeline for Q4 2026 and is not treated as already adopted in this catalog."
   ],
   "fields": [
+    {
+      "path": "model.responsible_economic_operator",
+      "requirementIds": [
+        "SYS-RESP-OP",
+        "REG-RESP-OP"
+      ],
+      "source": "Regulation (EU) 2023/1542 Article 77(3); Commission Battery Passport data point 2",
+      "access": "public_identifier",
+      "type": "object",
+      "required": true,
+      "dbTarget": "dpp_battery_models.canonical_data.responsible_economic_operator",
+      "apiTarget": "BatteryModel.responsibleEconomicOperator",
+      "uiTarget": "modelForm.responsibleEconomicOperator"
+    },
     {
       "path": "model.identification.manufacturer.name",
       "requirementIds": [
@@ -580,6 +594,21 @@
       "dbTarget": "dpp_battery_items.canonical_data.telemetry.state_of_charge",
       "apiTarget": "BatteryItem.telemetry.stateOfCharge",
       "uiTarget": "itemForm.stateOfChargeHistory"
+    },
+    {
+      "path": "model.instructions_for_use",
+      "requirementIds": [
+        "PUB-INSTRUCTIONS-USE"
+      ],
+      "source": "Regulation (EU) 2023/1542 Annex XIII; Commission Battery Passport data point 44",
+      "access": "public",
+      "type": "document_ref",
+      "required": false,
+      "requiredAt2027Launch": false,
+      "deferredReason": "Commission Battery Passport guidance V2 marks this data point not required at the February 2027 launch.",
+      "dbTarget": "dpp_battery_models.canonical_data.instructions_for_use",
+      "apiTarget": "BatteryModel.instructionsForUse",
+      "uiTarget": "modelForm.instructionsForUse"
     }
   ],
   "storageModel": "M04 schema: selected identity/status fields are typed columns; all remaining canonical battery model/item requirement fields are stored under tenant-scoped JSONB canonical_data paths and remain individually traceable through dbTarget."

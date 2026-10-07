@@ -19,14 +19,14 @@ class PassportAccessPolicyTests(unittest.TestCase):
         cls.policy = load_policy()
         cls.fixture = json.loads((ROOT / "data/sample-battery.json").read_text(encoding="utf-8"))
 
-    def test_all_42_fields_have_allowed_access_class(self) -> None:
-        self.assertEqual(len(self.catalog["fields"]), 42)
+    def test_all_44_fields_have_allowed_access_class(self) -> None:
+        self.assertEqual(len(self.catalog["fields"]), 44)
         counts = validate_access_catalog(self.catalog, self.policy)
-        self.assertEqual(counts["public"], 29)
-        self.assertEqual(counts["public_identifier"], 1)
+        self.assertEqual(counts["public"], 30)
+        self.assertEqual(counts["public_identifier"], 2)
         self.assertEqual(counts["legitimate_interest"], 11)
         self.assertEqual(counts["authority_only"], 1)
-        self.assertEqual(sum(counts.values()), 42)
+        self.assertEqual(sum(counts.values()), 44)
 
     def test_public_and_restricted_classes_are_disjoint(self) -> None:
         public = set(self.policy["public_projection_classes"])
@@ -39,7 +39,9 @@ class PassportAccessPolicyTests(unittest.TestCase):
         allowed = set(self.policy["public_projection_classes"])
         self.assertGreater(projection["field_count"], 0)
         self.assertTrue(all(field["access"] in allowed for field in projection["fields"]))
-        self.assertIn("item.unique_identifier", {field["path"] for field in projection["fields"]})
+        paths = {field["path"] for field in projection["fields"]}
+        self.assertIn("item.unique_identifier", paths)
+        self.assertIn("model.responsible_economic_operator", paths)
 
     def test_restricted_sample_values_do_not_leak(self) -> None:
         projection = project_public_passport(self.fixture, catalog=self.catalog, policy=self.policy)

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0.0-2026-10-07",
+  "legalSource": "Commission Implementing Decision (EU) 2026/1736 of 14 July 2026",
+  "decisionStatus": "in_force",
+  "rule": "Reference publication gives a presumption-of-conformity route only for covered requirements when the implementation actually conforms. SoulFlame MUST NOT mark a standard PASS from title/reference alone.",
+  "standards": [
+    {
+      "id": "EN-18216:2026",
+      "title": "Digital product passport – Data exchange protocols",
+      "ojReferencePublished": true,
+      "clauseReviewStatus": "BLOCKED_LICENSED_NORMATIVE_TEXT_REQUIRED",
+      "conformanceStatus": "NOT_ASSESSED"
+    },
+    {
+      "id": "EN-18219:2026",
+      "title": "Digital product passport – Unique identifiers",
+      "ojReferencePublished": true,
+      "clauseReviewStatus": "BLOCKED_LICENSED_NORMATIVE_TEXT_REQUIRED",
+      "conformanceStatus": "NOT_ASSESSED"
+    },
+    {
+      "id": "EN-18220:2026",
+      "title": "Digital product passport – Data carriers",
+      "ojReferencePublished": true,
+      "clauseReviewStatus": "BLOCKED_LICENSED_NORMATIVE_TEXT_REQUIRED",
+      "conformanceStatus": "NOT_ASSESSED"
+    },
+    {
+      "id": "EN-18221:2026",
+      "title": "Digital product passport – Data storage, archiving, and persistence",
+      "ojReferencePublished": true,
+      "clauseReviewStatus": "BLOCKED_LICENSED_NORMATIVE_TEXT_REQUIRED",
+      "conformanceStatus": "NOT_ASSESSED"
+    },
+    {
+      "id": "EN-18222:2026",
+      "title": "Digital Product Passport – Application Programming Interfaces (APIs) for product passport lifecycle management and searchability",
+      "ojReferencePublished": true,
+      "clauseReviewStatus": "BLOCKED_LICENSED_NORMATIVE_TEXT_REQUIRED",
+      "conformanceStatus": "NOT_ASSESSED"
+    },
+    {
+      "id": "EN-18223:2026",
+      "title": "Digital Product Passport – System interoperability",
+      "ojReferencePublished": true,
+      "clauseReviewStatus": "BLOCKED_LICENSED_NORMATIVE_TEXT_REQUIRED",
+      "conformanceStatus": "NOT_ASSESSED"
+    }
+  ]
+}

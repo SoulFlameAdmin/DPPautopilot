@@ -1,0 +1,44 @@
+name: EU DPP conformance groundwork
+
+on:
+  pull_request:
+    paths:
+      - "data/lmt-battery-71-eu-conformance-v1.json"
+      - "data/dpp-field-catalog.json"
+      - "data/eu-dpp-harmonised-standards-v1.json"
+      - "data/eu-dpp-system-contracts-v1.json"
+      - "data/eu-dpp-evidence-pack-template-v1.json"
+      - "data/eu-dpp-registry-adapter-v1.json"
+      - "scripts/eu_conformance.py"
+      - "tests/unit/test_eu_conformance.py"
+      - ".github/workflows/eu-dpp-conformance.yml"
+  push:
+    branches:
+      - "eu-dpp-conformance-v1"
+    paths:
+      - "data/lmt-battery-71-eu-conformance-v1.json"
+      - "data/eu-dpp-harmonised-standards-v1.json"
+      - "data/eu-dpp-system-contracts-v1.json"
+      - "data/eu-dpp-evidence-pack-template-v1.json"
+      - "data/eu-dpp-registry-adapter-v1.json"
+      - "scripts/eu_conformance.py"
+      - "tests/unit/test_eu_conformance.py"
+      - ".github/workflows/eu-dpp-conformance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eu-conformance-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate EU traceability contracts
+        run: python scripts/eu_conformance.py
+      - name: Run EU conformance unit tests
+        run: python -m unittest tests.unit.test_eu_conformance -v

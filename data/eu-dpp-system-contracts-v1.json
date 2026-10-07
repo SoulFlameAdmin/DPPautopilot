@@ -1,0 +1,126 @@
+{
+  "schemaVersion": "1.0.0-2026-10-07",
+  "modelVsIndividual": {
+    "rule": "Model-level facts are stored once and referenced by battery items; individual-battery facts must resolve to one exact physical battery and must not silently overwrite model facts.",
+    "modelLevels": [
+      "model",
+      "economic_operator"
+    ],
+    "individualLevels": [
+      "individual_battery"
+    ],
+    "mixedLevels": [
+      "model_with_batch_or_item_variation"
+    ],
+    "inheritance": "item may read model data by reference; item-specific override requires an explicit legal/data-contract basis and provenance"
+  },
+  "uniqueIdentifier": {
+    "legalBasis": "Regulation (EU) 2023/1542 Article 77(3)",
+    "required": true,
+    "perIndividualBattery": true,
+    "immutableAfterIssuance": true,
+    "uniquenessScope": "global scheme namespace used by the responsible economic operator",
+    "standardsBasis": [
+      "ISO/IEC 15459-1:2014",
+      "ISO/IEC 15459-2:2015",
+      "ISO/IEC 15459-3:2014",
+      "ISO/IEC 15459-4:2014",
+      "ISO/IEC 15459-5:2014",
+      "ISO/IEC 15459-6:2014"
+    ],
+    "validationState": "CONTRACT_DEFINED_SCHEME_PROFILE_PENDING"
+  },
+  "qrResolver": {
+    "legalBasis": "Regulation (EU) 2023/1542 Article 77(3) and Article 78",
+    "chain": [
+      "QR",
+      "unique_identifier",
+      "exact_battery_passport"
+    ],
+    "rules": [
+      "scan must resolve to the exact passport for the encoded unique identifier",
+      "must not rely on a generic marketing landing page",
+      "public access is free for public data",
+      "resolver changes must preserve identifier-to-passport continuity"
+    ],
+    "conformanceState": "CONTRACT_DEFINED_RUNTIME_TEST_PENDING"
+  },
+  "lifecycle": {
+    "systemStates": [
+      "ORIGINAL",
+      "REUSED",
+      "REPURPOSED",
+      "REMANUFACTURED",
+      "WASTE",
+      "RECYCLED"
+    ],
+    "rules": [
+      "repurposed/remanufactured successor passport must retain explicit link to original passport(s) where legally required",
+      "state transitions must be auditable",
+      "no lifecycle state may delete historical provenance"
+    ],
+    "conformanceState": "CONTRACT_DEFINED_TESTS_PENDING"
+  },
+  "access": {
+    "classes": [
+      "public",
+      "public_identifier",
+      "legitimate_interest",
+      "authority_only"
+    ],
+    "rule": "server-side policy must enforce access; UI hiding is not evidence of access control",
+    "conformanceState": "CONTRACT_DEFINED_ENFORCEMENT_TEST_PENDING"
+  },
+  "registryAdapter": {
+    "states": [
+      "not_registered",
+      "submitted",
+      "registered",
+      "rejected",
+      "needs_update",
+      "retired"
+    ],
+    "externalDependency": "live EU DPP Registry onboarding/credentials and test procedure",
+    "conformanceState": "ADAPTER_CONTRACT_DEFINED_LIVE_AUTHORIZED_INTEGRATION_PENDING",
+    "operationalSince": "2026-07-20",
+    "testingEnvironmentAvailable": true,
+    "requiredRegistryUpload": [
+      "unique_identifier"
+    ],
+    "registrationReceiptRequires": [
+      "unique_registration_identifier",
+      "receipt_reference"
+    ],
+    "registrationIdentifierIsComplianceProof": false
+  },
+  "evidencePack": {
+    "requiredSections": [
+      "company",
+      "responsible_economic_operator",
+      "model",
+      "individual_battery",
+      "unique_identifier",
+      "qr_resolution",
+      "source_documents",
+      "provenance",
+      "audit_trail",
+      "registry_proof",
+      "uat_evidence",
+      "legal_review"
+    ],
+    "rule": "missing external evidence keeps final EU conformance gate incomplete"
+  },
+  "finalGate": {
+    "allowedStatuses": [
+      "TECHNICALLY_READY",
+      "PILOT_EVIDENCE_COMPLETE",
+      "EU_CONFORMANCE_EVIDENCE_COMPLETE"
+    ],
+    "forbiddenClaimsWithoutExternalReview": [
+      "EU certified",
+      "fully EU compliant",
+      "officially approved by the EU"
+    ],
+    "rule": "system may report evidence state; it must not self-issue certification"
+  }
+}

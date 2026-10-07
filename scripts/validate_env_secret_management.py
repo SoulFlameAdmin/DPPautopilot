@@ -48,12 +48,20 @@ for line in env.splitlines():
         key,value=line.split("=",1)
         require("REPLACE" in value or "YOUR_PROJECT" in value,f"R01 .env.example contains non-placeholder value for {key}")
 
+shared_config=(ROOT/"api/_supabase_config.js").read_text(encoding="utf-8")
+for token in ["DPP_SUPABASE_URL","DPP_SUPABASE_PUBLISHABLE_KEY","SUPABASE_URL","SUPABASE_ANON_KEY"]:
+    require(token in shared_config,f"R01 shared Supabase config missing {token}")
+require("getSupabaseConfig" in shared_config,"R01 shared Supabase config helper missing")
+
 api_names=["models","items","passport","export","imports","tenant","organizations","members"]
 for name in api_names:
     text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
-    require("DPP_SUPABASE_URL" in text,f"R01 {name} API must accept canonical DPP_SUPABASE_URL")
-    require("DPP_SUPABASE_PUBLISHABLE_KEY" in text,f"R01 {name} API must accept canonical DPP_SUPABASE_PUBLISHABLE_KEY")
-    require("SUPABASE_URL" in text and "SUPABASE_ANON_KEY" in text,f"R01 {name} API must retain legacy env fallback during migration")
+    uses_shared="getSupabaseConfig" in text and "_supabase_config" in text
+    if uses_shared:
+        continue
+    require("DPP_SUPABASE_URL" in text,f"R01 {name} API must accept canonical DPP_SUPABASE_URL directly or via shared config")
+    require("DPP_SUPABASE_PUBLISHABLE_KEY" in text,f"R01 {name} API must accept canonical DPP_SUPABASE_PUBLISHABLE_KEY directly or via shared config")
+    require("SUPABASE_URL" in text and "SUPABASE_ANON_KEY" in text,f"R01 {name} API must retain legacy env fallback directly or via shared config during migration")
 
 doc=(ROOT/"docs/R01_ENV_SECRET_MANAGEMENT.md").read_text(encoding="utf-8")
 for phrase in ["service-role key","server-only secret store","publishable key","frhletkiuupgksmgxoxc","DPP_SUPABASE_URL","DPP_SUPABASE_PUBLISHABLE_KEY","DPP_SHARED_RATE_LIMIT_ENABLED","DPP_EXPORT_MANIFEST_SIGNING_KEY"]:

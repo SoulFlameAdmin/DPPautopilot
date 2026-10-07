@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "task": "R03",
   "status": "partial",
   "max_body_bytes": 1048576,
@@ -132,6 +132,26 @@
     {
       "id": "invalid_carrier_fields",
       "surface": "/api/carriers",
+      "expected": "400/422 validation error before upstream"
+    },
+    {
+      "id": "oversize_parsed_application_body",
+      "surface": "/api/application",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "oversize_parsed_registration_link_body",
+      "surface": "/api/registration-link",
+      "expected": "413 PAYLOAD_TOO_LARGE before upstream"
+    },
+    {
+      "id": "invalid_application_fields",
+      "surface": "/api/application",
+      "expected": "400/422 validation error before upstream"
+    },
+    {
+      "id": "invalid_registration_link_fields",
+      "surface": "/api/registration-link",
       "expected": "400/422 validation error before upstream"
     }
   ],
