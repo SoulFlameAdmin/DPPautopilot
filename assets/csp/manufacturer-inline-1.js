@@ -1,6 +1,7 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
 const STORAGE="dpp_company_session_v1";
+const GOOGLE_STORAGE="dpp_google_session_v1";
 const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
 let cfg=null,session=null,activeOrg=null,models=[],items=[],refreshing=null;
 
@@ -9,6 +10,27 @@ function readSession(){
   try{
     const value=JSON.parse(sessionStorage.getItem(STORAGE)||"null");
     if(value?.access_token){session=value;return true}
+  }catch{}
+  try{
+    const google=JSON.parse(localStorage.getItem(GOOGLE_STORAGE)||"null");
+    if(google?.access_token){
+      session={
+        access_token:google.access_token,
+        refresh_token:google.refresh_token||"",
+        expires_in:Math.max(60,Number(google.expires_at)?Number(google.expires_at)-Math.floor(Date.now()/1000):3600)
+      };
+      sessionStorage.setItem(STORAGE,JSON.stringify(session));
+    try{
+      const previous=JSON.parse(localStorage.getItem(GOOGLE_STORAGE)||"null")||{};
+      localStorage.setItem(GOOGLE_STORAGE,JSON.stringify({
+        ...previous,
+        access_token:session.access_token,
+        refresh_token:session.refresh_token||previous.refresh_token||"",
+        expires_at:Math.floor(Date.now()/1000)+(Number(session.expires_in)||3600)
+      }));
+    }catch{}
+      return true;
+    }
   }catch{}
   session=null;return false;
 }
