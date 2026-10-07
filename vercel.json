@@ -91,19 +91,19 @@
     },
     {
       "source": "/login",
-      "destination": "/live/login"
+      "destination": "/live/apply"
     },
     {
       "source": "/login/",
-      "destination": "/live/login"
+      "destination": "/live/apply"
     },
     {
       "source": "/forgot-password",
-      "destination": "/live/forgot-password"
+      "destination": "/live/apply"
     },
     {
       "source": "/forgot-password/",
-      "destination": "/live/forgot-password"
+      "destination": "/live/apply"
     },
     {
       "source": "/((?!data/|api/).*)",
