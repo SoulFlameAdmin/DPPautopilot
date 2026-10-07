@@ -98,6 +98,47 @@ function setDetail(p){
   ?"Selected "+p.unique_identifier+" · update keeps the same passport + QR."
   :"Select an ACTIVE passport.";
 }
+async function saveSelectedPassportPilotUpdate(){
+ if(!canWrite())return;
+ if(!selectedPassport||selectedPassport.status!=="active"){
+  return setText($("#detailEditResult"),"Select an ACTIVE passport first.","bad");
+ }
+ const capacity=Number($("#detailPilotCapacity").value);
+ if(!Number.isFinite(capacity)||capacity<=0||capacity>100000){
+  return setText($("#detailEditResult"),"Enter a valid test capacity in Ah.","bad");
+ }
+ const button=$("#detailSavePilotUpdate");
+ button.disabled=true;
+ setText($("#detailEditResult"),"Updating "+selectedPassport.unique_identifier+" without changing its QR…");
+ try{
+  const full=(await api("/api/passport?id="+encodeURIComponent(selectedPassport.passport_id))).data;
+  const publicPayload=JSON.parse(JSON.stringify(full.public_payload||{}));
+  if(!publicPayload.item||typeof publicPayload.item!=="object"||Array.isArray(publicPayload.item))publicPayload.item={};
+  publicPayload.item.unique_identifier=selectedPassport.unique_identifier;
+  publicPayload.item.capacity_ah=capacity;
+  const updated=(await api("/api/passport",{method:"PATCH",body:{
+   id:full.passport_id,
+   status:"active",
+   public_payload:publicPayload,
+   private_payload:full.private_payload||{},
+   expected_updated_at:full.updated_at
+  }})).data;
+  if(updated.passport_id!==full.passport_id)throw new Error("Passport identity changed unexpectedly.");
+  const sameIdentifier=selectedPassport.unique_identifier;
+  const samePassportId=full.passport_id;
+  await loadBase();
+  const current=passports.find(p=>p.passport_id===samePassportId);
+  if(current)setDetail(current);
+  setText($("#detailEditResult"),
+   "UPDATED · "+sameIdentifier+" · Capacity "+capacity+" Ah · same passport · same QR.",
+   "ok"
+  );
+ }catch(e){
+  setText($("#detailEditResult"),e.message,"bad");
+ }finally{
+  button.disabled=!canWrite()||!selectedPassport||selectedPassport.status!=="active";
+ }
+}
 function syncSearchFields(source){
  const mirror=$("#passportSearchMirror");
  if(source===mirror)$("#passportSearch").value=mirror.value;
