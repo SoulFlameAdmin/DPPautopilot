@@ -12,6 +12,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from eu_conformance import (
     ConformanceError,
     access_allowed,
+    assert_not_demo_uid,
     evaluate_final_gate,
     load_json,
     resolve_exact_passport,
@@ -19,7 +20,9 @@ from eu_conformance import (
     validate_71_matrix,
     validate_harmonised_standards_inventory,
     validate_lifecycle_transition,
+    validate_model_item_separation,
     validate_uid_bindings,
+    transition_registry_state,
 )
 
 
@@ -96,6 +99,55 @@ class EuDppConformanceTests(unittest.TestCase):
 
         with self.assertRaises(ConformanceError):
             validate_lifecycle_transition("RECYCLED", "ORIGINAL")
+
+
+    def test_demo_uid_is_forbidden_in_production_gate(self) -> None:
+        self.assertEqual(assert_not_demo_uid("01:1234567890123:BAT-0001"), "01:1234567890123:BAT-0001")
+        with self.assertRaises(ConformanceError):
+            assert_not_demo_uid("urn:dpp:demo:battery:LMT-A:000001")
+
+    def test_model_and_individual_battery_payloads_cannot_cross_contaminate(self) -> None:
+        result = validate_model_item_separation(
+            {"identification": {"model_id": "LMT-A"}, "voltage": {"nominal_v": 48}},
+            {"unique_identifier": "UID-001", "state_of_health": {"pct": 100}},
+        )
+        self.assertEqual(result["status"], "MODEL_ITEM_SEPARATION_VALID")
+
+        with self.assertRaises(ConformanceError):
+            validate_model_item_separation(
+                {"identification": {}, "unique_identifier": "UID-001"},
+                {"unique_identifier": "UID-001"},
+            )
+
+        with self.assertRaises(ConformanceError):
+            validate_model_item_separation(
+                {"identification": {}},
+                {"unique_identifier": "UID-001", "voltage": {"nominal_v": 48}},
+            )
+
+    def test_registry_state_machine_requires_external_proof(self) -> None:
+        submitted = transition_registry_state(
+            "not_registered",
+            "submitted",
+            submission_evidence="submission-2026-001",
+        )
+        self.assertEqual(submitted["to"], "submitted")
+
+        registered = transition_registry_state(
+            "submitted",
+            "registered",
+            registry_receipt="registry-receipt-001",
+        )
+        self.assertEqual(registered["status"], "REGISTRY_TRANSITION_VALID")
+
+        with self.assertRaises(ConformanceError):
+            transition_registry_state("not_registered", "submitted")
+
+        with self.assertRaises(ConformanceError):
+            transition_registry_state("submitted", "registered")
+
+        with self.assertRaises(ConformanceError):
+            transition_registry_state("registered", "not_registered")
 
     def test_en_references_cannot_self_pass_without_clause_review(self) -> None:
         result = validate_harmonised_standards_inventory(self.standards)
