@@ -109,7 +109,7 @@
       <section class="stats" aria-label="Configured pilot status">
         <article class="metric blue"><span class="metric-icon">▤</span><div><small>Total Passports</small><strong>0</strong><em>Готово за първия реален модел</em></div></article>
         <article class="metric green"><span class="metric-icon">✓</span><div><small>Status</small><strong>Configured</strong><em>Onboarding 8/8 завършен</em></div></article>
-        <article class="metric amber"><span class="metric-icon">＋</span><div><small>Next Step</small><strong>Product / SKU</strong><em>Добавете първия реален модел</em></div></article>
+        <a class="metric amber metric-link preparing" id="productSkuEntry" href="#" aria-disabled="true"><span class="metric-icon">＋</span><div><small>Next Step</small><strong>Product / SKU</strong><em id="productSkuEntryState">Подготвяме фирмения workspace…</em></div><span class="metric-go" aria-hidden="true">→</span></a>
         <article class="metric purple"><span class="metric-icon">▦</span><div><small>QR</small><strong>Ready</strong><em>След DPP създаване</em></div></article>
       </section>
 
@@ -118,7 +118,7 @@
         <div class="result ok" id="earlyStatus" role="status" aria-live="polite">Зареждаме конфигурацията…</div>
         <div class="early-info-grid">
           <div class="access-box"><span class="shield">◇</span><div><strong>Google access</strong><p id="clientEmail">—</p><small>Сесията се пази на устройството.</small></div></div>
-          <div class="access-box"><span class="shield">✓</span><div><strong>Следваща реална стъпка</strong><p>Добавете реалния Product / SKU. После създаваме Batch, серийни единици, DPP и QR.</p></div></div>
+          <div class="access-box"><span class="shield">✓</span><div><strong>Следваща реална стъпка</strong><p>Добавете реалния Product / SKU. После създаваме Batch, серийни единици, DPP и QR.</p><a class="btn primary early-product-cta" id="productSkuButton" href="#" aria-disabled="true">Отвори Product / SKU →</a></div></div>
         </div>
         <div class="configuration-summary" id="configurationSummary"></div>
       </section>
