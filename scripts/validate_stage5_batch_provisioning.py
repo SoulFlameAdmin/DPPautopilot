@@ -14,6 +14,7 @@ def main()->None:
     api=(ROOT/"api/batch-provision.js").read_text(encoding="utf-8")
     api_test=(ROOT/"tests/api/batch-provision.test.cjs").read_text(encoding="utf-8")
     db_test=(ROOT/"tests/db/test_scooter_batch_provisioning_subset.sql").read_text(encoding="utf-8")
+    generic_db=(ROOT/"tests/db/test_generic_battery_provisioning_subset.sql").read_text(encoding="utf-8")
     contract=json.loads((ROOT/"data/api-error-contract.json").read_text(encoding="utf-8"))
     rate=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
     obs=json.loads((ROOT/"data/observability-policy.json").read_text(encoding="utf-8"))
@@ -84,6 +85,14 @@ def main()->None:
         "viewer batch provisioning was not denied",
     ]:
         require(token in db_test,f"Stage 5 DB test missing: {token}")
+
+    for token in [
+        "GENERIC_BATTERY_PROVISIONING_PASS",
+        "Viewer gained generic provisioning write access",
+        "Cross-tenant model id was accepted by generic provisioning",
+        "Legacy scooter RPC stopped enforcing LMT compatibility",
+    ]:
+        require(token in generic_db,f"Generic manufacturer DB acceptance missing: {token}")
 
     batch_errors=contract["surfaces"].get("batch-provision",{})
     require(batch_errors.get("DP606",{}).get("code")=="BATCH_KEY_CONFLICT","DP606 mapping missing")
