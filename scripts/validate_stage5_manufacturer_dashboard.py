@@ -25,7 +25,7 @@ def main() -> None:
     for token in [
         'const STORAGE="dpp_company_session_v1"',
         'sessionStorage.getItem(STORAGE)',
-        'api("/api/organizations")',
+        'organizationRpc("dpp_api_organizations_list",{})',
         'api("/api/models")',
         'api("/api/items")',
         'api("/api/models",{method:"POST"',
