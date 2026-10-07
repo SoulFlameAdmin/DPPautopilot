@@ -10,6 +10,7 @@ def require(c: bool,m: str)->None:
 
 def main()->None:
     migration=(ROOT/"supabase/migrations/20261004143000_dpp_scooter_batch_provisioning.sql").read_text(encoding="utf-8")
+    generic=(ROOT/"supabase/migrations/20261007052000_dpp_generic_battery_provisioning_v1.sql").read_text(encoding="utf-8")
     api=(ROOT/"api/batch-provision.js").read_text(encoding="utf-8")
     api_test=(ROOT/"tests/api/batch-provision.test.cjs").read_text(encoding="utf-8")
     db_test=(ROOT/"tests/db/test_scooter_batch_provisioning_subset.sql").read_text(encoding="utf-8")
@@ -43,7 +44,7 @@ def main()->None:
         "startRequestObservability(req,res,'batch-provision')",
         "enforceRateLimit(req,res,'batch-provision')",
         "enforceSharedRateLimit(req,res,'batch-provision'",
-        "dpp_api_scooter_battery_batch_provision",
+        "dpp_api_battery_batch_provision",
         "findRestrictedPublicPaths",
         "findAuthorityOnlyPaths",
         "passport_url",
@@ -55,11 +56,22 @@ def main()->None:
             require(token in api,f"Stage 5 API missing: {token}")
 
     for token in [
+        "create or replace function public.dpp_api_battery_provision",
+        "create or replace function public.dpp_api_battery_batch_provision",
+        "dpp_api_battery_provision",
+        "public model category must match the selected battery model",
+        "grant execute on function public.dpp_api_battery_batch_provision",
+    ]:
+        require(token.lower() in generic.lower(),f"Manufacturer generic provisioning migration missing: {token}")
+
+    for token in [
         "Produce X generator creates deterministic serial range and calls one atomic batch RPC",
         "explicit batch rejects duplicate identifiers before upstream",
         "generator validates quantity serial width and range without partial work",
         "identical batch replay returns 200 and same identities",
         "divergent batch-key conflict maps to stable public error",
+        "batch validation accepts supported non-LMT manufacturer categories",
+        "batch validation rejects unknown battery categories before upstream",
     ]:
         require(token in api_test,f"Stage 5 API test missing: {token}")
 
@@ -79,7 +91,7 @@ def main()->None:
     require(rate["surfaces"].get("batch-provision")=={"POST":"authenticated_write"},"batch rate-limit policy missing")
     require("batch-provision" in obs["surfaces"],"batch observability surface missing")
 
-    print("STAGE5_BATCH_PROVISIONING_CONTRACT_PASS: Produce-X supports 1..250 units, deterministic serial ranges, atomic rollback, durable batch idempotency and per-item passport/QR output")
+    print("STAGE5_BATCH_PROVISIONING_CONTRACT_PASS: Produce-X supports 1..250 units across supported battery categories, deterministic serial ranges, atomic rollback, durable batch idempotency and per-item passport/QR output")
 
 if __name__=="__main__":
     main()
