@@ -74,6 +74,21 @@ async function api(path,{method="GET",body}={}){
   if(!r.ok)throw new Error(data?.error?.message||data?.error?.code||("HTTP "+r.status));
   return data;
 }
+async function verifyRegistrationRequest(){
+  if(!session?.access_token||recoveryMode)return null;
+  const url=new URL(location.href),requestId=url.searchParams.get("request");
+  if(!requestId)return null;
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)){
+    result($("#authResult"),"Невалиден registration request.","bad");return null;
+  }
+  try{
+    const verified=(await api("/api/registration-link",{method:"PATCH",body:{request_id:requestId}})).data;
+    url.searchParams.delete("request");url.searchParams.delete("dpp");
+    history.replaceState(null,"",url.pathname+url.search+url.hash);
+    result($("#authResult"),"DPP registration verified. Продължаваме към фирмения tenant.","ok");
+    return verified;
+  }catch(e){result($("#authResult"),"Registration verification: "+e.message,"bad");return null}
+}
 function syncAuthUi(){
   const on=!!session?.access_token;
   const recovery=on&&recoveryMode;
@@ -202,7 +217,7 @@ async function init(){
   restoreSession();parseConfirmationFragment();syncAuthUi();
   if(recoveryMode)return;
   if(session?.refresh_token){try{await refreshSession()}catch{clearSession()}}
-  if(session?.access_token)await loadTenantState();
+  if(session?.access_token){await verifyRegistrationRequest();await loadTenantState();}
   else result($("#authResult"),"Готово. Създай акаунт или влез.","ok");
 }
 $("#companyName").addEventListener("input",()=>{if(!$("#companySlug").dataset.manual)$("#companySlug").value=slugify($("#companyName").value)});
