@@ -45,7 +45,7 @@ function restoreSession(){
   try{const raw=localStorage.getItem(STORAGE)||sessionStorage.getItem(STORAGE);const value=JSON.parse(raw||"null");if(value?.access_token){session=value;localStorage.setItem(STORAGE,JSON.stringify(value));sessionStorage.removeItem(STORAGE);document.body.dataset.companySession="authenticated";return true}}catch{}
   return false;
 }
-function confirmationRedirect(){return new URL("/company",location.origin).href}
+function confirmationRedirect(){return new URL("/email-confirmed",location.origin).href}
 function recoveryRedirect(){return new URL("/reset-password",location.origin).href}
 function parseConfirmationFragment(){
   const p=new URLSearchParams(location.hash.replace(/^#/,""));
