@@ -91,6 +91,12 @@ function setDetail(p){
  const qr=$("#detailQrImage"); if(p){qr.src="/api/qr?identifier="+encodeURIComponent(id);qr.hidden=false}else{qr.removeAttribute("src");qr.hidden=true}
  const pub=$("#detailPublicLink");pub.href=p?"/passport?identifier="+encodeURIComponent(id):"#";
  const print=$("#detailPrintButton");print.disabled=!p||p.status!=="active";
+ const editInput=$("#detailPilotCapacity"),editButton=$("#detailSavePilotUpdate"),editResult=$("#detailEditResult");
+ if(editInput)editInput.disabled=!p||p.status!=="active"||!canWrite();
+ if(editButton)editButton.disabled=!p||p.status!=="active"||!canWrite();
+ if(editResult)editResult.textContent=p&&p.status==="active"
+  ?"Selected "+p.unique_identifier+" · update keeps the same passport + QR."
+  :"Select an ACTIVE passport.";
 }
 function syncSearchFields(source){
  const mirror=$("#passportSearchMirror");
