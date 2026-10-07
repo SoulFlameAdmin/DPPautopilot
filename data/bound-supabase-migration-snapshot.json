@@ -2,7 +2,7 @@
   "version": 1,
   "task": "C04",
   "project_id": "frhletkiuupgksmgxoxc",
-  "observed_at": "2026-10-07T17:37:16.000Z",
+  "observed_at": "2026-10-07T18:43:43.000Z",
   "source": "Supabase list_migrations read-only connector",
   "applied_migrations": [
     {
@@ -288,7 +288,11 @@
     {
       "version": "20261007173716",
       "name": "dpp_company_onboarding_canonical"
+    },
+    {
+      "version": "20261007184343",
+      "name": "dpp_technical_pilot_capacity_update"
     }
   ],
-  "note": "Read-only bound snapshot refreshed after live Supabase confirmed dpp_company_onboarding_canonical applied; canonical migration name is the cross-system identity."
+  "note": "Read-only bound snapshot refreshed after live Supabase confirmed dpp_technical_pilot_capacity_update applied; technical-pilot capacity update preserves passport/QR identity."
 }
