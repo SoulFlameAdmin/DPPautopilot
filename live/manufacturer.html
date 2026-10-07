@@ -350,6 +350,13 @@
               <div class="qr-wrap"><img id="detailQrImage" alt="Digital Product Passport QR"><small>Scan for Digital<br>Product Passport</small></div>
             </div>
           </div>
+          <div class="passport-edit-box" id="detailPilotEdit">
+            <strong>Selected DPP update test</strong>
+            <p class="muted">Променя само избрания публичен TECHNICAL PILOT DPP. SKU моделът и отпечатаният QR остават същите.</p>
+            <label><span>Capacity (Ah)</span><input id="detailPilotCapacity" type="number" min="0.1" step="0.1" placeholder="101"></label>
+            <button class="btn primary" id="detailSavePilotUpdate" type="button">Save to this DPP</button>
+            <div class="result" id="detailEditResult" role="status" aria-live="polite">Select an ACTIVE passport.</div>
+          </div>
           <div class="detail-actions">
             <a class="btn primary big" id="detailPublicLink" href="#" target="_blank" rel="noopener">↗ View Public Passport <span>→</span></a>
             <button class="btn big" id="detailPrintButton" type="button">▣ Print QR Carrier</button>
