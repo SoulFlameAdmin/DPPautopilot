@@ -1,5 +1,7 @@
 'use strict';
 
+const { getSupabaseConfig } = require('./_supabase_config.js');
+
 const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
@@ -35,16 +37,7 @@ function publicOrigin(env=process.env){
 }
 
 function authConfig(env=process.env){
-  const base=env.DPP_SUPABASE_URL||env.SUPABASE_URL;
-  const key=env.DPP_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
-  if(!base||!key){
-    const error=new Error('SERVER_CONFIGURATION_MISSING');
-    error.status=500;
-    error.publicCode='SERVER_CONFIGURATION_MISSING';
-    error.publicMessage='Server configuration is incomplete.';
-    throw error;
-  }
-  return {base:base.replace(/\/$/,''),key};
+  return getSupabaseConfig(env);
 }
 
 async function jsonFetch(url,options={},timeoutMs=DEFAULT_TIMEOUT_MS,fetchImpl=fetch){
