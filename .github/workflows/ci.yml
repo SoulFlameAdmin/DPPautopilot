@@ -96,6 +96,12 @@ jobs:
         run: python scripts/validate_env_secret_management.py
       - name: Validate R02 security header policy
         run: python scripts/validate_security_headers.py
+      - name: Test manufacturer onboarding API contract
+        run: node --test tests/api/manufacturer-onboarding.test.cjs
+      - name: Test manufacturer onboarding client binding
+        run: node --test tests/api/manufacturer-onboarding-client.test.cjs
+      - name: Test manufacturer onboarding entry gate
+        run: node --test tests/api/manufacturer-onboarding-gate.test.cjs
       - name: Validate R11 backup policy
         run: python scripts/validate_backup_policy.py
       - name: Validate R14 supply-chain policy
