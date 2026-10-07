@@ -31,9 +31,15 @@ function setMessage(message,kind=""){
   node.className="intake-message"+(kind?" "+kind:"");
 }
 async function api(action,extra={}){
+  const google=readGoogleSession();
+  if(!google?.access_token)throw new Error("Google session expired. Влезте отново.");
   const response=await fetch(ENDPOINT,{
     method:"POST",
-    headers:{"Content-Type":"application/json","Accept":"application/json"},
+    headers:{
+      "Content-Type":"application/json",
+      "Accept":"application/json",
+      "Authorization":"Bearer "+google.access_token
+    },
     body:JSON.stringify({action,token,...extra}),
     cache:"no-store"
   });

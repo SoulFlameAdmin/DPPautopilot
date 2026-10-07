@@ -106,9 +106,15 @@ function googleOAuthUrl(){
 async function openExistingEarlyAccess(){
   const token=localStorage.getItem(TOKEN_KEY);
   if(!/^[a-f0-9]{64}$/i.test(String(token||"")))return false;
+  const session=readGoogleSession();
+  if(!session?.access_token)return false;
   const response=await fetch(ENDPOINT,{
     method:"POST",
-    headers:{"Content-Type":"application/json","Accept":"application/json"},
+    headers:{
+      "Content-Type":"application/json",
+      "Accept":"application/json",
+      "Authorization":"Bearer "+session.access_token
+    },
     body:JSON.stringify({action:"open",token}),
     cache:"no-store"
   });
@@ -122,10 +128,16 @@ async function openExistingEarlyAccess(){
 async function registerGoogleClient(user){
   const email=String(user?.email||"").trim().toLowerCase();
   if(!email)throw new Error("Google не върна email за този акаунт.");
+  const session=readGoogleSession();
+  if(!session?.access_token)throw new Error("Google session expired.");
   const response=await fetch(ENDPOINT,{
     method:"POST",
-    headers:{"Content-Type":"application/json","Accept":"application/json"},
-    body:JSON.stringify({action:"new_client",email}),
+    headers:{
+      "Content-Type":"application/json",
+      "Accept":"application/json",
+      "Authorization":"Bearer "+session.access_token
+    },
+    body:JSON.stringify({action:"new_client"}),
     cache:"no-store"
   });
   const data=await response.json().catch(()=>({}));
