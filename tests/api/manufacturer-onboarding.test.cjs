@@ -78,8 +78,10 @@ test('configure response must prove all seven backend progress steps',()=>{
   }),false);
 });
 
-test('RPC forwards bearer token and exact answer payload',async()=>{
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+for (const [configName,env] of Object.entries({
+  canonical:{DPP_SUPABASE_URL:'https://example.supabase.co',DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only'},
+  legacy:{SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_only'}
+})) test(`RPC forwards bearer token and exact answer payload with ${configName} config`,async()=>{
   let seen;
   const fetchImpl=async(url,options)=>{
     seen={url,options};
@@ -97,6 +99,7 @@ test('RPC forwards bearer token and exact answer payload',async()=>{
   },'Bearer real-user',env,fetchImpl);
   assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_manufacturer_onboarding_answer_upsert');
   assert.equal(seen.options.headers.Authorization,'Bearer real-user');
+  assert.equal(seen.options.headers.apikey,'sb_publishable_test_only');
   assert.deepEqual(JSON.parse(seen.options.body),{
     p_question_key:'onboardingQ7',p_raw_answer:'CSV and ERP',p_structured_value:{import_method:['csv','erp']}
   });

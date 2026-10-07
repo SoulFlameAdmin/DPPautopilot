@@ -31,33 +31,84 @@
     <div class="result" id="statusBox">Проверка на личния dashboard link…</div>
   </section>
 
-  <section class="card onboarding-card" id="onboardingCard" hidden>
-    <div class="card-head">
-      <div><p class="eyebrow">EARLY ACCESS PROFILE</p><h2>Кажете ни коя е фирмата</h2></div>
-      <span class="state ok">EMAIL LINK VERIFIED</span>
-    </div>
-    <p class="muted">Изберете държава и производител. Ако фирмата не е в списъка, изберете „Друга фирма“ и я въведете ръчно.</p>
-
-    <div class="choice-grid">
-      <label class="choice"><span>Държава *</span><select id="countrySelect"><option value="">Изберете държава…</option></select></label>
-      <label class="choice"><span>Производител / фирма *</span><select id="manufacturerSelect" disabled><option value="">Първо изберете държава…</option></select></label>
+  <section class="card onboarding-card onboarding-glass" id="onboardingCard" hidden>
+    <div class="onboarding-intro">
+      <div>
+        <p class="eyebrow">FIRST LOGIN · MANUFACTURER SETUP</p>
+        <h2>Настройте DPP спрямо реалния ви процес</h2>
+        <p class="muted">Отговорете свободно на 8 въпроса. Този UI не симулира конфигурация и не отбелязва стъпки като завършени без реално състояние от системата.</p>
+      </div>
+      <span class="state pending">WAITING FOR REAL STATE</span>
     </div>
 
-    <label class="wide-label" id="customManufacturerWrap" hidden>
-      <span>Име на фирмата</span>
-      <input id="customManufacturer" maxlength="200" placeholder="Точното име на фирмата">
-    </label>
-
-    <div class="question-box">
-      <p class="field-title">Какво искате от DPP системата?</p>
-      <p class="question-help">Опишете свободно какви продукти произвеждате, колко модели/SKU имате, приблизителен обем, колко души ще работят със системата, какви ERP/MES/BMS/Excel/API системи използвате и какво искате да автоматизираме.</p>
-      <textarea id="requestText" maxlength="5000" rows="9" placeholder="Опишете нуждите на фирмата…"></textarea>
+    <div class="onboarding-question-grid" aria-label="DPP onboarding questions">
+      <label class="onboarding-question" for="onboardingQ1">
+        <span><b>01</b> Име на фирмата и дейност</span>
+        <textarea id="onboardingQ1" rows="3" maxlength="1000" placeholder="Напр. производител на индустриални батерии, сервиз, вносител…"></textarea>
+      </label>
+      <label class="onboarding-question" for="onboardingQ2">
+        <span><b>02</b> Какви батерии произвеждате / пускате на пазара</span>
+        <textarea id="onboardingQ2" rows="3" maxlength="1000" placeholder="Типове батерии, приложения, пазари…"></textarea>
+      </label>
+      <label class="onboarding-question" for="onboardingQ3">
+        <span><b>03</b> Колко модела / SKU имате</span>
+        <textarea id="onboardingQ3" rows="3" maxlength="1000" placeholder="Брой модели, варианти или продуктови линии…"></textarea>
+      </label>
+      <label class="onboarding-question" for="onboardingQ4">
+        <span><b>04</b> Serial numbers, batches или и двете</span>
+        <textarea id="onboardingQ4" rows="3" maxlength="1000" placeholder="Как идентифицирате отделните батерии и партиди…"></textarea>
+      </label>
+      <label class="onboarding-question" for="onboardingQ5">
+        <span><b>05</b> Какви данни пазите за всяка батерия</span>
+        <textarea id="onboardingQ5" rows="3" maxlength="1000" placeholder="Технически данни, произход, материали, тестове, сервиз…"></textarea>
+      </label>
+      <label class="onboarding-question" for="onboardingQ6">
+        <span><b>06</b> Приблизителен месечен обем</span>
+        <textarea id="onboardingQ6" rows="3" maxlength="1000" placeholder="Приблизителен брой батерии / партиди месечно…"></textarea>
+      </label>
+      <label class="onboarding-question" for="onboardingQ7">
+        <span><b>07</b> Къде са данните сега</span>
+        <textarea id="onboardingQ7" rows="3" maxlength="1000" placeholder="Excel, CSV, ERP, MES, API или друго…"></textarea>
+      </label>
+      <label class="onboarding-question" for="onboardingQ8">
+        <span><b>08</b> Как искате да печатате QR етикетите</span>
+        <textarea id="onboardingQ8" rows="3" maxlength="1000" placeholder="Принтер, размер, етикети, линия за производство…"></textarea>
+      </label>
     </div>
 
-    <div class="actions">
-      <button class="btn primary big-submit" id="submitApplication" type="button">Изпрати Early Access заявка →</button>
+    <div class="onboarding-configure">
+      <div>
+        <strong>Следваща стъпка</strong>
+        <span>Backend workstream-ът ще валидира отговорите, ще активира бутона и ще подава реалните progress states.</span>
+      </div>
+      <button class="btn primary big-submit" id="configureDppSystem" type="button" disabled>Configure DPP system →</button>
     </div>
-    <div class="result" id="applicationResult">На този етап не се изисква плащане.</div>
+
+    <div class="configuration-progress" aria-label="DPP configuration progress" aria-live="polite">
+      <div class="config-step pending" id="configStepCompany"><span class="config-dot"></span><div><strong>Company profile</strong><small>pending</small></div></div>
+      <div class="config-step pending" id="configStepWorkflow"><span class="config-dot"></span><div><strong>Battery workflow</strong><small>pending</small></div></div>
+      <div class="config-step pending" id="configStepProduct"><span class="config-dot"></span><div><strong>Product structure</strong><small>pending</small></div></div>
+      <div class="config-step pending" id="configStepBatch"><span class="config-dot"></span><div><strong>Batch &amp; serial tracking</strong><small>pending</small></div></div>
+      <div class="config-step pending" id="configStepDpp"><span class="config-dot"></span><div><strong>DPP configuration</strong><small>pending</small></div></div>
+      <div class="config-step pending" id="configStepQr"><span class="config-dot"></span><div><strong>QR workflow</strong><small>pending</small></div></div>
+      <div class="config-step pending" id="configStepReady"><span class="config-dot"></span><div><strong>Dashboard ready</strong><small>pending</small></div></div>
+    </div>
+
+    <p class="onboarding-state-note">Supported visual states: <code>pending</code> · <code>loading</code> · <code>done</code> · <code>error</code>. No timer-based success is used.</p>
+
+    <div class="legacy-onboarding-bridge" hidden aria-hidden="true">
+      <div class="choice-grid">
+        <label class="choice"><span>Държава *</span><select id="countrySelect"><option value="">Изберете държава…</option></select></label>
+        <label class="choice"><span>Производител / фирма *</span><select id="manufacturerSelect" disabled><option value="">Първо изберете държава…</option></select></label>
+      </div>
+      <label class="wide-label" id="customManufacturerWrap" hidden>
+        <span>Име на фирмата</span>
+        <input id="customManufacturer" maxlength="200" placeholder="Точното име на фирмата">
+      </label>
+      <textarea id="requestText" maxlength="5000" rows="2" aria-label="Legacy request payload"></textarea>
+      <button id="submitApplication" type="button">Legacy submit</button>
+      <div class="result" id="applicationResult">На този етап не се изисква плащане.</div>
+    </div>
   </section>
 
   <section class="card dashboard-card" id="reviewCard" hidden>
