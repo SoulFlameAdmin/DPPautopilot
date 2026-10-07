@@ -93,7 +93,7 @@ test('Produce X generator creates deterministic serial range and calls one atomi
   try{
     const res=makeRes();await handler(makeReq('POST',generatedBody()),res);
     assert.equal(res.statusCode,201);
-    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_scooter_battery_batch_provision');
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_battery_batch_provision');
     const sent=JSON.parse(seen.options.body);
     assert.equal(sent.p_batch_key,'BATCH-2026-10-A');
     assert.equal(sent.p_units.length,3);
@@ -179,4 +179,25 @@ test('unsupported methods return 405 and canonical origin is HTTPS-only',async()
   assert.equal(res.statusCode,405);assert.equal(res.headers.allow,'POST');
   assert.equal(handler._test.canonicalOrigin({DPP_PUBLIC_ORIGIN:'https://dpp.example'}),'https://dpp.example');
   assert.throws(()=>handler._test.canonicalOrigin({DPP_PUBLIC_ORIGIN:'http://dpp.example'}),/PUBLIC_ORIGIN_INVALID/);
+});
+
+test('batch validation accepts supported non-LMT manufacturer categories',()=>{
+  const body=generatedBody();
+  body.generator.public_payload_template.model.identification.category='industrial';
+  const checked=handler._test.normalizeBody(body);
+  assert.equal(checked.status,undefined);
+  assert.equal(checked.units[0].public_payload.model.identification.category,'industrial');
+});
+
+test('batch validation rejects unknown battery categories before upstream',async()=>{
+  const original=global.fetch;let called=false;global.fetch=async()=>{called=true;throw new Error('unexpected');};
+  try{
+    const body=generatedBody();
+    body.generator.public_payload_template.model.identification.category='unsupported';
+    const res=makeRes();
+    await handler(makeReq('POST',body),res);
+    assert.equal(res.statusCode,422);
+    assert.equal(JSON.parse(res.body).error.code,'VALIDATION_ERROR');
+    assert.equal(called,false);
+  }finally{global.fetch=original;}
 });
