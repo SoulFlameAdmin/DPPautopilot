@@ -147,7 +147,7 @@ async function animateConfiguration(steps){
   for(const key of keys){
     setConfigureStep(key,"active");
     await new Promise(resolve=>setTimeout(resolve,220));
-    if(returned.size===0||returned.has(key))setConfigureStep(key,"done");
+    if(returned.has(key))setConfigureStep(key,"done");
   }
 }
 async function submitAndConfigure(){
@@ -160,7 +160,14 @@ async function submitAndConfigure(){
     if(!profile.configuration||!Object.keys(profile.configuration).length){
       throw new Error("Системата не върна готова pilot конфигурация. Отговорите са запазени, но workspace-ът няма да бъде отворен преждевременно.");
     }
-    await animateConfiguration(profile.configuration?.steps||[]);
+    const configSteps=Array.isArray(profile.configuration.steps)?profile.configuration.steps:[];
+    const requiredSteps=["company","workflow","product","batch","dpp","qr","ready"];
+    const doneKeys=new Set(configSteps.filter(item=>item?.status==="done").map(item=>item.key));
+    const missing=requiredSteps.filter(key=>!doneKeys.has(key));
+    if(missing.length){
+      throw new Error("Конфигурацията е непълна: "+missing.join(", "));
+    }
+    await animateConfiguration(configSteps);
     $("configureMessage").textContent="Готово. Workspace-ът е конфигуриран. Отваряме dashboard-а…";
     localStorage.removeItem(DRAFT_KEY);
     setTimeout(()=>showDashboard(),500);
@@ -206,7 +213,11 @@ async function getPublicAuthConfig(){
 }
 async function organizationRpc(name,payload,accessToken){
   const auth=await getPublicAuthConfig();
-  const response=await fetch(auth.supabaseUrl.replace(/\/$/,"")+"/rest/v1/rpc/"+name,{
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),12000);
+  let response;
+  try{
+    response=await fetch(auth.supabaseUrl.replace(/\/$/,"")+"/rest/v1/rpc/"+name,{
     method:"POST",
     headers:{
       apikey:auth.publishableKey,
@@ -215,8 +226,15 @@ async function organizationRpc(name,payload,accessToken){
       Accept:"application/json"
     },
     body:JSON.stringify(payload||{}),
-    cache:"no-store"
+    cache:"no-store",
+    signal:controller.signal
   });
+  }catch(error){
+    if(error?.name==="AbortError")throw new Error("Tenant request timed out. Опитайте отново.");
+    throw error;
+  }finally{
+    clearTimeout(timer);
+  }
   const data=await response.json().catch(()=>null);
   if(!response.ok)throw new Error(data?.message||data?.error||"Tenant request failed.");
   return data;
@@ -272,22 +290,37 @@ function setProductEntryReady(active){
   }
   const state=$("productSkuEntryState");
   if(state)state.textContent="Отворете реалната Product / SKU форма";
-  if(active?.name)$("#tenantMeta").textContent="Google session · "+active.name+" · Production tenant active";
+  const tenantMeta=$("tenantMeta");
+  if(active?.name&&tenantMeta)tenantMeta.textContent="Google session · "+active.name+" · Production tenant active";
 }
+let productionEntryPromise=null;
 async function prepareProductionEntry(){
+  if(productionEntryPromise)return productionEntryPromise;
+  productionEntryPromise=(async()=>{
   const state=$("productSkuEntryState");
   try{
     if(state)state.textContent="Свързваме фирмения tenant…";
     const active=await ensureProductionTenant();
     setProductEntryReady(active);
-    $("#earlyStatus").textContent="Onboarding 8/8 е завършен. Company tenant е активен. Следва: реален Product / SKU.";
+    const earlyStatus=$("earlyStatus");
+    if(earlyStatus){
+      earlyStatus.textContent="Onboarding 8/8 е завършен. Company tenant е активен. Следва: реален Product / SKU.";
+      earlyStatus.className="result ok";
+    }
     return active;
   }catch(error){
     if(state)state.textContent="Не успяхме да активираме Product / SKU";
-    $("#earlyStatus").textContent="Onboarding е запазен, но Product / SKU още не е активен: "+error.message;
-    $("#earlyStatus").className="result bad";
+    const earlyStatus=$("earlyStatus");
+    if(earlyStatus){
+      earlyStatus.textContent="Onboarding е запазен, но Product / SKU още не е активен: "+error.message;
+      earlyStatus.className="result bad";
+    }
     throw error;
+  }finally{
+    productionEntryPromise=null;
   }
+  })();
+  return productionEntryPromise;
 }
 function renderConfiguration(){
   const container=$("configurationSummary");
