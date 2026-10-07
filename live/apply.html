@@ -5,63 +5,51 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
   <title>DPP Autopilot · Early Access</title>
-  <meta name="description" content="SoulFlame DPP Autopilot Early Access. Въведете email и получете личен линк към вашия DPP dashboard.">
+  <meta name="description" content="SoulFlame DPP Autopilot Early Access registration.">
   <link rel="stylesheet" href="/assets/csp/company-auth.css">
 </head>
 <body data-company-auth-ready="true" data-company-session="anonymous">
 <main class="shell">
   <header class="topbar">
     <a class="brand" href="/">DPP AUTOPILOT</a>
-    <span class="badge">EARLY ACCESS · EMAIL → DASHBOARD</span>
+    <span class="badge">EARLY ACCESS · NEW CLIENT</span>
   </header>
 
   <section class="hero">
     <div>
       <p class="eyebrow">SOULFLAME DPP AUTOPILOT</p>
-      <h1>Получете вашия DPP Dashboard.</h1>
-      <p>Напишете email адреса си. <strong>soulflame.dpp@gmail.com</strong> ще ви изпрати личен линк към вашия Early Access dashboard.</p>
+      <h1>Регистрирайте вашия email.</h1>
+      <p>Въведете email адреса си и натиснете <strong>Регистрирай</strong>. SoulFlame получава заявката и вие влизате директно във вашия Early Access manufacturer dashboard.</p>
     </div>
     <div class="security-note">
-      <strong>БЕЗ SUPABASE AUTH EMAIL</strong>
-      <span>Този flow не използва Supabase Magic Link. Email-ът идва директно от SoulFlame DPP Gmail и води към вашия DPP dashboard.</span>
+      <strong>EARLY ACCESS</strong>
+      <span>Няма Supabase Magic Link и не чакаме email потвърждение. След регистрацията ще се свържем с вас лично за следващите стъпки.</span>
     </div>
   </section>
 
   <section class="card" id="emailCard">
     <div class="card-head">
-      <div><p class="eyebrow">1 · EMAIL</p><h2>Къде да изпратим dashboard link-а?</h2></div>
-      <span class="state">EARLY ACCESS</span>
+      <div><p class="eyebrow">1 · EMAIL</p><h2>Регистрация</h2></div>
+      <span class="state">NEW CLIENT</span>
     </div>
 
     <div class="form-grid single-field">
       <label>
         <span>Email (Gmail или друг)</span>
-        <input id="email" type="email" autocomplete="email" placeholder="name@gmail.com или office@company.eu">
+        <input id="email" type="email" autocomplete="email" placeholder="voltrex@gmail.com или office@company.eu">
       </label>
     </div>
 
     <div class="actions">
-      <button class="btn primary big-submit" id="sendDashboardLink" type="button">Изпрати линк към моя Dashboard →</button>
+      <button class="btn primary big-submit" id="registerClient" type="button">Регистрирай →</button>
     </div>
 
     <div class="result" id="result" role="status" aria-live="polite">
-      След клика ще получите email от soulflame.dpp@gmail.com с личен линк към dashboard-а.
+      След клика SoulFlame ще получи вашия email и ще отворим DPP manufacturer dashboard-а.
     </div>
   </section>
 
-  <section class="card dashboard-card" id="sentCard" hidden>
-    <div class="dashboard-status">
-      <span class="ready-mark">✓</span>
-      <div>
-        <p class="eyebrow">EMAIL SENT</p>
-        <h2>Проверете пощата си.</h2>
-        <p>Изпратихме личния DPP dashboard link. Отворете писмото от <strong>soulflame.dpp@gmail.com</strong> и натиснете линка.</p>
-      </div>
-      <span class="state ok">READY</span>
-    </div>
-  </section>
-
-  <footer>Early Access · Gmail dashboard link · без Supabase Auth login.</footer>
+  <footer>Early Access · директен dashboard · обратна връзка от SoulFlame.</footer>
 </main>
 <script src="/assets/csp/client-apply-inline-1.js"></script>
 </body>
