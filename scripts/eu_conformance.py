@@ -349,6 +349,45 @@ def validate_harmonised_standards_inventory(inventory: dict[str, Any]) -> dict[s
 
 
 
+
+def validate_field_catalog_trace(matrix: dict[str, Any], catalog: dict[str, Any]) -> dict[str, Any]:
+    fields = catalog.get("fields")
+    if not isinstance(fields, list) or not fields:
+        raise ConformanceError("field catalog is empty")
+    field_paths = [
+        str(field.get("path") or "").strip()
+        for field in fields
+        if isinstance(field, dict) and str(field.get("path") or "").strip()
+    ]
+
+    unmapped: list[dict[str, Any]] = []
+    mapped = 0
+    for point in matrix.get("points") or []:
+        path = str(point.get("canonicalFieldPath") or "").strip()
+        matches = [
+            field_path
+            for field_path in field_paths
+            if path == field_path
+            or path.startswith(field_path + ".")
+            or field_path.startswith(path + ".")
+        ]
+        if matches:
+            mapped += 1
+        else:
+            unmapped.append({"number": point.get("number"), "path": path})
+
+    if unmapped:
+        detail = ", ".join(f"#{row['number']} {row['path']}" for row in unmapped)
+        raise ConformanceError("EU field catalog trace has unmapped points: " + detail)
+
+    return {
+        "mappedPoints": mapped,
+        "totalPoints": len(matrix.get("points") or []),
+        "catalogFields": len(field_paths),
+        "status": "ALL_71_POINTS_HAVE_DATA_CONTRACT_MAPPING",
+    }
+
+
 def validate_evidence_pack(pack: dict[str, Any], matrix: dict[str, Any]) -> dict[str, Any]:
     rows = pack.get("pointEvidence")
     if not isinstance(rows, list) or len(rows) != 71:
@@ -581,12 +620,15 @@ def run_repository_gate() -> dict[str, Any]:
     standards = load_json("data/eu-dpp-harmonised-standards-v1.json")
     evidence_pack = load_json("data/eu-dpp-evidence-pack-template-v1.json")
     registry_adapter = load_json("data/eu-dpp-registry-adapter-v1.json")
+    field_catalog = load_json("data/dpp-field-catalog.json")
     matrix_result = validate_71_matrix(matrix)
+    field_trace_result = validate_field_catalog_trace(matrix, field_catalog)
     standards_result = validate_harmonised_standards_inventory(standards)
     evidence_result = validate_evidence_pack(evidence_pack, matrix)
     registry_result = validate_registry_adapter_contract(registry_adapter)
     return {
         "matrix": matrix_result,
+        "fieldTrace": field_trace_result,
         "standards": standards_result,
         "evidencePack": evidence_result,
         "registryAdapter": registry_result,
