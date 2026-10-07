@@ -14,6 +14,7 @@
     ],
     "accessClasses": [
       "public",
+      "public_identifier",
       "legitimate_interest",
       "authority_only"
     ]
@@ -101,8 +102,8 @@
     "validator": "scripts/scooter_schema_validation.py",
     "acceptanceGate": "scripts/validate_scooter_schema.py",
     "syntheticFixture": "data/scooter-battery-sample-v1.json",
-    "requiredLmtFields": 41,
-    "requiredModelFields": 33,
+    "requiredLmtFields": 42,
+    "requiredModelFields": 34,
     "requiredItemFields": 8,
     "excludes": [
       "model.exhaustion_capacity_threshold"
@@ -123,7 +124,7 @@
       "optional": 1,
       "notRequired2027": 12
     },
-    "note": "The legacy 41 implementation-field schema remains a structural validator. Launch completeness is governed by the 71-point LMT matrix, which maps regulatory data points onto aggregated canonical fields and excludes launch-deferred points."
+    "note": "The LMT implementation-field schema now includes the responsible economic operator contract and remains a structural validator. Launch completeness is governed by the 71-point LMT matrix, which maps regulatory data points onto canonical fields and excludes launch-deferred points."
   },
   "regulatoryMatrix": "data/lmt-battery-71-v2.json",
   "regulatorySourceLock": "data/lmt-regulatory-source-lock.json",
