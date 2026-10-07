@@ -1,7 +1,7 @@
 'use strict';
 
 const { getSupabaseConfig } = require('./_supabase_config.js');
-const { mapDatabaseError } = require('./_errors.js');
+const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
@@ -87,7 +87,7 @@ async function rpc(name,payload,authorization,env=process.env,fetchImpl=fetch,ti
   }finally{clearTimeout(timer)}
 
   if(!response.ok){
-    const mapped=mapDatabaseError('manufacturer-onboarding',data);
+    const mapped=mapSharedDatabaseError('manufacturer-onboarding',data);
     const error=new Error(mapped.code);
     error.status=mapped.status;error.publicCode=mapped.code;error.publicMessage=mapped.message;
     throw error;
