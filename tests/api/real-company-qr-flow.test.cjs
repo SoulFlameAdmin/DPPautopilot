@@ -24,7 +24,7 @@ test('real company dashboard exposes non-LMT model data and technical QR pilot c
 });
 
 test('real company flow is tenant-backed and never demo/local product storage',()=>{
-  assert.match(dashboard,/api\("\/api\/organizations"\)/);
+  assert.match(dashboard,/organizationRpc\("dpp_api_organizations_list",\{\}\)/);
   assert.match(dashboard,/api\("\/api\/models"/);
   assert.match(dashboard,/api\("\/api\/items"/);
   assert.doesNotMatch(dashboard,/localStorage/);
