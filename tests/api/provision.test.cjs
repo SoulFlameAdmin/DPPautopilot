@@ -101,7 +101,7 @@ test('POST atomically provisions a draft battery passport and returns canonical 
     const res=makeRes();
     await handler(makeReq('POST',validBody()),res);
     assert.equal(res.statusCode,201);
-    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_scooter_battery_provision');
+    assert.equal(seen.url,'https://example.supabase.co/rest/v1/rpc/dpp_api_battery_provision');
     assert.equal(seen.options.headers.Authorization,'Bearer provision-token');
     const sent=JSON.parse(seen.options.body);
     assert.equal(sent.p_model_id,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
@@ -157,10 +157,18 @@ test('public payload must carry the exact individual battery identifier',async()
   }finally{global.fetch=original;}
 });
 
-test('non-LMT public category is rejected locally',async()=>{
-  const res=makeRes();
+test('supported non-LMT battery categories are accepted by the manufacturer API boundary',()=>{
   const body=validBody();
   body.public_payload.model.identification.category='electric_vehicle';
+  const checked=handler._test.validateBody(body);
+  assert.equal(checked.status,undefined);
+  assert.equal(checked.publicPayload.model.identification.category,'electric_vehicle');
+});
+
+test('unknown public battery category is rejected locally',async()=>{
+  const res=makeRes();
+  const body=validBody();
+  body.public_payload.model.identification.category='not_a_real_category';
   await handler(makeReq('POST',body),res);
   assert.equal(res.statusCode,422);
   assert.equal(JSON.parse(res.body).error.code,'VALIDATION_ERROR');
