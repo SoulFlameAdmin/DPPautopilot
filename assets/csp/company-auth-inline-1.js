@@ -2,6 +2,7 @@
 const $=s=>document.querySelector(s);
 const STORAGE="dpp_company_session_v1";
 const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
+const RECOVERY_COOLDOWN_KEY="dpp_recovery_cooldown_v1",RECOVERY_COOLDOWN_MS=60000;
 let cfg=null,session=null,refreshTimer=null,currentUser=null,activeOrg=null,recoveryMode=false;
 
 function result(node,message,kind=""){node.textContent=message;node.className="result"+(kind?" "+kind:"")}
@@ -241,11 +242,14 @@ $("#signup").addEventListener("click",async()=>{
 });
 $("#forgotPassword").addEventListener("click",async()=>{
   const e=$("#email").value.trim();
+  const last=Number(localStorage.getItem(RECOVERY_COOLDOWN_KEY)||0),remaining=RECOVERY_COOLDOWN_MS-(Date.now()-last);
+  if(remaining>0)return result($("#authResult"),"Изчакай "+Math.ceil(remaining/1000)+" сек. преди нов recovery email.","bad");
   if(!validEmail(e))return result($("#authResult"),"Въведи валиден email за recovery.","bad");
   $("#forgotPassword").disabled=true;
   try{
     await authCall("/auth/v1/recover?redirect_to="+encodeURIComponent(recoveryRedirect()),{method:"POST",body:{email:e}});
-    result($("#authResult"),"Ако акаунтът съществува, recovery линкът е изпратен на email-а.","ok");
+    localStorage.setItem(RECOVERY_COOLDOWN_KEY,String(Date.now()));
+    result($("#authResult"),"Recovery заявката е изпратена. Изчакай email-а; нов опит е блокиран за 60 сек.","ok");
   }catch(err){result($("#authResult"),err.message,"bad")}
   finally{$("#forgotPassword").disabled=false}
 });
