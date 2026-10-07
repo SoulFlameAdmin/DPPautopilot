@@ -4,6 +4,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const vm=require('node:vm');
 const XLSX=require('../../vendor/xlsx.full.min.js');
 
 test('vendored SheetJS parser is patched and can round-trip XLSX rows',()=>{
@@ -36,7 +37,7 @@ test('vendored SheetJS parser is patched and can round-trip XLSX rows',()=>{
 test('manufacturer production page self-hosts XLSX parser and exposes worksheet controls',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../../live/manufacturer.html'),'utf8');
   const ops=fs.readFileSync(path.join(__dirname,'../../assets/csp/manufacturer-ops-inline-1.js'),'utf8');
-  assert.match(html,/src="\/vendor\/xlsx\.full\.min\.js"/);
+  assert.match(html,/src="\/assets\/csp\/manufacturer-entry\.js"/);
   assert.match(html,/id="xlsxFile"/);
   assert.match(html,/id="xlsxSheet"/);
   assert.doesNotMatch(html,/cdn\.jsdelivr\.net\/npm\/xlsx/);
@@ -45,4 +46,37 @@ test('manufacturer production page self-hosts XLSX parser and exposes worksheet 
   assert.match(ops,/sheetRows:1002/);
   assert.match(ops,/Максимумът е 1000 data rows/);
   assert.match(ops,/Максимумът е 100 колони/);
+});
+
+function runEntry(){
+  const pending=[];
+  const result={};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../assets/csp/manufacturer-entry.js'),'utf8'),{
+    URLSearchParams,location:{search:''},localStorage:{getItem:()=>null},
+    document:{createElement:()=>({}),body:{append:script=>pending.push(script)},
+      querySelector:selector=>selector==='#gateResult'?result:null}
+  });
+  return {pending,result};
+}
+const flush=()=>new Promise(resolve=>setImmediate(resolve));
+
+test('production loader waits for local XLSX before loading import operations',async()=>{
+  const {pending}=runEntry();
+  assert.deepEqual(pending.map(s=>s.src),['/assets/csp/manufacturer-inline-1.js']);
+  pending[0].onload();await flush();
+  assert.equal(pending.length,2);
+  assert.equal(pending[1].src,'/vendor/xlsx.full.min.js');
+  pending[1].onload();await flush();
+  assert.equal(pending.length,3);
+  assert.equal(pending[2].src,'/assets/csp/manufacturer-ops-inline-1.js');
+  pending[2].onload();await flush();
+});
+
+test('XLSX load failure blocks import operations and reports the error',async()=>{
+  const {pending,result}=runEntry();
+  pending[0].onload();await flush();
+  pending[1].onerror();await flush();
+  assert.equal(pending.length,2);
+  assert.equal(result.className,'result bad');
+  assert.match(result.textContent,/Failed to load \/vendor\/xlsx\.full\.min\.js/);
 });

@@ -98,6 +98,8 @@ jobs:
         run: python scripts/validate_security_headers.py
       - name: Test manufacturer onboarding API contract
         run: node --test tests/api/manufacturer-onboarding.test.cjs
+      - name: Test XLSX parser and production loader
+        run: node --test tests/unit/xlsx-import.test.cjs
       - name: Test intake validation, rate limits and log redaction
         run: node --test tests/api/intake-security.test.cjs
       - name: Validate R11 backup policy

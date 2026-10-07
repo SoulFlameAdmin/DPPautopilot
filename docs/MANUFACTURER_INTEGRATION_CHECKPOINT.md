@@ -23,6 +23,10 @@ R03, R05 and R09 now inventory application, registration-link and manufacturer-o
 
 R07 now inventories all five intake/onboarding tables, including actual source-level access and deletion behavior. The early-access session default expiry is 30 days, not automatic deletion. Retention, erasure/export, external-service access enforcement and deployed database controls remain unverified; policy maturity remains partial. No API runtime behavior or SQL changed in this follow-up.
 
+## Production loader regression follow-up
+
+The XLSX unit suite expected a direct HTML parser script tag even though manufacturer-entry.js now loads it sequentially. The assertion now checks the entry script; runtime VM tests verify that import operations wait for the local parser and remain unloaded if it fails. CI runs this suite before C04. Local results: 149 Python unit tests and all 4 XLSX tests pass; no runtime code changed. PostgreSQL replay remains unverified in this workspace because neither PostgreSQL nor Docker is installed.
+
 ## Verification
 
 - `node --test tests/api/*.test.cjs`: **329 passed, 0 failed** (mocked/local API tests; no live database evidence).
