@@ -61,4 +61,7 @@ jobs:
           begin;
           \i tests/db/test_generic_battery_provisioning_subset.sql
           rollback;
+          begin;
+          \i tests/db/test_technical_pilot_draft_activation_subset.sql
+          rollback;
           SQL
