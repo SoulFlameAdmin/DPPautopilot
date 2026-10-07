@@ -21,12 +21,25 @@
     "composition": {
       "chemistry": "Lithium-ion NMC 811 (Synthetic)",
       "hazardous_substances": [
-        {"name": "Synthetic electrolyte component", "cas": "DEMO-0001", "concentration_percent": 2.1}
+        {
+          "name": "Synthetic electrolyte component",
+          "cas": "DEMO-0001",
+          "concentration_percent": 2.1
+        }
       ],
       "critical_raw_materials": [
-        {"material": "Lithium", "share_percent": 2.8},
-        {"material": "Cobalt", "share_percent": 4.2},
-        {"material": "Natural graphite", "share_percent": 11.5}
+        {
+          "material": "Lithium",
+          "share_percent": 2.8
+        },
+        {
+          "material": "Cobalt",
+          "share_percent": 4.2
+        },
+        {
+          "material": "Natural graphite",
+          "share_percent": 11.5
+        }
       ]
     },
     "safety": {
@@ -81,7 +94,7 @@
       "cell_milliohm": 1.9,
       "pack_milliohm": 47.5
     },
-    "c_rate_test": 1.0,
+    "c_rate_test": 1,
     "markings": {
       "ce": true,
       "separate_collection_symbol": true,
@@ -99,31 +112,67 @@
       "electrolyte": "Synthetic electrolyte formulation"
     },
     "spares": [
-      {"part_number": "DEMO-CMU-001", "description": "Cell monitoring unit", "source_contact": "parts@example.invalid"}
+      {
+        "part_number": "DEMO-CMU-001",
+        "description": "Cell monitoring unit",
+        "source_contact": "parts@example.invalid"
+      }
     ],
     "disassembly": {
       "exploded_diagram_ref": "DEMO-DIAGRAM-001",
-      "sequence": ["Isolate high voltage", "Remove service disconnect", "Unfasten enclosure"],
-      "fasteners": ["Synthetic M8 flange bolt", "Synthetic bonded seal"],
-      "tools": ["Insulated torque wrench", "HV-rated PPE"],
-      "warnings": ["Synthetic demo: verify zero-energy state before service"],
-      "cell_layout": {"modules": 12, "cells_per_module": 24}
+      "sequence": [
+        "Isolate high voltage",
+        "Remove service disconnect",
+        "Unfasten enclosure"
+      ],
+      "fasteners": [
+        "Synthetic M8 flange bolt",
+        "Synthetic bonded seal"
+      ],
+      "tools": [
+        "Insulated torque wrench",
+        "HV-rated PPE"
+      ],
+      "warnings": [
+        "Synthetic demo: verify zero-energy state before service"
+      ],
+      "cell_layout": {
+        "modules": 12,
+        "cells_per_module": 24
+      }
     },
     "safety_measures": {
       "transport": "Synthetic demo transport procedure",
       "service": "Synthetic demo isolation procedure"
     },
     "compliance_test_reports": [
-      {"document_ref": "DEMO-TEST-REPORT-001", "synthetic": true, "result": "DEMO-PASS-NOT-A-REAL-CONFORMITY-RESULT"}
-    ]
+      {
+        "document_ref": "DEMO-TEST-REPORT-001",
+        "synthetic": true,
+        "result": "DEMO-PASS-NOT-A-REAL-CONFORMITY-RESULT"
+      }
+    ],
+    "responsible_economic_operator": {
+      "name": "Northstar Demo Cells (Synthetic)",
+      "role": "manufacturer_responsible_for_passport",
+      "operator_identifier": "DEMO-EO-001"
+    }
   },
   "items": [
     {
       "unique_identifier": "urn:dpp:demo:battery:NSD-EV-82-DEMO:000001",
       "performance_history": [
-        {"at": "2026-08-15T10:00:00Z", "event": "market_placement", "capacity_ah": 230, "power_kw": 250}
+        {
+          "at": "2026-08-15T10:00:00Z",
+          "event": "market_placement",
+          "capacity_ah": 230,
+          "power_kw": 250
+        }
       ],
-      "state_of_health": {"percent": 100, "measured_at": "2026-08-15T10:00:00Z"},
+      "state_of_health": {
+        "percent": 100,
+        "measured_at": "2026-08-15T10:00:00Z"
+      },
       "lifecycle_status": "original",
       "usage": {
         "cycles": 0,
@@ -131,33 +180,64 @@
       },
       "telemetry": {
         "environment": [
-          {"at": "2026-08-15T10:00:00Z", "temperature_c": 24, "humidity_percent": 43}
+          {
+            "at": "2026-08-15T10:00:00Z",
+            "temperature_c": 24,
+            "humidity_percent": 43
+          }
         ],
         "state_of_charge": [
-          {"at": "2026-08-15T10:00:00Z", "percent": 62}
+          {
+            "at": "2026-08-15T10:00:00Z",
+            "percent": 62
+          }
         ]
       }
     },
     {
       "unique_identifier": "urn:dpp:demo:battery:NSD-EV-82-DEMO:000002",
       "performance_history": [
-        {"at": "2026-08-16T10:00:00Z", "event": "market_placement", "capacity_ah": 230, "power_kw": 250},
-        {"at": "2026-09-10T10:00:00Z", "event": "demo_status_update", "capacity_ah": 228.7, "power_kw": 248}
+        {
+          "at": "2026-08-16T10:00:00Z",
+          "event": "market_placement",
+          "capacity_ah": 230,
+          "power_kw": 250
+        },
+        {
+          "at": "2026-09-10T10:00:00Z",
+          "event": "demo_status_update",
+          "capacity_ah": 228.7,
+          "power_kw": 248
+        }
       ],
-      "state_of_health": {"percent": 99.4, "measured_at": "2026-09-10T10:00:00Z"},
+      "state_of_health": {
+        "percent": 99.4,
+        "measured_at": "2026-09-10T10:00:00Z"
+      },
       "lifecycle_status": "original",
       "usage": {
         "cycles": 34,
         "events": [
-          {"at": "2026-09-02T14:20:00Z", "type": "demo_warning", "description": "Synthetic temperature warning used to exercise the UI"}
+          {
+            "at": "2026-09-02T14:20:00Z",
+            "type": "demo_warning",
+            "description": "Synthetic temperature warning used to exercise the UI"
+          }
         ]
       },
       "telemetry": {
         "environment": [
-          {"at": "2026-09-10T10:00:00Z", "temperature_c": 29, "humidity_percent": 38}
+          {
+            "at": "2026-09-10T10:00:00Z",
+            "temperature_c": 29,
+            "humidity_percent": 38
+          }
         ],
         "state_of_charge": [
-          {"at": "2026-09-10T10:00:00Z", "percent": 71}
+          {
+            "at": "2026-09-10T10:00:00Z",
+            "percent": 71
+          }
         ]
       }
     }
