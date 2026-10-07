@@ -61,6 +61,9 @@ jobs:
           \i tests/db/test_scooter_batch_provisioning_subset.sql
           rollback;
           begin;
+          \i tests/db/test_manufacturer_onboarding_subset.sql
+          rollback;
+          begin;
           \i tests/db/test_generic_battery_provisioning_subset.sql
           rollback;
           begin;
