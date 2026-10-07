@@ -47,7 +47,7 @@ begin
   end if;
 
   select count(*)::integer into versions_before
-  from public.dpp_passport_versions
+  from public.dpp_passport_versions v
   where v.passport_id=v_passport_id;
 
   -- A DRAFT must not be publicly resolvable before explicit publication.
