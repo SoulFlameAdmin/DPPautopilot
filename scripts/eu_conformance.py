@@ -35,6 +35,54 @@ LIFECYCLE_TRANSITIONS = {
     "RECYCLED": set(),
 }
 
+REGISTRY_TRANSITIONS = {
+    "not_registered": {"submitted"},
+    "submitted": {"registered", "rejected"},
+    "registered": {"needs_update", "retired"},
+    "rejected": {"submitted", "retired"},
+    "needs_update": {"submitted", "retired"},
+    "retired": set(),
+}
+
+MODEL_ONLY_SECTIONS = {
+    "identification",
+    "manufacturer",
+    "category",
+    "model_id",
+    "place_of_manufacture",
+    "rated_capacity_ah",
+    "composition",
+    "carbon_footprint",
+    "responsible_sourcing",
+    "recycled_content",
+    "renewable_content_share",
+    "voltage",
+    "power_capability",
+    "expected_lifetime",
+    "storage_temperature",
+    "warranty_calendar_life",
+    "energy_efficiency",
+    "internal_resistance",
+    "c_rate_test",
+    "markings",
+    "eu_declaration_of_conformity",
+    "waste_information",
+    "restricted_composition",
+    "spares",
+    "disassembly",
+    "safety_measures",
+    "compliance_test_reports",
+}
+
+ITEM_ONLY_SECTIONS = {
+    "unique_identifier",
+    "performance_history",
+    "state_of_health",
+    "lifecycle_status",
+    "usage",
+    "telemetry",
+}
+
 
 class ConformanceError(ValueError):
     pass
@@ -184,6 +232,61 @@ def validate_lifecycle_transition(
         "to": target,
         "predecessorLinked": bool(predecessor_passport_uid),
         "status": "TRANSITION_VALID",
+    }
+
+
+
+def assert_not_demo_uid(identifier: str) -> str:
+    uid = str(identifier or "").strip()
+    if not uid:
+        raise ConformanceError("production UID is empty")
+    if uid.lower().startswith("urn:dpp:demo:"):
+        raise ConformanceError("demo UID namespace is forbidden in an EU production gate")
+    return uid
+
+
+def validate_model_item_separation(
+    model_payload: dict[str, Any],
+    item_payload: dict[str, Any],
+) -> dict[str, Any]:
+    model_item_keys = sorted(set(model_payload) & ITEM_ONLY_SECTIONS)
+    item_model_keys = sorted(set(item_payload) & MODEL_ONLY_SECTIONS)
+    if model_item_keys:
+        raise ConformanceError(
+            "model payload contains individual-battery fields: " + ", ".join(model_item_keys)
+        )
+    if item_model_keys:
+        raise ConformanceError(
+            "item payload contains model-level fields: " + ", ".join(item_model_keys)
+        )
+    return {
+        "modelSections": len(model_payload),
+        "itemSections": len(item_payload),
+        "status": "MODEL_ITEM_SEPARATION_VALID",
+    }
+
+
+def transition_registry_state(
+    current: str,
+    target: str,
+    *,
+    submission_evidence: str | None = None,
+    registry_receipt: str | None = None,
+) -> dict[str, Any]:
+    if current not in REGISTRY_TRANSITIONS or target not in REGISTRY_TRANSITIONS:
+        raise ConformanceError("unknown registry state")
+    if target not in REGISTRY_TRANSITIONS[current]:
+        raise ConformanceError(f"illegal registry transition {current} -> {target}")
+    if target == "submitted" and not str(submission_evidence or "").strip():
+        raise ConformanceError("submitted requires submission evidence")
+    if target == "registered" and not str(registry_receipt or "").strip():
+        raise ConformanceError("registered requires registry receipt/proof")
+    return {
+        "from": current,
+        "to": target,
+        "submissionEvidence": bool(submission_evidence),
+        "registryReceipt": bool(registry_receipt),
+        "status": "REGISTRY_TRANSITION_VALID",
     }
 
 
