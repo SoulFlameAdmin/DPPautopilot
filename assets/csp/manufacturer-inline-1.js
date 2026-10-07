@@ -259,8 +259,27 @@ function renderItems(){
     host.append(row);
   }
 }
+async function organizationRpc(name,payload={}){
+  if(!session?.access_token)throw new Error("Login required.");
+  const r=await fetch(cfg.supabaseUrl.replace(/\/$/,"")+"/rest/v1/rpc/"+name,{
+    method:"POST",
+    headers:{
+      apikey:cfg.publishableKey,
+      Authorization:"Bearer "+session.access_token,
+      "Content-Type":"application/json",
+      Accept:"application/json"
+    },
+    body:JSON.stringify(payload),
+    cache:"no-store"
+  });
+  const data=await r.json().catch(()=>null);
+  if(r.status===401&&await refreshSession())return organizationRpc(name,payload);
+  if(!r.ok)throw new Error(data?.message||data?.error||("HTTP "+r.status));
+  return data;
+}
 async function loadTenant(){
-  const orgs=(await api("/api/organizations")).data||[];
+  let orgs=await organizationRpc("dpp_api_organizations_list",{});
+  if(!Array.isArray(orgs))orgs=[];
   activeOrg=orgs.find(o=>o.active)||null;
   if(!activeOrg){
     if(orgs.length)showGate("Има фирмено пространство, но няма активен tenant. Активирай го през Company Access.");
