@@ -11,10 +11,12 @@ def require(c: bool,m: str)->None:
 def main()->None:
     migration=(ROOT/"supabase/migrations/20261004143000_dpp_scooter_batch_provisioning.sql").read_text(encoding="utf-8")
     generic=(ROOT/"supabase/migrations/20261007052000_dpp_generic_battery_provisioning_v1.sql").read_text(encoding="utf-8")
+    pilot_activation=(ROOT/"supabase/migrations/20261007053000_dpp_technical_pilot_draft_activation_v1.sql").read_text(encoding="utf-8")
     api=(ROOT/"api/batch-provision.js").read_text(encoding="utf-8")
     api_test=(ROOT/"tests/api/batch-provision.test.cjs").read_text(encoding="utf-8")
     db_test=(ROOT/"tests/db/test_scooter_batch_provisioning_subset.sql").read_text(encoding="utf-8")
     generic_db=(ROOT/"tests/db/test_generic_battery_provisioning_subset.sql").read_text(encoding="utf-8")
+    pilot_db=(ROOT/"tests/db/test_technical_pilot_draft_activation_subset.sql").read_text(encoding="utf-8")
     contract=json.loads((ROOT/"data/api-error-contract.json").read_text(encoding="utf-8"))
     rate=json.loads((ROOT/"data/rate-limit-policy.json").read_text(encoding="utf-8"))
     obs=json.loads((ROOT/"data/observability-policy.json").read_text(encoding="utf-8"))
@@ -87,12 +89,29 @@ def main()->None:
         require(token in db_test,f"Stage 5 DB test missing: {token}")
 
     for token in [
+        "create or replace function public.dpp_api_technical_pilot_publish",
+        "v_passport.status='draft'",
+        "set status='active'",
+        "'activated_from_draft',v_activated_from_draft",
+        "LMT passports require the regulatory readiness activation route",
+    ]:
+        require(token.lower() in pilot_activation.lower(),f"Technical pilot draft activation migration missing: {token}")
+
+    for token in [
         "GENERIC_BATTERY_PROVISIONING_PASS",
         "Viewer gained generic provisioning write access",
         "Cross-tenant model id was accepted by generic provisioning",
         "Legacy scooter RPC stopped enforcing LMT compatibility",
     ]:
         require(token in generic_db,f"Generic manufacturer DB acceptance missing: {token}")
+
+    for token in [
+        "TECHNICAL_PILOT_DRAFT_ACTIVATION_PASS",
+        "DRAFT passport was public before pilot activation",
+        "DRAFT activation did not append exactly one passport version",
+        "LMT technical pilot bypassed readiness gate",
+    ]:
+        require(token in pilot_db,f"Technical pilot draft activation DB acceptance missing: {token}")
 
     batch_errors=contract["surfaces"].get("batch-provision",{})
     require(batch_errors.get("DP606",{}).get("code")=="BATCH_KEY_CONFLICT","DP606 mapping missing")
