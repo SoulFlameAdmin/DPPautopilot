@@ -85,7 +85,11 @@ async function requestMagicLink(email,requestId,env=process.env,fetchImpl=fetch)
     body:JSON.stringify({
       email,
       create_user:true,
-      data:{dpp_company_onboarding:true,registration_request_id:requestId}
+      data:{
+        dpp_company_onboarding:true,
+        registration_request_id:requestId,
+        Domain:new URL('/apply',publicOrigin(env)).toString()
+      }
     })
   },DEFAULT_TIMEOUT_MS,fetchImpl);
   if(!response.ok){
