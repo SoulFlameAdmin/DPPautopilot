@@ -26,6 +26,14 @@
       "destination": "/live/qr"
     },
     {
+      "source": "/dashboard",
+      "destination": "/live/dashboard"
+    },
+    {
+      "source": "/dashboard/",
+      "destination": "/live/dashboard"
+    },
+    {
       "source": "/apply",
       "destination": "/live/apply"
     },
