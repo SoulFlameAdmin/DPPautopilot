@@ -1,55 +1,58 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
-const STORAGE="dpp_company_session_v1";
-const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
-const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-let cfg=null,session=null,currentUser=null,directory={countries:[],manufacturers:{}};
+const ENDPOINT="https://soulflame-twins.vercel.app/api/dpp-dashboard-link";
+const TOKEN_STORAGE="dpp_early_access_token_v1";
+let token="",profile=null,directory={countries:[],manufacturers:{}};
 
-function setStatus(message,kind=""){const n=$("#statusBox");n.textContent=message;n.className="result"+(kind?" "+kind:"")}
-function authHeaders(token){return {apikey:cfg.publishableKey,Authorization:"Bearer "+token,"Content-Type":"application/json",Accept:"application/json"}}
-async function authCall(path){
-  const r=await fetch(cfg.supabaseUrl+path,{headers:authHeaders(session.access_token),cache:"no-store"});
-  const data=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(data.message||data.error||"Authentication failed.");
-  return data;
+function setStatus(message,kind=""){
+  const n=$("#statusBox");
+  n.textContent=message;
+  n.className="result"+(kind?" "+kind:"");
 }
-async function api(path,{method="GET",body}={}){
-  const r=await fetch(path,{method,headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json",Accept:"application/json"},body:body?JSON.stringify(body):undefined,cache:"no-store"});
-  const data=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(data?.error?.message||data?.error?.code||"Request failed.");
-  return data;
+function tokenFromHash(){
+  const p=new URLSearchParams(String(location.hash||"").replace(/^#/,""));
+  const value=String(p.get("access")||"").trim();
+  return /^[a-f0-9]{64}$/i.test(value)?value:"";
 }
-function parseHashSession(){
-  const p=new URLSearchParams(location.hash.replace(/^#/,""));
-  const token=p.get("access_token");
-  if(!token)return null;
-  return {access_token:token,refresh_token:p.get("refresh_token")||"",expires_in:Number(p.get("expires_in"))||3600};
+function saveToken(value){
+  token=value;
+  if(token)localStorage.setItem(TOKEN_STORAGE,token);
 }
-function requestId(){
-  const value=new URL(location.href).searchParams.get("request")||"";
-  return UUID_RE.test(value)?value:null;
-}
-async function bindRequest(){
-  const id=requestId();
-  if(!id)return;
-  await api("/api/registration-link",{method:"PATCH",body:{request_id:id}});
+function restoreToken(){
+  const value=String(localStorage.getItem(TOKEN_STORAGE)||"").trim();
+  if(/^[a-f0-9]{64}$/i.test(value)){token=value;return true}
+  return false;
 }
 function cleanUrl(){
-  const u=new URL(location.href);u.hash="";u.searchParams.delete("request");history.replaceState(null,"",u.pathname+u.search);
+  history.replaceState(null,"",location.pathname+location.search);
+}
+async function call(action,extra={}){
+  const response=await fetch(ENDPOINT,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Accept":"application/json"},
+    body:JSON.stringify({action,token,...extra}),
+    cache:"no-store"
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data?.error||"Dashboard request failed.");
+  return data;
 }
 async function loadDirectory(){
   const r=await fetch("/data/manufacturers.json",{cache:"no-store"});
   if(!r.ok)throw new Error("Manufacturer directory unavailable.");
   directory=await r.json();
+  const s=$("#countrySelect");
   for(const [code,name] of directory.countries||[]){
-    const o=document.createElement("option");o.value=code;o.textContent=name;$("#countrySelect").append(o);
+    const o=document.createElement("option");o.value=code;o.textContent=name;s.append(o);
   }
-  const other=document.createElement("option");other.value="OTHER";other.textContent="Other / Друга държава";$("#countrySelect").append(other);
+  const other=document.createElement("option");other.value="OTHER";other.textContent="Other / Друга държава";s.append(other);
 }
 function updateManufacturers(){
   const code=$("#countrySelect").value;
   const s=$("#manufacturerSelect");s.replaceChildren();
-  if(!code){const o=document.createElement("option");o.value="";o.textContent="Първо изберете държава…";s.append(o);s.disabled=true;return}
+  if(!code){
+    const o=document.createElement("option");o.value="";o.textContent="Първо изберете държава…";s.append(o);s.disabled=true;return;
+  }
   s.disabled=false;
   let o=document.createElement("option");o.value="";o.textContent="Изберете вашата фирма…";s.append(o);
   for(const name of directory.manufacturers?.[code]||[]){o=document.createElement("option");o.value=name;o.textContent=name;s.append(o)}
@@ -61,49 +64,73 @@ function manufacturerName(){
 function countryName(){
   return $("#countrySelect").selectedOptions[0]?.textContent||"";
 }
-function showReview(app){
-  $("#loadingCard").hidden=true;$("#onboardingCard").hidden=true;$("#reviewCard").hidden=false;
-  $("#dashCompany").textContent=app.company_name||"—";
-  $("#dashCountry").textContent=app.country||"—";
-  $("#dashEmail").textContent=app.email||currentUser?.email||"—";
+function showReview(data){
+  $("#loadingCard").hidden=true;
+  $("#onboardingCard").hidden=true;
+  $("#reviewCard").hidden=false;
+  $("#dashCompany").textContent=data.companyName||"—";
+  $("#dashCountry").textContent=data.country||"—";
+  $("#dashEmail").textContent=data.email||"—";
 }
 async function submit(){
-  const company=manufacturerName(),country=countryName(),notes=$("#requestText").value.trim();
+  const company=manufacturerName();
+  const country=countryName();
+  const requestText=$("#requestText").value.trim();
   if(!$("#countrySelect").value)throw new Error("Изберете държава.");
   if(!$("#manufacturerSelect").value)throw new Error("Изберете фирма.");
   if(!company)throw new Error("Въведете името на фирмата.");
-  if(notes.length<20)throw new Error("Опишете накратко какво ви трябва.");
+  if(requestText.length<20)throw new Error("Опишете накратко какво ви трябва.");
+
   $("#submitApplication").disabled=true;
-  $("#applicationResult").textContent="Изпращаме заявката…";
+  const resultNode=$("#applicationResult");
+  resultNode.textContent="Записваме заявката…";
+  resultNode.className="result";
   try{
-    const app=(await api("/api/application",{method:"POST",body:{
-      company_name:company,contact_name:"",country,website:"",
-      employees_count:null,dpp_users_count:null,production_sites_count:null,
-      systems:[],product_categories:"Battery / electric mobility DPP early access",
-      sku_count:null,annual_units:null,
-      notes:"Manufacturer: "+company+"\n\nClient request:\n"+notes
-    }})).data;
-    showReview({...app,country,email:currentUser.email});
-  }finally{$("#submitApplication").disabled=false}
+    const response=await call("submit",{
+      country,
+      companyName:company,
+      manufacturer:company,
+      requestText
+    });
+    showReview(response.data||{email:profile.email,country,companyName:company});
+  }finally{
+    $("#submitApplication").disabled=false;
+  }
 }
 async function init(){
-  cfg=await fetch("/data/auth-config.json",{cache:"no-store"}).then(r=>r.json());
-  if(cfg.supabaseUrl!==PROJECT_URL)throw new Error("Invalid auth configuration.");
-  session=parseHashSession();
-  if(session){sessionStorage.setItem(STORAGE,JSON.stringify(session))}
-  else{try{session=JSON.parse(sessionStorage.getItem(STORAGE)||"null")}catch{}}
-  if(!session?.access_token)throw new Error("Няма валидна Supabase Auth сесия. Поискайте нов sign-in link.");
-  currentUser=await authCall("/auth/v1/user");
-  await bindRequest();
-  cleanUrl();
+  const hashToken=tokenFromHash();
+  if(hashToken){saveToken(hashToken);cleanUrl()}
+  else restoreToken();
+
+  if(!token)throw new Error("Няма личен dashboard link. Върнете се в Early Access страницата и поискайте линк по email.");
+
+  const opened=await call("open");
+  profile=opened.data||{};
+  $("#welcomeText").textContent="Добре дошли, "+(profile.email||"client")+". Това е вашият DPP Early Access dashboard.";
+
   await loadDirectory();
-  $("#welcomeText").textContent="Добре дошли, "+currentUser.email+". Това е вашият DPP Early Access dashboard.";
-  const apps=(await api("/api/application")).data||[];
-  if(apps.length){showReview(apps[0]);return}
-  $("#loadingCard").hidden=true;$("#onboardingCard").hidden=false;
+
+  if(["submitted","reviewing","quoted","activated","rejected"].includes(String(profile.status||""))){
+    showReview(profile);
+    return;
+  }
+
+  $("#loadingCard").hidden=true;
+  $("#onboardingCard").hidden=false;
 }
-$("#countrySelect").addEventListener("change",()=>{updateManufacturers();$("#customManufacturerWrap").hidden=true;$("#customManufacturer").value=""});
-$("#manufacturerSelect").addEventListener("change",()=>{$("#customManufacturerWrap").hidden=$("#manufacturerSelect").value!=="__OTHER__"});
-$("#submitApplication").addEventListener("click",()=>submit().catch(e=>{const n=$("#applicationResult");n.textContent=e.message;n.className="result bad"}));
-init().catch(e=>setStatus(e.message,"bad"));
+
+$("#countrySelect").addEventListener("change",()=>{
+  updateManufacturers();
+  $("#customManufacturerWrap").hidden=true;
+  $("#customManufacturer").value="";
+});
+$("#manufacturerSelect").addEventListener("change",()=>{
+  $("#customManufacturerWrap").hidden=$("#manufacturerSelect").value!=="__OTHER__";
+});
+$("#submitApplication").addEventListener("click",()=>submit().catch(error=>{
+  const n=$("#applicationResult");
+  n.textContent=error.message;
+  n.className="result bad";
+}));
+init().catch(error=>setStatus(error.message,"bad"));
 })();
