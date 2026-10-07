@@ -19,6 +19,39 @@ ALLOWED_VERIFY = {
 }
 ALLOWED_CONFORMANCE = {"MAPPED_NOT_PROVEN", "PASS", "FAIL", "N/A"}
 
+EVIDENCE_STATUS_BY_APPLICABILITY = {
+    "mandatory": {"MISSING", "EVIDENCED", "VERIFIED", "REJECTED"},
+    "if_applicable": {
+        "CONDITIONAL_PENDING",
+        "NOT_APPLICABLE_WITH_BASIS",
+        "EVIDENCED",
+        "VERIFIED",
+        "REJECTED",
+    },
+    "optional": {"OPTIONAL_PENDING", "EVIDENCED", "VERIFIED", "REJECTED"},
+    "not_required_2027": {"DEFERRED_2027", "EVIDENCED", "VERIFIED", "REJECTED"},
+}
+EXTERNAL_EVIDENCE_STATUS = {"MISSING", "EVIDENCED", "VERIFIED", "REJECTED"}
+EU_EXTERNAL_SECTIONS = {
+    "company",
+    "responsible_economic_operator",
+    "unique_identifier",
+    "qr_resolution",
+    "registry_proof",
+    "physical_qr_scan",
+    "uat_evidence",
+    "licensed_en_clause_review",
+    "legal_compliance_review",
+}
+REGISTRY_STATES = {
+    "not_registered",
+    "submitted",
+    "registered",
+    "rejected",
+    "needs_update",
+    "retired",
+}
+
 ACCESS_ROLES = {
     "public": {"anonymous", "public", "legitimate_interest", "responsible_operator", "authority"},
     "public_identifier": {"anonymous", "public", "legitimate_interest", "responsible_operator", "authority"},
@@ -315,6 +348,209 @@ def validate_harmonised_standards_inventory(inventory: dict[str, Any]) -> dict[s
     return {"count": len(standards), "status": "REFERENCES_LOCKED_CLAUSE_REVIEW_PENDING"}
 
 
+
+def validate_evidence_pack(pack: dict[str, Any], matrix: dict[str, Any]) -> dict[str, Any]:
+    rows = pack.get("pointEvidence")
+    if not isinstance(rows, list) or len(rows) != 71:
+        raise ConformanceError("evidence pack must contain exactly 71 pointEvidence rows")
+    if [row.get("number") for row in rows] != list(range(1, 72)):
+        raise ConformanceError("evidence pack point numbers must be exactly 1..71 in order")
+
+    matrix_rows = {row["number"]: row for row in matrix.get("points") or []}
+    if len(matrix_rows) != 71:
+        raise ConformanceError("source matrix is not a valid 71-point matrix")
+
+    mandatory_missing = 0
+    mandatory_evidenced_not_verified = 0
+    conditional_unassessed = 0
+    conditional_evidenced_not_verified = 0
+    verified_points = 0
+
+    for row in rows:
+        number = row["number"]
+        source = matrix_rows[number]
+        for key in ("legalSource", "canonicalFieldPath", "applicabilityAt2027Launch"):
+            if row.get(key) != source.get(key):
+                raise ConformanceError(f"point {number}: evidence pack drift in {key}")
+
+        applicability = row["applicabilityAt2027Launch"]
+        status = row.get("evidenceStatus")
+        allowed = EVIDENCE_STATUS_BY_APPLICABILITY.get(applicability)
+        if allowed is None or status not in allowed:
+            raise ConformanceError(f"point {number}: invalid evidenceStatus for {applicability}")
+
+        evidence_ids = row.get("evidenceIds")
+        provenance_refs = row.get("provenanceRefs")
+        if not isinstance(evidence_ids, list) or not isinstance(provenance_refs, list):
+            raise ConformanceError(f"point {number}: evidenceIds/provenanceRefs must be arrays")
+
+        if status in {"EVIDENCED", "VERIFIED"}:
+            if not evidence_ids:
+                raise ConformanceError(f"point {number}: {status} requires evidenceIds")
+            if source.get("provenanceRequired") and not provenance_refs:
+                raise ConformanceError(f"point {number}: {status} requires provenanceRefs")
+        if status == "VERIFIED":
+            if not str(row.get("verificationRef") or "").strip():
+                raise ConformanceError(f"point {number}: VERIFIED requires verificationRef")
+            verified_points += 1
+
+        if applicability == "mandatory":
+            if status == "MISSING":
+                mandatory_missing += 1
+            elif status == "EVIDENCED":
+                mandatory_evidenced_not_verified += 1
+            elif status == "REJECTED":
+                mandatory_missing += 1
+        elif applicability == "if_applicable":
+            if status == "CONDITIONAL_PENDING":
+                conditional_unassessed += 1
+            elif status == "EVIDENCED":
+                conditional_evidenced_not_verified += 1
+            elif status == "REJECTED":
+                conditional_unassessed += 1
+            elif status == "NOT_APPLICABLE_WITH_BASIS":
+                if not str(row.get("notes") or "").strip():
+                    raise ConformanceError(
+                        f"point {number}: NOT_APPLICABLE_WITH_BASIS requires notes/basis"
+                    )
+
+    external = pack.get("externalSections")
+    if not isinstance(external, list):
+        raise ConformanceError("externalSections must be an array")
+    external_by_id = {row.get("id"): row for row in external if isinstance(row, dict)}
+    if set(external_by_id) != EU_EXTERNAL_SECTIONS:
+        raise ConformanceError("externalSections do not match the EU evidence contract")
+
+    external_unverified = 0
+    for section_id in sorted(EU_EXTERNAL_SECTIONS):
+        row = external_by_id[section_id]
+        status = row.get("status")
+        if status not in EXTERNAL_EVIDENCE_STATUS:
+            raise ConformanceError(f"external section {section_id}: invalid status")
+        refs = row.get("evidenceRefs")
+        if not isinstance(refs, list):
+            raise ConformanceError(f"external section {section_id}: evidenceRefs must be an array")
+        if status in {"EVIDENCED", "VERIFIED"} and not refs:
+            raise ConformanceError(f"external section {section_id}: {status} requires evidenceRefs")
+        if status != "VERIFIED":
+            external_unverified += 1
+
+    if mandatory_missing or conditional_unassessed:
+        readiness = "EVIDENCE_COLLECTION_REQUIRED"
+    elif mandatory_evidenced_not_verified or conditional_evidenced_not_verified or external_unverified:
+        readiness = "VERIFICATION_REQUIRED"
+    else:
+        readiness = "EVIDENCE_PACK_READY_FOR_FINAL_GATE"
+
+    return {
+        "total": 71,
+        "verifiedPoints": verified_points,
+        "mandatoryMissing": mandatory_missing,
+        "mandatoryEvidencedNotVerified": mandatory_evidenced_not_verified,
+        "conditionalUnassessed": conditional_unassessed,
+        "conditionalEvidencedNotVerified": conditional_evidenced_not_verified,
+        "externalUnverified": external_unverified,
+        "readiness": readiness,
+    }
+
+
+def validate_registry_adapter_contract(adapter: dict[str, Any]) -> dict[str, Any]:
+    if adapter.get("mode") != "provider_neutral_no_network_submission":
+        raise ConformanceError("unexpected Registry adapter mode")
+    facts = adapter.get("operationalFacts") or {}
+    if facts.get("registryOperationalSince") != "2026-07-20":
+        raise ConformanceError("Registry operational date is missing or unexpected")
+    if facts.get("testingEnvironmentAvailable") is not True:
+        raise ConformanceError("Registry testing environment must be represented")
+    if "unique_identifier" not in (facts.get("storesAtLeast") or []):
+        raise ConformanceError("Registry contract must store at least unique_identifier")
+    if "unique_registration_identifier" not in (facts.get("returnsAfterUpload") or []):
+        raise ConformanceError("Registry contract must model unique_registration_identifier")
+    if facts.get("registrationIdentifierIsComplianceProof") is not False:
+        raise ConformanceError("Registry registration identifier must not be treated as compliance proof")
+
+    states = set(adapter.get("states") or [])
+    if states != REGISTRY_STATES:
+        raise ConformanceError("Registry adapter states are incomplete")
+
+    response = adapter.get("responseContract") or {}
+    registered_requires = set(response.get("registeredRequires") or [])
+    if {"unique_registration_identifier", "receipt_reference"} - registered_requires:
+        raise ConformanceError("registered response contract is incomplete")
+
+    transport = adapter.get("transport") or {}
+    if transport.get("networkSubmissionEnabled") is not False:
+        raise ConformanceError("network Registry submission must remain disabled in repo-only adapter")
+
+    return {
+        "states": len(states),
+        "operationalSince": facts["registryOperationalSince"],
+        "testingEnvironmentAvailable": True,
+        "status": "REGISTRY_ADAPTER_CONTRACT_VALID",
+    }
+
+
+def _reject_registry_secret_fields(value: Any, path: str = "request") -> None:
+    secret_keys = {
+        "authorization",
+        "access_token",
+        "refresh_token",
+        "api_key",
+        "apikey",
+        "client_secret",
+        "password",
+        "service_role_key",
+    }
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if str(key).strip().lower() in secret_keys:
+                raise ConformanceError(f"{path} contains forbidden credential field {key}")
+            _reject_registry_secret_fields(child, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            _reject_registry_secret_fields(child, f"{path}[{index}]")
+
+
+def build_registry_upload_request(
+    unique_identifier: str,
+    additional_registry_data: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    uid = assert_not_demo_uid(unique_identifier)
+    additional = {} if additional_registry_data is None else additional_registry_data
+    if not isinstance(additional, dict):
+        raise ConformanceError("additional_registry_data must be an object")
+    _reject_registry_secret_fields(additional)
+    return {
+        "unique_identifier": uid,
+        "additional_registry_data": additional,
+        "networkSubmissionAllowed": False,
+        "state": "not_registered",
+    }
+
+
+def record_registry_registration(
+    request: dict[str, Any],
+    response: dict[str, Any],
+) -> dict[str, Any]:
+    if not isinstance(request, dict) or not isinstance(response, dict):
+        raise ConformanceError("Registry request/response must be objects")
+    uid = assert_not_demo_uid(request.get("unique_identifier"))
+    registration_id = str(response.get("unique_registration_identifier") or "").strip()
+    receipt_reference = str(response.get("receipt_reference") or "").strip()
+    if not registration_id:
+        raise ConformanceError("Registry response requires unique_registration_identifier")
+    if not receipt_reference:
+        raise ConformanceError("Registry response requires receipt_reference")
+    return {
+        "state": "registered",
+        "unique_identifier": uid,
+        "unique_registration_identifier": registration_id,
+        "receipt_reference": receipt_reference,
+        "registryEvidenceComplete": True,
+        "complianceProven": False,
+    }
+
+
 def evaluate_final_gate(evidence: dict[str, Any]) -> str:
     technical = bool(evidence.get("technical_tests_passed"))
     if not technical:
@@ -343,11 +579,17 @@ def evaluate_final_gate(evidence: dict[str, Any]) -> str:
 def run_repository_gate() -> dict[str, Any]:
     matrix = load_json("data/lmt-battery-71-eu-conformance-v1.json")
     standards = load_json("data/eu-dpp-harmonised-standards-v1.json")
+    evidence_pack = load_json("data/eu-dpp-evidence-pack-template-v1.json")
+    registry_adapter = load_json("data/eu-dpp-registry-adapter-v1.json")
     matrix_result = validate_71_matrix(matrix)
     standards_result = validate_harmonised_standards_inventory(standards)
+    evidence_result = validate_evidence_pack(evidence_pack, matrix)
+    registry_result = validate_registry_adapter_contract(registry_adapter)
     return {
         "matrix": matrix_result,
         "standards": standards_result,
+        "evidencePack": evidence_result,
+        "registryAdapter": registry_result,
         "claim": "TECHNICAL_TRACEABILITY_GATE_ONLY_NOT_EU_CERTIFICATION",
     }
 
