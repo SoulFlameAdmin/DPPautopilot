@@ -83,7 +83,7 @@ async function verifyRegistrationRequest(){
   }
   try{
     const verified=(await api("/api/registration-link",{method:"PATCH",body:{request_id:requestId}})).data;
-    url.searchParams.delete("request");url.searchParams.delete("dpp");
+    url.searchParams.delete("request");
     history.replaceState(null,"",url.pathname+url.search+url.hash);
     result($("#authResult"),"DPP registration verified. Продължаваме към фирмения tenant.","ok");
     return verified;
