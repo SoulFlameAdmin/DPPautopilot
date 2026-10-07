@@ -83,11 +83,11 @@
     },
     {
       "source": "/register",
-      "destination": "/live/register"
+      "destination": "/live/apply"
     },
     {
       "source": "/register/",
-      "destination": "/live/register"
+      "destination": "/live/apply"
     },
     {
       "source": "/login",
