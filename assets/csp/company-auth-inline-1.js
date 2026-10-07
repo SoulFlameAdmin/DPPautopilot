@@ -26,13 +26,13 @@ function scheduleRefresh(expiresIn){
 }
 function saveSession(value){
   session=value&&value.access_token?{access_token:value.access_token,refresh_token:value.refresh_token||"",expires_in:Number(value.expires_in)||3600}:null;
-  if(session){sessionStorage.setItem(STORAGE,JSON.stringify(session));document.body.dataset.companySession="authenticated";scheduleRefresh(session.expires_in)}
+  if(session){localStorage.setItem(STORAGE,JSON.stringify(session));sessionStorage.removeItem(STORAGE);document.body.dataset.companySession="authenticated";scheduleRefresh(session.expires_in)}
   else clearSession(false);
   syncAuthUi();
 }
 function clearSession(sync=true){
   if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null}
-  session=null;sessionStorage.removeItem(STORAGE);document.body.dataset.companySession="anonymous";
+  session=null;localStorage.removeItem(STORAGE);sessionStorage.removeItem(STORAGE);document.body.dataset.companySession="anonymous";
   if(sync)syncAuthUi();
 }
 async function refreshSession(){
@@ -41,7 +41,7 @@ async function refreshSession(){
   saveSession(data);return true;
 }
 function restoreSession(){
-  try{const value=JSON.parse(sessionStorage.getItem(STORAGE)||"null");if(value?.access_token){session=value;document.body.dataset.companySession="authenticated";return true}}catch{}
+  try{const raw=localStorage.getItem(STORAGE)||sessionStorage.getItem(STORAGE);const value=JSON.parse(raw||"null");if(value?.access_token){session=value;localStorage.setItem(STORAGE,JSON.stringify(value));sessionStorage.removeItem(STORAGE);document.body.dataset.companySession="authenticated";return true}}catch{}
   return false;
 }
 function confirmationRedirect(){return new URL("/company",location.origin).href}
@@ -235,8 +235,8 @@ $("#signup").addEventListener("click",async()=>{
     const path="/auth/v1/signup?redirect_to="+encodeURIComponent(confirmationRedirect());
     const data=await authCall(path,{method:"POST",body:{email:e,password:p}});
     if(data.access_token){saveSession(data);await loadTenantState();return}
-    $("#verifyCard").hidden=false;$("#verifyResult").textContent="Confirmation email requested for "+e+". След потвърждение отвори /company.";
-    result($("#authResult"),"Регистрацията е приета. Нужно е email потвърждение.","ok");
+    $("#verifyCard").hidden=false;$("#verifyResult").textContent="Нов акаунт: провери email-а за потвърждение. Съществуващ акаунт: натисни „Вход“ със същия email и парола.";
+    result($("#authResult"),"Заявката е приета. Ако акаунтът вече съществува, използвай „Вход“.","ok");
   }catch(err){result($("#authResult"),err.message,"bad")}
 });
 $("#forgotPassword").addEventListener("click",async()=>{
