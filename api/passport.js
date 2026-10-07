@@ -456,7 +456,7 @@ async function handler(req, res) {
     if (!validTimestamp(body.expected_updated_at)) {
       return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
     }
-    if (body.action != null && !['activate','submit_authority_evidence','transition'].includes(body.action)) {
+    if (body.action != null && !['activate','submit_authority_evidence','transition','update_technical_pilot'].includes(body.action)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
     }
     if (body.action === 'submit_authority_evidence') {
@@ -470,6 +470,39 @@ async function handler(req, res) {
       }, authorization);
       return send(res, 200, { data: receipt });
     }
+    if (body.action === 'update_technical_pilot') {
+      const capacityAh = Number(body.capacity_ah);
+      if (!Number.isFinite(capacityAh) || capacityAh <= 0 || capacityAh > 100000) {
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'capacity_ah must be a positive number.' } });
+      }
+
+      const current = await rpc('dpp_api_passport_private', { p_id: id }, authorization);
+      if (current.status !== 'active' ||
+          current.public_payload?.pilot?.mode !== 'technical_pilot' ||
+          current.public_payload?.pilot?.regulatory_compliance !== false) {
+        return send(res, 409, { error: { code: 'TECHNICAL_PILOT_REQUIRED', message: 'Only ACTIVE technical-pilot passports can use this update action.' } });
+      }
+
+      const publicPayload = JSON.parse(JSON.stringify(current.public_payload || {}));
+      if (!plainObject(publicPayload.model)) publicPayload.model = {};
+      publicPayload.model.rated_capacity_ah = capacityAh;
+
+      const publicAccessProblem = validatePublicPayloadAccess(publicPayload);
+      if (publicAccessProblem) {
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+      }
+
+      const passport = await rpc('dpp_api_passport_update_checked', {
+        p_id: id,
+        p_status: 'active',
+        p_public_payload: publicPayload,
+        p_private_payload: current.private_payload || {},
+        p_expected_updated_at: body.expected_updated_at
+      }, authorization);
+
+      return send(res, 200, { data: sanitizeOrganizationPrivatePassport(passport) });
+    }
+
     if (body.action === 'activate') {
       const passport = await rpc('dpp_api_scooter_passport_activate', {
         p_passport_id: id,
