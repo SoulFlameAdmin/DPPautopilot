@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0.0-2026-10-07",
+  "mode": "provider_neutral_no_network_submission",
+  "legalBasis": [
+    "Regulation (EU) 2024/1781 Article 13",
+    "Regulation (EU) 2023/1542 Article 77(10)"
+  ],
+  "operationalFacts": {
+    "registryOperationalSince": "2026-07-20",
+    "testingEnvironmentAvailable": true,
+    "storesAtLeast": [
+      "unique_identifier"
+    ],
+    "returnsAfterUpload": [
+      "unique_registration_identifier"
+    ],
+    "registrationIdentifierIsComplianceProof": false
+  },
+  "states": [
+    "not_registered",
+    "submitted",
+    "registered",
+    "rejected",
+    "needs_update",
+    "retired"
+  ],
+  "internalOrchestratorMapping": {
+    "not_registered": [
+      "draft",
+      "queued"
+    ],
+    "submitted": [
+      "submitted"
+    ],
+    "registered": [
+      "accepted"
+    ],
+    "rejected": [
+      "rejected"
+    ],
+    "needs_update": [
+      "retry_wait"
+    ],
+    "retired": [
+      "cancelled"
+    ]
+  },
+  "requestContract": {
+    "required": [
+      "unique_identifier"
+    ],
+    "optional": [
+      "additional_registry_data"
+    ],
+    "rules": [
+      "unique_identifier must be production-safe and must not use the demo namespace",
+      "credentials and secrets are never persisted in repository payloads",
+      "additional_registry_data is only supplied when required by the official Registry interface or applicable implementing rules"
+    ]
+  },
+  "responseContract": {
+    "registeredRequires": [
+      "unique_registration_identifier",
+      "receipt_reference"
+    ],
+    "rules": [
+      "a Registry receipt proves registration evidence only",
+      "a unique registration identifier does not prove product or DPP compliance"
+    ]
+  },
+  "transport": {
+    "networkSubmissionEnabled": false,
+    "bindingStatus": "OFFICIAL_TECHNICAL_INTERFACE_NOT_BOUND_IN_REPO",
+    "note": "Keep the adapter provider-neutral until the official technical interface is bound and tested with authorized credentials outside the repository."
+  }
+}
