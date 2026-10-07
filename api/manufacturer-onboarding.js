@@ -149,7 +149,7 @@ async function handler(req,res){
       return send(res,200,{data:configured});
     }
 
-    return send(res,422,{error:{code:'VALIDATION_ERROR',message:'action must be answer or configure.'}});
+    return send(res,422,{error:{code:'VALIDATION_ERROR',message:'The request failed validation.'}});
   }catch(error){return errorResponse(res,error)}
 }
 
