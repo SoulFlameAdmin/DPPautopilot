@@ -147,6 +147,12 @@ function showReady(org){
   $("#readyCompany").textContent=org.name+" е активна.";
   $("#readyMeta").textContent="Role: "+org.role+" · tenant: "+org.slug+" · "+org.organization_id;
   loadTeam().catch(e=>result($("#teamResult"),e.message,"bad"));
+  const params=new URLSearchParams(location.search);
+  if(!recoveryMode&&(params.get("dpp")==="1"||params.get("request"))){
+    const target=new URL("/manufacturer",location.origin);
+    target.searchParams.set("onboarding","1");
+    location.replace(target.href);
+  }
 }
 
 function canManageTarget(targetRole){
