@@ -2,6 +2,8 @@
 const ENDPOINT="https://soulflame-twins.vercel.app/api/dpp-dashboard-link";
 const TOKEN_KEY="dpp_early_access_token_v1";
 const DRAFT_KEY="dpp_early_access_onboarding_v2";
+const GOOGLE_SESSION_KEY="dpp_google_session_v1";
+const COMPANY_SESSION_KEY="dpp_company_session_v1";
 
 const QUESTIONS=[
   {key:"country",kicker:"КОМПАНИЯ · 01",text:"В коя държава е регистрирана фирмата?",help:"Напишете държавата и, ако е важно за дейността ви, основния пазар."},
@@ -170,6 +172,98 @@ async function submitAndConfigure(){
     renderQuestion();
   }
 }
+function readGoogleSession(){
+  try{
+    const value=JSON.parse(localStorage.getItem(GOOGLE_SESSION_KEY)||"null");
+    return value&&value.access_token?value:null;
+  }catch{return null}
+}
+function slugify(value){
+  return String(value||"company")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g,"-")
+    .replace(/^-+|-+$/g,"")
+    .slice(0,80)||"company";
+}
+function copyGoogleToCompanySession(google){
+  if(!google?.access_token)throw new Error("Google session is missing.");
+  const session={
+    access_token:google.access_token,
+    refresh_token:google.refresh_token||"",
+    expires_in:Math.max(60,Number(google.expires_at)?Number(google.expires_at)-Math.floor(Date.now()/1000):3600)
+  };
+  sessionStorage.setItem(COMPANY_SESSION_KEY,JSON.stringify(session));
+  return session;
+}
+async function productionApi(path,{method="GET",body,token:accessToken}={}){
+  const response=await fetch(path,{
+    method,
+    headers:{
+      Authorization:"Bearer "+accessToken,
+      "Content-Type":"application/json",
+      Accept:"application/json"
+    },
+    body:body?JSON.stringify(body):undefined,
+    cache:"no-store"
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data?.error?.message||data?.error?.code||("HTTP "+response.status));
+  return data;
+}
+async function ensureProductionTenant(){
+  const google=readGoogleSession();
+  if(!google?.access_token)throw new Error("Няма запазена Google сесия. Влезте отново през /register.");
+  copyGoogleToCompanySession(google);
+
+  let organizations=(await productionApi("/api/organizations",{token:google.access_token})).data||[];
+  let active=organizations.find(org=>org&&org.active)||null;
+  if(active)return active;
+
+  if(organizations.length){
+    throw new Error("Има фирмен tenant, но няма активен workspace.");
+  }
+
+  const company=profile?.configuration?.company?.name||profile?.companyName||answers.company||"DPP Company";
+  const suffix=(globalThis.crypto&&typeof globalThis.crypto.randomUUID==="function"
+    ?globalThis.crypto.randomUUID().replace(/-/g,"").slice(0,8)
+    :String(Date.now()).slice(-8));
+  const slug=(slugify(company).slice(0,80)+"-"+suffix).slice(0,120).replace(/-+$/,"");
+  active=(await productionApi("/api/organizations",{
+    method:"POST",
+    token:google.access_token,
+    body:{name:String(company).slice(0,200),slug}
+  })).data;
+  return active;
+}
+function setProductEntryReady(active){
+  for(const id of ["productSkuEntry","productSkuButton"]){
+    const link=$(id);
+    if(!link)continue;
+    link.href="/manufacturer#modelRegisterCard";
+    link.setAttribute("aria-disabled","false");
+    link.classList.remove("preparing");
+    link.classList.add("ready");
+  }
+  const state=$("productSkuEntryState");
+  if(state)state.textContent="Отворете реалната Product / SKU форма";
+  if(active?.name)$("#tenantMeta").textContent="Google session · "+active.name+" · Production tenant active";
+}
+async function prepareProductionEntry(){
+  const state=$("productSkuEntryState");
+  try{
+    if(state)state.textContent="Свързваме фирмения tenant…";
+    const active=await ensureProductionTenant();
+    setProductEntryReady(active);
+    $("#earlyStatus").textContent="Onboarding 8/8 е завършен. Company tenant е активен. Следва: реален Product / SKU.";
+    return active;
+  }catch(error){
+    if(state)state.textContent="Не успяхме да активираме Product / SKU";
+    $("#earlyStatus").textContent="Onboarding е запазен, но Product / SKU още не е активен: "+error.message;
+    $("#earlyStatus").className="result bad";
+    throw error;
+  }
+}
 function renderConfiguration(){
   const container=$("configurationSummary");
   if(!container)return;
@@ -201,6 +295,7 @@ function showDashboard(){
   $("tenantMeta").textContent="Google session · Auto-configured DPP pilot";
   $("earlyStatus").textContent="Onboarding 8/8 е завършен. Pilot workspace-ът е конфигуриран автоматично от вашите отговори. Следва: реален Product / SKU.";
   renderConfiguration();
+  prepareProductionEntry().catch(()=>{});
 }
 function showWizard(){
   $("intakeScreen").hidden=false;
@@ -214,6 +309,16 @@ function showWizard(){
   step=firstIncomplete();
   if(step>=QUESTIONS.length){submitAndConfigure();return;}
   renderQuestion();
+}
+
+for(const id of ["productSkuEntry","productSkuButton"]){
+  const link=$(id);
+  if(link)link.addEventListener("click",event=>{
+    if(link.getAttribute("aria-disabled")==="true"){
+      event.preventDefault();
+      prepareProductionEntry().catch(()=>{});
+    }
+  });
 }
 
 $("answerInput").addEventListener("input",()=>{
