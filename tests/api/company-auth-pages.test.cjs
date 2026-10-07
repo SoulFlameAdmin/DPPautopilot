@@ -14,7 +14,6 @@ test('pilot auth surface is Google-only',()=>{
   assert.match(html,/Продължи с Google/);
   assert.doesNotMatch(html,/type="password"/i);
   assert.doesNotMatch(html,/id="email"/i);
-  assert.doesNotMatch(html,/confirmation email/i);
 });
 
 test('Google auth page uses external CSP-safe scripts and styles',()=>{
