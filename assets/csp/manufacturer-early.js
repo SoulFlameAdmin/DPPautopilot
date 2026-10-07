@@ -70,7 +70,7 @@ function renderQuestion(){
   $("answerState").textContent=answers[q.key]?"ЗАПАЗЕНО":"НЕЗАПИСАНО";
   $("progressLabel").textContent="ВЪПРОС "+(step+1)+" ОТ "+QUESTIONS.length;
   $("progressPercent").textContent=Math.round(((step+1)/QUESTIONS.length)*100)+"%";
-  $("progressBar").style.width=(((step+1)/QUESTIONS.length)*100)+"%";
+  $("progressBar").className="p"+(step+1);
   $("backQuestion").disabled=step===0;
   $("nextQuestion").textContent=step===QUESTIONS.length-1?"Завърши и настрой системата →":"Запази и продължи →";
   $("answerInput").focus();
