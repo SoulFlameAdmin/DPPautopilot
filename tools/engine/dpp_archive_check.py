@@ -15,12 +15,54 @@ import sys
 from pathlib import Path
 
 REQUIRED_DPP = (
-    "dpp_organizations", "dpp_organization_members", "dpp_user_tenant_context",
-    "dpp_battery_models", "dpp_provision_batches", "dpp_battery_items",
-    "dpp_passports", "dpp_passport_versions", "dpp_audit_log",
-    "dpp_early_access_sessions", "dpp_manufacturer_configurations",
+    "dpp_app_binding",
+    "dpp_audit_log",
+    "dpp_authority_evidence",
+    "dpp_authority_users",
+    "dpp_battery_items",
+    "dpp_battery_models",
+    "dpp_carrier_scan_events",
+    "dpp_client_applications",
+    "dpp_early_access_sessions",
+    "dpp_email_outbox",
+    "dpp_evidence_attachments",
+    "dpp_field_catalog_access",
+    "dpp_field_catalog_runtime",
+    "dpp_field_events",
+    "dpp_import_mappings",
+    "dpp_import_rows",
+    "dpp_import_runs",
+    "dpp_manufacturer_configurations",
     "dpp_manufacturer_onboarding_answers",
+    "dpp_nfc_challenges",
+    "dpp_nfc_identities",
+    "dpp_nfc_provisioning_receipts",
+    "dpp_nfc_verification_events",
+    "dpp_organization_members",
+    "dpp_organizations",
+    "dpp_partner_access",
+    "dpp_passport_authority_payloads",
+    "dpp_passport_lifecycle",
+    "dpp_passport_versions",
+    "dpp_passports",
+    "dpp_physical_carriers",
+    "dpp_provision_batch_items",
+    "dpp_provision_batches",
+    "dpp_rate_limit_buckets",
+    "dpp_registration_requests",
+    "dpp_registry_submissions",
+    "dpp_supplier_data_packages",
+    "dpp_supplier_field_requirements",
+    "dpp_supplier_invitations",
+    "dpp_supplier_package_signatures",
+    "dpp_supplier_package_verification_events",
+    "dpp_supplier_portal_members",
+    "dpp_supplier_reminder_events",
+    "dpp_suppliers",
+    "dpp_user_tenant_context",
+    "dpp_world_companies",
 )
+REQUIRED_DEPENDENCIES = (("auth", "users"), ("public", "leads"), ("storage", "objects"))
 
 
 def find_table_data(toc: str) -> set[tuple[str, str]]:
@@ -37,15 +79,23 @@ def find_table_data(toc: str) -> set[tuple[str, str]]:
 def assess_toc(toc: str, require_auth: bool = True) -> dict:
     entries = find_table_data(toc)
     missing = [f"public.{t}" for t in REQUIRED_DPP if ("public", t) not in entries]
-    if require_auth and ("auth", "users") not in entries:
-        missing.append("auth.users")
+    # These cross-schema tables are required by real DPP foreign keys or Storage metadata.
+    # Partial archives never qualify as restore-ready, even if structure checks pass.
+    if require_auth:
+        missing.extend(f"{schema}.{table}" for schema, table in REQUIRED_DEPENDENCIES
+                       if (schema, table) not in entries)
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "structural_toc_pass": not missing,
-        "expected_table_data_entries": len(REQUIRED_DPP) + int(require_auth),
+        "expected_table_data_entries": len(REQUIRED_DPP) + (len(REQUIRED_DEPENDENCIES) if require_auth else 0),
+        "all_46_dpp_tables_present": all(("public", t) in entries for t in REQUIRED_DPP),
+        "external_dependency_checks": ("auth.users", "public.leads", "storage.objects") if require_auth else (),
+        "partial_archive_mode": not require_auth,
         "seen_table_data_entries": len(entries),
         "missing_required_table_data": missing,
         "includes_auth_users_data": ("auth", "users") in entries,
+        "includes_leads_data": ("public", "leads") in entries,
+        "includes_storage_metadata": ("storage", "objects") in entries,
         "database_restore_verified": False,
         "storage_objects_restored_verified": False,
         "recovery_gate_green": False,
@@ -58,7 +108,7 @@ def main(argv: list[str] | None = None) -> int:
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--archive", type=Path, help="Existing local pg_dump -Fc archive to inspect via pg_restore -l")
     mode.add_argument("--toc", type=Path, help="Existing local pg_restore -l output (metadata only)")
-    parser.add_argument("--no-auth-required", action="store_true", help="Partial DPP-only dump. Do NOT treat it as independently restorable.")
+    parser.add_argument("--no-auth-required", action="store_true", help="Partial DPP-only dump: skip external dependencies. NEVER restore-ready.")
     args = parser.parse_args(argv)
     try:
         if args.archive:
