@@ -30,6 +30,9 @@ class ManufacturerProgressContract(unittest.TestCase):
         self.assertRegex(self.sql, r"revoke all on function public\.dpp_api_manufacturer_onboarding_configure\(\) from public, anon;")
         self.assertRegex(self.sql, r"grant execute on function public\.dpp_api_manufacturer_onboarding_configure\(\) to authenticated;")
 
+    def test_postgres_function_ddl_is_terminated_before_acl_statements(self):
+        self.assertIn("$function$;\\n\\nrevoke all on function", self.sql)
+
     def test_no_destructive_or_unrelated_schema_changes(self):
         self.assertIn("create or replace function public.dpp_api_manufacturer_onboarding_configure()", self.sql)
         for name in ("drop table", "truncate", "alter table", "drop function"):
