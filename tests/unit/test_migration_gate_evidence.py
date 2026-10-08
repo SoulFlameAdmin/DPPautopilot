@@ -11,7 +11,7 @@ VER=importlib.util.module_from_spec(VS); assert VS and VS.loader; VS.loader.exec
 POLICY=json.loads((ROOT/'data/migration-deployment-gate-policy.json').read_text(encoding='utf-8'))
 
 def good():
-    sha='abcdef1234567890'
+    sha='abcdef1234567890abcdef1234567890abcdef12'
     manifest=GEN.build_manifest(sha)
     names=[m['name'] for m in manifest['migrations']]
     return {
@@ -24,6 +24,12 @@ def good():
 class MigrationGateTests(unittest.TestCase):
     def test_accepts_exact_manifest_database_and_schema_evidence(self):
         VER.verify(good(),POLICY)
+
+    def test_rejects_abbreviated_or_non_hex_candidate_sha(self):
+        for invalid in ('abcdef123', 'z'*40, 'ABCDEF'*6+'ABCD', ''):
+            e=good();e['candidate_commit_sha']=invalid
+            with self.assertRaisesRegex(VER.MigrationGateDenied,'exact 40-character'):
+                VER.verify(e,POLICY)
 
     def test_rejects_manifest_commit_drift(self):
         e=good();e['manifest']['commit_sha']='deadbeef'
