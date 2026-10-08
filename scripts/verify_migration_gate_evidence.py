@@ -39,6 +39,23 @@ def verify(evidence:dict[str,Any],policy:dict[str,Any]=POLICY)->None:
         names.append(row['name'])
     if len(names)!=len(set(names)):
         raise MigrationGateDenied('duplicate migration name in manifest')
+    # Never trust a self-consistent manifest alone. Recompute each file hash from
+    # this exact checked-out source and require complete, non-extra coverage.
+    source_dir=ROOT/'supabase/migrations'
+    expected_files={p.name:p for p in source_dir.glob('*.sql')}
+    listed_files=set()
+    for row in rows:
+        filename=row.get('filename')
+        if not isinstance(filename,str) or filename not in expected_files:
+            raise MigrationGateDenied('manifest references missing source migration file')
+        if filename in listed_files:
+            raise MigrationGateDenied('duplicate migration filename in manifest')
+        listed_files.add(filename)
+        actual_sha=hashlib.sha256(expected_files[filename].read_bytes()).hexdigest()
+        if row.get('sha256')!=actual_sha:
+            raise MigrationGateDenied('manifest migration file SHA256 does not match checked-out source')
+    if listed_files!=set(expected_files):
+        raise MigrationGateDenied('manifest does not cover every repository migration file')
     if database.get('project_id')!=policy['bound_project_id']:
         raise MigrationGateDenied('database project mismatch')
     applied=database.get('applied_migration_names')
