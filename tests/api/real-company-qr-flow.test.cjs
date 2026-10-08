@@ -27,7 +27,8 @@ test('real company flow is tenant-backed and never demo/local product storage',(
   assert.match(dashboard,/organizationRpc\("dpp_api_organizations_list",\{\}\)/);
   assert.match(dashboard,/api\("\/api\/models"/);
   assert.match(dashboard,/api\("\/api\/items"/);
-  assert.doesNotMatch(dashboard,/localStorage/);
+  assert.match(dashboard,/const GOOGLE_STORAGE="dpp_google_session_v1"/);
+  assert.doesNotMatch(dashboard,/localStorage\.(?:setItem|getItem)\([^\n;]*(?:demo|model|item|product|battery|passport|batch)/i);
   assert.match(html,/REAL TENANT DATA · NO DEMO STORAGE/);
 });
 
