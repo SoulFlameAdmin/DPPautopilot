@@ -65,17 +65,44 @@ test('state contract requires bounded completion state',()=>{
   assert.equal(api.validState({organization_id:ORG,user_id:USER,answered_count:9,complete:true,answers:[],configuration:null}),false);
 });
 
-test('configure response must prove all seven backend progress steps',()=>{
+test('8/8 onboarding cannot fabricate manufactured Product, Batch, DPP or QR',()=>{
+  const keys=['company','workflow','product','batch','dpp','qr','ready'];
+  const steps=keys.map((key,index)=>({key,status:index===0?'done':'pending'}));
+  const state={organization_id:ORG,status:'configured',revision:1,
+    configured_at:'2026-10-07T03:00:00.000Z',steps};
+  assert.equal(api.validConfigure(state),true);
+  // All-done is the historical misleading response. Reject, do not misreport 100%.
+  assert.equal(api.validConfigure({...state,steps:keys.map(key=>({key,status:'done'}))}),false);
+  for(const key of ['workflow','product','batch','dpp','qr','ready']){
+    const incorrect=steps.map(step=>step.key===key?{key,status:'done'}:step);
+    assert.equal(api.validConfigure({...state,steps:incorrect}),false,key);
+  }
+  assert.equal(api.validConfigure({...state,steps:[...steps.slice(0,6),{key:'ready',status:'loading'}]}),false);
+});
+
+test('configure RPC rejects legacy database response declaring fake production-ready',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_key'};
   const steps=['company','workflow','product','batch','dpp','qr','ready'].map(key=>({key,status:'done'}));
-  assert.equal(api.validConfigure({
-    organization_id:ORG,status:'configured',revision:1,
-    configured_at:'2026-10-07T03:00:00.000Z',steps
-  }),true);
-  steps[6]={key:'ready',status:'loading'};
-  assert.equal(api.validConfigure({
-    organization_id:ORG,status:'configured',revision:1,
-    configured_at:'2026-10-07T03:00:00.000Z',steps
-  }),false);
+  await assert.rejects(
+    ()=>api.rpc('dpp_api_manufacturer_onboarding_configure',{},'Bearer real-user',env,
+      async()=>({ok:true,json:async()=>({
+        organization_id:ORG,status:'configured',revision:2,
+        configured_at:'2026-10-07T03:00:00.000Z',steps
+      })})),
+    e=>e.status===502&&e.publicCode==='UPSTREAM_ERROR'
+  );
+});
+
+test('configure RPC accepts truthfully pending manufacturing after 8/8',async()=>{
+  const env={SUPABASE_URL:'https://example.supabase.co',DPP_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_key'};
+  const keys=['company','workflow','product','batch','dpp','qr','ready'];
+  const steps=keys.map((key,index)=>({key,status:index===0?'done':'pending'}));
+  const data=await api.rpc('dpp_api_manufacturer_onboarding_configure',{},'Bearer real-user',env,
+    async()=>({ok:true,json:async()=>({
+      organization_id:ORG,status:'configured',revision:2,
+      configured_at:'2026-10-07T03:00:00.000Z',steps
+    })}));
+  assert.equal(data.steps.find(step=>step.key==='ready').status,'pending');
 });
 
 test('RPC forwards bearer token and exact answer payload',async()=>{

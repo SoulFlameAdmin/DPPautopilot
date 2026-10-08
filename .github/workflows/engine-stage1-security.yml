@@ -1,0 +1,39 @@
+name: DPP Stage1 Engine Regression
+on:
+  push:
+    branches: [mitko/dpp-stability-engine]
+  pull_request:
+    paths:
+      - 'tests/engine/**'
+      - 'tools/engine/**'
+      - 'supabase/migrations/20261008131700_dpp_capacity_update_anon_execute_revoke.sql'
+      - 'supabase/migrations/20261008131800_dpp_onboarding_truthful_progress.sql'
+      - 'api/manufacturer-onboarding.js'
+      - 'tests/api/manufacturer-onboarding.test.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-engine-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests/engine -p 'test_*.py' -v
+      - name: Verify manufacturer onboarding API tests
+        run: node --test tests/api/manufacturer-onboarding.test.cjs
+      - name: Verify active-only QR and revocation regression
+        run: node --test tests/api/qr.test.cjs
+      - name: Generate read-only C04 migration gap diagnostics (not release approval)
+        run: python tools/engine/dpp_migration_preflight.py --out artifacts/dpp-c04-readonly-preflight.json
+      - name: Archive migration gap diagnostics
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dpp-c04-nonrelease-gap-diagnostic
+          path: artifacts/dpp-c04-readonly-preflight.json
+          if-no-files-found: error
+

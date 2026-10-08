@@ -123,7 +123,9 @@ async function handler(req, res) {
   const download = req.query && String(req.query.download || '') === '1';
   res.statusCode = 200;
   res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+  // Active-only QR availability is a revocable status decision; do not cache
+  // prior ACTIVE SVG responses across a later DRAFT/suspend/revoke transition.
+  res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Content-Disposition', (download ? 'attachment' : 'inline') + '; filename="dpp-passport-qr.svg"');
   res.setHeader('X-DPP-Carrier', 'qr');
   res.setHeader('X-DPP-Identifier', identifier);

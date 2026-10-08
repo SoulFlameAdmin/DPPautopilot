@@ -71,6 +71,7 @@ test('GET returns SVG and exact canonical target header',async()=>{
     assert.equal(res.headers['x-dpp-carrier'],'qr');
     assert.equal(res.headers['x-dpp-identifier'],'BAT-001');
     assert.equal(res.headers['x-dpp-target'],'https://dpp.example/passport?identifier=BAT-001&carrier=qr');
+    assert.equal(res.headers['cache-control'],'no-store');
     assert.match(res.body,/^<svg\b/);
   } finally {
     restoreFetch();
@@ -120,5 +121,78 @@ test('different battery identifiers produce different canonical targets and diff
     restoreFetch();
     if(old===undefined) delete process.env.DPP_PUBLIC_ORIGIN;
     else process.env.DPP_PUBLIC_ORIGIN=old;
+  }
+});
+
+test('DRAFT and revoked passports never render public QR SVG',async()=>{
+  const oldFetch=global.fetch, oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY='anon-key';
+  let status='draft';
+  global.fetch=async()=>({ok:true,status:200,json:async()=>({
+    kind:'unavailable',status,unique_identifier:'BAT-SECURITY-1'
+  })});
+  try{
+    for(const next of ['draft','suspended','retired','revoked','replaced']){
+      status=next;
+      const res=makeRes();
+      await handler(makeReq('GET',{identifier:'BAT-SECURITY-1'}),res);
+      assert.equal(res.statusCode,404,next);
+      assert.equal(JSON.parse(res.body).error.code,'PUBLIC_PASSPORT_NOT_FOUND');
+      assert.doesNotMatch(res.body,/<svg\b/);
+      assert.equal(res.headers['cache-control'],'no-store');
+    }
+  }finally{
+    global.fetch=oldFetch;
+    if(oldUrl===undefined)delete process.env.SUPABASE_URL;else process.env.SUPABASE_URL=oldUrl;
+    if(oldKey===undefined)delete process.env.SUPABASE_ANON_KEY;else process.env.SUPABASE_ANON_KEY=oldKey;
+  }
+});
+
+test('ACTIVE resolver response for a different battery identifier is denied',async()=>{
+  const oldFetch=global.fetch,oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY='anon-key';
+  global.fetch=async()=>({ok:true,status:200,json:async()=>({
+    kind:'active',status:'active',unique_identifier:'BAT-SOMEONE-ELSE'
+  })});
+  try{
+    const response=makeRes();
+    await handler(makeReq('GET',{identifier:'BAT-REQUESTED'}),response);
+    assert.equal(response.statusCode,404);
+    assert.equal(JSON.parse(response.body).error.code,'PUBLIC_PASSPORT_NOT_FOUND');
+  }finally{
+    global.fetch=oldFetch;
+    if(oldUrl===undefined)delete process.env.SUPABASE_URL;else process.env.SUPABASE_URL=oldUrl;
+    if(oldKey===undefined)delete process.env.SUPABASE_ANON_KEY;else process.env.SUPABASE_ANON_KEY=oldKey;
+  }
+});
+
+test('same identifier retains same printed QR target after passport update',async()=>{
+  const oldFetch=global.fetch,oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
+  const oldOrigin=process.env.DPP_PUBLIC_ORIGIN;
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.DPP_PUBLIC_ORIGIN='https://dpp.example';
+  let revision=1;
+  global.fetch=async()=>({ok:true,status:200,json:async()=>({
+    kind:'active',status:'active',unique_identifier:'BAT-PERSIST-0001',
+    public_payload:{revision}
+  })});
+  try{
+    const first=makeRes();await handler(makeReq('GET',{identifier:'BAT-PERSIST-0001'}),first);
+    revision=2;
+    const second=makeRes();await handler(makeReq('GET',{identifier:'BAT-PERSIST-0001'}),second);
+    assert.equal(first.statusCode,200);
+    assert.equal(second.statusCode,200);
+    assert.equal(first.headers['x-dpp-target'],second.headers['x-dpp-target']);
+    assert.equal(first.body,second.body);
+    assert.equal(first.headers['cache-control'],'no-store');
+    assert.equal(second.headers['cache-control'],'no-store');
+  }finally{
+    global.fetch=oldFetch;
+    if(oldUrl===undefined)delete process.env.SUPABASE_URL;else process.env.SUPABASE_URL=oldUrl;
+    if(oldKey===undefined)delete process.env.SUPABASE_ANON_KEY;else process.env.SUPABASE_ANON_KEY=oldKey;
+    if(oldOrigin===undefined)delete process.env.DPP_PUBLIC_ORIGIN;else process.env.DPP_PUBLIC_ORIGIN=oldOrigin;
   }
 });
