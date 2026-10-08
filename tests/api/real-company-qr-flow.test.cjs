@@ -8,6 +8,8 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'../..');
 const html=fs.readFileSync(path.join(root,'live/manufacturer.html'),'utf8');
 const dashboard=fs.readFileSync(path.join(root,'assets/csp/manufacturer-inline-1.js'),'utf8');
+const entry=fs.readFileSync(path.join(root,'assets/csp/manufacturer-entry.js'),'utf8');
+const detailHardening=fs.readFileSync(path.join(root,'assets/csp/manufacturer-detail-hardening.js'),'utf8');
 const ops=fs.readFileSync(path.join(root,'assets/csp/manufacturer-ops-inline-1.js'),'utf8');
 const passportApi=fs.readFileSync(path.join(root,'api/passport.js'),'utf8');
 const carriersApi=fs.readFileSync(path.join(root,'api/carriers.js'),'utf8');
@@ -52,6 +54,24 @@ test('technical pilot binds QR and exposes print\/scan path',()=>{
   assert.match(html,/Bind QR \+ Print selected/);
   assert.match(ops,/\$\("#printSelected"\)\.addEventListener/);
   assert.match(ops,/printPassports\(selectedPassports\(\),\{bind:true\}\)/);
+});
+
+test('DRAFT passport cannot assign or load QR before ACTIVE state',()=>{
+  const hardeningPos=entry.indexOf('/assets/csp/manufacturer-detail-hardening.js');
+  const opsPos=entry.indexOf('/assets/csp/manufacturer-ops-inline-1.js');
+  assert.ok(hardeningPos>=0&&opsPos>hardeningPos,'detail hardening must load before operations bundle');
+  assert.match(detailHardening,/Object\.defineProperty\(qr,"src"/);
+  assert.match(detailHardening,/if\(!active\(\)\)/);
+  assert.match(detailHardening,/this\.removeAttribute\("src"\)/);
+  assert.match(detailHardening,/QR available after activation/);
+});
+
+test('selected DPP detail refreshes passport-specific capacity from public_payload',()=>{
+  assert.match(detailHardening,/\/api\/passport\?id=/);
+  assert.match(detailHardening,/full\?\.public_payload\?\.model\?\.rated_capacity_ah/);
+  assert.match(detailHardening,/selectedPassportId\(\)!==passportId/);
+  assert.match(detailHardening,/capacityNode\.textContent=value\+" Ah"/);
+  assert.match(detailHardening,/capacityInput&&active\(\)/);
 });
 
 test('LMT remains separated from technical pilot shortcut',()=>{
