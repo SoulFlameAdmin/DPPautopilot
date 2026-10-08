@@ -167,3 +167,32 @@ test('ACTIVE resolver response for a different battery identifier is denied',asy
     if(oldKey===undefined)delete process.env.SUPABASE_ANON_KEY;else process.env.SUPABASE_ANON_KEY=oldKey;
   }
 });
+
+test('same identifier retains same printed QR target after passport update',async()=>{
+  const oldFetch=global.fetch,oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
+  const oldOrigin=process.env.DPP_PUBLIC_ORIGIN;
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.DPP_PUBLIC_ORIGIN='https://dpp.example';
+  let revision=1;
+  global.fetch=async()=>({ok:true,status:200,json:async()=>({
+    kind:'active',status:'active',unique_identifier:'BAT-PERSIST-0001',
+    public_payload:{revision}
+  })});
+  try{
+    const first=makeRes();await handler(makeReq('GET',{identifier:'BAT-PERSIST-0001'}),first);
+    revision=2;
+    const second=makeRes();await handler(makeReq('GET',{identifier:'BAT-PERSIST-0001'}),second);
+    assert.equal(first.statusCode,200);
+    assert.equal(second.statusCode,200);
+    assert.equal(first.headers['x-dpp-target'],second.headers['x-dpp-target']);
+    assert.equal(first.body,second.body);
+    assert.equal(first.headers['cache-control'],'no-store');
+    assert.equal(second.headers['cache-control'],'no-store');
+  }finally{
+    global.fetch=oldFetch;
+    if(oldUrl===undefined)delete process.env.SUPABASE_URL;else process.env.SUPABASE_URL=oldUrl;
+    if(oldKey===undefined)delete process.env.SUPABASE_ANON_KEY;else process.env.SUPABASE_ANON_KEY=oldKey;
+    if(oldOrigin===undefined)delete process.env.DPP_PUBLIC_ORIGIN;else process.env.DPP_PUBLIC_ORIGIN=oldOrigin;
+  }
+});
