@@ -1,45 +1,84 @@
-// Regression for PR #297: unsaved capacity must survive blur and late API responses.
-// Run: node tests/unit/test_manufacturer_capacity_blur.js
-const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const vm = require("node:vm");
-const source = fs.readFileSync("assets/csp/manufacturer-detail-hardening.js", "utf8");
-const listeners = {};
-const capacity = {value:"101", addEventListener(type,fn){listeners[type]=fn;}};
-const status = {textContent:"ACTIVE"};
-const battery = {textContent:"battery-1"};
-const label = {textContent:""};
-const row = {dataset:{passportId:"passport-A"}};
-const qr = {hidden:false,removeAttribute(){},closest(){return {querySelector(){return {textContent:""};}}}};
-const document = {
-  activeElement:null,
-  querySelector(s){return s.includes("passport-rows")?row:null;},
-  addEventListener(){},
-};
-const nodes = {"#detailQrImage":qr,"#detailStatus":status,"#detailBatteryId":battery,
-  "#detailFieldCapacity":label,"#detailPilotCapacity":capacity};
-document.querySelector = s => nodes[s] || (s.includes("passport-rows")?row:null);
-const pending=[];
-const context = {document,sessionStorage:{getItem(){return JSON.stringify({access_token:"test"});}},
-  localStorage:{getItem(){return null;}}, HTMLImageElement:function(){},
-  MutationObserver:class {observe(){}},queueMicrotask(){},setTimeout(){},
-  fetch(){return new Promise(resolve=>pending.push(resolve));}};
-context.HTMLImageElement.prototype={};
-vm.runInNewContext(source,context);
-async function tick(){await Promise.resolve();await Promise.resolve();await Promise.resolve();}
-(async()=>{
-  // Trigger selection request via the registered click callback, with immediate timer.
-  // Source exposes no test hook, so invoke its sync function inside the VM.
-  const sync=vm.runInNewContext("syncPassportSpecificDetail",context);
-  const request=sync();
-  capacity.value="125";listeners.input();document.activeElement=null;
-  pending.shift()({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:101}}}})});
+'use strict';
+// Regression tests execute the actual production input listener and async sync function.
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const source = fs.readFileSync(path.join(__dirname, '../../assets/csp/manufacturer-detail-hardening.js'), 'utf8');
+const trackStart = source.indexOf('function trackPassportSelection(){');
+const accessStart = source.indexOf('function accessToken(){', trackStart);
+const syncStart = source.indexOf('async function syncPassportSpecificDetail(){');
+const syncEnd = source.indexOf('\nif(qrState)qrState.id', syncStart);
+assert.ok(trackStart >= 0 && accessStart > trackStart && syncStart > accessStart && syncEnd > syncStart,
+  'actual production listener and async function must be present');
+
+function harness({focused = false} = {}) {
+  let id = 'P-001';
+  let onInput;
+  const input = {
+    value: '101',
+    addEventListener(type, handler) { if (type === 'input') onInput = handler; }
+  };
+  const label = {textContent: ''};
+  const document = {activeElement: focused ? input : null};
+  const pending = [];
+  const factory = new Function(
+    'selectedPassportId', 'accessToken', 'setQrState', 'fetch',
+    'capacityNode', 'capacityInput', 'active', 'document',
+    'let requestVersion=0;let trackedPassportId="";let dirtyCapacityPassportId="";' +
+      source.slice(trackStart, accessStart) + source.slice(syncStart, syncEnd) +
+      ';return syncPassportSpecificDetail;'
+  );
+  const sync = factory(
+    () => id, () => 'test-token', () => {},
+    () => new Promise(resolve => pending.push(resolve)),
+    label, input, () => true, document
+  );
+  assert.equal(typeof onInput, 'function', 'real input event listener must register');
+  return {
+    input, label, pending, sync, document,
+    edit(value) { input.value = value; onInput(); },
+    setId(value) { id = value; },
+    respond(value) {
+      const resolve = pending.shift();
+      assert.ok(resolve, 'expected a pending API response');
+      resolve({ok: true, json: async () => ({data: {public_payload: {model: {rated_capacity_ah: value}}}})});
+    }
+  };
+}
+
+test('late 101 Ah API response does not overwrite unsaved 125 Ah after blur', async () => {
+  const h = harness({focused: true});
+  const request = h.sync();
+  h.edit('125');
+  h.document.activeElement = null;
+  h.respond(101);
   await request;
-  assert.equal(capacity.value,"125","late response must not erase unsaved edit after blur");
-  row.dataset.passportId="passport-B";
-  const request2=sync();
-  pending.shift()({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:90}}}})});
-  await request2;
-  assert.equal(capacity.value,"90","switching passport resets dirty guard");
-  console.log("PASS: blur race and passport-switch reset");
-})().catch(e=>{console.error(e);process.exitCode=1;});
+  assert.equal(h.label.textContent, '101 Ah');
+  assert.equal(h.input.value, '125');
+});
+
+test('changing selected passport ignores stale response and accepts new 90 Ah', async () => {
+  const h = harness();
+  const old = h.sync();
+  h.edit('125');
+  h.setId('P-002');
+  const fresh = h.sync();
+  h.respond(101);
+  await old;
+  assert.equal(h.input.value, '125', 'stale P-001 response must not update P-002');
+  h.respond(90);
+  await fresh;
+  assert.equal(h.input.value, '90');
+  assert.equal(h.label.textContent, '90 Ah');
+});
+
+test('untouched, unfocused field hydrates from selected passport', async () => {
+  const h = harness();
+  const request = h.sync();
+  h.respond(101);
+  await request;
+  assert.equal(h.input.value, '101');
+  assert.equal(h.label.textContent, '101 Ah');
+});
