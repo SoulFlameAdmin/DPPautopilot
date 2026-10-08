@@ -1,5 +1,5 @@
 # SOULFLAME DPP — STAGE 1 / QR + CROSS-TENANT INTEGRITY CHECKPOINT
-**2026-10-08 21:00 Europe/Sofia (approx.) — reviewed exact GitHub test run; this document is an evidence overlay only.**
+**2026-10-08 (Europe/Sofia) — reviewed exact GitHub test run; this document is an evidence overlay only.**
 
 ## Source and ownership
 Repo `SoulFlameAdmin/DPPautopilot`, branch `mitko/dpp-stability-engine`, draft PR #293. No merge, no production deployment, no live SQL writes. Vercel remediation deferred per owner.
