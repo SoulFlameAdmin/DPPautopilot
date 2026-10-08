@@ -134,3 +134,65 @@ test('async passport readback initializes unfocused capacity and ignores stale s
   await pending;
   assert.equal(delayed.input.value,'125');
 });
+
+function pilotUpdateRaceHarness({returnWrongIdentity=false}={}){
+  const start=detailOps.indexOf('async function saveSelectedPassportPilotUpdate(){');
+  const end=detailOps.indexOf('const detailSavePilotUpdate=',start);
+  assert.ok(start>=0&&end>start,'actual save function must be present');
+  const a={passport_id:'PASS-A',status:'active',unique_identifier:'BAT-A'};
+  const b={passport_id:'PASS-B',status:'active',unique_identifier:'BAT-B'};
+  const nodes=new Map([
+    ['#detailPilotCapacity',{value:'125'}],
+    ['#detailSavePilotUpdate',{disabled:false}],
+    ['#detailEditResult',{textContent:'',className:''}]
+  ]);
+  const $=name=>nodes.get(name);
+  const requests=[];
+  let resolveGet;
+  const api=async(path,options)=>{
+    requests.push({path,options});
+    if(options?.method==='PATCH')return {data:{passport_id:'PASS-A'}};
+    return new Promise(resolve=>{resolveGet=resolve;});
+  };
+  let selectAfterLoad=[];
+  const factory=new Function('$','canWrite','setText','api','loadBase','setDetail',
+    'let passports=[];let selectedPassport={passport_id:"PASS-A",status:"active",unique_identifier:"BAT-A"};'+
+    detailOps.slice(start,end)+
+    ';return {save:saveSelectedPassportPilotUpdate,'+
+    'select:(p)=>{selectedPassport=p;},'+
+    'selected:()=>selectedPassport,passports:(ps)=>{passports=ps;}};');
+  let harness;
+  const reload=async()=>{harness.passports([a,b]);};
+  harness=factory($,()=>true,(el,msg,kind)=>{el.textContent=msg;el.kind=kind;},
+    api,reload,p=>{selectAfterLoad.push(p.passport_id);harness.select(p)});
+  return {harness,requests,nodes,a,b,getRespond(){
+      assert.equal(typeof resolveGet,'function');
+      resolveGet({data:{passport_id:returnWrongIdentity?'PASS-B':'PASS-A',updated_at:'2026-10-08T21:00:00Z'}});
+    },selectAfterLoad};
+}
+
+test('pilot PATCH cannot steal selection or attribute response to another DPP after async GET',async()=>{
+  const h=pilotUpdateRaceHarness();
+  const saving=h.harness.save();
+  h.harness.select(h.b); // user switched to another passport while first GET was pending
+  h.getRespond();
+  await saving;
+  assert.equal(h.requests.length,2);
+  assert.equal(h.requests[0].path,'/api/passport?id=PASS-A');
+  assert.equal(h.requests[1].options.body.id,'PASS-A');
+  assert.equal(h.requests[1].options.body.capacity_ah,125);
+  assert.equal(h.harness.selected().passport_id,'PASS-B');
+  assert.deepEqual(h.selectAfterLoad,[]);
+  assert.match(h.nodes.get('#detailEditResult').textContent,/UPDATED · BAT-A/);
+  assert.match(h.nodes.get('#detailEditResult').textContent,/Currently viewing a different passport/);
+});
+
+test('pilot PATCH refuses mismatched identity from prior detail GET before any write',async()=>{
+  const h=pilotUpdateRaceHarness({returnWrongIdentity:true});
+  const saving=h.harness.save();
+  h.getRespond();
+  await saving;
+  assert.equal(h.requests.length,1,'wrong passport detail must fail before PATCH');
+  assert.equal(h.nodes.get('#detailEditResult').kind,'bad');
+  assert.match(h.nodes.get('#detailEditResult').textContent,/identity changed/);
+});
