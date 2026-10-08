@@ -56,3 +56,43 @@ test('selected DPP capacity never falls back to different master SKU capacity',(
   assert.match(detailOps,/priorPassportId!==/);
   assert.match(detailOps,/priorPassportStatus!==/);
 });
+
+function selectedDetailHarness(){
+  const nodes=new Map();
+  const el=k=>{if(!nodes.has(k))nodes.set(k,{textContent:'',value:'',disabled:false,href:'#',hidden:true,src:'',removeAttribute(){this.src='';}});return nodes.get(k)};
+  const start=detailOps.indexOf('function setDetail(p){');
+  const end=detailOps.indexOf('async function saveSelectedPassportPilotUpdate()',start);
+  assert.ok(start>=0&&end>start);
+  const create=new Function('document','itemById','itemModel','activeOrg','fmt','safeText','canWrite','$',
+    'let selectedPassport=null;'+detailOps.slice(start,end)+';return setDetail');
+  const set=create({querySelectorAll:()=>[]},()=>({model_id:'m'}),()=>({
+    rated_capacity_ah:100,canonical_data:{},model_identifier:'SKU',category:'industrial'
+  }),{name:'Test company'},()=>'',x=>String(x),()=>true,el);
+  return {set,el};
+}
+
+test('real selected-DPP function: DRAFT never requests QR, ACTIVE uses its own 101Ah',()=>{
+  const h=selectedDetailHarness();
+  h.set({passport_id:'P1',battery_item_id:'B1',unique_identifier:'BAT-1',status:'draft'});
+  assert.equal(h.el('#detailQrImage').src,'');
+  assert.equal(h.el('#detailQrImage').hidden,true);
+  assert.equal(h.el('#detailPublicLink').href,'#');
+  h.set({passport_id:'P1',battery_item_id:'B1',unique_identifier:'BAT-1',status:'active',
+    public_payload:{model:{rated_capacity_ah:101}}});
+  assert.equal(h.el('#detailQrImage').src,'/api/qr?identifier=BAT-1');
+  assert.equal(h.el('#detailFieldCapacity').textContent,'101 Ah');
+  assert.equal(h.el('#detailPilotCapacity').value,'101');
+});
+
+test('real selected-DPP function: switching passports cannot copy previous edit capacity',()=>{
+  const h=selectedDetailHarness();
+  h.set({passport_id:'P1',battery_item_id:'B1',unique_identifier:'BAT-1',status:'active',
+    public_payload:{model:{rated_capacity_ah:101}}});
+  h.el('#detailPilotCapacity').value='120';
+  h.set({passport_id:'P2',battery_item_id:'B2',unique_identifier:'BAT-2',status:'active'});
+  assert.equal(h.el('#detailPilotCapacity').value,'');
+  assert.equal(h.el('#detailFieldCapacity').textContent,'Verifying passport capacity…');
+  h.set({passport_id:'P3',battery_item_id:'B3',unique_identifier:'BAT-3',status:'draft'});
+  assert.equal(h.el('#detailQrImage').src,'');
+  assert.equal(h.el('#detailPrintButton').disabled,true);
+});
