@@ -164,6 +164,7 @@ begin
       'dpp_api_supplier_reminders_list(uuid)',
       'dpp_api_suppliers_list()',
       'dpp_api_technical_pilot_publish(uuid,jsonb,jsonb)',
+      'dpp_api_technical_pilot_update_capacity(uuid,numeric,timestamp with time zone)',
       'dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)'
     );
 
@@ -236,6 +237,7 @@ begin
       ('dpp_api_passports_list(integer)'),
       ('dpp_api_scooter_passport_transition(uuid,text,text,text,text,timestamp with time zone)'),
       ('dpp_api_technical_pilot_publish(uuid,jsonb,jsonb)'),
+      ('dpp_api_technical_pilot_update_capacity(uuid,numeric,timestamp with time zone)'),
       ('dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)')
   )
   select string_agg(r.signature,', ' order by r.signature)
