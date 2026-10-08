@@ -123,3 +123,28 @@ test('different battery identifiers produce different canonical targets and diff
     else process.env.DPP_PUBLIC_ORIGIN=old;
   }
 });
+
+test('DRAFT and revoked passports never render public QR SVG',async()=>{
+  const oldFetch=global.fetch, oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_ANON_KEY;
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY='anon-key';
+  let status='draft';
+  global.fetch=async()=>({ok:true,status:200,json:async()=>({
+    kind:'unavailable',status,unique_identifier:'BAT-SECURITY-1'
+  })});
+  try{
+    for(const next of ['draft','suspended','retired','revoked','replaced']){
+      status=next;
+      const res=makeRes();
+      await handler(makeReq('GET',{identifier:'BAT-SECURITY-1'}),res);
+      assert.equal(res.statusCode,404,next);
+      assert.equal(JSON.parse(res.body).error.code,'PUBLIC_PASSPORT_NOT_FOUND');
+      assert.doesNotMatch(res.body,/<svg\b/);
+      assert.equal(res.headers['cache-control'],'no-store');
+    }
+  }finally{
+    global.fetch=oldFetch;
+    if(oldUrl===undefined)delete process.env.SUPABASE_URL;else process.env.SUPABASE_URL=oldUrl;
+    if(oldKey===undefined)delete process.env.SUPABASE_ANON_KEY;else process.env.SUPABASE_ANON_KEY=oldKey;
+  }
+});
