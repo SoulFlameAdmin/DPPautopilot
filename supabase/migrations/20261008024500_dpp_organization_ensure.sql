@@ -14,7 +14,9 @@ declare
   v_user uuid;
   v_active uuid;
   v_count integer;
-  v_org public.dpp_organizations%rowtype;
+  v_org_id uuid;
+  v_org_name text;
+  v_org_slug text;
   v_role text;
   v_created jsonb;
 begin
@@ -30,25 +32,23 @@ begin
     raise exception 'organization slug is invalid' using errcode='DP501';
   end if;
 
-  -- Same-user onboarding is a critical section. A second browser tab waits here,
-  -- then observes the membership created by the first tab instead of creating another.
   perform pg_catalog.pg_advisory_xact_lock(
-    pg_catalog.hashtextextended('dpp_org_ensure:'||v_user::text,0)
+    pg_catalog.hashtextextended('dpp_org_ensure:'||v_user::text,0::bigint)
   );
 
   v_active:=public.dpp_active_organization_id();
   if v_active is not null then
-    select o,m.role
-      into v_org,v_role
+    select o.id,o.name,o.slug,m.role
+      into v_org_id,v_org_name,v_org_slug,v_role
     from public.dpp_organization_members m
     join public.dpp_organizations o on o.id=m.organization_id
     where m.user_id=v_user and m.organization_id=v_active;
 
     if found then
       return jsonb_build_object(
-        'organization_id',v_org.id,
-        'name',v_org.name,
-        'slug',v_org.slug,
+        'organization_id',v_org_id,
+        'name',v_org_name,
+        'slug',v_org_slug,
         'role',v_role,
         'active',true,
         'idempotent_replay',true
@@ -61,19 +61,19 @@ begin
   where m.user_id=v_user;
 
   if v_count=1 then
-    select o,m.role
-      into v_org,v_role
+    select o.id,o.name,o.slug,m.role
+      into v_org_id,v_org_name,v_org_slug,v_role
     from public.dpp_organization_members m
     join public.dpp_organizations o on o.id=m.organization_id
     where m.user_id=v_user
     limit 1;
 
-    perform public.dpp_set_active_organization(v_org.id);
+    perform public.dpp_set_active_organization(v_org_id);
 
     return jsonb_build_object(
-      'organization_id',v_org.id,
-      'name',v_org.name,
-      'slug',v_org.slug,
+      'organization_id',v_org_id,
+      'name',v_org_name,
+      'slug',v_org_slug,
       'role',v_role,
       'active',true,
       'idempotent_replay',true
