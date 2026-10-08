@@ -4,6 +4,7 @@ const { mapDatabaseError: mapSharedDatabaseError } = require('./_errors.js');
 const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
+const { getSupabaseConfig } = require('./_supabase_config.js');
 
 const CATEGORIES = new Set([
   'portable',
@@ -92,13 +93,7 @@ function upstreamInvalidJsonError() {
 }
 
 async function rpc(name, payload, authorization, env = process.env, fetchImpl = fetch, timeoutMs = DEFAULT_RPC_TIMEOUT_MS) {
-  const base = env.DPP_SUPABASE_URL || env.SUPABASE_URL;
-  const key = env.DPP_SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY;
-  if (!base || !key) {
-    const error = new Error('SERVER_CONFIGURATION_MISSING');
-    error.status = 500;
-    throw error;
-  }
+  const {base,key}=getSupabaseConfig(env);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);

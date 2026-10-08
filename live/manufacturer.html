@@ -273,8 +273,12 @@
                   <label><span>Serial start</span><input id="batchSerialStart" type="number" min="0" step="1" value="1"></label>
                   <label><span>Serial width</span><input id="batchSerialWidth" type="number" min="1" max="12" step="1" value="6"></label>
                 </div>
-                <div class="actions"><button class="btn primary" id="batchProvision" type="button">Create batch DRAFT passports</button></div>
+                <div class="actions">
+                  <button class="btn primary" id="batchProvision" type="button">Create batch DRAFT passports</button>
+                  <button class="btn" id="activateBatchPilot" type="button">Activate this batch as TECHNICAL PILOT + QR</button>
+                </div>
                 <div class="result" id="batchResult" role="status" aria-live="polite">Select SKU and define the serial range. QR printing unlocks only after each passport is ACTIVE.</div>
+                <p class="muted"><strong>Pilot activation:</strong> keeps the same DPP identities, marks each passport <code>regulatory_compliance=false</code>, and binds a QR carrier. This is not regulatory certification.</p>
                 <div class="flow-next-row"><a class="btn" href="#csvImportProduction">Next · Add Batteries / Serials →</a></div>
               </article>
             </div>
@@ -345,6 +349,13 @@
               </dl>
               <div class="qr-wrap"><img id="detailQrImage" alt="Digital Product Passport QR"><small>Scan for Digital<br>Product Passport</small></div>
             </div>
+          </div>
+          <div class="passport-edit-box" id="detailPilotEdit">
+            <strong>Selected DPP update test</strong>
+            <p class="muted">Променя само избрания публичен TECHNICAL PILOT DPP. SKU моделът и отпечатаният QR остават същите.</p>
+            <label><span>Capacity (Ah)</span><input id="detailPilotCapacity" type="number" min="0.1" step="0.1" placeholder="101"></label>
+            <button class="btn primary" id="detailSavePilotUpdate" type="button">Save to this DPP</button>
+            <div class="result" id="detailEditResult" role="status" aria-live="polite">Select an ACTIVE passport.</div>
           </div>
           <div class="detail-actions">
             <a class="btn primary big" id="detailPublicLink" href="#" target="_blank" rel="noopener">↗ View Public Passport <span>→</span></a>

@@ -91,7 +91,52 @@ function setDetail(p){
  const qr=$("#detailQrImage"); if(p){qr.src="/api/qr?identifier="+encodeURIComponent(id);qr.hidden=false}else{qr.removeAttribute("src");qr.hidden=true}
  const pub=$("#detailPublicLink");pub.href=p?"/passport?identifier="+encodeURIComponent(id):"#";
  const print=$("#detailPrintButton");print.disabled=!p||p.status!=="active";
+ const editInput=$("#detailPilotCapacity"),editButton=$("#detailSavePilotUpdate"),editResult=$("#detailEditResult");
+ if(editInput)editInput.disabled=!p||p.status!=="active"||!canWrite();
+ if(editButton)editButton.disabled=!p||p.status!=="active"||!canWrite();
+ if(editResult)editResult.textContent=p&&p.status==="active"
+  ?"Selected "+p.unique_identifier+" · update keeps the same passport + QR."
+  :"Select an ACTIVE passport.";
 }
+async function saveSelectedPassportPilotUpdate(){
+ if(!canWrite())return;
+ if(!selectedPassport||selectedPassport.status!=="active"){
+  return setText($("#detailEditResult"),"Select an ACTIVE passport first.","bad");
+ }
+ const capacity=Number($("#detailPilotCapacity").value);
+ if(!Number.isFinite(capacity)||capacity<=0||capacity>100000){
+  return setText($("#detailEditResult"),"Enter a valid test capacity in Ah.","bad");
+ }
+ const button=$("#detailSavePilotUpdate");
+ button.disabled=true;
+ setText($("#detailEditResult"),"Updating "+selectedPassport.unique_identifier+" without changing its QR…");
+ try{
+  const full=(await api("/api/passport?id="+encodeURIComponent(selectedPassport.passport_id))).data;
+  const updated=(await api("/api/passport",{method:"PATCH",body:{
+   id:full.passport_id,
+   action:"update_technical_pilot",
+   capacity_ah:capacity,
+   expected_updated_at:full.updated_at
+  }})).data;
+  if(updated.passport_id!==full.passport_id)throw new Error("Passport identity changed unexpectedly.");
+  const sameIdentifier=selectedPassport.unique_identifier;
+  const samePassportId=full.passport_id;
+  await loadBase();
+  const current=passports.find(p=>p.passport_id===samePassportId);
+  if(current)setDetail(current);
+  setText($("#detailEditResult"),
+   "UPDATED · "+sameIdentifier+" · Capacity "+capacity+" Ah · same passport · same QR.",
+   "ok"
+  );
+ }catch(e){
+  setText($("#detailEditResult"),e.message,"bad");
+ }finally{
+  button.disabled=!canWrite()||!selectedPassport||selectedPassport.status!=="active";
+ }
+}
+const detailSavePilotUpdate=$("#detailSavePilotUpdate");
+if(detailSavePilotUpdate)detailSavePilotUpdate.addEventListener("click",saveSelectedPassportPilotUpdate);
+
 function syncSearchFields(source){
  const mirror=$("#passportSearchMirror");
  if(source===mirror)$("#passportSearch").value=mirror.value;
@@ -132,7 +177,9 @@ function renderPassports(){
   const item=itemById(p.battery_item_id),model=itemModel(item);
   const row=document.createElement("article");row.className="ops-row";row.dataset.passportId=p.passport_id;
   const c0=document.createElement("div");c0.className="ops-cell";
-  const check=document.createElement("input");check.type="checkbox";check.className="passport-print-check";check.dataset.itemId=p.battery_item_id;check.dataset.identifier=p.unique_identifier;check.disabled=p.status!=="active";c0.append(check);
+  const check=document.createElement("input");check.type="checkbox";check.className="passport-print-check";check.dataset.itemId=p.battery_item_id;check.dataset.identifier=p.unique_identifier;check.disabled=p.status!=="active";
+  check.addEventListener("change",()=>{if(check.checked)setDetail(p)});
+  c0.append(check);
   const c1=document.createElement("div");c1.className="ops-cell";const id=document.createElement("strong");id.textContent=p.unique_identifier;c1.append(id);
   const c2=document.createElement("div");c2.className="ops-cell muted";c2.textContent=model?.model_identifier||safeText(item?.model_id);
   const c3=document.createElement("div");c3.className="ops-cell muted";c3.textContent=activeOrg?.name||"—";

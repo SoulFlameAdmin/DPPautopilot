@@ -1,6 +1,7 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
 const STORAGE="dpp_company_session_v1";
+const GOOGLE_STORAGE="dpp_google_session_v1";
 const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
 let cfg=null,session=null,activeOrg=null,models=[],items=[],refreshing=null;
 
@@ -9,6 +10,27 @@ function readSession(){
   try{
     const value=JSON.parse(sessionStorage.getItem(STORAGE)||"null");
     if(value?.access_token){session=value;return true}
+  }catch{}
+  try{
+    const google=JSON.parse(localStorage.getItem(GOOGLE_STORAGE)||"null");
+    if(google?.access_token){
+      session={
+        access_token:google.access_token,
+        refresh_token:google.refresh_token||"",
+        expires_in:Math.max(60,Number(google.expires_at)?Number(google.expires_at)-Math.floor(Date.now()/1000):3600)
+      };
+      sessionStorage.setItem(STORAGE,JSON.stringify(session));
+    try{
+      const previous=JSON.parse(localStorage.getItem(GOOGLE_STORAGE)||"null")||{};
+      localStorage.setItem(GOOGLE_STORAGE,JSON.stringify({
+        ...previous,
+        access_token:session.access_token,
+        refresh_token:session.refresh_token||previous.refresh_token||"",
+        expires_at:Math.floor(Date.now()/1000)+(Number(session.expires_in)||3600)
+      }));
+    }catch{}
+      return true;
+    }
   }catch{}
   session=null;return false;
 }
@@ -68,6 +90,7 @@ function setMode(){
   $("#createModel").disabled=!write;
   $("#provisionBattery").disabled=!write;
   $("#batchProvision").disabled=!write;
+  const activateBatchPilot=$("#activateBatchPilot");if(activateBatchPilot)activateBatchPilot.disabled=!write;
   $("#modelIdentifier").disabled=!write;
   $("#manufacturerName").disabled=!write;
   $("#modelCategory").disabled=!write;
@@ -235,8 +258,8 @@ function lifecycleEditor(item){
 }
 function renderItems(){
   const host=$("#itemsList");host.replaceChildren();
-  $("#itemsCount").textContent=String(items.length);
-  $("#originalItemsCount").textContent=String(items.filter(i=>i.lifecycle_status==="original").length);
+  const itemsCount=$("#itemsCount"); if(itemsCount)itemsCount.textContent=String(items.length);
+  const originalItemsCount=$("#originalItemsCount"); if(originalItemsCount)originalItemsCount.textContent=String(items.filter(i=>i.lifecycle_status==="original").length);
   if(!items.length){const e=document.createElement("div");e.className="empty";e.textContent="Няма произведени battery items в активната фирма.";host.append(e);return}
   for(const item of items.slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))).slice(0,30)){
     const row=document.createElement("article");row.className="row";
@@ -259,11 +282,37 @@ function renderItems(){
     host.append(row);
   }
 }
+async function organizationRpc(name,payload={}){
+  if(!session?.access_token)throw new Error("Login required.");
+  const r=await fetch(cfg.supabaseUrl.replace(/\/$/,"")+"/rest/v1/rpc/"+name,{
+    method:"POST",
+    headers:{
+      apikey:cfg.publishableKey,
+      Authorization:"Bearer "+session.access_token,
+      "Content-Type":"application/json",
+      Accept:"application/json"
+    },
+    body:JSON.stringify(payload),
+    cache:"no-store"
+  });
+  const data=await r.json().catch(()=>null);
+  if(r.status===401&&await refreshSession())return organizationRpc(name,payload);
+  if(!r.ok)throw new Error(data?.message||data?.error||("HTTP "+r.status));
+  return data;
+}
 async function loadTenant(){
-  const orgs=(await api("/api/organizations")).data||[];
+  let orgs=await organizationRpc("dpp_api_organizations_list",{});
+  if(!Array.isArray(orgs))orgs=[];
   activeOrg=orgs.find(o=>o.active)||null;
+  if(!activeOrg&&orgs.length===1){
+    await organizationRpc("dpp_api_tenant_context_set",{p_organization_id:orgs[0].organization_id});
+    orgs=await organizationRpc("dpp_api_organizations_list",{});
+    if(!Array.isArray(orgs))orgs=[];
+    activeOrg=orgs.find(o=>o.active)||null;
+  }
   if(!activeOrg){
-    if(orgs.length)showGate("Има фирмено пространство, но няма активен tenant. Активирай го през Company Access.");
+    if(orgs.length>1)showGate("Има няколко фирмени пространства, но няма активен tenant. Избери workspace през Company Access.");
+    else if(orgs.length===1)showGate("Не успяхме да активираме единственото фирмено пространство. Опитай отново.");
     else showGate("Няма фирмено пространство. Създай company tenant през Company Access.");
     return false;
   }
@@ -493,6 +542,90 @@ async function provisionBattery(){
   }catch(e){setResult($("#provisionResult"),e.message,"bad")}
   finally{$("#provisionBattery").disabled=!canWrite()}
 }
+function currentBatchIdentifiers(){
+  const prefix=$("#batchPrefix").value.trim();
+  const quantity=Number($("#batchQuantity").value);
+  const serialStart=Number($("#batchSerialStart").value);
+  const serialWidth=Number($("#batchSerialWidth").value);
+  if(!prefix||!Number.isInteger(quantity)||quantity<1||quantity>250||
+     !Number.isSafeInteger(serialStart)||serialStart<0||
+     !Number.isInteger(serialWidth)||serialWidth<1||serialWidth>12){
+    return [];
+  }
+  const out=[];
+  for(let i=0;i<quantity;i++){
+    out.push(prefix+String(serialStart+i).padStart(serialWidth,"0"));
+  }
+  return out;
+}
+async function activateCurrentBatchTechnicalPilot(){
+  if(!canWrite())return;
+  const button=$("#activateBatchPilot");
+  const model=models.find(m=>m.id===$("#batchModel").value);
+  if(!model)return setResult($("#batchResult"),"Избери SKU / модел за batch activation.","bad");
+  if(model.category==="light_means_of_transport"){
+    return setResult($("#batchResult"),"LMT batch не може да се активира като technical pilot. Използвай strict readiness activation.","bad");
+  }
+  const identifiers=currentBatchIdentifiers();
+  if(!identifiers.length)return setResult($("#batchResult"),"Въведи валиден serial range за batch activation.","bad");
+
+  button.disabled=true;
+  setResult($("#batchResult"),"Проверка на "+identifiers.length+" DRAFT паспорта за този batch…");
+  try{
+    const list=(await api("/api/passport?list=1&limit=500")).data||[];
+    const wanted=new Set(identifiers);
+    const batchPassports=list.filter(p=>wanted.has(p.unique_identifier));
+    const foundIds=new Set(batchPassports.map(p=>p.unique_identifier));
+    const missing=identifiers.filter(id=>!foundIds.has(id));
+    if(missing.length){
+      throw new Error("Липсват DPP записи за "+missing.length+" serial units: "+missing.slice(0,3).join(", ")+(missing.length>3?"…":""));
+    }
+
+    let activated=0,alreadyActive=0,qrReady=0;
+    for(let index=0;index<batchPassports.length;index++){
+      const p=batchPassports[index];
+      setResult($("#batchResult"),"Technical pilot activation "+(index+1)+"/"+batchPassports.length+" · "+p.unique_identifier+"…");
+      const item=items.find(i=>i.id===p.battery_item_id);
+      if(!item||item.model_id!==model.id){
+        throw new Error("Batch item/model mismatch for "+p.unique_identifier);
+      }
+      if(p.status==="active"){
+        alreadyActive++;
+        await ensurePilotQrCarrier(p.battery_item_id);
+        qrReady++;
+        continue;
+      }
+      if(p.status!=="draft"){
+        throw new Error(p.unique_identifier+" is "+p.status+"; only DRAFT/ACTIVE pilot passports are allowed.");
+      }
+      const full=(await api("/api/passport?id="+encodeURIComponent(p.passport_id))).data;
+      const published=(await api("/api/passport",{method:"POST",body:{
+        action:"publish_technical_pilot",
+        battery_item_id:p.battery_item_id,
+        public_payload:full.public_payload||{},
+        private_payload:full.private_payload||{}
+      }})).data;
+      if(published.passport_id!==p.passport_id||published.status!=="active"||published.regulatory_compliance!==false){
+        throw new Error("Unexpected technical pilot state for "+p.unique_identifier);
+      }
+      activated++;
+      await ensurePilotQrCarrier(p.battery_item_id);
+      qrReady++;
+    }
+
+    await loadData();
+    setResult(
+      $("#batchResult"),
+      "TECHNICAL PILOT READY · "+identifiers.length+" units · "+activated+" activated · "+alreadyActive+" already ACTIVE · "+qrReady+" QR carriers ready · regulatory_compliance=false. Следва: Select all ACTIVE → Print.",
+      "ok"
+    );
+    location.hash="printCenterProduction";
+  }catch(e){
+    setResult($("#batchResult"),e.message,"bad");
+  }finally{
+    button.disabled=!canWrite();
+  }
+}
 async function provisionBatch(){
   if(!canWrite())return;
   const model=models.find(m=>m.id===$("#batchModel").value);
@@ -591,5 +724,6 @@ $("#createModel").addEventListener("click",createModel);
 $("#publishTechnicalPilot").addEventListener("click",publishTechnicalPilot);
 $("#provisionBattery").addEventListener("click",provisionBattery);
 $("#batchProvision").addEventListener("click",provisionBatch);
+const activateBatchPilot=$("#activateBatchPilot");if(activateBatchPilot)activateBatchPilot.addEventListener("click",activateCurrentBatchTechnicalPilot);
 init().catch(e=>{document.body.dataset.manufacturerReady="false";showGate(e.message)});
 })();

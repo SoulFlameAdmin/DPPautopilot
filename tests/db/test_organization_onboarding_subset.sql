@@ -1,6 +1,5 @@
 -- M02/M03/M24 organization onboarding and membership-management precursor.
 -- Caller wraps in BEGIN/ROLLBACK.
-
 do $test$
 declare
   u_owner uuid := 'c1818181-8181-4181-8181-818181818181';
@@ -11,9 +10,11 @@ declare
   u_outsider uuid := 'c6868686-8686-4686-8686-868686868686';
   org_a uuid;
   org_b uuid;
+  org_ensure uuid;
   payload jsonb;
   members jsonb;
   seen boolean;
+  membership_count integer;
 begin
   if exists (
     select 1 from information_schema.columns
@@ -142,6 +143,63 @@ begin
      or members->0->>'organization_id'<>org_b::text
      or (members->0->>'active')::boolean is not true then
     raise exception 'M02 organization discovery leaked another tenant or lost active state';
+  end if;
+
+  -- P0 ensure: zero memberships creates exactly one owner tenant and marks it active.
+  perform set_config('request.jwt.claim.sub',u_extra::text,true);
+  payload:=public.dpp_api_organization_ensure('Ensure Org','ensure-org');
+  org_ensure:=(payload->>'organization_id')::uuid;
+  if payload->>'role'<>'owner'
+     or (payload->>'active')::boolean is not true
+     or (payload->>'idempotent_replay')::boolean is not false then
+    raise exception 'organization ensure initial create returned unexpected state: %',payload;
+  end if;
+  select count(*)::integer into membership_count
+  from public.dpp_organization_members where user_id=u_extra;
+  if membership_count<>1 then
+    raise exception 'organization ensure initial create expected one membership, got %',membership_count;
+  end if;
+
+  -- Replaying ensure must return the exact same tenant and never create a duplicate.
+  payload:=public.dpp_api_organization_ensure('Ignored Replay Name','ignored-replay-slug');
+  if (payload->>'organization_id')::uuid<>org_ensure
+     or (payload->>'idempotent_replay')::boolean is not true then
+    raise exception 'organization ensure replay did not return existing tenant: %',payload;
+  end if;
+  select count(*)::integer into membership_count
+  from public.dpp_organization_members where user_id=u_extra;
+  if membership_count<>1 then
+    raise exception 'organization ensure replay created duplicate membership/tenant';
+  end if;
+
+  -- One membership with no active context is unambiguous and must self-heal.
+  delete from public.dpp_user_tenant_context where user_id=u_extra;
+  payload:=public.dpp_api_organization_ensure('Ignored Recovery Name','ignored-recovery-slug');
+  if (payload->>'organization_id')::uuid<>org_ensure
+     or public.dpp_active_organization_id()<>org_ensure
+     or (payload->>'idempotent_replay')::boolean is not true then
+    raise exception 'organization ensure failed single-membership recovery: %',payload;
+  end if;
+
+  -- More than one membership with no active context is ambiguous: never guess.
+  insert into public.dpp_organization_members(organization_id,user_id,role)
+  values(org_b,u_extra,'viewer');
+  delete from public.dpp_user_tenant_context where user_id=u_extra;
+  seen:=false;
+  begin
+    perform public.dpp_api_organization_ensure('Must Not Create','must-not-create');
+  exception when sqlstate 'DP103' then seen:=true;
+  end;
+  if not seen then
+    raise exception 'organization ensure guessed among multiple memberships';
+  end if;
+  if public.dpp_active_organization_id() is not null then
+    raise exception 'organization ensure set tenant context after ambiguous membership error';
+  end if;
+  select count(*)::integer into membership_count
+  from public.dpp_organization_members where user_id=u_extra;
+  if membership_count<>2 then
+    raise exception 'organization ensure ambiguous path mutated membership count';
   end if;
 
   perform set_config('request.jwt.claim.sub',u_owner::text,true);

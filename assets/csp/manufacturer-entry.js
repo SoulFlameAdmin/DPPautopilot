@@ -1,5 +1,7 @@
 (()=>{"use strict";
 const EARLY_STORAGE="dpp_early_access_client_v1";
+const COMPANY_SESSION_KEY="dpp_company_session_v1";
+const GOOGLE_SESSION_KEY="dpp_google_session_v1";
 
 function loadScript(src){
   return new Promise((resolve,reject)=>{
@@ -70,9 +72,22 @@ function showEarlyAccess(client){
 }
 function companySession(){
   try{
-    const value=JSON.parse(sessionStorage.getItem("dpp_company_session_v1")||"null");
-    return value?.access_token?value:null;
-  }catch{return null}
+    const value=JSON.parse(sessionStorage.getItem(COMPANY_SESSION_KEY)||"null");
+    if(value?.access_token)return value;
+  }catch{}
+  try{
+    const google=JSON.parse(localStorage.getItem(GOOGLE_SESSION_KEY)||"null");
+    if(google?.access_token){
+      const value={
+        access_token:google.access_token,
+        refresh_token:google.refresh_token||"",
+        expires_in:Math.max(60,Number(google.expires_at)?Number(google.expires_at)-Math.floor(Date.now()/1000):3600)
+      };
+      sessionStorage.setItem(COMPANY_SESSION_KEY,JSON.stringify(value));
+      return value;
+    }
+  }catch{}
+  return null;
 }
 async function ensureOnboardingConfigured(){
   const active=companySession();
@@ -92,6 +107,7 @@ async function loadProductionDashboard(){
   if(!await ensureOnboardingConfigured())return;
   await loadScript("/assets/csp/manufacturer-inline-1.js");
   await loadScript("/vendor/xlsx.full.min.js");
+  await loadScript("/assets/csp/manufacturer-detail-hardening.js");
   await loadScript("/assets/csp/manufacturer-ops-inline-1.js");
 }
 

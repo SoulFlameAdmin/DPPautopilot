@@ -25,7 +25,7 @@ def main() -> None:
     for token in [
         'const STORAGE="dpp_company_session_v1"',
         'sessionStorage.getItem(STORAGE)',
-        'api("/api/organizations")',
+        'organizationRpc("dpp_api_organizations_list",{})',
         'api("/api/models")',
         'api("/api/items")',
         'api("/api/models",{method:"POST"',
@@ -38,7 +38,10 @@ def main() -> None:
     ]:
         require(token in js,f"manufacturer runtime missing: {token}")
 
-    require("localStorage" not in js,"manufacturer dashboard must not keep product data in localStorage")
+    require('GOOGLE_STORAGE="dpp_google_session_v1"' in js,
+            "manufacturer dashboard must restore auth from persistent Google session")
+    require('localStorage.setItem("models"' not in js and 'localStorage.setItem("items"' not in js,
+            "manufacturer dashboard must not keep product data in localStorage")
     require("?sample=1" not in html and "?sample=1" not in js,"manufacturer dashboard must not depend on demo/sample mode")
     require("innerHTML" not in js,"manufacturer dashboard must render backend values without innerHTML injection")
 

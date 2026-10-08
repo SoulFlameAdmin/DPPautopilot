@@ -116,10 +116,35 @@
   .quick-action:hover,.quick-action:focus-visible{transform:none}
 }
 @media print{
-  body>*{display:none!important}
-  .print-sheet{display:grid!important;grid-template-columns:repeat(2,1fr);gap:12mm;padding:8mm;background:white;color:black}
-  .print-label{break-inside:avoid;border:1px solid #222;border-radius:4mm;padding:5mm;display:grid;grid-template-columns:32mm 1fr;gap:5mm;align-items:center}
-  .print-label img{width:32mm;height:32mm}
-  .print-label strong{font-size:11pt;word-break:break-all}
-  .print-label small{display:block;margin-top:2mm;font-size:8pt}
+  @page{margin:8mm}
+  html,body{background:#fff!important}
+  body>.app-sidebar{display:none!important}
+  body>main.shell{display:block!important;margin:0!important;padding:0!important;width:auto!important;max-width:none!important}
+  body>main.shell>*:not(.print-sheet){display:none!important}
+  .print-sheet{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12mm;
+    padding:0;
+    margin:0;
+    width:100%;
+    background:#fff!important;
+    color:#000!important
+  }
+  .print-label{
+    break-inside:avoid;
+    page-break-inside:avoid;
+    border:1px solid #222;
+    border-radius:4mm;
+    padding:5mm;
+    display:grid!important;
+    grid-template-columns:32mm 1fr;
+    gap:5mm;
+    align-items:center;
+    background:#fff!important;
+    color:#000!important
+  }
+  .print-label img{display:block!important;width:32mm;height:32mm;object-fit:contain}
+  .print-label strong{display:block;font-size:11pt;word-break:break-all;color:#000!important}
+  .print-label small{display:block;margin-top:2mm;font-size:8pt;color:#000!important}
 }
