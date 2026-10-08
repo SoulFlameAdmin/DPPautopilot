@@ -109,7 +109,7 @@ function capacitySyncHarness({focused=false,resolver}={}){
   let currentId='P-001';
   const apiFetch=resolver|| (async()=>({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:101}}}})}));
   const init=new Function('selectedPassportId','accessToken','setQrState','fetch','capacityNode','capacityInput','active','document',
-    'let requestVersion=0;'+capacityHardening.slice(begin,end)+';return syncPassportSpecificDetail;');
+    'let requestVersion=0;let dirtyCapacityPassportId="";'+capacityHardening.slice(begin,end)+';return syncPassportSpecificDetail;');
   const sync=init(()=>currentId,()=>'test-token',()=>{},apiFetch,display,input,()=>true,document);
   return {sync,input,display,setId(value){currentId=value;}};
 }

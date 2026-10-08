@@ -9,9 +9,20 @@ const capacityInput=document.querySelector("#detailPilotCapacity");
 const qrWrap=qr?.closest(".qr-wrap");
 const qrState=qrWrap?.querySelector("small")||null;
 let requestVersion=0;
+let dirtyCapacityPassportId="";
+let trackedPassportId="";
 
 function active(){return String(statusNode?.textContent||"").trim().toUpperCase()==="ACTIVE";}
 function selectedPassportId(){return document.querySelector(".passport-rows .ops-row.selected")?.dataset?.passportId||"";}
+function trackPassportSelection(){
+  const id=selectedPassportId();
+  if(id!==trackedPassportId){trackedPassportId=id;dirtyCapacityPassportId="";}
+  return id;
+}
+capacityInput?.addEventListener("input",()=>{
+  const id=trackPassportSelection();
+  if(id)dirtyCapacityPassportId=id;
+});
 function accessToken(){
   try{const value=JSON.parse(sessionStorage.getItem(COMPANY_SESSION_KEY)||"null");if(value?.access_token)return value.access_token;}catch{}
   try{const value=JSON.parse(localStorage.getItem(GOOGLE_SESSION_KEY)||"null");if(value?.access_token)return value.access_token;}catch{}
@@ -74,7 +85,7 @@ async function syncPassportSpecificDetail(){
       if(capacityNode)capacityNode.textContent=value+" Ah";
       // Do not overwrite a user typing a new capacity while the asynchronous
       // passport-specific detail request returns. Submit remains an explicit action.
-      if(capacityInput&&active()&&document.activeElement!==capacityInput)
+      if(capacityInput&&active()&&document.activeElement!==capacityInput&&dirtyCapacityPassportId!==passportId)
         capacityInput.value=String(value);
     }
   }catch{}
@@ -86,7 +97,7 @@ const observer=new MutationObserver(()=>queueMicrotask(syncPassportSpecificDetai
 if(statusNode)observer.observe(statusNode,{childList:true,subtree:true});
 if(batteryNode)observer.observe(batteryNode,{childList:true,subtree:true});
 document.addEventListener("click",event=>{
-  if(event.target.closest(".passport-rows .ops-row"))setTimeout(syncPassportSpecificDetail,0);
+  if(event.target.closest(".passport-rows .ops-row")){dirtyCapacityPassportId="";trackedPassportId=selectedPassportId();setTimeout(syncPassportSpecificDetail,0);}
 });
 document.addEventListener("change",event=>{
   if(event.target.matches(".passport-print-check"))setTimeout(syncPassportSpecificDetail,0);
