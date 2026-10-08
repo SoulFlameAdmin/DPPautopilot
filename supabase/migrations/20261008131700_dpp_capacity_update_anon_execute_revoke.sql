@@ -7,7 +7,8 @@
 -- Before production promotion: verify bound project, backup/restore readiness,
 -- existing RPC signature and expected caller role under independent review.
 
-begin;
+-- Supabase runs each migration inside its own transaction; do not explicitly
+-- BEGIN/COMMIT here or risk prematurely closing the migration runner's transaction.
 
 do $guard$
 begin
@@ -40,4 +41,3 @@ begin
 end
 $assert$;
 
-commit;
