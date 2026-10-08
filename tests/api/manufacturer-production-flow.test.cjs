@@ -41,3 +41,18 @@ test('manufacturer dashboard safely recovers one inactive membership but never g
   assert.match(manufacturer,/if\(orgs\.length>1\)showGate/);
   assert.match(manufacturer,/няколко фирмени пространства/);
 });
+
+const detailOps=fs.readFileSync(path.join(__dirname,'../../assets/csp/manufacturer-ops-inline-1.js'),'utf8');
+
+test('DRAFT QR and public-link availability depends on ACTIVE state, not mere passport existence',()=>{
+  assert.match(detailOps,/const isPublic=!!p&&p\.status==="active"/);
+  assert.match(detailOps,/if\(isPublic\)\{qr\.src=/);
+  assert.match(detailOps,/pub\.href=isPublic\?/);
+});
+
+test('selected DPP capacity never falls back to different master SKU capacity',()=>{
+  assert.match(detailOps,/p\?\.public_payload\?\.model\?\.rated_capacity_ah/);
+  assert.match(detailOps,/Verifying passport capacity/);
+  assert.match(detailOps,/priorPassportId!==/);
+  assert.match(detailOps,/priorPassportStatus!==/);
+});
