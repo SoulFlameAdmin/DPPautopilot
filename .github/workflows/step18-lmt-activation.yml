@@ -59,3 +59,8 @@ jobs:
           \i tests/db/test_lmt_activation_gate_subset.sql
           rollback;
           SQL
+
+      - name: Run P0 parallel tenant ensure acceptance
+        env:
+          PGPASSWORD: postgres
+        run: bash tests/db/test_organization_ensure_parallel.sh
