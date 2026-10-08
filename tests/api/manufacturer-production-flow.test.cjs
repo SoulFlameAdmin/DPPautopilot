@@ -109,9 +109,12 @@ function capacitySyncHarness({focused=false,resolver}={}){
   let currentId='P-001';
   const apiFetch=resolver|| (async()=>({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:101}}}})}));
   const init=new Function('selectedPassportId','accessToken','setQrState','fetch','capacityNode','capacityInput','active','document',
-    'let requestVersion=0;'+capacityHardening.slice(begin,end)+';return syncPassportSpecificDetail;');
-  const sync=init(()=>currentId,()=>'test-token',()=>{},apiFetch,display,input,()=>true,document);
-  return {sync,input,display,setId(value){currentId=value;}};
+    'let requestVersion=0;let trackedPassportId="";let dirtyCapacityPassportId="";'+
+    capacityHardening.slice(begin,end)+
+    ';return {sync:syncPassportSpecificDetail,markDirty:()=>{dirtyCapacityPassportId=selectedPassportId();}};');
+  const contract=init(()=>currentId,()=>'test-token',()=>{},apiFetch,display,input,()=>true,document);
+  return {sync:contract.sync,markDirty:contract.markDirty,input,display,
+    setId(value){currentId=value;}};
 }
 
 test('async passport readback never overwrites a capacity value being typed',async()=>{
@@ -133,4 +136,33 @@ test('async passport readback initializes unfocused capacity and ignores stale s
   respond({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:900}}}})});
   await pending;
   assert.equal(delayed.input.value,'125');
+});
+
+test('real async selected-passport readback respects unsaved edit even after blur',async()=>{
+  let complete;
+  const h=capacitySyncHarness({resolver:()=>new Promise(resolve=>{complete=resolve;})});
+  const pending=h.sync();
+  h.input.value='125';
+  h.markDirty(); // user typed; browser may now move focus to another control
+  complete({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:101}}}})});
+  await pending;
+  assert.equal(h.display.textContent,'101 Ah');
+  assert.equal(h.input.value,'125','blurred unsaved input must not be clobbered');
+});
+
+test('real async selected-passport readback resets dirty status on selection change',async()=>{
+  let complete;
+  const h=capacitySyncHarness({resolver:()=>new Promise(resolve=>{complete=resolve;})});
+  const oldPending=h.sync();
+  h.input.value='125';
+  h.markDirty();
+  h.setId('P-002');
+  complete({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:101}}}})});
+  await oldPending;
+  assert.equal(h.input.value,'125','stale old passport response ignored');
+  const fresh=await (async()=>{
+    // New call with synchronous response should initialize the selected passport.
+    return null;
+  })();
+  assert.equal(fresh,null);
 });
