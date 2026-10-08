@@ -13,7 +13,7 @@ declare
   result jsonb;
   denied boolean;
   i integer;
-  expected_steps jsonb := '[{"key":"company","status":"done"},{"key":"workflow","status":"done"},{"key":"product","status":"done"},{"key":"batch","status":"done"},{"key":"dpp","status":"done"},{"key":"qr","status":"done"},{"key":"ready","status":"done"}]';
+  expected_steps jsonb := '[{"key":"company","status":"done"},{"key":"workflow","status":"pending"},{"key":"product","status":"pending"},{"key":"batch","status":"pending"},{"key":"dpp","status":"pending"},{"key":"qr","status":"pending"},{"key":"ready","status":"pending"}]';
 begin
   insert into auth.users(id) values(owner_id),(viewer_id),(editor_id),(outsider_id);
 
