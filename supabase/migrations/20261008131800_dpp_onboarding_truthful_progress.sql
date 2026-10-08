@@ -92,8 +92,7 @@ begin
     )
   );
 end
-$function$
-
+$function$;
 
 revoke all on function public.dpp_api_manufacturer_onboarding_configure() from public, anon;
 grant execute on function public.dpp_api_manufacturer_onboarding_configure() to authenticated;
