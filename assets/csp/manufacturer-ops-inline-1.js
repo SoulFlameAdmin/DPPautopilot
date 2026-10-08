@@ -68,6 +68,7 @@ function itemModel(item){return item?modelById(item.model_id):null}
 function safeText(v,fallback="—"){return v==null||v===""?fallback:String(v)}
 function setDetail(p){
  const priorPassportId=selectedPassport?.passport_id||null;
+ const priorPassportStatus=selectedPassport?.status||null;
  selectedPassport=p||null;
  document.querySelectorAll(".passport-rows .ops-row").forEach(row=>row.classList.toggle("selected",!!p&&row.dataset.passportId===p.passport_id));
  const item=p?itemById(p.battery_item_id):null,model=itemModel(item);
@@ -101,7 +102,7 @@ function setDetail(p){
  const print=$("#detailPrintButton");print.disabled=!p||p.status!=="active";
  const editInput=$("#detailPilotCapacity"),editButton=$("#detailSavePilotUpdate"),editResult=$("#detailEditResult");
  // Do not carry the previous passport's editable capacity into a new selection.
- if(editInput&&priorPassportId!==(p?.passport_id||null))
+ if(editInput&&(priorPassportId!==(p?.passport_id||null)||priorPassportStatus!==(p?.status||null)))
   editInput.value=knownPassportCapacity?String(passportCapacity):"";
  if(editInput)editInput.disabled=!p||p.status!=="active"||!canWrite();
  if(editButton)editButton.disabled=!p||p.status!=="active"||!canWrite();
