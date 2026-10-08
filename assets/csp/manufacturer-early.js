@@ -265,25 +265,15 @@ async function ensureProductionTenant(){
   if(!google?.access_token)throw new Error("Няма запазена Google сесия. Влезте отново през /register.");
   copyGoogleToCompanySession(google);
 
-  let organizations=await organizationRpc("dpp_api_organizations_list",{},google.access_token);
-  if(!Array.isArray(organizations))organizations=[];
-  let active=organizations.find(org=>org&&org.active)||null;
-  if(active)return active;
-
-  if(organizations.length){
-    throw new Error("Има фирмен tenant, но няма активен workspace.");
-  }
-
   const company=profile?.configuration?.company?.name||profile?.companyName||answers.company||"DPP Company";
   const suffix=(globalThis.crypto&&typeof globalThis.crypto.randomUUID==="function"
     ?globalThis.crypto.randomUUID().replace(/-/g,"").slice(0,8)
     :String(Date.now()).slice(-8));
   const slug=(slugify(company).slice(0,80)+"-"+suffix).slice(0,120).replace(/-+$/,"");
-  active=await organizationRpc("dpp_api_organization_create",{
+  return organizationRpc("dpp_api_organization_ensure",{
     p_name:String(company).slice(0,200),
     p_slug:slug
   },google.access_token);
-  return active;
 }
 function setProductEntryReady(active){
   for(const id of ["productSkuEntry","productSkuButton"]){
