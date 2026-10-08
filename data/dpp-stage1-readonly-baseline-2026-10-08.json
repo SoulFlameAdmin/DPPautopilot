@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "read_only_production_metadata_baseline_not_a_backup",
+  "source_project_ref": "frhletkiuupgksmgxoxc",
+  "captured_at_utc": "2026-10-08T16:03:30.514798Z",
+  "capture_method": "one read-only SQL SELECT, no PII",
+  "postgres_version": "17.6",
+  "migration_count": 468,
+  "latest_migration": "20261007184343",
+  "dpp_table_count": 46,
+  "dpp_schema_fingerprint": "d78d9fab43f514fab9d08ab49db8b855",
+  "counts": {
+    "organizations": 3,
+    "models": 4,
+    "provision_batches": 2,
+    "battery_items": 24,
+    "passports": 24,
+    "passport_versions": 48,
+    "audit_events": 105,
+    "storage_metadata_objects": 5
+  },
+  "orphan_items_without_model": 0,
+  "orphan_passports_without_item": 0,
+  "stale_tenant_contexts": 0,
+  "limitations": [
+    "This is not a backup. No production row data, user credentials or Storage bytes are in this file.",
+    "A future restore must be compared with a snapshot captured at the SAME backup restore point, not blindly against these live counts.",
+    "Full DPP restore depends on auth.users and the non-DPP leads table via foreign keys.",
+    "Supabase managed physical backup listing and isolated data restore are not verified.",
+    "Storage object bytes require separate restore evidence.",
+    "Do not restore the shared Supabase project in place."
+  ]
+}
