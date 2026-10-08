@@ -45,7 +45,10 @@ function validConfigure(value){
      !Number.isInteger(value.revision)||value.revision<1||!validTimestamp(value.configured_at)||!Array.isArray(value.steps))return false;
   const expected=['company','workflow','product','batch','dpp','qr','ready'];
   if(value.steps.length!==expected.length)return false;
-  return value.steps.every((step,index)=>plainObject(step)&&step.key===expected[index]&&step.status==='done');
+  // 8/8 onboarding only configures a workspace; it does not manufacture batteries.
+  // Require the database to return truthful progress, not fabricated DONE flags.
+  return value.steps.every((step,index)=>plainObject(step)&&step.key===expected[index]&&
+    step.status===(index===0?'done':'pending'));
 }
 function validateAnswerBody(body){
   if(!plainObject(body)||body.action!=='answer')return 'action';
