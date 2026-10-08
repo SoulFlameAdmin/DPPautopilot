@@ -17,3 +17,22 @@ SPEC.loader.exec_module(MODULE)
 
 # unittest discovery imports this class; keep one source of truth for test cases.
 MigrationGateTests = MODULE.MigrationGateTests
+
+import unittest
+
+class C04FilenameShapeAcceptance(unittest.TestCase):
+    def test_actual_14_digit_filename_in_repo_is_accepted(self):
+        e = MODULE.good()
+        names = {row["filename"] for row in e["manifest"]["migrations"]}
+        self.assertIn("20261008024500_dpp_organization_ensure.sql", names)
+        MODULE.VER.verify(e, MODULE.POLICY)
+
+    def test_13_digit_filename_is_rejected_even_if_envelope_is_rehashed(self):
+        e = MODULE.good()
+        row = next(row for row in e["manifest"]["migrations"]
+                   if row["name"] == "dpp_organization_ensure")
+        row["filename"] = "2026100802450_dpp_organization_ensure.sql"
+        MODULE.MigrationGateTests.rehash_manifest(e)
+        with self.assertRaisesRegex(MODULE.VER.MigrationGateDenied,
+                                    "missing source migration file"):
+            MODULE.VER.verify(e, MODULE.POLICY)
