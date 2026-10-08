@@ -12,8 +12,8 @@ class MigrationGateDenied(AssertionError):
 
 def verify(evidence:dict[str,Any],policy:dict[str,Any]=POLICY)->None:
     candidate=evidence.get('candidate_commit_sha')
-    if not isinstance(candidate,str) or len(candidate)<7:
-        raise MigrationGateDenied('candidate commit missing')
+    if not isinstance(candidate,str) or not re.fullmatch(r'[0-9a-f]{40}',candidate):
+        raise MigrationGateDenied('candidate commit must be an exact 40-character Git SHA')
     manifest=evidence.get('manifest')
     database=evidence.get('database')
     schema=evidence.get('schema_verification')
