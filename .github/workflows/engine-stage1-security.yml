@@ -26,3 +26,5 @@ jobs:
       - run: python -m unittest discover -s tests/engine -p 'test_*.py' -v
       - name: Verify manufacturer onboarding API tests
         run: node --test tests/api/manufacturer-onboarding.test.cjs
+      - name: Verify active-only QR and revocation regression
+        run: node --test tests/api/qr.test.cjs
