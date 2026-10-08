@@ -7,6 +7,9 @@ on:
       - 'tests/engine/**'
       - 'tools/engine/**'
       - 'supabase/migrations/20261008131700_dpp_capacity_update_anon_execute_revoke.sql'
+      - 'supabase/migrations/20261008131800_dpp_onboarding_truthful_progress.sql'
+      - 'api/manufacturer-onboarding.js'
+      - 'tests/api/manufacturer-onboarding.test.cjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,3 +24,5 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m unittest discover -s tests/engine -p 'test_*.py' -v
+      - name: Verify manufacturer onboarding API tests
+        run: node --test tests/api/manufacturer-onboarding.test.cjs
