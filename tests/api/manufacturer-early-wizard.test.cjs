@@ -63,3 +63,11 @@ test('dashboard is hidden until onboarding/configuration is complete',()=>{
   assert.match(html,/AUTO-CONFIGURED/);
   assert.match(html,/Product \/ SKU/);
 });
+
+test('production tenant onboarding uses atomic organization ensure instead of list-then-create race',()=>{
+  const js=read('assets/csp/manufacturer-early.js');
+  assert.match(js,/organizationRpc\("dpp_api_organization_ensure"/);
+  assert.doesNotMatch(js,/organizationRpc\("dpp_api_organization_create"/);
+  assert.match(js,/p_name:String\(company\)\.slice\(0,200\)/);
+  assert.match(js,/p_slug:slug/);
+});
