@@ -93,3 +93,10 @@ Record independently checked blockers and ENGINE-owned actions before writes to 
 - **Database safety:** bound project currently has 468 applied migrations; neither atomic ensure nor capacity anon revoke nor truthful progress function replacement has been applied to production. Backup/restore acceptance still missing.
 - Borko independently notified via Gmail of this P0 separation and exact SHA for review; no independent QA acceptance recorded yet.
 - **Strict status:** both open PRs are DRAFT; no merge, no production deployment, no 100% GREEN claim. Vercel remediation deferred per owner.
+
+## Stage 1 follow-up — verified Step18 closure and C04 deployment gap
+
+- **Step18 is now green in actual disposable PG17 CI**: test-fixture query corrected to `active_organization_id` in commit `bd12f9296aa371db5949d1a1a87d3457505f9a33`; [run #37824785133](https://github.com/SoulFlameAdmin/DPPautopilot/actions/runs/37824785133) SUCCESS, with `P0_ORGANIZATION_ENSURE_PARALLEL_PASS` showing one organization and membership for two concurrent requests. Borko independent review remains open.
+- **C04 remains correctly red**: read-only report [Engine run #37824544395](https://github.com/SoulFlameAdmin/DPPautopilot/actions/runs/37824544395) found 75 repo migration names, 72 in the bound DPP subset of the live snapshot, and exactly 3 unapplied names. Project-wide live history has 468 migrations.
+- **Reconciliation finding**: 62 canonical matching migrations have different historical filename versions than recorded live migration versions. Existing C04 policy compares canonical **names**; timestamp differences are a provenance warning, not permission to change history or falsely update snapshots. Need independent schema/hash review.
+- **Main CI remains FAIL on C04**. This is the **remaining known release-gate blocker among the previously failing Main CI and Step18 pair**. No production changes, no merge, no deploy; no proved provider backup restore.
