@@ -94,3 +94,15 @@ Staged but **NOT APPLIED**: `20261008024500_dpp_organization_ensure.sql` (organi
 - **Stop rule unchanged:** E0.2 remains YELLOW/BLOCKED before live DDL; these new tools are structural/preflight gates, not a completed full-data restore.
 
 See Supabase official [Database Backups](https://supabase.com/docs/guides/platform/backups) and [Restore to a new project](https://supabase.com/docs/guides/platform/clone-project). The clone may incur additional expense and still requires separate Storage object configuration and bytes.
+
+
+## E0.2 strict archive preflight hardening — 2026-10-08
+
+After independent inspection of the real database dependency graph, the first archive checker was found to validate only **12** representative DPP tables. That could misleadingly report a structural PASS for an incomplete logical archive missing other DPP tables. This has now been corrected:
+
+- The archive checker requires **TABLE DATA entries for all 46 existing DPP tables**, rather than 12 selected tables.
+- In strict whole-project mode it additionally requires `auth.users` (identity FK), `public.leads` (external DPP partner FK), and `storage.objects` (Storage metadata only), totaling **49 table-data entries**.
+- A partial DPP-only archive can still be inspected explicitly, but is always marked `partial_archive_mode=true` and `recovery_gate_green=false`.
+- Distinct tests now reject absent `public.leads`, absent Storage metadata, absent minor DPP tables and superficially present schema-only table entries. There are now **16 isolated regression test cases**.
+- GitHub regression run **37814484534** succeeded on commit `061bab592f311de5f6d1b16545d2f51282bd5ba5`.
+- **No backup file, database rows or Storage object bytes were exported, restored or made public.** This remains an improved screening test, not a real restored-backup acceptance.
