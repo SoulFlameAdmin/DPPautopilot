@@ -38,7 +38,7 @@ begin
 
   v_active:=public.dpp_active_organization_id();
   if v_active is not null then
-    select o.*,m.role
+    select o,m.role
       into v_org,v_role
     from public.dpp_organization_members m
     join public.dpp_organizations o on o.id=m.organization_id
@@ -61,7 +61,7 @@ begin
   where m.user_id=v_user;
 
   if v_count=1 then
-    select o.*,m.role
+    select o,m.role
       into v_org,v_role
     from public.dpp_organization_members m
     join public.dpp_organizations o on o.id=m.organization_id
