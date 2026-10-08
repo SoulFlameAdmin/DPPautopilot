@@ -31,6 +31,26 @@ class MigrationGateTests(unittest.TestCase):
             with self.assertRaisesRegex(VER.MigrationGateDenied,'exact 40-character'):
                 VER.verify(e,POLICY)
 
+    def test_valid_sql_filename_is_recognized_directly(self):
+        import re
+        pattern = r'(\\d{14})_([a-z0-9_]+)\\.sql'
+        valid = '20261008024500_dpp_organization_ensure.sql'
+        match = re.fullmatch(pattern, valid)
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(1), '20261008024500')
+        self.assertEqual(match.group(2), 'dpp_organization_ensure')
+        for filename in (
+            '202610080245_dpp_organization_ensure.sql',
+            '20261008024500_DPP_Organization_Ensure.sql',
+            '20261008024500_dpp_organization_ensure.sql.bak',
+            '20261008024500_dpp_organization_ensureXsql',
+        ):
+            self.assertIsNone(re.fullmatch(pattern, filename), filename)
+
+    def test_c04_manifest_verifier_accepts_valid_sql_filename(self):
+        # Exercises the actual code path, not just a duplicate regex.
+        VER.verify(good(), POLICY)
+
     def test_rejects_manifest_commit_drift(self):
         e=good();e['manifest']['commit_sha']='deadbeef'
         with self.assertRaisesRegex(VER.MigrationGateDenied,'manifest commit'): VER.verify(e,POLICY)
