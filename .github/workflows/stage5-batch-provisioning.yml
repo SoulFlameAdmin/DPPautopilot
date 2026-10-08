@@ -37,6 +37,8 @@ jobs:
         run: node --test tests/api/batch-provision.test.cjs
       - name: Run Manufacturer production flow contract
         run: node --test tests/api/manufacturer-production-flow.test.cjs
+      - name: Run Borko capacity-after-blur contract
+        run: node tests/unit/test_manufacturer_capacity_blur.js
 
       - name: Replay migrations and run Stage 5 DB acceptance
         env:
