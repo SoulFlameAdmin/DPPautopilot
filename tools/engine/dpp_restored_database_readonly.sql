@@ -53,6 +53,64 @@ SELECT jsonb_pretty(jsonb_build_object(
       ON m.user_id=c.user_id AND m.organization_id=c.active_organization_id
     WHERE c.active_organization_id IS NOT NULL AND m.user_id IS NULL
   ),
+  'item_model_cross_tenant', (
+    SELECT count(*) FROM public.dpp_battery_items i
+    JOIN public.dpp_battery_models m ON m.id=i.model_id
+    WHERE i.organization_id IS DISTINCT FROM m.organization_id
+  ),
+  'passport_item_cross_tenant', (
+    SELECT count(*) FROM public.dpp_passports p
+    JOIN public.dpp_battery_items i ON i.id=p.battery_item_id
+    WHERE p.organization_id IS DISTINCT FROM i.organization_id
+  ),
+  'passport_version_cross_tenant', (
+    SELECT count(*) FROM public.dpp_passport_versions v
+    JOIN public.dpp_passports p ON p.id=v.passport_id
+    WHERE v.organization_id IS DISTINCT FROM p.organization_id
+  ),
+  'batch_model_cross_tenant', (
+    SELECT count(*) FROM public.dpp_provision_batches b
+    JOIN public.dpp_battery_models m ON m.id=b.model_id
+    WHERE b.organization_id IS DISTINCT FROM m.organization_id
+  ),
+  'provision_item_cross_tenant', (
+    SELECT count(*) FROM public.dpp_provision_batch_items bi
+    JOIN public.dpp_provision_batches b ON b.id=bi.batch_id
+    JOIN public.dpp_battery_items i ON i.id=bi.item_id
+    WHERE b.organization_id IS DISTINCT FROM i.organization_id
+  ),
+  'provision_passport_cross_tenant', (
+    SELECT count(*) FROM public.dpp_provision_batch_items bi
+    JOIN public.dpp_provision_batches b ON b.id=bi.batch_id
+    JOIN public.dpp_passports p ON p.id=bi.passport_id
+    WHERE b.organization_id IS DISTINCT FROM p.organization_id
+  ),
+  'batch_serial_mismatch', (
+    SELECT count(*) FROM public.dpp_provision_batch_items bi
+    JOIN public.dpp_battery_items i ON i.id=bi.item_id
+    WHERE bi.unique_identifier IS DISTINCT FROM i.unique_identifier
+  ),
+  'batch_passport_item_mismatch', (
+    SELECT count(*) FROM public.dpp_provision_batch_items bi
+    JOIN public.dpp_passports p ON p.id=bi.passport_id
+    WHERE bi.item_id IS DISTINCT FROM p.battery_item_id
+  ),
+  'missing_serials', (
+    SELECT count(*) FROM public.dpp_battery_items i
+    WHERE i.unique_identifier IS NULL OR btrim(i.unique_identifier)=''
+  ),
+  'duplicate_serial_per_org', (
+    SELECT count(*) FROM (
+      SELECT organization_id,unique_identifier FROM public.dpp_battery_items
+      GROUP BY 1,2 HAVING count(*)>1
+    ) duplicates
+  ),
+  'duplicate_passport_version', (
+    SELECT count(*) FROM (
+      SELECT passport_id,version_no FROM public.dpp_passport_versions
+      GROUP BY 1,2 HAVING count(*)>1
+    ) duplicates
+  ),
   'dpp_storage_metadata_objects', (SELECT count(*) FROM storage.objects WHERE bucket_id LIKE 'dpp%'),
   'storage_bytes_verified', FALSE,
   'warning', 'This query only checks database metadata and integrity. Actual Storage bytes need separate restore.'
