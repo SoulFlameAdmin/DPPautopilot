@@ -56,6 +56,8 @@ jobs:
             echo "Replaying $file"
             "${PSQL[@]}" -f "$file"
           done
+          # Assert actual PostgreSQL 17 RPC permissions and honest manufacturer progress.
+          "${PSQL[@]}" -f tests/db/test_stage1_security_acl_subset.sql
           "${PSQL[@]}" <<'SQL'
           begin;
           \i tests/db/test_scooter_batch_provisioning_subset.sql
