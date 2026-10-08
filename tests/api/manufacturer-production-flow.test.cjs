@@ -151,18 +151,18 @@ test('real async selected-passport readback respects unsaved edit even after blu
 });
 
 test('real async selected-passport readback resets dirty status on selection change',async()=>{
-  let complete;
-  const h=capacitySyncHarness({resolver:()=>new Promise(resolve=>{complete=resolve;})});
+  const complete=[];
+  const h=capacitySyncHarness({resolver:()=>new Promise(resolve=>{complete.push(resolve);})});
   const oldPending=h.sync();
   h.input.value='125';
   h.markDirty();
   h.setId('P-002');
-  complete({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:101}}}})});
+  const freshPending=h.sync();
+  complete[0]({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:101}}}})});
   await oldPending;
   assert.equal(h.input.value,'125','stale old passport response ignored');
-  const fresh=await (async()=>{
-    // New call with synchronous response should initialize the selected passport.
-    return null;
-  })();
-  assert.equal(fresh,null);
+  complete[1]({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:90}}}})});
+  await freshPending;
+  assert.equal(h.input.value,'90','newly selected passport must reset old dirty guard');
+  assert.equal(h.display.textContent,'90 Ah');
 });
