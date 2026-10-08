@@ -304,8 +304,15 @@ async function loadTenant(){
   let orgs=await organizationRpc("dpp_api_organizations_list",{});
   if(!Array.isArray(orgs))orgs=[];
   activeOrg=orgs.find(o=>o.active)||null;
+  if(!activeOrg&&orgs.length===1){
+    await organizationRpc("dpp_api_tenant_context_set",{p_organization_id:orgs[0].organization_id});
+    orgs=await organizationRpc("dpp_api_organizations_list",{});
+    if(!Array.isArray(orgs))orgs=[];
+    activeOrg=orgs.find(o=>o.active)||null;
+  }
   if(!activeOrg){
-    if(orgs.length)showGate("Има фирмено пространство, но няма активен tenant. Активирай го през Company Access.");
+    if(orgs.length>1)showGate("Има няколко фирмени пространства, но няма активен tenant. Избери workspace през Company Access.");
+    else if(orgs.length===1)showGate("Не успяхме да активираме единственото фирмено пространство. Опитай отново.");
     else showGate("Няма фирмено пространство. Създай company tenant през Company Access.");
     return false;
   }
