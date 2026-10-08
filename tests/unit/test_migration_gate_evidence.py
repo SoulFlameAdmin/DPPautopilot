@@ -45,4 +45,43 @@ class MigrationGateTests(unittest.TestCase):
         e=good();e['schema_verification']['commit_sha']='deadbeef'
         with self.assertRaisesRegex(VER.MigrationGateDenied,'schema verification commit'): VER.verify(e,POLICY)
 
+
+    @staticmethod
+    def rehash_manifest(e):
+        manifest=e['manifest']
+        core={'schema_version':manifest['schema_version'],
+              'commit_sha':manifest['commit_sha'],
+              'migrations':manifest['migrations']}
+        manifest['manifest_sha256']=hashlib.sha256(
+            json.dumps(core,sort_keys=True,separators=(',',':')).encode()
+        ).hexdigest()
+
+    def test_rejects_forged_self_consistent_migration_contents(self):
+        e=good()
+        e['manifest']['migrations'][0]['sha256']='a'*64
+        self.rehash_manifest(e)
+        with self.assertRaisesRegex(VER.MigrationGateDenied,'does not match checked-out source'):
+            VER.verify(e,POLICY)
+
+    def test_rejects_relabelled_migration_even_if_checksum_recomputed(self):
+        e=good()
+        e['manifest']['migrations'][0]['name']='invented_dpp_migration_name'
+        self.rehash_manifest(e)
+        with self.assertRaisesRegex(VER.MigrationGateDenied,'do not match source filename'):
+            VER.verify(e,POLICY)
+
+    def test_rejects_manifest_omitting_a_repo_migration(self):
+        e=good()
+        e['manifest']['migrations'].pop()
+        self.rehash_manifest(e)
+        with self.assertRaisesRegex(VER.MigrationGateDenied,'every repository migration'):
+            VER.verify(e,POLICY)
+
+    def test_rejects_relabelled_filename_version(self):
+        e=good()
+        e['manifest']['migrations'][0]['filename_version']='19000101000000'
+        self.rehash_manifest(e)
+        with self.assertRaisesRegex(VER.MigrationGateDenied,'do not match source filename'):
+            VER.verify(e,POLICY)
+
 if __name__=='__main__': unittest.main()
