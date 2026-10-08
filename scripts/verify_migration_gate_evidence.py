@@ -48,7 +48,7 @@ def verify(evidence:dict[str,Any],policy:dict[str,Any]=POLICY)->None:
         filename=row.get('filename')
         if not isinstance(filename,str) or filename not in expected_files:
             raise MigrationGateDenied('manifest references missing source migration file')
-        parsed=re.fullmatch(r'(\\d{14})_([a-z0-9_]+)\\.sql',filename)
+        parsed=re.fullmatch(r'(\d{14})_([a-z0-9_]+)\.sql',filename)
         if not parsed or row.get('filename_version')!=parsed.group(1) or row.get('name')!=parsed.group(2):
             raise MigrationGateDenied('manifest migration name/version do not match source filename')
         if filename in listed_files:
