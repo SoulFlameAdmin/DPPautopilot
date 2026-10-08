@@ -9,9 +9,20 @@ const capacityInput=document.querySelector("#detailPilotCapacity");
 const qrWrap=qr?.closest(".qr-wrap");
 const qrState=qrWrap?.querySelector("small")||null;
 let requestVersion=0;
+let dirtyCapacityPassportId="";
+let trackedPassportId="";
 
 function active(){return String(statusNode?.textContent||"").trim().toUpperCase()==="ACTIVE";}
 function selectedPassportId(){return document.querySelector(".passport-rows .ops-row.selected")?.dataset?.passportId||"";}
+function trackPassportSelection(){
+  const id=selectedPassportId();
+  if(id!==trackedPassportId){trackedPassportId=id;dirtyCapacityPassportId="";}
+  return id;
+}
+capacityInput?.addEventListener("input",()=>{
+  const id=trackPassportSelection();
+  if(id)dirtyCapacityPassportId=id;
+});
 function accessToken(){
   try{const value=JSON.parse(sessionStorage.getItem(COMPANY_SESSION_KEY)||"null");if(value?.access_token)return value.access_token;}catch{}
   try{const value=JSON.parse(localStorage.getItem(GOOGLE_SESSION_KEY)||"null");if(value?.access_token)return value.access_token;}catch{}
@@ -54,7 +65,7 @@ if(qr){
 }
 
 async function syncPassportSpecificDetail(){
-  const passportId=selectedPassportId();
+  const passportId=trackPassportSelection();
   const version=++requestVersion;
   setQrState();
   if(!passportId)return;
@@ -74,7 +85,7 @@ async function syncPassportSpecificDetail(){
       if(capacityNode)capacityNode.textContent=value+" Ah";
       // Do not overwrite a user typing a new capacity while the asynchronous
       // passport-specific detail request returns. Submit remains an explicit action.
-      if(capacityInput&&active()&&document.activeElement!==capacityInput)
+      if(capacityInput&&active()&&document.activeElement!==capacityInput&&dirtyCapacityPassportId!==passportId)
         capacityInput.value=String(value);
     }
   }catch{}
