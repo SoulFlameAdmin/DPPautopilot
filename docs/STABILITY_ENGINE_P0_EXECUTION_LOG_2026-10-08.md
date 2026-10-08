@@ -62,3 +62,13 @@ Record independently checked blockers and ENGINE-owned actions before writes to 
 - `E0.2` **BLOCKED / TO VERIFY**: backup/PITR and tested restore evidence.
 - `E0.3` **BLOCKED**: Vercel 402/account issue.
 - `E1-E4` **PENDING**: no production mutation or deploy has been executed.
+
+
+## 2026-10-08 ENGINE stage 1 — verified code, still unreleased
+- Twins branch created: `SoulFlameAdmin/soulflame-twins@mitko/dpp-stability-twins-engine` from exact deployed base `037efcd5f5c7e30c9ad01cfa353d9608bc10ad0c`.
+- Twins **DRAFT PR #170**: https://github.com/SoulFlameAdmin/soulflame-twins/pull/170. Real code changes now staged in `api/dpp-dashboard-link.js` — authenticated caller JWT to atomic ensure, explicit mismatch/DP103 failure, no arbitrary first-membership fallback, no forged manufacturing DONE, historic stored DONE converted to pending on output.
+- Latest code commit `f4d756c90a25c3b48e8322fa768f8f7e6492248b`; contract tests updated `8df0365e3b44b93a30818aef8687c0f5c91e8f80` and independent GitHub Actions workflow added at `.github/workflows/dpp-tenant-atomic.yml` (`d5b4ea539ea4b30d4770310a8de23bc99cfa3a7b`).
+- 13/13 mocked contract cases PASS in an isolated V8 harness against committed code and tests. **Not equivalent to official GitHub Actions PASS**, concurrent 2-tab live SQL test, security acceptance or real client E2E.
+- Additional conservative release probe staged: `tools/engine/production_http_gate.py`, commit `857f3e9943506fc141326df819e176ed05e67d7f`; unit tests `tests/engine/test_production_http_gate.py`, commit `b813a81ff8ee3334827b212c67003877f8143d43`. Any HTTP 402/DEPLOYMENT_DISABLED must fail this gate.
+- Borko notified via Gmail about DRAFT PR #170, required independent verification and do-not-merge rule.
+- **UNCHANGED**: production Supabase migration is absent, production Vercel 402 unresolved, no schema writes, no merge, no production deployment. Remain BLOCKED on E0 recovery and E1 verified migration before promoting any new backend code.
