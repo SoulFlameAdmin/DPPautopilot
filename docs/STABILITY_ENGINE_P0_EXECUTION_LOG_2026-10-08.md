@@ -72,3 +72,14 @@ Record independently checked blockers and ENGINE-owned actions before writes to 
 - Additional conservative release probe staged: `tools/engine/production_http_gate.py`, commit `857f3e9943506fc141326df819e176ed05e67d7f`; unit tests `tests/engine/test_production_http_gate.py`, commit `b813a81ff8ee3334827b212c67003877f8143d43`. Any HTTP 402/DEPLOYMENT_DISABLED must fail this gate.
 - Borko notified via Gmail about DRAFT PR #170, required independent verification and do-not-merge rule.
 - **UNCHANGED**: production Supabase migration is absent, production Vercel 402 unresolved, no schema writes, no merge, no production deployment. Remain BLOCKED on E0 recovery and E1 verified migration before promoting any new backend code.
+
+## 2026-10-08 — Stage 1 owner START checkpoint
+- Vercel deploy/billing intentionally deferred per owner; source/DB/API security and stability only.
+- Confirmed bound DB `frhletkiuupgksmgxoxc` has 468 migrations, latest `20261007184343 dpp_technical_pilot_capacity_update`. Atomic ensure + anon revoke not applied; no live database edits performed.
+- Supabase security advisor flags exactly **one unintended DPP anon SECURITY DEFINER RPC exposure**: `dpp_api_technical_pilot_update_capacity`. Four other anon DPP RPCs are explicitly expected public paths: `dpp_api_carrier_open`, `dpp_api_passport_public`, `dpp_api_passport_public_resolve`, `dpp_api_registration_request_create`. Do not indiscriminately revoke public passport resolution.
+- `rls_enabled_no_policy` entries on private `dpp_*` tables can be deliberate deny-by-default; no permissive RLS policy is to be added just to silence advisors.
+- DPP SQL ACL patch is STAGED on PR #293; `DPP Stage1 Engine Regression` GitHub Actions passed on a35e0841, no production migration applies.
+- Twins PR #170 now includes defense against **viewer role modifying manufacturer answers through service-role-backed sync**. Writes require returned membership role owner/admin/editor, read-only dashboard open still permitted. The atomic RPC returns authenticated tenant role; unknown roles fail closed.
+- Additional security acceptance tests exercise wrong-company mismatch before client session write, failed RPC before false reviewing, viewer read/deny-write, stolen dashboard token, dashboard open no repeated config revision, CORS preview impersonation, and 8/8 onboarding status.
+- **Residual privileged-write caveat:** user-role is verified before a server service-role write, not atomically inside the same DB transaction. Independent reviewer must assess role-revocation TOCTOU before Stage 1 security GREEN; require a tenant-scoped authenticated RPC or equivalent DB-enforced authorization for final guarantee.
+- **Status:** P0 under active development. Main CI C04 and Step18 still FAIL because of missing bound live migration and Borko-owned Step18 wrong-column fixture; separate pass of Engine contract tests does not clear them.
