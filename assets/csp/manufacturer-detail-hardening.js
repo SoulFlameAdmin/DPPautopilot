@@ -65,7 +65,8 @@ if(qr){
 }
 
 async function syncPassportSpecificDetail(){
-  const passportId=trackPassportSelection();
+  const passportId=selectedPassportId();
+  if(passportId!==trackedPassportId){trackedPassportId=passportId;dirtyCapacityPassportId="";}
   const version=++requestVersion;
   setQrState();
   if(!passportId)return;
