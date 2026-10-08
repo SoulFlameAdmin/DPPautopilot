@@ -39,9 +39,10 @@ class CapacityRpcPrivilegeTests(unittest.TestCase):
         self.assertIn("has_function_privilege('authenticated'", self.normalized)
         self.assertIn("raise exception 'p0 security fail:", self.normalized)
 
-    def test_is_non_destructive_and_transactional(self):
-        self.assertRegex(self.normalized, r"\bbegin;")
-        self.assertRegex(self.normalized, r"\bcommit;")
+    def test_is_non_destructive_and_uses_migration_runner_transaction(self):
+        self.assertNotRegex(self.normalized, r"\bbegin;")
+        self.assertNotRegex(self.normalized, r"\bcommit;")
+        self.assertIn("supabase runs each migration inside its own transaction", self.normalized)
         for dangerous in (
             r"\bdrop table\b", r"\btruncate\b", r"\bdelete from\b",
             r"\bupdate public\.", r"\binsert into\b", r"\balter table\b",
