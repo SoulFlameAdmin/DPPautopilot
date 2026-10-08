@@ -115,29 +115,40 @@ async function saveSelectedPassportPilotUpdate(){
  if(!selectedPassport||selectedPassport.status!=="active"){
   return setText($("#detailEditResult"),"Select an ACTIVE passport first.","bad");
  }
+ // Freeze the identity before the first await. The operator can select
+ // another passport while the detail GET/PATCH roundtrip is in flight.
+ const targetPassportId=selectedPassport.passport_id;
+ const targetIdentifier=selectedPassport.unique_identifier;
  const capacity=Number($("#detailPilotCapacity").value);
  if(!Number.isFinite(capacity)||capacity<=0||capacity>100000){
   return setText($("#detailEditResult"),"Enter a valid test capacity in Ah.","bad");
  }
  const button=$("#detailSavePilotUpdate");
  button.disabled=true;
- setText($("#detailEditResult"),"Updating "+selectedPassport.unique_identifier+" without changing its QR…");
+ setText($("#detailEditResult"),"Updating "+targetIdentifier+" without changing its QR…");
  try{
-  const full=(await api("/api/passport?id="+encodeURIComponent(selectedPassport.passport_id))).data;
+  const full=(await api("/api/passport?id="+encodeURIComponent(targetPassportId))).data;
+  if(!full||full.passport_id!==targetPassportId)
+   throw new Error("Selected passport identity changed during update.");
   const updated=(await api("/api/passport",{method:"PATCH",body:{
    id:full.passport_id,
    action:"update_technical_pilot",
    capacity_ah:capacity,
    expected_updated_at:full.updated_at
   }})).data;
-  if(updated.passport_id!==full.passport_id)throw new Error("Passport identity changed unexpectedly.");
-  const sameIdentifier=selectedPassport.unique_identifier;
-  const samePassportId=full.passport_id;
+  if(updated.passport_id!==targetPassportId)throw new Error("Passport identity changed unexpectedly.");
+  // loadBase refreshes the selected passport and preserves a different
+  // user-selected passport. Never force the view back to the old target.
   await loadBase();
-  const current=passports.find(p=>p.passport_id===samePassportId);
-  if(current)setDetail(current);
+  if(selectedPassport?.passport_id===targetPassportId){
+   const current=passports.find(p=>p.passport_id===targetPassportId);
+   if(current)setDetail(current);
+  }
+  const viewingAnother=selectedPassport?.passport_id!==targetPassportId;
   setText($("#detailEditResult"),
-   "UPDATED · "+sameIdentifier+" · Capacity "+capacity+" Ah · same passport · same QR.",
+   "UPDATED · "+targetIdentifier+" · Capacity "+capacity+
+    " Ah · same passport · same QR."+
+    (viewingAnother?" · Currently viewing a different passport.":""),
    "ok"
   );
  }catch(e){
