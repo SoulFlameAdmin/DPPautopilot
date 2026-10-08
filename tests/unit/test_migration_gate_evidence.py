@@ -33,7 +33,7 @@ class MigrationGateTests(unittest.TestCase):
 
     def test_valid_sql_filename_is_recognized_directly(self):
         import re
-        pattern = r'(\\d{14})_([a-z0-9_]+)\\.sql'
+        pattern = r'(\d{14})_([a-z0-9_]+)\.sql'
         valid = '20261008024500_dpp_organization_ensure.sql'
         match = re.fullmatch(pattern, valid)
         self.assertIsNotNone(match)
