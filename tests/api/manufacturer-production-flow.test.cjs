@@ -34,3 +34,10 @@ test('LMT production cannot use the technical-pilot shortcut',()=>{
   assert.match(manufacturer,/model\.category==="light_means_of_transport"\)return/);
   assert.match(manufacturer,/Technical QR Pilot е само за non-LMT model/);
 });
+
+test('manufacturer dashboard safely recovers one inactive membership but never guesses among multiple tenants',()=>{
+  assert.match(manufacturer,/if\(!activeOrg&&orgs\.length===1\)/);
+  assert.match(manufacturer,/organizationRpc\("dpp_api_tenant_context_set",\{p_organization_id:orgs\[0\]\.organization_id\}\)/);
+  assert.match(manufacturer,/if\(orgs\.length>1\)showGate/);
+  assert.match(manufacturer,/няколко фирмени пространства/);
+});
