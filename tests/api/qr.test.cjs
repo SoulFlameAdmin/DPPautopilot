@@ -71,6 +71,7 @@ test('GET returns SVG and exact canonical target header',async()=>{
     assert.equal(res.headers['x-dpp-carrier'],'qr');
     assert.equal(res.headers['x-dpp-identifier'],'BAT-001');
     assert.equal(res.headers['x-dpp-target'],'https://dpp.example/passport?identifier=BAT-001&carrier=qr');
+    assert.equal(res.headers['cache-control'],'no-store');
     assert.match(res.body,/^<svg\b/);
   } finally {
     restoreFetch();
