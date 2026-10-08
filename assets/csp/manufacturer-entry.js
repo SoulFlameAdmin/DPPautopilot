@@ -107,6 +107,7 @@ async function loadProductionDashboard(){
   if(!await ensureOnboardingConfigured())return;
   await loadScript("/assets/csp/manufacturer-inline-1.js");
   await loadScript("/vendor/xlsx.full.min.js");
+  await loadScript("/assets/csp/manufacturer-detail-hardening.js");
   await loadScript("/assets/csp/manufacturer-ops-inline-1.js");
 }
 
