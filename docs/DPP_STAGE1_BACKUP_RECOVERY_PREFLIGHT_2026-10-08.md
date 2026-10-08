@@ -55,7 +55,7 @@ DPP GitHub Stage 5 PostgreSQL 17 CI on the Engine branch passed, including repla
 Owner opens [the project's Backup dashboard](https://supabase.com/dashboard/project/frhletkiuupgksmgxoxc/database/backups). Record *backup type*, latest completed backup timestamp (UTC), available retention window, PITR status if applicable, and project plan. No restore click. A screenshot without access tokens or PII is sufficient for the inventory stage.
 
 **Gate R2 — Confirm data and Storage separately.**  
-Document the protected export path for DPP rows + membership/user dependencies and the three DPP-named Storage buckets containing five actual objects. No sensitive contents in GitHub, emails, or public artifacts; backup must be encrypted and access-controlled. Confirm provider's managed backup cannot alone reconstruct missing Storage bytes.
+Document the protected export path for DPP rows + membership/user dependencies and the three DPP-named Storage buckets. The most recent read-only metadata query found **5 objects totaling 49,255 declared bytes in `dpp-autopilot-static`**; the other DPP-named buckets contain no objects at that snapshot. No sensitive contents in GitHub, emails, or public artifacts; backup must be encrypted and access-controlled. Confirm provider's managed backup cannot alone reconstruct missing Storage bytes.
 
 **Gate R3 — Prove recovery in an isolated destination.**  
 Use a *new isolated test destination* or an owned local PostgreSQL 17 instance, never the shared production project. Import an approved snapshot at a known restore point (without sharing credentials with collaborators). Record success/failure of SQL data import, necessary Auth relations, Storage object recovery, and indexes/constraints. Any new billed Supabase project/branch requires explicit owner cost confirmation first.
@@ -81,3 +81,16 @@ Staged but **NOT APPLIED**: `20261008024500_dpp_organization_ensure.sql` (organi
 - **E0.2 BACKUP & RESTORE READY:** **BLOCKED / YELLOW**, do not label 100% GREEN.
 
 **Official reference:** [Supabase Database Backups](https://supabase.com/docs/guides/platform/backups). Daily backups are provided for qualifying plans; Restore interrupts project access and Storage bytes require separate handling.
+
+## E0.2 executed after this document was created — restoration evidence tooling
+
+- Built `tools/engine/dpp_archive_check.py`: safe local-only structural inspection of an **existing logical PostgreSQL custom-format archive** using `pg_restore --list` (no production connection, no restoration). It checks required DPP table data and, in strict mode, `auth.users`, and **never** claims restored data or Storage bytes are GREEN. This tool does **not** inspect Supabase managed physical backups.
+- Added `tests/engine/test_dpp_archive_check.py` with **11 automated negative and positive test cases**, including missing auth, missing passport versions, corrupt archive, symlink rejection and prevention of false recovery GREEN. GitHub **DPP Stage1 Engine Regression run 37805644006 SUCCESS** at commit `23f73866f31a51d20178522cfe29d51e322abb76`; tests were also run locally in isolated Python.
+- Added `tools/engine/dpp_restored_database_readonly.sql` for aggregate-only schema/row integrity verification **after** a real isolated restore. It runs `BEGIN TRANSACTION READ ONLY` and returns no personal/customer row content; it explicitly cannot prove Storage object restoration.
+- Captured one-query production **metadata-only**, no-PII baseline at **2026-10-08 16:03:30 UTC** in `data/dpp-stage1-readonly-baseline-2026-10-08.json`. It records DPP counts, schema fingerprint and orphan checks; this is **not a data backup and must not be compared to a different restore point as if it were**.
+- Live schema dependency audit shows `dpp_*` tables reference **`auth.users` and `public.leads`** as external foreign keys. A partial DPP-only archive omitting these relations may fail restore or lose essential authorization provenance. Use provider restore-to-new-project on qualifying paid physical-backup projects, or carefully staged protected logical backup.
+- Live `archive_mode=on`, `wal_level=logical`, `data_checksums=on` confirm PostgreSQL server configuration **only**. These values do **not** prove a particular managed backup exists or that PITR retention is enabled.
+- The Supabase connector has no managed-backup listing or isolated restore action. Provider actual backup timestamps, a newly restored separate project, and Storage byte recovery remain **UNVERIFIED**.
+- **Stop rule unchanged:** E0.2 remains YELLOW/BLOCKED before live DDL; these new tools are structural/preflight gates, not a completed full-data restore.
+
+See Supabase official [Database Backups](https://supabase.com/docs/guides/platform/backups) and [Restore to a new project](https://supabase.com/docs/guides/platform/clone-project). The clone may incur additional expense and still requires separate Storage object configuration and bytes.
