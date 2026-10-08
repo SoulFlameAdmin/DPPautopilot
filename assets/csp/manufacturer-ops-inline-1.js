@@ -67,13 +67,19 @@ function modelById(id){return models.find(x=>x.id===id)||null}
 function itemModel(item){return item?modelById(item.model_id):null}
 function safeText(v,fallback="—"){return v==null||v===""?fallback:String(v)}
 function setDetail(p){
+ const priorPassportId=selectedPassport?.passport_id||null;
+ const priorPassportStatus=selectedPassport?.status||null;
  selectedPassport=p||null;
  document.querySelectorAll(".passport-rows .ops-row").forEach(row=>row.classList.toggle("selected",!!p&&row.dataset.passportId===p.passport_id));
  const item=p?itemById(p.battery_item_id):null,model=itemModel(item);
  const id=p?.unique_identifier||"Select a passport";
  const status=(p?.status||"—").toUpperCase();
  const chemistry=model?.canonical_data?.composition?.chemistry||model?.canonical_data?.chemistry||"—";
- const capacity=model?.rated_capacity_ah!=null?model.rated_capacity_ah+" Ah":(model?.canonical_data?.rated_capacity_ah!=null?model.canonical_data.rated_capacity_ah+" Ah":"—");
+ // Never present the SKU/model capacity as if it were the selected DPP's
+ // actual capacity: a TECHNICAL PILOT passport can be updated independently.
+ const passportCapacity=Number(p?.public_payload?.model?.rated_capacity_ah);
+ const knownPassportCapacity=Number.isFinite(passportCapacity)&&passportCapacity>0;
+ const capacity=knownPassportCapacity?passportCapacity+" Ah":(p?"Verifying passport capacity…":"—");
  const type=model?.category||"—";
  const company=activeOrg?.name||"—";
  const manufacturer=model?.manufacturer_name||company;
@@ -88,10 +94,16 @@ function setDetail(p){
  $("#detailFieldCapacity").textContent=capacity;
  $("#detailFieldManufacturer").textContent=manufacturer;
  $("#detailFieldStatus").textContent=status;
- const qr=$("#detailQrImage"); if(p){qr.src="/api/qr?identifier="+encodeURIComponent(id);qr.hidden=false}else{qr.removeAttribute("src");qr.hidden=true}
- const pub=$("#detailPublicLink");pub.href=p?"/passport?identifier="+encodeURIComponent(id):"#";
+ const isPublic=!!p&&p.status==="active";
+ const qr=$("#detailQrImage");
+ if(isPublic){qr.src="/api/qr?identifier="+encodeURIComponent(id);qr.hidden=false}
+ else{qr.removeAttribute("src");qr.hidden=true}
+ const pub=$("#detailPublicLink");pub.href=isPublic?"/passport?identifier="+encodeURIComponent(id):"#";
  const print=$("#detailPrintButton");print.disabled=!p||p.status!=="active";
  const editInput=$("#detailPilotCapacity"),editButton=$("#detailSavePilotUpdate"),editResult=$("#detailEditResult");
+ // Do not carry the previous passport's editable capacity into a new selection.
+ if(editInput&&(priorPassportId!==(p?.passport_id||null)||priorPassportStatus!==(p?.status||null)))
+  editInput.value=knownPassportCapacity?String(passportCapacity):"";
  if(editInput)editInput.disabled=!p||p.status!=="active"||!canWrite();
  if(editButton)editButton.disabled=!p||p.status!=="active"||!canWrite();
  if(editResult)editResult.textContent=p&&p.status==="active"

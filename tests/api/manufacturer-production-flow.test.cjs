@@ -41,3 +41,96 @@ test('manufacturer dashboard safely recovers one inactive membership but never g
   assert.match(manufacturer,/if\(orgs\.length>1\)showGate/);
   assert.match(manufacturer,/няколко фирмени пространства/);
 });
+
+const detailOps=fs.readFileSync(path.join(__dirname,'../../assets/csp/manufacturer-ops-inline-1.js'),'utf8');
+
+test('DRAFT QR and public-link availability depends on ACTIVE state, not mere passport existence',()=>{
+  assert.match(detailOps,/const isPublic=!!p&&p\.status==="active"/);
+  assert.match(detailOps,/if\(isPublic\)\{qr\.src=/);
+  assert.match(detailOps,/pub\.href=isPublic\?/);
+});
+
+test('selected DPP capacity never falls back to different master SKU capacity',()=>{
+  assert.match(detailOps,/p\?\.public_payload\?\.model\?\.rated_capacity_ah/);
+  assert.match(detailOps,/Verifying passport capacity/);
+  assert.match(detailOps,/priorPassportId!==/);
+  assert.match(detailOps,/priorPassportStatus!==/);
+});
+
+function selectedDetailHarness(){
+  const nodes=new Map();
+  const el=k=>{if(!nodes.has(k))nodes.set(k,{textContent:'',value:'',disabled:false,href:'#',hidden:true,src:'',removeAttribute(){this.src='';}});return nodes.get(k)};
+  const start=detailOps.indexOf('function setDetail(p){');
+  const end=detailOps.indexOf('async function saveSelectedPassportPilotUpdate()',start);
+  assert.ok(start>=0&&end>start);
+  const create=new Function('document','itemById','itemModel','activeOrg','fmt','safeText','canWrite','$',
+    'let selectedPassport=null;'+detailOps.slice(start,end)+';return setDetail');
+  const set=create({querySelectorAll:()=>[]},()=>({model_id:'m'}),()=>({
+    rated_capacity_ah:100,canonical_data:{},model_identifier:'SKU',category:'industrial'
+  }),{name:'Test company'},()=>'',x=>String(x),()=>true,el);
+  return {set,el};
+}
+
+test('real selected-DPP function: DRAFT never requests QR, ACTIVE uses its own 101Ah',()=>{
+  const h=selectedDetailHarness();
+  h.set({passport_id:'P1',battery_item_id:'B1',unique_identifier:'BAT-1',status:'draft'});
+  assert.equal(h.el('#detailQrImage').src,'');
+  assert.equal(h.el('#detailQrImage').hidden,true);
+  assert.equal(h.el('#detailPublicLink').href,'#');
+  h.set({passport_id:'P1',battery_item_id:'B1',unique_identifier:'BAT-1',status:'active',
+    public_payload:{model:{rated_capacity_ah:101}}});
+  assert.equal(h.el('#detailQrImage').src,'/api/qr?identifier=BAT-1');
+  assert.equal(h.el('#detailFieldCapacity').textContent,'101 Ah');
+  assert.equal(h.el('#detailPilotCapacity').value,'101');
+});
+
+test('real selected-DPP function: switching passports cannot copy previous edit capacity',()=>{
+  const h=selectedDetailHarness();
+  h.set({passport_id:'P1',battery_item_id:'B1',unique_identifier:'BAT-1',status:'active',
+    public_payload:{model:{rated_capacity_ah:101}}});
+  h.el('#detailPilotCapacity').value='120';
+  h.set({passport_id:'P2',battery_item_id:'B2',unique_identifier:'BAT-2',status:'active'});
+  assert.equal(h.el('#detailPilotCapacity').value,'');
+  assert.equal(h.el('#detailFieldCapacity').textContent,'Verifying passport capacity…');
+  h.set({passport_id:'P3',battery_item_id:'B3',unique_identifier:'BAT-3',status:'draft'});
+  assert.equal(h.el('#detailQrImage').src,'');
+  assert.equal(h.el('#detailPrintButton').disabled,true);
+});
+
+const capacityHardening=fs.readFileSync(path.join(__dirname,'../../assets/csp/manufacturer-detail-hardening.js'),'utf8');
+
+function capacitySyncHarness({focused=false,resolver}={}){
+  const begin=capacityHardening.indexOf('async function syncPassportSpecificDetail(){');
+  const end=capacityHardening.indexOf('\nif(qrState)qrState.id',begin);
+  assert.ok(begin>=0&&end>begin,'actual async passport detail function must be present');
+  const input={value:'125'};
+  const display={textContent:'Verifying passport capacity…'};
+  const document={activeElement:focused?input:null};
+  let currentId='P-001';
+  const apiFetch=resolver|| (async()=>({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:101}}}})}));
+  const init=new Function('selectedPassportId','accessToken','setQrState','fetch','capacityNode','capacityInput','active','document',
+    'let requestVersion=0;'+capacityHardening.slice(begin,end)+';return syncPassportSpecificDetail;');
+  const sync=init(()=>currentId,()=>'test-token',()=>{},apiFetch,display,input,()=>true,document);
+  return {sync,input,display,setId(value){currentId=value;}};
+}
+
+test('async passport readback never overwrites a capacity value being typed',async()=>{
+  const h=capacitySyncHarness({focused:true});
+  await h.sync();
+  assert.equal(h.display.textContent,'101 Ah');
+  assert.equal(h.input.value,'125');
+});
+
+test('async passport readback initializes unfocused capacity and ignores stale selection',async()=>{
+  const h=capacitySyncHarness();
+  await h.sync();
+  assert.equal(h.display.textContent,'101 Ah');
+  assert.equal(h.input.value,'101');
+  let respond;
+  const delayed=capacitySyncHarness({resolver:()=>new Promise(resolve=>{respond=resolve;})});
+  const pending=delayed.sync();
+  delayed.setId('P-002');
+  respond({ok:true,json:async()=>({data:{public_payload:{model:{rated_capacity_ah:900}}}})});
+  await pending;
+  assert.equal(delayed.input.value,'125');
+});

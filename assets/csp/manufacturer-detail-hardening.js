@@ -72,7 +72,10 @@ async function syncPassportSpecificDetail(){
     const value=Number(raw);
     if(Number.isFinite(value)&&value>0){
       if(capacityNode)capacityNode.textContent=value+" Ah";
-      if(capacityInput&&active())capacityInput.value=String(value);
+      // Do not overwrite a user typing a new capacity while the asynchronous
+      // passport-specific detail request returns. Submit remains an explicit action.
+      if(capacityInput&&active()&&document.activeElement!==capacityInput)
+        capacityInput.value=String(value);
     }
   }catch{}
 }
