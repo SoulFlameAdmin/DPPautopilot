@@ -15,4 +15,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Run AI-first intake, extraction, endpoint, UI and persistence safety tests
-        run: node --test tests/api/ai-intake-contract.test.cjs tests/api/ai-prompt-extractor.test.cjs tests/api/ai-intake-endpoint.test.cjs tests/api/ai-intake-ui.test.cjs tests/api/ai-intake-persistence-contract.test.cjs tests/api/ai-intake-persistence-runtime.test.cjs
+        run: node --test tests/api/ai-intake-contract.test.cjs tests/api/ai-prompt-extractor.test.cjs tests/api/ai-intake-endpoint.test.cjs tests/api/ai-intake-ui.test.cjs tests/api/ai-intake-persistence-contract.test.cjs tests/api/ai-intake-persistence-runtime.test.cjs tests/api/ai-intake-persistence-integration.test.cjs
