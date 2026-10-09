@@ -10,14 +10,14 @@ const {
 
 function verifiedFacts() {
   const values = {
-    company_role: 'manufacturer',
-    product_category: 'battery',
-    battery_type: 'LMT',
-    manufacturer_name: 'Example Battery Ltd',
-    model_name: 'EB-48',
-    market_scope: ['EU'],
-    data_sources: ['ERP export', 'technical datasheet'],
-    goal: 'Create a reviewable DPP draft and QR after approval'
+    country: 'Bulgaria, EU market',
+    company: 'Example Battery Ltd',
+    products: 'LMT and e-bike battery packs',
+    sku: '12 active models',
+    annualVolume: '25,000 units/year',
+    users: 'Compliance, engineering and production; 8 users',
+    systems: 'ERP, BMS exports, Excel and REST API',
+    automation: 'Collect evidence, prepare DPP drafts, validate status and publish QR after approval'
   };
   return Object.fromEntries(
     MODULES.battery.map(item => [item.key, {
@@ -29,11 +29,19 @@ function verifiedFacts() {
   );
 }
 
+test('contract mirrors the existing eight-question manufacturer Early Access schema', () => {
+  assert.deepEqual(MODULES.battery.map(item => item.key), [
+    'country', 'company', 'products', 'sku',
+    'annualVolume', 'users', 'systems', 'automation'
+  ]);
+});
+
 test('one prompt starts in collecting state and asks only for unresolved facts', () => {
   const state = buildIntakeState({
     module: 'battery',
     prompt: 'We manufacture e-bike batteries and need digital product passports.'
   });
+  assert.equal(state.onboarding_schema, 'manufacturer-early-v2');
   assert.equal(state.status, 'collecting');
   assert.equal(state.can_generate, false);
   assert.equal(state.can_publish, false);
@@ -44,25 +52,25 @@ test('one prompt starts in collecting state and asks only for unresolved facts',
 
 test('verified sourced facts reduce questions deterministically', () => {
   const facts = verifiedFacts();
-  delete facts.goal;
-  facts.model_name.verified = false;
+  delete facts.automation;
+  facts.systems.verified = false;
   const state = buildIntakeState({
     prompt: 'Continue setup.',
     facts
   });
-  assert.deepEqual(state.missing_fields, ['goal']);
-  assert.deepEqual(state.unverified_fields, ['model_name']);
+  assert.deepEqual(state.missing_fields, ['automation']);
+  assert.deepEqual(state.unverified_fields, ['systems']);
   assert.deepEqual(state.questions.map(item => [item.key, item.reason]), [
-    ['goal', 'missing'],
-    ['model_name', 'unverified']
+    ['automation', 'missing'],
+    ['systems', 'unverified']
   ]);
   assert.equal(state.status, 'collecting');
 });
 
 test('AI/model inference cannot be accepted as factual provenance', () => {
   const facts = verifiedFacts();
-  facts.model_name = {
-    value: 'Guessed Model',
+  facts.products = {
+    value: 'Guessed battery category',
     source_type: 'ai',
     source_ref: 'model:guess',
     verified: true
@@ -75,7 +83,7 @@ test('AI/model inference cannot be accepted as factual provenance', () => {
 
 test('a fact without a source reference is rejected', () => {
   const facts = verifiedFacts();
-  facts.battery_type.source_ref = '   ';
+  facts.company.source_ref = '   ';
   assert.throws(
     () => buildIntakeState({ prompt: 'Continue.', facts }),
     error => error instanceof IntakeContractError && error.code === 'MISSING_SOURCE_REF'
@@ -116,7 +124,7 @@ test('manual mode works without an AI prompt and keeps the same evidence rules',
   assert.equal(state.policy.ai_inference_is_evidence, false);
 });
 
-test('unknown facts cannot silently enter the DPP state', () => {
+test('unknown facts cannot silently enter the onboarding state', () => {
   const facts = verifiedFacts();
   facts.secret_guess = {
     value: 'something',
@@ -134,6 +142,6 @@ test('builder does not mutate caller-owned fact objects', () => {
   const facts = verifiedFacts();
   const before = JSON.stringify(facts);
   const state = buildIntakeState({ prompt: 'Continue.', facts });
-  state.facts.model_name.value = 'mutated output';
+  state.facts.company.value = 'mutated output';
   assert.equal(JSON.stringify(facts), before);
 });
