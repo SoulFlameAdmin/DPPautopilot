@@ -1,0 +1,70 @@
+name: AI-first Intake Contract
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ai-intake-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Run AI-first intake, extraction, endpoint, UI and persistence safety tests
+        run: node --test tests/api/ai-intake-contract.test.cjs tests/api/ai-prompt-extractor.test.cjs tests/api/ai-intake-endpoint.test.cjs tests/api/ai-intake-ui.test.cjs tests/api/ai-intake-persistence-contract.test.cjs tests/api/ai-intake-persistence-runtime.test.cjs tests/api/ai-intake-persistence-integration.test.cjs tests/api/ai-intake-ui-persistence.test.cjs tests/api/ai-intake-state-cas.test.cjs tests/api/ai-intake-manual-candidate.test.cjs
+
+  ai-intake-db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dpp_ai_intake
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dpp_ai_intake"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Replay migrations and run A2/A2.1/A2.2 DB acceptance
+        env:
+          PGPASSWORD: postgres
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSQL=(psql -h 127.0.0.1 -U postgres -d dpp_ai_intake -v ON_ERROR_STOP=1)
+          "${PSQL[@]}" <<'SQL'
+          create extension if not exists pgcrypto;
+          create role anon nologin;
+          create role authenticated nologin;
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          SQL
+          for file in supabase/migrations/*.sql; do
+            echo "Replaying $file"
+            "${PSQL[@]}" -f "$file"
+          done
+          "${PSQL[@]}" <<'SQL'
+          begin;
+          \i tests/db/test_ai_intake_persistence_subset.sql
+          rollback;
+          begin;
+          \i tests/db/test_ai_conversation_cas_subset.sql
+          rollback;
+          begin;
+          \i tests/db/test_ai_manual_candidate_cas_subset.sql
+          rollback;
+          SQL
