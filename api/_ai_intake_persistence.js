@@ -34,7 +34,7 @@ function validUuid(value) {
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-function requestId(value) {
+function resolveRequestId(value) {
   if (value === undefined || value === null || value === '') return randomUUID();
   if (!validUuid(value)) {
     throw new AIPersistenceError('AI_INTAKE_INVALID_REQUEST_ID', 'AI intake request id is invalid.', 422);
@@ -153,11 +153,7 @@ async function persistExtractedTurn({
   if (!persistenceEnabled(env)) return { enabled: false };
   const session = await resumeOrCreate({ authorization, env, fetchImpl });
   const normalized = normalizeCandidates(candidates, sourceRef);
-  const idempotencyKey = requestId === undefined ? requestId : requestId;
-  const resolvedRequestId = requestId === undefined ? randomUUID() : requestId;
-  if (!validUuid(resolvedRequestId)) {
-    throw new AIPersistenceError('AI_INTAKE_INVALID_REQUEST_ID', 'AI intake request id is invalid.', 422);
-  }
+  const resolvedRequestId = resolveRequestId(requestId);
   const expectedRevision = Number(session.revision);
   const saved = await rpc('dpp_api_ai_intake_turn_save_cas', {
     p_session_id: session.id,
@@ -216,31 +212,29 @@ async function reviewCandidateCas({
   candidateId,
   accept,
   expectedRevision,
-  requestId: suppliedRequestId
+  requestId
 }, options = {}) {
   if (!validUuid(sessionId) || !validUuid(candidateId) || typeof accept !== 'boolean' ||
       !Number.isSafeInteger(expectedRevision) || expectedRevision < 0) {
     throw new AIPersistenceError('AI_INTAKE_INVALID_REVIEW', 'AI intake CAS review is invalid.', 422);
   }
-  const resolvedRequestId = requestId(suppliedRequestId);
   return rpc('dpp_api_ai_intake_candidate_review_cas', {
     p_session_id: sessionId,
     p_candidate_id: candidateId,
     p_accept: accept,
     p_expected_revision: expectedRevision,
-    p_request_id: resolvedRequestId
+    p_request_id: resolveRequestId(requestId)
   }, options);
 }
 
-async function approveSessionCas({ sessionId, expectedRevision, requestId: suppliedRequestId }, options = {}) {
+async function approveSessionCas({ sessionId, expectedRevision, requestId }, options = {}) {
   if (!validUuid(sessionId) || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0) {
     throw new AIPersistenceError('AI_INTAKE_INVALID_APPROVAL', 'AI intake final approval is invalid.', 422);
   }
-  const resolvedRequestId = requestId(suppliedRequestId);
   return rpc('dpp_api_ai_intake_session_approve_cas', {
     p_session_id: sessionId,
     p_expected_revision: expectedRevision,
-    p_request_id: resolvedRequestId
+    p_request_id: resolveRequestId(requestId)
   }, options);
 }
 
@@ -250,7 +244,7 @@ module.exports = {
   AIPersistenceError,
   persistenceEnabled,
   validUuid,
-  requestId,
+  resolveRequestId,
   rpc,
   resumeOrCreate,
   normalizeCandidates,
