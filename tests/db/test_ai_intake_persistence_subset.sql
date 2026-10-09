@@ -32,7 +32,6 @@ begin
     raise exception 'AI intake session creation mismatch';
   end if;
 
-  -- Resume must return the same active session for the same user/tenant/kind.
   result:=public.dpp_api_ai_intake_resume_or_create();
   if (result->>'id')::uuid<>session_a then
     raise exception 'AI intake resume created a duplicate active session';
@@ -65,7 +64,6 @@ begin
     raise exception 'Initial AI intake snapshot mismatch';
   end if;
 
-  -- White-box assertion: direct grants are deliberately revoked from authenticated.
   execute 'reset role';
   if exists(
     select 1 from public.dpp_ai_intake_candidates
@@ -74,15 +72,13 @@ begin
     raise exception 'AI candidate became verified without human review';
   end if;
 
-  -- Return to the real application role for all public RPC behavior.
   execute 'set local role authenticated';
   perform set_config('request.jwt.claim.sub',owner_id::text,true);
   perform public.dpp_api_tenant_context_set(org_a);
 
-  -- Explicit approval is separate from the original candidate and can contain a human edit.
-  result:=public.dpp_api_ai_intake_candidate_review(session_a,'company','Battery A Ltd',true);
+  -- Legacy wrapper now follows Worker A semantics: edits require a new candidate; review verifies the candidate value.
+  result:=public.dpp_api_ai_intake_candidate_review(session_a,'company','Battery A',true);
   if result->>'verification_state'<>'accepted'
-     or result->>'approved_value'<>'Battery A Ltd'
      or (result->>'canonical_answers_written')::boolean is not false
      or (result->>'can_publish')::boolean is not false then
     raise exception 'Human approval result mismatch';
@@ -90,27 +86,23 @@ begin
 
   snapshot:=public.dpp_api_ai_intake_snapshot(session_a);
   if (snapshot->>'approved_count')::integer<>1
-     or snapshot#>>'{approved_answers,company}'<>'Battery A Ltd' then
+     or snapshot#>>'{approved_answers,company}'<>'Battery A' then
     raise exception 'Approved answer was not resumable';
   end if;
 
-  -- White-box provenance/approval separation checks run as test owner only.
   execute 'reset role';
   if not exists(
-    select 1
-    from public.dpp_ai_intake_candidates c
+    select 1 from public.dpp_ai_intake_candidates c
     where c.organization_id=org_a and c.session_id=session_a
       and c.field_key='company' and c.candidate_value='Battery A'
       and c.verification_state='accepted'
   ) then
     raise exception 'Original AI candidate/provenance was not preserved';
   end if;
-
   if not exists(
-    select 1
-    from public.dpp_ai_intake_approvals a
+    select 1 from public.dpp_ai_intake_approvals a
     where a.organization_id=org_a and a.session_id=session_a
-      and a.field_key='company' and a.approved_value='Battery A Ltd'
+      and a.field_key='company' and a.approved_value='Battery A'
       and a.approved_by=owner_id
   ) then
     raise exception 'Human approval was not stored separately';
@@ -120,7 +112,7 @@ begin
   perform set_config('request.jwt.claim.sub',owner_id::text,true);
   perform public.dpp_api_tenant_context_set(org_a);
 
-  -- Re-running the model for a field invalidates its previous approval and returns it to unverified.
+  -- A later model candidate invalidates the field approval but preserves both candidates for conflict review.
   perform public.dpp_api_ai_intake_turn_save(
     session_a,
     'The legal company name is Battery A AD.',
@@ -142,10 +134,13 @@ begin
       and candidate_value='Battery A AD' and verification_state='unverified'
       and reviewed_by is null and reviewed_at is null
   ) then
-    raise exception 'Updated AI candidate was not reset to unverified';
+    raise exception 'Updated AI candidate was not stored as unverified';
+  end if;
+  if (select count(*) from public.dpp_ai_intake_candidates
+      where organization_id=org_a and session_id=session_a and field_key='company')<>2 then
+    raise exception 'Conflicting company candidates were not both preserved';
   end if;
 
-  -- Viewer can read snapshot but cannot create/write/review.
   execute 'set local role authenticated';
   perform set_config('request.jwt.claim.sub',viewer_id::text,true);
   perform public.dpp_api_tenant_context_set(org_a);
@@ -168,7 +163,6 @@ begin
   end;
   if not denied then raise exception 'Viewer gained AI candidate review access'; end if;
 
-  -- Separate tenant must not see tenant A session.
   perform set_config('request.jwt.claim.sub',outsider_id::text,true);
   result:=public.dpp_api_organization_create('AI Intake B','ai-intake-b');
   org_b:=(result->>'organization_id')::uuid;
@@ -181,7 +175,6 @@ begin
   end;
   if not denied then raise exception 'AI intake snapshot leaked across tenants'; end if;
 
-  -- No A2 operation may write canonical onboarding, products, items, passports, or publish state.
   execute 'reset role';
   if exists(select 1 from public.dpp_manufacturer_onboarding_answers where organization_id=org_a)
      or exists(select 1 from public.dpp_battery_models where organization_id=org_a)
