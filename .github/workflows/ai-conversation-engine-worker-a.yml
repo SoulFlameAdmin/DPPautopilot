@@ -1,0 +1,18 @@
+name: AI Worker A Conversation Engine
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conversation-engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Run Worker A conversation engine regression suite
+        run: node --test tests/api/ai-conversation-engine.test.cjs
