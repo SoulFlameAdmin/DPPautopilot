@@ -153,7 +153,7 @@ async function animateConfiguration(steps){
   for(const key of keys){
     setConfigureStep(key,"active");
     await new Promise(resolve=>setTimeout(resolve,220));
-    if(returned.has(key))setConfigureStep(key,"done");
+    setConfigureStep(key,returned.has(key)?"done":"");
   }
 }
 async function submitAndConfigure(){
@@ -167,14 +167,11 @@ async function submitAndConfigure(){
       throw new Error("Системата не върна готова pilot конфигурация. Отговорите са запазени, но workspace-ът няма да бъде отворен преждевременно.");
     }
     const configSteps=Array.isArray(profile.configuration.steps)?profile.configuration.steps:[];
-    const requiredSteps=["company","workflow","product","batch","dpp","qr","ready"];
-    const doneKeys=new Set(configSteps.filter(item=>item?.status==="done").map(item=>item.key));
-    const missing=requiredSteps.filter(key=>!doneKeys.has(key));
-    if(missing.length){
-      throw new Error("Конфигурацията е непълна: "+missing.join(", "));
-    }
+    // Onboarding only configures company metadata; products, batches, DPP and QR are real future work.
+    const companyReady=configSteps.some(item=>item?.key==="company"&&item?.status==="done");
+    if(!companyReady)throw new Error("Фирмената конфигурация не е потвърдена.");
     await animateConfiguration(configSteps);
-    $("configureMessage").textContent="Готово. Workspace-ът е конфигуриран. Отваряме dashboard-а…";
+    $("configureMessage").textContent="Отговорите са записани. Отваряме фирмения workspace за проверка на tenant…";
     localStorage.removeItem(DRAFT_KEY);
     setTimeout(()=>showDashboard(),500);
   }catch(error){
@@ -276,7 +273,7 @@ async function ensureProductionTenant(){
     p_slug:slug
   },google.access_token);
   const active=Array.isArray(response)?response[0]:response;
-  if(!active||typeof active!=="object"||!(active.id||active.organization_id)){
+  if(!active||typeof active!=="object"||!(active.id||active.organization_id)||active.active!==true){
     throw new Error("Фирменият tenant не е потвърден. Опитайте отново.");
   }
   copyGoogleToCompanySession(google);
