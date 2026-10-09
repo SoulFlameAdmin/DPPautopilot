@@ -56,11 +56,20 @@ test('completion requires a real configuration before opening dashboard',()=>{
   assert.match(js,/profile\.configuration&&Object\.keys\(profile\.configuration\)\.length/);
 });
 
+test('onboarding 8/8 accepts future product/QR steps as PENDING without false completion',()=>{
+  const js=read('assets/csp/manufacturer-early.js');
+  assert.match(js,/const companyReady=configSteps\.some/);
+  assert.match(js,/returned\.has\(key\)\?"done":""/);
+  assert.doesNotMatch(js,/missing=requiredSteps\.filter/);
+});
+
 test('dashboard is hidden until onboarding/configuration is complete',()=>{
   const html=read('live/manufacturer-early.html');
   assert.match(html,/id="appSidebar"[^>]*hidden/);
   assert.match(html,/id="dashboardHome"[^>]*hidden/);
-  assert.match(html,/AUTO-CONFIGURED/);
+  assert.match(html,/id="tenantBadge">PREPARING/);
+  assert.match(html,/id="tenantRetry" hidden/);
+  assert.doesNotMatch(html,/<span class="state ok">AUTO-CONFIGURED<\/span>/);
   assert.match(html,/Product \/ SKU/);
 });
 
@@ -71,3 +80,6 @@ test('production tenant onboarding uses atomic organization ensure instead of li
   assert.match(js,/p_name:String\(company\)\.slice\(0,200\)/);
   assert.match(js,/p_slug:slug/);
 });
+
+// Run behavioral tenant READY / failure / retry regressions in existing CI suite.
+require('./manufacturer-tenant-ready-state.test.cjs');

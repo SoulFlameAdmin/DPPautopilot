@@ -153,7 +153,7 @@ async function animateConfiguration(steps){
   for(const key of keys){
     setConfigureStep(key,"active");
     await new Promise(resolve=>setTimeout(resolve,220));
-    if(returned.has(key))setConfigureStep(key,"done");
+    setConfigureStep(key,returned.has(key)?"done":"");
   }
 }
 async function submitAndConfigure(){
@@ -167,14 +167,11 @@ async function submitAndConfigure(){
       throw new Error("Системата не върна готова pilot конфигурация. Отговорите са запазени, но workspace-ът няма да бъде отворен преждевременно.");
     }
     const configSteps=Array.isArray(profile.configuration.steps)?profile.configuration.steps:[];
-    const requiredSteps=["company","workflow","product","batch","dpp","qr","ready"];
-    const doneKeys=new Set(configSteps.filter(item=>item?.status==="done").map(item=>item.key));
-    const missing=requiredSteps.filter(key=>!doneKeys.has(key));
-    if(missing.length){
-      throw new Error("Конфигурацията е непълна: "+missing.join(", "));
-    }
+    // Onboarding only configures company metadata; products, batches, DPP and QR are real future work.
+    const companyReady=configSteps.some(item=>item?.key==="company"&&item?.status==="done");
+    if(!companyReady)throw new Error("Фирмената конфигурация не е потвърдена.");
     await animateConfiguration(configSteps);
-    $("configureMessage").textContent="Готово. Workspace-ът е конфигуриран. Отваряме dashboard-а…";
+    $("configureMessage").textContent="Отговорите са записани. Отваряме фирмения workspace за проверка на tenant…";
     localStorage.removeItem(DRAFT_KEY);
     setTimeout(()=>showDashboard(),500);
   }catch(error){
@@ -242,6 +239,7 @@ async function organizationRpc(name,payload,accessToken){
     clearTimeout(timer);
   }
   const data=await response.json().catch(()=>null);
+  if(response.status===401)throw new Error("Google сесията изтече. Влезте отново през /register.");
   if(!response.ok)throw new Error(data?.message||data?.error||"Tenant request failed.");
   return data;
 }
@@ -261,19 +259,25 @@ async function productionApi(path,{method="GET",body,token:accessToken}={}){
   return data;
 }
 async function ensureProductionTenant(){
+  // Prevent a stale previous-company session from surviving a failed ensure.
+  sessionStorage.removeItem(COMPANY_SESSION_KEY);
   const google=readGoogleSession();
   if(!google?.access_token)throw new Error("Няма запазена Google сесия. Влезте отново през /register.");
-  copyGoogleToCompanySession(google);
-
   const company=profile?.configuration?.company?.name||profile?.companyName||answers.company||"DPP Company";
   const suffix=(globalThis.crypto&&typeof globalThis.crypto.randomUUID==="function"
     ?globalThis.crypto.randomUUID().replace(/-/g,"").slice(0,8)
     :String(Date.now()).slice(-8));
   const slug=(slugify(company).slice(0,80)+"-"+suffix).slice(0,120).replace(/-+$/,"");
-  return organizationRpc("dpp_api_organization_ensure",{
+  const response=await organizationRpc("dpp_api_organization_ensure",{
     p_name:String(company).slice(0,200),
     p_slug:slug
   },google.access_token);
+  const active=Array.isArray(response)?response[0]:response;
+  if(!active||typeof active!=="object"||!(active.id||active.organization_id)||active.active!==true){
+    throw new Error("Фирменият tenant не е потвърден. Опитайте отново.");
+  }
+  copyGoogleToCompanySession(google);
+  return active;
 }
 function setProductEntryReady(active){
   for(const id of ["productSkuEntry","productSkuButton"]){
@@ -292,12 +296,14 @@ function setProductEntryReady(active){
 let productionEntryPromise=null;
 async function prepareProductionEntry(){
   if(productionEntryPromise)return productionEntryPromise;
+  globalThis.DPPTenantUI.preparing();
   productionEntryPromise=(async()=>{
   const state=$("productSkuEntryState");
   try{
     if(state)state.textContent="Свързваме фирмения tenant…";
     const active=await ensureProductionTenant();
     setProductEntryReady(active);
+    globalThis.DPPTenantUI.ready(active);
     const earlyStatus=$("earlyStatus");
     if(earlyStatus){
       earlyStatus.textContent="Onboarding 8/8 е завършен. Company tenant е активен. Следва: реален Product / SKU.";
@@ -305,6 +311,7 @@ async function prepareProductionEntry(){
     }
     return active;
   }catch(error){
+    globalThis.DPPTenantUI.failed(error);
     if(state)state.textContent="Не успяхме да активираме Product / SKU";
     const earlyStatus=$("earlyStatus");
     if(earlyStatus){
@@ -342,14 +349,11 @@ function showDashboard(){
   $("intakeScreen").hidden=true;
   $("appSidebar").hidden=false;
   $("dashboardHome").hidden=false;
-  document.body.dataset.manufacturerTenant="configured";
   $("clientEmail").textContent=profile?.email||"—";
   $("clientEmailTop").textContent=profile?.email||"—";
   $("profileCompany").textContent=profile?.companyName||profile?.configuration?.company?.name||"Configured";
-  $("tenantMeta").textContent="Google session · Auto-configured DPP pilot";
-  $("earlyStatus").textContent="Onboarding 8/8 е завършен. Pilot workspace-ът е конфигуриран автоматично от вашите отговори. Следва: реален Product / SKU.";
   renderConfiguration();
-  prepareProductionEntry().catch(()=>{});
+  prepareProductionEntry().catch(error=>globalThis.DPPTenantUI.failed(error));
 }
 function showWizard(){
   $("intakeScreen").hidden=false;
@@ -365,12 +369,14 @@ function showWizard(){
   renderQuestion();
 }
 
+$("tenantRetry").addEventListener("click",()=>prepareProductionEntry().catch(error=>globalThis.DPPTenantUI.failed(error)));
+
 for(const id of ["productSkuEntry","productSkuButton"]){
   const link=$(id);
   if(link)link.addEventListener("click",event=>{
     if(link.getAttribute("aria-disabled")==="true"){
       event.preventDefault();
-      prepareProductionEntry().catch(()=>{});
+      if(document.body.dataset.manufacturerTenant==="setup-failed")prepareProductionEntry().catch(error=>globalThis.DPPTenantUI.failed(error));
     }
   });
 }

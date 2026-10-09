@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/assets/csp/manufacturer-ops.css">
   <link rel="stylesheet" href="/assets/csp/manufacturer-early.css">
 </head>
-<body data-manufacturer-ready="true" data-manufacturer-auth="early-access" data-manufacturer-tenant="pending" data-manufacturer-mode="early-access">
+<body data-manufacturer-ready="false" data-manufacturer-auth="early-access" data-manufacturer-tenant="pending" data-manufacturer-mode="early-access">
 
   <section class="intake-screen" id="intakeScreen" aria-label="DPP manufacturer onboarding">
     <header class="intake-top">
@@ -100,22 +100,23 @@
     <div id="dashboard">
       <section class="welcome configured-welcome">
         <p class="eyebrow">DPP PILOT WORKSPACE</p>
-        <span class="state ok">AUTO-CONFIGURED</span>
-        <h1>Вашият DPP workspace е готов.</h1>
-        <p>Конфигурацията е създадена от вашите onboarding отговори. Следващата реална стъпка е Product / SKU → Batch → Serial units → DPP → QR.</p>
-        <div class="tenant-line"><strong id="clientEmailTop">—</strong><span id="tenantMeta">Configured workspace</span></div>
+        <span class="state" id="tenantBadge">PREPARING</span>
+        <h1 id="tenantHeadline">Подготвяме фирмения workspace…</h1>
+        <p id="tenantDescription">Onboarding отговорите са запазени. Изчакваме потвърждение на фирмения tenant преди Product / SKU.</p>
+        <div class="tenant-line"><strong id="clientEmailTop">—</strong><span id="tenantMeta">Tenant verification pending</span></div>
       </section>
 
       <section class="stats" aria-label="Configured pilot status">
         <article class="metric blue"><span class="metric-icon">▤</span><div><small>Total Passports</small><strong>0</strong><em>Готово за първия реален модел</em></div></article>
-        <article class="metric green"><span class="metric-icon">✓</span><div><small>Status</small><strong>Configured</strong><em>Onboarding 8/8 завършен</em></div></article>
+        <article class="metric green"><span class="metric-icon">✓</span><div><small>Status</small><strong id="tenantStatusMetric">Preparing</strong><em>Onboarding 8/8 завършен</em></div></article>
         <a class="metric amber metric-link preparing" id="productSkuEntry" href="#" aria-disabled="true"><span class="metric-icon">＋</span><div><small>Next Step</small><strong>Product / SKU</strong><em id="productSkuEntryState">Подготвяме фирмения workspace…</em></div><span class="metric-go" aria-hidden="true">→</span></a>
-        <article class="metric purple"><span class="metric-icon">▦</span><div><small>QR</small><strong>Ready</strong><em>След DPP създаване</em></div></article>
+        <article class="metric purple"><span class="metric-icon">▦</span><div><small>QR</small><strong id="tenantQrStatus">Pending</strong><em>След DPP създаване</em></div></article>
       </section>
 
       <section class="passport-table card">
-        <div class="section-head"><div><p class="eyebrow">PILOT CONFIGURATION</p><h2>Настройката е завършена</h2></div><span class="state ok">READY FOR PRODUCT</span></div>
-        <div class="result ok" id="earlyStatus" role="status" aria-live="polite">Зареждаме конфигурацията…</div>
+        <div class="section-head"><div><p class="eyebrow">PILOT CONFIGURATION</p><h2 id="tenantSectionTitle">Проверяваме конфигурацията</h2></div><span class="state" id="tenantSectionBadge">PREPARING</span></div>
+        <div class="result" id="earlyStatus" role="status" aria-live="polite">Проверяваме фирмения tenant…</div>
+        <button class="btn primary" type="button" id="tenantRetry" hidden>Опитай отново →</button>
         <div class="early-info-grid">
           <div class="access-box"><span class="shield">◇</span><div><strong>Google access</strong><p id="clientEmail">—</p><small>Сесията се пази на устройството.</small></div></div>
           <div class="access-box"><span class="shield">✓</span><div><strong>Следваща реална стъпка</strong><p>Добавете реалния Product / SKU. После създаваме Batch, серийни единици, DPP и QR.</p><a class="btn primary early-product-cta" id="productSkuButton" href="#" aria-disabled="true">Отвори Product / SKU →</a></div></div>
@@ -125,6 +126,7 @@
     </div>
   </main>
 
+  <script src="/assets/csp/manufacturer-tenant-state.js"></script>
   <script src="/assets/csp/manufacturer-early.js"></script>
 </body>
 </html>
