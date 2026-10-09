@@ -14,5 +14,5 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Run AI-first intake, extraction and endpoint safety tests
-        run: node --test tests/api/ai-intake-contract.test.cjs tests/api/ai-prompt-extractor.test.cjs tests/api/ai-intake-endpoint.test.cjs
+      - name: Run AI-first intake, extraction, endpoint and UI safety tests
+        run: node --test tests/api/ai-intake-contract.test.cjs tests/api/ai-prompt-extractor.test.cjs tests/api/ai-intake-endpoint.test.cjs tests/api/ai-intake-ui.test.cjs
