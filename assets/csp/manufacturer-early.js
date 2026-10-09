@@ -281,9 +281,7 @@ async function ensureProductionTenant(){
   return active;
 }
 function setProductEntryReady(active){
-  $("tenantRetry").addEventListener("click",()=>prepareProductionEntry().catch(error=>globalThis.DPPTenantUI.failed(error)));
-
-for(const id of ["productSkuEntry","productSkuButton"]){
+  for(const id of ["productSkuEntry","productSkuButton"]){
     const link=$(id);
     if(!link)continue;
     link.href="/manufacturer#modelRegisterCard";
@@ -371,6 +369,8 @@ function showWizard(){
   if(step>=QUESTIONS.length){submitAndConfigure();return;}
   renderQuestion();
 }
+
+$("tenantRetry").addEventListener("click",()=>prepareProductionEntry().catch(error=>globalThis.DPPTenantUI.failed(error)));
 
 for(const id of ["productSkuEntry","productSkuButton"]){
   const link=$(id);
