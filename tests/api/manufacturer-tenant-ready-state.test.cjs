@@ -78,7 +78,7 @@ test('pending tenant is not marked ready until RPC success',async()=>{
   assert.equal(browser.el('tenantStatusMetric').textContent,'Preparing');
   assert.equal(browser.el('productSkuButton').getAttribute('aria-disabled'),'true');
   assert.equal(browser.companyStored.size,0);
-  release(response(true,200,{organization_id:'org-id',name:'Demo'}));
+  release(response(true,200,{organization_id:'org-id',name:'Demo',active:true}));
   await settle();
   assert.equal(browser.document.body.dataset.manufacturerTenant,'configured');
   assert.equal(browser.document.body.dataset.manufacturerReady,'true');
@@ -105,7 +105,7 @@ test('expired Google token never produces a READY screen',async()=>{
 test('manual Retry transitions failed to preparing and then to ready',async()=>{
   const browser=boot(call=>call===1
     ?response(false,503,{message:'Temporarily unavailable'})
-    :response(true,200,{organization_id:'org-id',name:'Demo'}));
+    :response(true,200,{organization_id:'org-id',name:'Demo',active:true}));
   await settle();
   assert.equal(browser.document.body.dataset.manufacturerTenant,'setup-failed');
   browser.el('tenantRetry').listeners.get('click')();
