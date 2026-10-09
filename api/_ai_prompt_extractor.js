@@ -3,6 +3,7 @@
 const { MODULES } = require('./_ai_intake_contract.js');
 
 const GATEWAY_URL = 'https://ai-gateway.vercel.sh/v1/responses';
+const DEFAULT_MODEL = 'openai/gpt-5.6-sol';
 const MAX_PROMPT_CHARS = 20000;
 const REQUEST_TIMEOUT_MS = 15000;
 const ONBOARDING_KEYS = Object.freeze(MODULES.battery.map(item => item.key));
@@ -19,18 +20,11 @@ class AIExtractorError extends Error {
 
 function getGatewayConfig(env = process.env) {
   const token = String(env.AI_GATEWAY_API_KEY || env.VERCEL_OIDC_TOKEN || '').trim();
-  const model = String(env.AI_GATEWAY_MODEL || '').trim();
+  const model = String(env.AI_GATEWAY_MODEL || DEFAULT_MODEL).trim();
   if (!token) {
     throw new AIExtractorError(
       'AI_NOT_CONFIGURED',
       'AI Gateway authentication is not configured.',
-      503
-    );
-  }
-  if (!model) {
-    throw new AIExtractorError(
-      'AI_MODEL_NOT_CONFIGURED',
-      'AI_GATEWAY_MODEL is not configured.',
       503
     );
   }
@@ -224,6 +218,7 @@ async function extractPromptCandidates({
 
 module.exports = {
   GATEWAY_URL,
+  DEFAULT_MODEL,
   MAX_PROMPT_CHARS,
   ONBOARDING_KEYS,
   AIExtractorError,
