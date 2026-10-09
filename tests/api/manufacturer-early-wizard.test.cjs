@@ -62,7 +62,7 @@ test('dashboard is hidden until onboarding/configuration is complete',()=>{
   assert.match(html,/id="dashboardHome"[^>]*hidden/);
   assert.match(html,/id="tenantBadge">PREPARING/);
   assert.match(html,/id="tenantRetry" hidden/);
-  assert.doesNotMatch(html,/<span class="state ok">AUTO-CONFIGURED<\\/span>/);
+  assert.doesNotMatch(html,/<span class="state ok">AUTO-CONFIGURED<\/span>/);
   assert.match(html,/Product \/ SKU/);
 });
 
