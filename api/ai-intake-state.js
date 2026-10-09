@@ -19,6 +19,7 @@ const {
   reviewCandidateCas,
   approveSessionCas
 } = require('./_ai_intake_persistence.js');
+const { createManualCandidateCas } = require('./_ai_intake_manual_candidate.js');
 
 const ONBOARDING_KEY_SET = new Set(ONBOARDING_KEYS);
 
@@ -40,7 +41,7 @@ function validRevision(value) {
 
 function validateBody(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return 'body';
-  if (!['resume','snapshot','review','review_cas','approve'].includes(body.action)) return 'action';
+  if (!['resume','snapshot','review','manual_candidate','review_cas','approve'].includes(body.action)) return 'action';
 
   if (body.action === 'resume') {
     return Object.keys(body).some(key => key !== 'action') ? 'unknown_field' : null;
@@ -64,6 +65,16 @@ function validateBody(body) {
     } else if (body.approved_value !== undefined && body.approved_value !== null) {
       return 'approved_value';
     }
+    return null;
+  }
+
+  if (body.action === 'manual_candidate') {
+    const allowed = new Set(['action','session_id','field_key','value','expected_revision','request_id']);
+    if (Object.keys(body).some(key => !allowed.has(key))) return 'unknown_field';
+    if (!ONBOARDING_KEY_SET.has(body.field_key)) return 'field_key';
+    if (typeof body.value !== 'string' || !body.value.trim() || body.value.trim().length > 5000) return 'value';
+    if (!validRevision(body.expected_revision)) return 'expected_revision';
+    if (body.request_id !== undefined && !validUuid(body.request_id)) return 'request_id';
     return null;
   }
 
@@ -158,6 +169,14 @@ function createHandler({ env = process.env, fetchImpl = globalThis.fetch } = {})
           fieldKey: body.field_key,
           approvedValue: body.approved_value,
           accept: body.accept
+        }, options);
+      } else if (body.action === 'manual_candidate') {
+        data = await createManualCandidateCas({
+          sessionId: body.session_id,
+          fieldKey: body.field_key,
+          value: body.value,
+          expectedRevision: body.expected_revision,
+          requestId: body.request_id
         }, options);
       } else if (body.action === 'review_cas') {
         data = await reviewCandidateCas({
