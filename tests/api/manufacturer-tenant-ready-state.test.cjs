@@ -58,7 +58,7 @@ function boot(tenantResponse){
   const localStorage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,String(v)),removeItem:k=>stored.delete(k)};
   const sessionStorage={setItem:(k,v)=>companyStored.set(k,String(v)),getItem:k=>companyStored.get(k)||null};
   const context={document,fetch,localStorage,sessionStorage,location:{hash:'',pathname:'/manufacturer-early'},URLSearchParams,
-    history:{replaceState(){}},setTimeout,clearTimeout,console};
+    history:{replaceState(){}},setTimeout,clearTimeout,AbortController,console};
   vm.runInNewContext(ui,context,{filename:'manufacturer-tenant-state.js'});
   vm.runInNewContext(app,context,{filename:'manufacturer-early.js'});
   return {document,el,companyStored,calls:()=>calls};
