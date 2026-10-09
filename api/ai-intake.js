@@ -36,7 +36,7 @@ function bearer(req) {
 
 function validUuid(value) {
   return typeof value === 'string' &&
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 function validateBody(body) {
@@ -45,7 +45,8 @@ function validateBody(body) {
   const prompt = body.prompt.trim();
   if (!prompt || prompt.length > MAX_PROMPT_CHARS) return 'prompt';
   if (body.module !== undefined && body.module !== 'battery') return 'module';
-  const allowed = new Set(['prompt', 'module']);
+  if (body.request_id !== undefined && !validUuid(body.request_id)) return 'request_id';
+  const allowed = new Set(['prompt', 'module', 'request_id']);
   if (Object.keys(body).some(key => !allowed.has(key))) return 'unknown_field';
   return null;
 }
@@ -181,6 +182,7 @@ function createHandler({ env = process.env, fetchImpl = globalThis.fetch } = {})
         candidates: extracted.candidates,
         model: extracted.model,
         sourceRef: 'conversation:prompt',
+        requestId: body.request_id,
         env,
         fetchImpl
       });
