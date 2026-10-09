@@ -56,7 +56,7 @@ function boot(tenantResponse){
     throw new Error('Unexpected fetch '+u);
   };
   const localStorage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,String(v)),removeItem:k=>stored.delete(k)};
-  const sessionStorage={setItem:(k,v)=>companyStored.set(k,String(v)),getItem:k=>companyStored.get(k)||null};
+  const sessionStorage={setItem:(k,v)=>companyStored.set(k,String(v)),getItem:k=>companyStored.get(k)||null,removeItem:k=>companyStored.delete(k)};
   const context={document,fetch,localStorage,sessionStorage,location:{hash:'',pathname:'/manufacturer-early'},URLSearchParams,
     history:{replaceState(){}},setTimeout,clearTimeout,AbortController,console};
   vm.runInNewContext(ui,context,{filename:'manufacturer-tenant-state.js'});
