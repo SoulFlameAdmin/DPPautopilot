@@ -19,12 +19,38 @@ function candidates() {
   ];
 }
 
-test('UI helper accepts only the exact eight onboarding keys and removes duplicates', () => {
+function snapshotCandidates() {
+  return [
+    { id: 'c1', field_key: 'company', value: 'Acme Battery', evidence: 'Acme Battery', verification_state: 'unverified', source_type: 'user' },
+    { id: 'c2', field_key: 'company', value: 'Acme Battery AD', evidence: 'Acme Battery AD', verification_state: 'unverified', source_type: 'user' },
+    { id: 'c3', field_key: 'country', value: 'Bulgaria', evidence: 'Bulgaria', verification_state: 'accepted', source_type: 'user' },
+    { id: 'c4', field_key: 'company', value: 'Old Name', evidence: 'Old Name', verification_state: 'rejected', source_type: 'user' }
+  ];
+}
+
+test('one-prompt UI helper accepts only exact eight onboarding keys and removes same-prompt duplicates', () => {
   assert.deepEqual(Core.KEYS, [
     'country', 'company', 'products', 'sku',
     'annualVolume', 'users', 'systems', 'automation'
   ]);
   assert.deepEqual(Core.sanitizeCandidates(candidates()).map(item => item.key), ['company', 'country']);
+});
+
+test('persisted snapshot helper preserves multiple candidates for one field', () => {
+  const safe = Core.sanitizeSnapshotCandidates(snapshotCandidates());
+  assert.equal(safe.length, 4);
+  assert.deepEqual(safe.filter(item => item.key === 'company').map(item => item.id), ['c1','c2','c4']);
+  assert.deepEqual(Core.conflictKeys(safe), ['company']);
+  assert.deepEqual(Core.acceptedAnswers(safe), { country: 'Bulgaria' });
+});
+
+test('rejected candidate does not create a conflict and whitespace/case normalization is stable', () => {
+  const safe = Core.sanitizeSnapshotCandidates([
+    { id: 'c1', field_key: 'company', value: ' Acme   Battery ', evidence: 'A', verification_state: 'unverified' },
+    { id: 'c2', field_key: 'company', value: 'acme battery', evidence: 'B', verification_state: 'unverified' },
+    { id: 'c3', field_key: 'company', value: 'Other', evidence: 'C', verification_state: 'rejected' }
+  ]);
+  assert.deepEqual(Core.conflictKeys(safe), []);
 });
 
 test('AI suggestions do not become answers until explicitly selected by the user', () => {
