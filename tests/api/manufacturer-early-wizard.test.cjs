@@ -56,6 +56,13 @@ test('completion requires a real configuration before opening dashboard',()=>{
   assert.match(js,/profile\.configuration&&Object\.keys\(profile\.configuration\)\.length/);
 });
 
+test('onboarding 8/8 accepts future product/QR steps as PENDING without false completion',()=>{
+  const js=read('assets/csp/manufacturer-early.js');
+  assert.match(js,/const companyReady=configSteps\.some/);
+  assert.match(js,/returned\.has\(key\)\?"done":""/);
+  assert.doesNotMatch(js,/missing=requiredSteps\.filter/);
+});
+
 test('dashboard is hidden until onboarding/configuration is complete',()=>{
   const html=read('live/manufacturer-early.html');
   assert.match(html,/id="appSidebar"[^>]*hidden/);
