@@ -262,6 +262,8 @@ async function productionApi(path,{method="GET",body,token:accessToken}={}){
   return data;
 }
 async function ensureProductionTenant(){
+  // Prevent a stale previous-company session from surviving a failed ensure.
+  sessionStorage.removeItem(COMPANY_SESSION_KEY);
   const google=readGoogleSession();
   if(!google?.access_token)throw new Error("Няма запазена Google сесия. Влезте отново през /register.");
   const company=profile?.configuration?.company?.name||profile?.companyName||answers.company||"DPP Company";
