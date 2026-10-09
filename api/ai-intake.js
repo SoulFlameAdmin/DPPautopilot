@@ -15,6 +15,10 @@ const {
   MAX_PROMPT_CHARS,
   extractPromptCandidates
 } = require('./_ai_prompt_extractor.js');
+const {
+  AIPersistenceError,
+  persistExtractedTurn
+} = require('./_ai_intake_persistence.js');
 
 const AUTH_TIMEOUT_MS = 8000;
 
@@ -99,7 +103,7 @@ async function validateAccessToken(authorization, env = process.env, fetchImpl =
 }
 
 function publicError(error) {
-  if (error instanceof AIExtractorError) {
+  if (error instanceof AIExtractorError || error instanceof AIPersistenceError) {
     return {
       status: Number.isInteger(error.status) ? error.status : 502,
       body: { error: { code: error.code || 'AI_ERROR', message: error.message || 'AI request failed.' } }
@@ -171,11 +175,21 @@ function createHandler({ env = process.env, fetchImpl = globalThis.fetch } = {})
         prompt,
         facts: extracted.facts
       });
+      const persistence = await persistExtractedTurn({
+        authorization,
+        prompt,
+        candidates: extracted.candidates,
+        model: extracted.model,
+        sourceRef: 'conversation:prompt',
+        env,
+        fetchImpl
+      });
       return send(res, 200, {
         data: {
           candidates: extracted.candidates,
           intake: state,
           model: extracted.model,
+          persistence,
           notice: 'AI candidates are unverified until explicitly confirmed by the user.'
         }
       });
