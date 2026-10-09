@@ -73,3 +73,6 @@ test('production tenant onboarding uses atomic organization ensure instead of li
   assert.match(js,/p_name:String\(company\)\.slice\(0,200\)/);
   assert.match(js,/p_slug:slug/);
 });
+
+// Run behavioral tenant READY / failure / retry regressions in existing CI suite.
+require('./manufacturer-tenant-ready-state.test.cjs');
