@@ -3,24 +3,24 @@
 /**
  * SOULFLAME DPP AI-first intake contract v0.
  *
- * This module is intentionally model-provider agnostic. An LLM may propose
- * candidate facts, but this contract only accepts facts that are bound to an
- * allowed source and explicitly verified. AI inference is never a source of
- * truth and can never make a passport ready by itself.
+ * The first contract deliberately mirrors the eight fields already used by the
+ * manufacturer Early Access wizard so AI mode and manual mode feed the same
+ * downstream onboarding flow. An LLM may propose candidates, but AI inference
+ * is never factual provenance and can never make onboarding ready by itself.
  */
 
 const ALLOWED_SOURCE_TYPES = new Set(['user', 'document', 'system', 'integration']);
 
 const MODULES = Object.freeze({
   battery: Object.freeze([
-    Object.freeze({ key: 'company_role', question: 'Каква е ролята на фирмата за този продукт?' }),
-    Object.freeze({ key: 'product_category', question: 'Каква е точната продуктова категория?' }),
-    Object.freeze({ key: 'battery_type', question: 'Какъв тип батерия е продуктът?' }),
-    Object.freeze({ key: 'manufacturer_name', question: 'Кой е производителят?' }),
-    Object.freeze({ key: 'model_name', question: 'Как се казва моделът или продуктовата линия?' }),
-    Object.freeze({ key: 'market_scope', question: 'На кои пазари ще се пуска продуктът?' }),
-    Object.freeze({ key: 'data_sources', question: 'Какви източници на данни и доказателства имате?' }),
-    Object.freeze({ key: 'goal', question: 'Какво искате системата да подготви или публикува?' })
+    Object.freeze({ key: 'country', question: 'В коя държава е регистрирана фирмата?' }),
+    Object.freeze({ key: 'company', question: 'Как се казва фирмата / производителят?' }),
+    Object.freeze({ key: 'products', question: 'Какво точно произвеждате?' }),
+    Object.freeze({ key: 'sku', question: 'Колко модела / SKU имате приблизително?' }),
+    Object.freeze({ key: 'annualVolume', question: 'Какъв е приблизителният ви годишен производствен обем?' }),
+    Object.freeze({ key: 'users', question: 'Кои хора ще работят с DPP системата?' }),
+    Object.freeze({ key: 'systems', question: 'Какви системи и данни използвате в момента?' }),
+    Object.freeze({ key: 'automation', question: 'Какво искате SoulFlame DPP да автоматизира или реши за вас?' })
   ])
 });
 
@@ -125,10 +125,11 @@ function buildIntakeState(input = {}) {
     }
   }
 
+  const missingKeys = new Set(missing.map(item => item.key));
   const questions = [...missing, ...unverified].map(definition => ({
     key: definition.key,
     question: definition.question,
-    reason: missing.some(item => item.key === definition.key) ? 'missing' : 'unverified'
+    reason: missingKeys.has(definition.key) ? 'missing' : 'unverified'
   }));
 
   const allVerified = missing.length === 0 && unverified.length === 0;
@@ -140,6 +141,7 @@ function buildIntakeState(input = {}) {
   return {
     contract_version: 1,
     module: moduleKey,
+    onboarding_schema: 'manufacturer-early-v2',
     mode,
     prompt,
     facts,
