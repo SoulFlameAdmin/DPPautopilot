@@ -1,5 +1,7 @@
 -- AI-first A2 persistence acceptance. CI wraps this file in BEGIN/ROLLBACK.
 -- Proves resumability, tenant isolation, explicit human approval, and no canonical side effects.
+-- Direct table assertions intentionally run as the PostgreSQL test owner because authenticated
+-- has no direct table grants; product behavior is exercised only through checked RPCs.
 
 do $test$
 declare
@@ -63,12 +65,19 @@ begin
     raise exception 'Initial AI intake snapshot mismatch';
   end if;
 
+  -- White-box assertion: direct grants are deliberately revoked from authenticated.
+  execute 'reset role';
   if exists(
     select 1 from public.dpp_ai_intake_candidates
     where organization_id=org_a and session_id=session_a and verification_state<>'unverified'
   ) then
     raise exception 'AI candidate became verified without human review';
   end if;
+
+  -- Return to the real application role for all public RPC behavior.
+  execute 'set local role authenticated';
+  perform set_config('request.jwt.claim.sub',owner_id::text,true);
+  perform public.dpp_api_tenant_context_set(org_a);
 
   -- Explicit approval is separate from the original candidate and can contain a human edit.
   result:=public.dpp_api_ai_intake_candidate_review(session_a,'company','Battery A Ltd',true);
@@ -85,6 +94,8 @@ begin
     raise exception 'Approved answer was not resumable';
   end if;
 
+  -- White-box provenance/approval separation checks run as test owner only.
+  execute 'reset role';
   if not exists(
     select 1
     from public.dpp_ai_intake_candidates c
@@ -105,6 +116,10 @@ begin
     raise exception 'Human approval was not stored separately';
   end if;
 
+  execute 'set local role authenticated';
+  perform set_config('request.jwt.claim.sub',owner_id::text,true);
+  perform public.dpp_api_tenant_context_set(org_a);
+
   -- Re-running the model for a field invalidates its previous approval and returns it to unverified.
   perform public.dpp_api_ai_intake_turn_save(
     session_a,
@@ -119,9 +134,8 @@ begin
   if (snapshot->>'approved_count')::integer<>0 then
     raise exception 'Stale approval survived a changed AI candidate';
   end if;
-  if snapshot#>>'{candidates,0,verification_state}' is null then
-    null; -- Candidate order is lexical; detailed state is asserted directly below.
-  end if;
+
+  execute 'reset role';
   if not exists(
     select 1 from public.dpp_ai_intake_candidates
     where organization_id=org_a and session_id=session_a and field_key='company'
@@ -131,7 +145,8 @@ begin
     raise exception 'Updated AI candidate was not reset to unverified';
   end if;
 
-  -- Viewer can resume/read snapshot but cannot create/write/review.
+  -- Viewer can read snapshot but cannot create/write/review.
+  execute 'set local role authenticated';
   perform set_config('request.jwt.claim.sub',viewer_id::text,true);
   perform public.dpp_api_tenant_context_set(org_a);
   snapshot:=public.dpp_api_ai_intake_snapshot(session_a);
