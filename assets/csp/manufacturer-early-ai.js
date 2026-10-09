@@ -6,7 +6,9 @@ const GOOGLE_SESSION_KEY="dpp_google_session_v1";
 const EARLY_TOKEN_KEY="dpp_early_access_token_v1";
 const CONTINUE_KEY="dpp_ai_intake_manual_continue_v1";
 const PROMPT_KEY="dpp_ai_intake_prompt_v1";
+const AI_SESSION_KEY="dpp_ai_intake_session_v1";
 const EARLY_ENDPOINT="https://soulflame-twins.vercel.app/api/dpp-dashboard-link";
+const AI_STATE_ENDPOINT="/api/ai-intake-state";
 const LABELS={
   country:"Държава / пазар",company:"Фирма / производител",products:"Продукти",sku:"Модели / SKU",
   annualVolume:"Годишен обем",users:"Екип / роли",systems:"Системи / данни",automation:"Какво да автоматизираме"
@@ -16,6 +18,9 @@ const $=id=>document.getElementById(id);
 function readJson(key){try{return JSON.parse(localStorage.getItem(key)||"null")}catch{return null}}
 function googleSession(){const value=readJson(GOOGLE_SESSION_KEY);return value?.access_token?value:null}
 function earlyToken(){return String(localStorage.getItem(EARLY_TOKEN_KEY)||"").trim()}
+function validUuid(value){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value||""))}
+function aiSessionId(){const value=String(localStorage.getItem(AI_SESSION_KEY)||"").trim();return validUuid(value)?value:""}
+function setAiSession(value){if(validUuid(value))localStorage.setItem(AI_SESSION_KEY,String(value));else localStorage.removeItem(AI_SESSION_KEY)}
 function message(text,kind=""){const node=$("aiIntakeMessage");if(!node)return;node.textContent=text;node.className="ai-intake-message"+(kind?" "+kind:"")}
 function setBusy(active){for(const id of ["aiAnalyze","aiManual","aiConfirm"]){const el=$(id);if(el)el.disabled=!!active}}
 function showManual(){
@@ -75,16 +80,17 @@ function buildPanel(){
   const question=$("questionStage");question?.parentNode?.insertBefore(panel,question);
 }
 
-function renderCandidates(candidates,intake){
+function renderCandidates(candidates,intake,approvedAnswers={}){
   const box=$("aiCandidates");box.innerHTML="";
   for(const candidate of candidates){
+    const approved=String(approvedAnswers?.[candidate.key]||"").trim();
     const row=document.createElement("label");row.className="ai-candidate";row.dataset.key=candidate.key;
-    const check=document.createElement("input");check.type="checkbox";check.dataset.aiSelect=candidate.key;
+    const check=document.createElement("input");check.type="checkbox";check.dataset.aiSelect=candidate.key;check.checked=!!approved;
     const content=document.createElement("span");content.className="ai-candidate-content";
     const top=document.createElement("span");top.className="ai-candidate-top";
     const name=document.createElement("strong");name.textContent=LABELS[candidate.key]||candidate.key;
-    const state=document.createElement("b");state.textContent="НЕПОТВЪРДЕНО";top.append(name,state);
-    const input=document.createElement("textarea");input.rows=2;input.maxLength=5000;input.value=candidate.value;input.dataset.aiValue=candidate.key;
+    const state=document.createElement("b");state.textContent=approved?"ПОТВЪРДЕНО":"НЕПОТВЪРДЕНО";top.append(name,state);
+    const input=document.createElement("textarea");input.rows=2;input.maxLength=5000;input.value=approved||candidate.value;input.dataset.aiValue=candidate.key;
     const evidence=document.createElement("small");evidence.textContent="Източник: вашият промпт · “"+candidate.evidence+"”";
     content.append(top,input,evidence);row.append(check,content);box.append(row);
   }
@@ -93,6 +99,49 @@ function renderCandidates(candidates,intake){
   const node=$("aiMissing");
   node.textContent=missing.length?"След потвърждението ще останат за ръчно попълване: "+missing.map(key=>LABELS[key]||key).join(", ")+".":"AI намери предложения за всичките 8 полета. Те пак трябва да бъдат потвърдени от вас.";
   node.dataset.unverified=String(unverified.length);
+}
+
+async function stateApi(action,extra={}){
+  const google=googleSession();
+  if(!google?.access_token)throw new Error("Google сесията липсва. Влезте отново.");
+  const response=await fetch(AI_STATE_ENDPOINT,{
+    method:"POST",
+    headers:{"Content-Type":"application/json",Accept:"application/json",Authorization:"Bearer "+google.access_token},
+    body:JSON.stringify({action,...extra}),
+    cache:"no-store"
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){
+    const error=new Error(data?.error?.message||data?.error?.code||("HTTP "+response.status));
+    error.code=data?.error?.code||"";error.status=response.status;throw error;
+  }
+  return data?.data||{};
+}
+
+async function restorePersistentReview(){
+  const sessionId=aiSessionId();
+  if(!sessionId)return false;
+  try{
+    const snapshot=await stateApi("snapshot",{session_id:sessionId});
+    const rawCandidates=Array.isArray(snapshot?.candidates)?snapshot.candidates:[];
+    const candidates=Core.sanitizeCandidates(rawCandidates.map(item=>({key:item?.field_key,value:item?.value,evidence:item?.evidence})));
+    if(!candidates.length)return false;
+    const approved=snapshot?.approved_answers&&typeof snapshot.approved_answers==="object"?snapshot.approved_answers:{};
+    const candidateKeys=candidates.map(item=>item.key);
+    const latestPrompt=(Array.isArray(snapshot?.messages)?[...snapshot.messages].reverse().find(item=>item?.actor==="user"&&String(item?.content||"").trim()):null)?.content||"";
+    if(latestPrompt){$("aiPrompt").value=latestPrompt;$("aiPromptCount").textContent=latestPrompt.length+" / 20000";sessionStorage.setItem(PROMPT_KEY,latestPrompt)}
+    renderCandidates(candidates,{
+      missing_fields:Core.remainingKeys(candidateKeys),
+      unverified_fields:candidates.filter(item=>!approved[item.key]).map(item=>item.key)
+    },approved);
+    $("aiReview").hidden=false;$("aiFinish").hidden=true;$("aiAnalyze").textContent="Анализирай отново →";
+    message("Възстановихме последния запазен AI review. Нищо не е публикувано.","ok");
+    return true;
+  }catch(error){
+    if(error?.code==="AI_PERSISTENCE_NOT_ENABLED"||error?.code==="AI_INTAKE_NOT_FOUND"||error?.status===404){setAiSession("");return false}
+    message("Не успяхме да възстановим AI review. Можете да анализирате отново или да използвате ръчния режим.","bad");
+    return false;
+  }
 }
 
 async function analyze(){
@@ -108,6 +157,9 @@ async function analyze(){
     if(!response.ok)throw new Error(data?.error?.message||data?.error?.code||("HTTP "+response.status));
     const candidates=Core.sanitizeCandidates(data?.data?.candidates);
     if(!candidates.length){message("AI не намери достатъчно изрично написани данни. Продължете в ръчен режим или допълнете промпта.","bad");return}
+    const persistence=data?.data?.persistence;
+    if(persistence?.enabled===true&&validUuid(persistence?.session_id))setAiSession(persistence.session_id);
+    else if(persistence?.enabled===false)setAiSession("");
     renderCandidates(candidates,data?.data?.intake);
     $("aiReview").hidden=false;
     $("aiFinish").hidden=true;
@@ -116,6 +168,14 @@ async function analyze(){
   }catch(error){
     message("AI режимът не е достъпен в момента: "+(error.message||"unknown error")+". Ръчният режим остава напълно достъпен.","bad");
   }finally{setBusy(false)}
+}
+
+async function recordApprovals(chosen){
+  const sessionId=aiSessionId();
+  if(!sessionId)return;
+  for(const [key,value] of Object.entries(chosen)){
+    await stateApi("review",{session_id:sessionId,field_key:key,approved_value:value,accept:true});
+  }
 }
 
 async function saveConfirmed(){
@@ -130,8 +190,9 @@ async function saveConfirmed(){
   const chosen=Core.selectedAnswers(raw,selection,edits);
   const keys=Object.keys(chosen);
   if(!keys.length){message("Маркирайте поне едно предложение, което сте проверили.","bad");return}
-  setBusy(true);message("Записваме само изрично потвърдените от вас стойности…");
+  setBusy(true);message("Записваме human approval следата и само потвърдените стойности…");
   try{
+    await recordApprovals(chosen);
     for(const key of keys){
       const response=await fetch(EARLY_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json",Authorization:"Bearer "+google.access_token},body:JSON.stringify({action:"questionnaire_save",token,key,answer:chosen[key]}),cache:"no-store"});
       const data=await response.json().catch(()=>({}));
@@ -163,5 +224,6 @@ async function saveConfirmed(){
   $("aiBack").addEventListener("click",()=>{$("aiReview").hidden=true;$("aiPrompt").focus()});
   $("aiConfirm").addEventListener("click",saveConfirmed);
   $("aiFinishButton").addEventListener("click",()=>{sessionStorage.setItem(CONTINUE_KEY,"1");location.reload()});
+  await restorePersistentReview();
 })();
 })();
