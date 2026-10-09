@@ -12,9 +12,12 @@ const {
   AIPersistenceError,
   ONBOARDING_KEYS,
   persistenceEnabled,
+  validUuid,
   resumeOrCreate,
   snapshot,
-  reviewCandidate
+  reviewCandidate,
+  reviewCandidateCas,
+  approveSessionCas
 } = require('./_ai_intake_persistence.js');
 
 const ONBOARDING_KEY_SET = new Set(ONBOARDING_KEYS);
@@ -31,31 +34,53 @@ function bearer(req) {
   return typeof value === 'string' && /^Bearer\s+\S+$/i.test(value) ? value : null;
 }
 
+function validRevision(value) {
+  return Number.isSafeInteger(value) && value >= 0;
+}
+
 function validateBody(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return 'body';
-  if (!['resume','snapshot','review'].includes(body.action)) return 'action';
+  if (!['resume','snapshot','review','review_cas','approve'].includes(body.action)) return 'action';
 
   if (body.action === 'resume') {
     return Object.keys(body).some(key => key !== 'action') ? 'unknown_field' : null;
   }
 
-  if (typeof body.session_id !== 'string') return 'session_id';
+  if (!validUuid(body.session_id)) return 'session_id';
   if (body.action === 'snapshot') {
     const allowed = new Set(['action','session_id']);
     return Object.keys(body).some(key => !allowed.has(key)) ? 'unknown_field' : null;
   }
 
-  const allowed = new Set(['action','session_id','field_key','approved_value','accept']);
-  if (Object.keys(body).some(key => !allowed.has(key))) return 'unknown_field';
-  if (!ONBOARDING_KEY_SET.has(body.field_key)) return 'field_key';
-  if (typeof body.accept !== 'boolean') return 'accept';
-  if (body.accept) {
-    if (typeof body.approved_value !== 'string') return 'approved_value';
-    const value = body.approved_value.trim();
-    if (!value || value.length > 5000) return 'approved_value';
-  } else if (body.approved_value !== undefined && body.approved_value !== null) {
-    return 'approved_value';
+  if (body.action === 'review') {
+    const allowed = new Set(['action','session_id','field_key','approved_value','accept']);
+    if (Object.keys(body).some(key => !allowed.has(key))) return 'unknown_field';
+    if (!ONBOARDING_KEY_SET.has(body.field_key)) return 'field_key';
+    if (typeof body.accept !== 'boolean') return 'accept';
+    if (body.accept) {
+      if (typeof body.approved_value !== 'string') return 'approved_value';
+      const value = body.approved_value.trim();
+      if (!value || value.length > 5000) return 'approved_value';
+    } else if (body.approved_value !== undefined && body.approved_value !== null) {
+      return 'approved_value';
+    }
+    return null;
   }
+
+  if (body.action === 'review_cas') {
+    const allowed = new Set(['action','session_id','candidate_id','accept','expected_revision','request_id']);
+    if (Object.keys(body).some(key => !allowed.has(key))) return 'unknown_field';
+    if (!validUuid(body.candidate_id)) return 'candidate_id';
+    if (typeof body.accept !== 'boolean') return 'accept';
+    if (!validRevision(body.expected_revision)) return 'expected_revision';
+    if (body.request_id !== undefined && !validUuid(body.request_id)) return 'request_id';
+    return null;
+  }
+
+  const allowed = new Set(['action','session_id','expected_revision','request_id']);
+  if (Object.keys(body).some(key => !allowed.has(key))) return 'unknown_field';
+  if (!validRevision(body.expected_revision)) return 'expected_revision';
+  if (body.request_id !== undefined && !validUuid(body.request_id)) return 'request_id';
   return null;
 }
 
@@ -127,12 +152,26 @@ function createHandler({ env = process.env, fetchImpl = globalThis.fetch } = {})
         data = await resumeOrCreate(options);
       } else if (body.action === 'snapshot') {
         data = await snapshot(body.session_id, options);
-      } else {
+      } else if (body.action === 'review') {
         data = await reviewCandidate({
           sessionId: body.session_id,
           fieldKey: body.field_key,
           approvedValue: body.approved_value,
           accept: body.accept
+        }, options);
+      } else if (body.action === 'review_cas') {
+        data = await reviewCandidateCas({
+          sessionId: body.session_id,
+          candidateId: body.candidate_id,
+          accept: body.accept,
+          expectedRevision: body.expected_revision,
+          requestId: body.request_id
+        }, options);
+      } else {
+        data = await approveSessionCas({
+          sessionId: body.session_id,
+          expectedRevision: body.expected_revision,
+          requestId: body.request_id
         }, options);
       }
       return send(res, 200, { data });
@@ -147,6 +186,7 @@ const handler = createHandler();
 module.exports = handler;
 module.exports._test = {
   bearer,
+  validRevision,
   validateBody,
   publicError,
   createHandler
