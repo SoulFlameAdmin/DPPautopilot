@@ -37,6 +37,8 @@ jobs:
         run: node --test tests/api/batch-provision.test.cjs
       - name: Run Manufacturer production flow contract
         run: node --test tests/api/manufacturer-production-flow.test.cjs
+      - name: Exercise isolated company-to-passport-to-QR chain and revocation
+        run: node --test tests/api/onboarding-flow.test.cjs
       - name: Verify capacity edit, blur and delayed API races
         run: node --test tests/unit/test_manufacturer_capacity_blur.js
 
