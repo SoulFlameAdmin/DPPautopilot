@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
-      - name: Replay migrations and run A2 persistence DB acceptance
+      - name: Replay migrations and run A2/A2.1 DB acceptance
         env:
           PGPASSWORD: postgres
         shell: bash
@@ -60,5 +60,8 @@ jobs:
           "${PSQL[@]}" <<'SQL'
           begin;
           \i tests/db/test_ai_intake_persistence_subset.sql
+          rollback;
+          begin;
+          \i tests/db/test_ai_conversation_cas_subset.sql
           rollback;
           SQL
