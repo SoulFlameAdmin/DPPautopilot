@@ -39,6 +39,8 @@ jobs:
         run: node --test tests/api/manufacturer-production-flow.test.cjs
       - name: Exercise isolated company-to-passport-to-QR chain and revocation
         run: node --test tests/api/onboarding-flow.test.cjs
+      - name: Exercise Google-only entry, manufacturer onboarding and public QR contracts
+        run: node --test tests/api/company-auth-pages.test.cjs tests/api/manufacturer-onboarding.test.cjs tests/api/real-company-qr-flow.test.cjs
       - name: Verify capacity edit, blur and delayed API races
         run: node --test tests/unit/test_manufacturer_capacity_blur.js
 
