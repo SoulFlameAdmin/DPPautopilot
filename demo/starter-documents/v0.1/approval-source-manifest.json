@@ -1,0 +1,58 @@
+{
+  "status": "DEMO / SAMPLE / APPROVAL",
+  "source_message_id": "1a10e20e285aa7d8",
+  "source_subject": "SoulFlame DPP — approval demos",
+  "archive_equivalence": "UNVERIFIED",
+  "assets": [
+    {
+      "name": "паспорт_на_батерията_с_qr_код.png",
+      "path": "demo/starter-documents/v0.1/approval-source-1.png",
+      "sha256": "13824d0e87c2e97f68591156da6e0a4cf2866494c0401b0bc4199070cd41b60a",
+      "dimensions": [
+        1103,
+        1426
+      ],
+      "qr_decode": [
+        {
+          "text": "https://dpp-autopilot.vercel.app/passport?identifier=BAT-SF-NFC-0001",
+          "format": "QR Code"
+        }
+      ]
+    },
+    {
+      "name": "дигитален_паспорт_на_батерия.png",
+      "path": "demo/starter-documents/v0.1/approval-source-2.png",
+      "sha256": "e307f6165a739db81b519be48577d8c23299ce378da2055d517d7fc212d2bd6c",
+      "dimensions": [
+        1426,
+        1103
+      ],
+      "qr_decode": [
+        {
+          "text": "https://dpp-autopilot.vercel.app/passport?identifier=BAT-SF-NFC-0001",
+          "format": "QR Code"
+        }
+      ]
+    },
+    {
+      "name": "професионална_фактура_soulflame_с_qr_код.png",
+      "path": "demo/starter-documents/v0.1/approval-source-3.png",
+      "sha256": "a51c2a35ce1179bc5fdf7463d90a1a8399b94f06b97ea1d93687665f706e95d1",
+      "dimensions": [
+        1103,
+        1426
+      ],
+      "qr_decode": "NOT DECODED — destination unverified"
+    },
+    {
+      "name": "табло_soulflame_за_батерийни_паспорти.png",
+      "path": "demo/starter-documents/v0.1/approval-source-4.png",
+      "sha256": "17ac8107ce7b9e01e9cbdb428c1f6397e0d571027054372f2c60a700baad926f",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "qr_decode": "NOT DECODED — destination unverified"
+    }
+  ]
+}
