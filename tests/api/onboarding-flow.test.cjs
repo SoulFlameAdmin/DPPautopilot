@@ -10,6 +10,7 @@ const models=require('../../api/models.js');
 const items=require('../../api/items.js');
 const imports=require('../../api/imports.js');
 const passport=require('../../api/passport.js');
+const qr=require('../../api/qr.js');
 
 const IDS={
   org:'d1818181-8181-4181-8181-818181818181',
@@ -163,9 +164,11 @@ test('new org -> member -> model/item -> import validate/commit -> public passpo
   const originalWarn=console.warn;
   const oldUrl=process.env.SUPABASE_URL;
   const oldKey=process.env.DPP_SUPABASE_PUBLISHABLE_KEY;
+  const oldPublicOrigin=process.env.DPP_PUBLIC_ORIGIN;
   const b=backend();
   process.env.SUPABASE_URL='https://example.supabase.co';
   process.env.DPP_SUPABASE_PUBLISHABLE_KEY='sb_publishable_test_key';
+  process.env.DPP_PUBLIC_ORIGIN='https://isolated-qr-test.example';
   global.fetch=b.fetchImpl;
   console.warn=()=>{};
   try{
@@ -249,6 +252,26 @@ test('new org -> member -> model/item -> import validate/commit -> public passpo
     assert.equal(json(res).data.unique_identifier,'urn:dpp:m24:pilot:0001');
     assert.equal(Object.prototype.hasOwnProperty.call(json(res).data,'private_payload'),false);
 
+    // Run the real public QR handler against this same isolated in-memory
+    // simulated company/model/item/passport lifecycle (no real tenant writes).
+    res=makeRes();
+    await qr(req('GET',null,{identifier:'urn:dpp:m24:pilot:0001'},null),res);
+    assert.equal(res.statusCode,200,'ACTIVE DPP must produce a public QR carrier');
+    assert.match(res.headers['content-type'],/image\/svg\+xml/);
+    assert.equal(res.headers['cache-control'],'no-store');
+    assert.equal(res.headers['x-dpp-carrier'],'qr');
+    assert.equal(res.headers['x-dpp-identifier'],'urn:dpp:m24:pilot:0001');
+    assert.equal(res.headers['x-dpp-target'],
+      'https://isolated-qr-test.example/passport?identifier=urn%3Adpp%3Am24%3Apilot%3A0001&carrier=qr');
+    assert.match(res.body,/<svg/);
+    // Revoked public passport must immediately stop providing a valid QR,
+    // even after the same identifier has previously returned an SVG.
+    b.state.passport.status='revoked';
+    res=makeRes();
+    await qr(req('GET',null,{identifier:'urn:dpp:m24:pilot:0001'},null),res);
+    assert.equal(res.statusCode,404,'revoked passport must not return a QR');
+    assert.equal(json(res).error.code,'PUBLIC_PASSPORT_NOT_FOUND');
+
     for(const call of b.state.payloads.filter(x=>x.rpc.startsWith('dpp_api_members_'))){
       assert.equal(Object.prototype.hasOwnProperty.call(call.body,'p_organization_id'),false);
     }
@@ -259,5 +282,6 @@ test('new org -> member -> model/item -> import validate/commit -> public passpo
     console.warn=originalWarn;
     if(oldUrl===undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL=oldUrl;
     if(oldKey===undefined) delete process.env.DPP_SUPABASE_PUBLISHABLE_KEY; else process.env.DPP_SUPABASE_PUBLISHABLE_KEY=oldKey;
+    if(oldPublicOrigin===undefined) delete process.env.DPP_PUBLIC_ORIGIN; else process.env.DPP_PUBLIC_ORIGIN=oldPublicOrigin;
   }
 });
