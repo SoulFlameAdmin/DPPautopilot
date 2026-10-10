@@ -6,38 +6,47 @@ const PROJECT_URL="https://frhletkiuupgksmgxoxc.supabase.co";
 let cfg=null,session=null,activeOrg=null,models=[],items=[],refreshing=null;
 
 function setResult(node,message,kind=""){node.textContent=message;node.className="result"+(kind?" "+kind:"")}
+function expiresSoon(value){
+  const expiry=Number(value?.expires_at);
+  return !Number.isSafeInteger(expiry)||expiry<=Math.floor(Date.now()/1000)+30;
+}
 function readSession(){
+  let google=null;
+  try{google=JSON.parse(localStorage.getItem(GOOGLE_STORAGE)||"null")}catch{}
+  if(google?.access_token){
+    session={
+      access_token:google.access_token,
+      refresh_token:google.refresh_token||"",
+      expires_at:Number(google.expires_at)||0,source:"google"
+    };
+    if(expiresSoon(session))return false;
+    sessionStorage.setItem(STORAGE,JSON.stringify(session));
+    return true;
+  }
   try{
     const value=JSON.parse(sessionStorage.getItem(STORAGE)||"null");
-    if(value?.access_token){session=value;return true}
-  }catch{}
-  try{
-    const google=JSON.parse(localStorage.getItem(GOOGLE_STORAGE)||"null");
-    if(google?.access_token){
-      session={
-        access_token:google.access_token,
-        refresh_token:google.refresh_token||"",
-        expires_in:Math.max(60,Number(google.expires_at)?Number(google.expires_at)-Math.floor(Date.now()/1000):3600)
-      };
-      sessionStorage.setItem(STORAGE,JSON.stringify(session));
-    try{
-      const previous=JSON.parse(localStorage.getItem(GOOGLE_STORAGE)||"null")||{};
-      localStorage.setItem(GOOGLE_STORAGE,JSON.stringify({
-        ...previous,
-        access_token:session.access_token,
-        refresh_token:session.refresh_token||previous.refresh_token||"",
-        expires_at:Math.floor(Date.now()/1000)+(Number(session.expires_in)||3600)
-      }));
-    }catch{}
-      return true;
+    if(value?.access_token&&value.source!=="google"){
+      session=value;
+      return !expiresSoon(value);
     }
   }catch{}
   session=null;return false;
 }
 function saveSession(value){
-  if(value?.access_token){
-    session={access_token:value.access_token,refresh_token:value.refresh_token||session?.refresh_token||"",expires_in:Number(value.expires_in)||3600};
+  const ttl=Number(value?.expires_in);
+  if(value?.access_token&&typeof value?.refresh_token==="string"&&value.refresh_token&&
+     Number.isSafeInteger(ttl)&&ttl>30&&ttl<=604800){
+    const expiresAt=Math.floor(Date.now()/1000)+ttl;
+    session={access_token:value.access_token,refresh_token:value.refresh_token,
+      expires_at:expiresAt,expires_in:ttl,source:"google"};
     sessionStorage.setItem(STORAGE,JSON.stringify(session));
+    try{
+      const google=JSON.parse(localStorage.getItem(GOOGLE_STORAGE)||"null");
+      if(google)localStorage.setItem(GOOGLE_STORAGE,JSON.stringify({
+        ...google,access_token:session.access_token,
+        refresh_token:session.refresh_token,expires_at:expiresAt
+      }));
+    }catch{}
   }else{
     session=null;sessionStorage.removeItem(STORAGE);
   }
@@ -62,14 +71,17 @@ async function refreshSession(){
   refreshing=(async()=>{
     try{
       const data=await authCall("/auth/v1/token?grant_type=refresh_token",{body:{refresh_token:session.refresh_token}});
-      saveSession(data);return true;
-    }catch{return false}
+      saveSession(data);
+      if(!session?.access_token||expiresSoon(session))throw new Error("AUTH_REFRESH_INVALID");
+      return true;
+    }catch{sessionStorage.removeItem(STORAGE);localStorage.removeItem(GOOGLE_STORAGE);session=null;return false}
     finally{refreshing=null}
   })();
   return refreshing;
 }
 async function api(path,{method="GET",body,retry=true}={}){
   if(!session?.access_token)throw new Error("Login required.");
+  if(expiresSoon(session)&&!await refreshSession())throw new Error("Login required.");
   const r=await fetch(path,{
     method,
     headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json",Accept:"application/json"},
@@ -90,7 +102,14 @@ function setMode(){
   $("#createModel").disabled=!write;
   $("#provisionBattery").disabled=!write;
   $("#batchProvision").disabled=!write;
-  const activateBatchPilot=$("#activateBatchPilot");if(activateBatchPilot)activateBatchPilot.disabled=!write;
+  window.addEventListener("storage",event=>{
+  if(event.key===GOOGLE_STORAGE&&event.storageArea===localStorage){
+    session=null;sessionStorage.removeItem(STORAGE);
+    // Reload so another tab's logout/refresh cannot leave an old token active.
+    if(document.body.dataset.manufacturerAuth==="authenticated")location.reload();
+  }
+});
+const activateBatchPilot=$("#activateBatchPilot");if(activateBatchPilot)activateBatchPilot.disabled=!write;
   $("#modelIdentifier").disabled=!write;
   $("#manufacturerName").disabled=!write;
   $("#modelCategory").disabled=!write;
@@ -703,7 +722,7 @@ async function init(){
   cfg=await fetch("/data/auth-config.json",{cache:"no-store"}).then(async r=>{if(!r.ok)throw new Error("Auth config unavailable.");return r.json()});
   if(cfg.supabaseUrl!==PROJECT_URL||!String(cfg.publishableKey||"").startsWith("sb_publishable_"))throw new Error("Invalid DPP auth configuration.");
   document.body.dataset.manufacturerReady="true";
-  if(!readSession()){
+  if(!readSession()&&!await refreshSession()){
     document.body.dataset.manufacturerAuth="missing";
     showGate("Няма активна фирмена сесия. Влез през Company Access.");
     return;

@@ -1,0 +1,25 @@
+name: Manufacturer Google Session Expiry QA
+on:
+  pull_request:
+    paths:
+      - 'assets/csp/manufacturer-inline-1.js'
+      - 'assets/csp/manufacturer-entry.js'
+      - 'tests/api/manufacturer-google-expiry.test.cjs'
+      - '.github/workflows/manufacturer-google-expiry-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  session-expiry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Verify standalone session expiry, refresh and cross-tab safety
+        run: |
+          node --check assets/csp/manufacturer-entry.js
+          node --check assets/csp/manufacturer-inline-1.js
+          node --test tests/api/manufacturer-google-expiry.test.cjs
