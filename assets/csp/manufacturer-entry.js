@@ -70,27 +70,59 @@ function showEarlyAccess(client){
   addEarlyAccessNotice(client);
   disableEarlyAccessControls();
 }
-function companySession(){
-  try{
-    const value=JSON.parse(sessionStorage.getItem(COMPANY_SESSION_KEY)||"null");
-    if(value?.access_token)return value;
-  }catch{}
-  try{
-    const google=JSON.parse(localStorage.getItem(GOOGLE_SESSION_KEY)||"null");
-    if(google?.access_token){
-      const value={
-        access_token:google.access_token,
-        refresh_token:google.refresh_token||"",
-        expires_in:Math.max(60,Number(google.expires_at)?Number(google.expires_at)-Math.floor(Date.now()/1000):3600)
-      };
-      sessionStorage.setItem(COMPANY_SESSION_KEY,JSON.stringify(value));
-      return value;
+async function companySession(){
+  const now=Math.floor(Date.now()/1000);
+  let google=null,company=null;
+  try{google=JSON.parse(localStorage.getItem(GOOGLE_SESSION_KEY)||"null")}catch{}
+  try{company=JSON.parse(sessionStorage.getItem(COMPANY_SESSION_KEY)||"null")}catch{}
+  if(google?.access_token){
+    const expires=Number(google.expires_at);
+    if(Number.isSafeInteger(expires)&&expires>now+30){
+      const fresh={access_token:google.access_token,refresh_token:google.refresh_token||"",
+        expires_at:expires,expires_in:expires-now,source:"google"};
+      sessionStorage.setItem(COMPANY_SESSION_KEY,JSON.stringify(fresh));
+      return fresh;
     }
-  }catch{}
+    // Expired tokens are never renewed by simply changing their local expiry.
+    try{
+      if(typeof google.refresh_token!=="string"||!google.refresh_token)throw new Error("NO_REFRESH_TOKEN");
+      const cfgResponse=await fetch("/data/auth-config.json",{cache:"no-store"});
+      if(!cfgResponse.ok)throw new Error("AUTH_CONFIG_UNAVAILABLE");
+      const cfg=await cfgResponse.json();
+      if(cfg?.supabaseUrl!=="https://frhletkiuupgksmgxoxc.supabase.co"||
+         typeof cfg.publishableKey!=="string"||!cfg.publishableKey.startsWith("sb_publishable_"))
+        throw new Error("AUTH_CONFIG_INVALID");
+      const response=await fetch(cfg.supabaseUrl+"/auth/v1/token?grant_type=refresh_token",{
+        method:"POST",headers:{apikey:cfg.publishableKey,"Content-Type":"application/json",Accept:"application/json"},
+        body:JSON.stringify({refresh_token:google.refresh_token}),cache:"no-store"
+      });
+      if(!response.ok)throw new Error("AUTH_REFRESH_REJECTED");
+      const data=await response.json();
+      const ttl=Number(data?.expires_in);
+      if(typeof data?.access_token!=="string"||!data.access_token||
+         typeof data?.refresh_token!=="string"||!data.refresh_token||
+         !Number.isSafeInteger(ttl)||ttl<=30||ttl>604800)throw new Error("AUTH_REFRESH_INVALID");
+      const expiresAt=Math.floor(Date.now()/1000)+ttl;
+      const fresh={access_token:data.access_token,refresh_token:data.refresh_token,
+        expires_at:expiresAt,expires_in:ttl,source:"google"};
+      localStorage.setItem(GOOGLE_SESSION_KEY,JSON.stringify({...google,...fresh}));
+      sessionStorage.setItem(COMPANY_SESSION_KEY,JSON.stringify(fresh));
+      return fresh;
+    }catch{
+      localStorage.removeItem(GOOGLE_SESSION_KEY);
+      sessionStorage.removeItem(COMPANY_SESSION_KEY);
+      return null;
+    }
+  }
+  if(company?.source==="google"){
+    sessionStorage.removeItem(COMPANY_SESSION_KEY);return null;
+  }
+  const expires=Number(company?.expires_at);
+  if(company?.access_token&&Number.isSafeInteger(expires)&&expires>now+30)return company;
   return null;
 }
 async function ensureOnboardingConfigured(){
-  const active=companySession();
+  const active=await companySession();
   if(!active)return true;
   const response=await fetch("/api/manufacturer-onboarding",{
     headers:{Authorization:"Bearer "+active.access_token,Accept:"application/json"},
