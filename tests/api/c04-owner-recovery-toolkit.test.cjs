@@ -47,7 +47,7 @@ test('migration manifest freezes exactly the ten expected migrations', () => {
   for (const m of manifest.migrations) assert.match(m.sha256, /^[0-9a-f]{64}$/);
 });
 
-test('local bytes manifest verifies intact files and rejects tampering', () => {
+test('local bytes manifest omits absolute source root and verifies intact files', () => {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'c04-bytes-'));
   const source = path.join(temp, 'source');
   const restored = path.join(temp, 'restored');
@@ -55,16 +55,40 @@ test('local bytes manifest verifies intact files and rejects tampering', () => {
   fs.mkdirSync(path.join(restored, 'private'), { recursive: true });
   fs.writeFileSync(path.join(source, 'private', 'a.bin'), Buffer.from([1,2,3,4]));
   fs.copyFileSync(path.join(source, 'private', 'a.bin'), path.join(restored, 'private', 'a.bin'));
-  const manifest = path.join(temp, 'storage.json');
-  let result = run(['bytes-manifest', source, manifest]);
+  const manifestPath = path.join(temp, 'storage.json');
+  let result = run(['bytes-manifest', source, manifestPath]);
   assert.equal(result.status, 0, result.stderr);
-  result = run(['verify-bytes', manifest, restored]);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  assert.equal(manifest.sourceRootNotRecorded, true);
+  assert.equal(Object.prototype.hasOwnProperty.call(manifest, 'sourceRootLocalOnly'), false);
+  result = run(['verify-bytes', manifestPath, restored]);
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(JSON.parse(result.stdout).pass, true);
-  fs.appendFileSync(path.join(restored, 'private', 'a.bin'), Buffer.from([9]));
-  result = run(['verify-bytes', manifest, restored]);
+  const verify = JSON.parse(result.stdout);
+  assert.equal(verify.pass, true);
+  assert.equal(verify.expectedFiles, 1);
+  assert.equal(verify.actualFiles, 1);
+});
+
+test('local bytes verification rejects modified and unexpected extra files', () => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'c04-bytes-tamper-'));
+  const source = path.join(temp, 'source');
+  const restored = path.join(temp, 'restored');
+  fs.mkdirSync(source, { recursive: true });
+  fs.mkdirSync(restored, { recursive: true });
+  fs.writeFileSync(path.join(source, 'a.bin'), Buffer.from([1,2,3,4]));
+  fs.copyFileSync(path.join(source, 'a.bin'), path.join(restored, 'a.bin'));
+  const manifestPath = path.join(temp, 'storage.json');
+  let result = run(['bytes-manifest', source, manifestPath]);
+  assert.equal(result.status, 0, result.stderr);
+
+  fs.appendFileSync(path.join(restored, 'a.bin'), Buffer.from([9]));
+  fs.writeFileSync(path.join(restored, 'unexpected.bin'), Buffer.from([7]));
+  result = run(['verify-bytes', manifestPath, restored]);
   assert.equal(result.status, 2, result.stderr);
-  assert.equal(JSON.parse(result.stdout).pass, false);
+  const verify = JSON.parse(result.stdout);
+  assert.equal(verify.pass, false);
+  assert.ok(verify.failures.some(f => f.reason === 'size-or-sha256-mismatch'));
+  assert.ok(verify.failures.some(f => f.reason === 'unexpected-extra-file'));
 });
 
 test('documentation preserves hard production boundary and private evidence handling', () => {
