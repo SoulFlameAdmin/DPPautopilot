@@ -1,0 +1,110 @@
+name: API Regression Independent
+
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'tests/api/**'
+      - 'lib/**'
+      - '.github/workflows/api-regression-independent.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact proposed SHA
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Verify required API regression files exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            tests/api/organizations.test.cjs
+            tests/api/members.test.cjs
+            tests/api/onboarding-flow.test.cjs
+            tests/api/models.test.cjs
+            tests/api/items.test.cjs
+            tests/api/batch-provision.test.cjs
+            tests/api/passport.test.cjs
+            tests/api/completeness-workflow.test.cjs
+            tests/api/qr.test.cjs
+            tests/api/real-company-qr-flow.test.cjs
+            tests/api/imports.test.cjs
+            tests/api/export.test.cjs
+            tests/api/error-contract.test.cjs
+            tests/api/conflicts.test.cjs
+            tests/api/tenant-isolation.test.cjs
+            tests/api/input-validation.test.cjs
+            tests/api/integration.test.cjs
+            tests/api/rate-limit.test.cjs
+            tests/api/observability.test.cjs
+            tests/api/monitoring-alerts.test.cjs
+            tests/api/ai-intake-contract.test.cjs
+            tests/api/ai-intake-endpoint.test.cjs
+            tests/api/ai-intake-manual-candidate.test.cjs
+            tests/api/ai-intake-persistence-contract.test.cjs
+            tests/api/ai-intake-persistence-integration.test.cjs
+            tests/api/ai-intake-persistence-runtime.test.cjs
+            tests/api/ai-intake-state-cas.test.cjs
+          )
+          missing=0
+          for file in "${required[@]}"; do
+            if [[ ! -f "$file" ]]; then
+              echo "MISSING_API_REGRESSION_FILE: $file"
+              missing=1
+            fi
+          done
+          [[ "$missing" -eq 0 ]]
+          echo "API_REGRESSION_FILESET_PASS count=${#required[@]}"
+
+      - name: Run tenant, RBAC and core resource API contracts
+        run: >-
+          node --test
+          tests/api/organizations.test.cjs
+          tests/api/members.test.cjs
+          tests/api/onboarding-flow.test.cjs
+          tests/api/models.test.cjs
+          tests/api/items.test.cjs
+          tests/api/batch-provision.test.cjs
+          tests/api/passport.test.cjs
+          tests/api/completeness-workflow.test.cjs
+
+      - name: Run QR, import, export and conflict API contracts
+        run: >-
+          node --test
+          tests/api/qr.test.cjs
+          tests/api/real-company-qr-flow.test.cjs
+          tests/api/imports.test.cjs
+          tests/api/export.test.cjs
+          tests/api/error-contract.test.cjs
+          tests/api/conflicts.test.cjs
+
+      - name: Run API security and resilience contracts
+        run: >-
+          node --test
+          tests/api/tenant-isolation.test.cjs
+          tests/api/input-validation.test.cjs
+          tests/api/integration.test.cjs
+          tests/api/rate-limit.test.cjs
+          tests/api/observability.test.cjs
+          tests/api/monitoring-alerts.test.cjs
+
+      - name: Run AI intake API contracts independent of C04
+        run: >-
+          node --test
+          tests/api/ai-intake-contract.test.cjs
+          tests/api/ai-intake-endpoint.test.cjs
+          tests/api/ai-intake-manual-candidate.test.cjs
+          tests/api/ai-intake-persistence-contract.test.cjs
+          tests/api/ai-intake-persistence-integration.test.cjs
+          tests/api/ai-intake-persistence-runtime.test.cjs
+          tests/api/ai-intake-state-cas.test.cjs
+
+      - name: Emit independent API regression marker
+        run: echo 'API_REGRESSION_PASS'
