@@ -58,7 +58,7 @@ function planBatteryDraft({context,facts=[],approval=null,applicability={}}={}){
    fail('INVALID_APPLICABILITY');
  }
  const public_payload={},private_payload={},provenance=[];
- const missing=[],unverified=[],pending=[],policyReview=[],authority=[],ignored=[];
+ const missing=[],unverified=[],pending=[],policyReview=[],schemaReview=[],authority=[],ignored=[];
  for(const p of matrix.points){
   const f=byNumber.get(p.number),state=p.lmtStatusAt2027_02_18;
   if(state==='not_required_2027'){if(f)ignored.push(p.number);continue;}
@@ -75,6 +75,10 @@ function planBatteryDraft({context,facts=[],approval=null,applicability={}}={}){
      (p.number===7&&f.value!==context.model_identifier))fail('IDENTITY_MISMATCH');
   if(p.access==='authority_only'){authority.push(p.number);continue;}
   if(p.number===2){policyReview.push(p.number);continue;}
+  // Fail closed on nested public/private values until typed schemas and access checks exist.
+  if(['object','array','document_ref_array'].includes(p.valueType)){
+   schemaReview.push(p.number);continue;
+  }
   const isPublic=p.access==='public'||p.number===1;
   const isPrivate=['legitimate_interest','legitimate_interest_and_authorities'].includes(p.access);
   if(!isPublic&&!isPrivate){policyReview.push(p.number);continue;}
@@ -88,7 +92,7 @@ function planBatteryDraft({context,facts=[],approval=null,applicability={}}={}){
   schema_version:matrix.schemaVersion,has_human_approval:approved,
   draft_body:approved?{battery_item_id:context.battery_item_id,public_payload,private_payload}:null,
   mapped:provenance.length,provenance,missing,unverified,pending_conditional:pending,
-  authority_separate:authority,policy_review:policyReview,ignored_future:ignored,
+  authority_separate:authority,policy_review:policyReview,unmapped_complex_fields:schemaReview,ignored_future:ignored,
   can_publish:false,can_activate:false,compliance_assessed:false,
   server_authorization_and_evidence_validation_required:true};
 }
