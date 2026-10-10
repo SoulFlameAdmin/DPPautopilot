@@ -56,10 +56,11 @@ test('entry never rewrites a still valid Google expiry',async()=>{
 });
 test('expired Google session performs actual Supabase refresh before granting onboarding',async()=>{
  const h=sandbox({google:expired(),refreshResponse:good()}),get=entrySession(h.env);
+ const previous=h.ls.getItem(GOOGLE);
  const token=await get();
  assert.equal(token.access_token,'NEW_VALID');
  assert.ok(token.expires_at>now()+3000);
- assert.equal(h.calls.at(-1).googleAtCall,serialized(expired())===h.calls.at(-1).googleAtCall?h.calls.at(-1).googleAtCall:h.calls.at(-1).googleAtCall);
+ assert.equal(h.calls.at(-1).googleAtCall,previous);
  assert.equal(JSON.parse(h.ls.getItem(GOOGLE)).access_token,'NEW_VALID');
  assert.equal(JSON.parse(h.ss.getItem(COMPANY)).access_token,'NEW_VALID');
 });
