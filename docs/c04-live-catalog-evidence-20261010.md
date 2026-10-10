@@ -29,6 +29,20 @@
 
 **Important:** The October 7 snapshot is stale, and a missing migration registry name by itself does not prove the associated objects are missing. Here we independently inspected the *live* object catalog and found specific absent functions/tables, plus one unwanted live anon grant. We have NOT applied any DDL, DML, grants or production migrations.
 
+## Independent PR #324 CI follow-up
+
+While this audit was being prepared, Borko advanced PR #324 to
+`2ffc377a8199a8a8daea9ec36348047a8201ca23` with additional
+actor-bound concurrent-replay regression evidence. Its GitHub Actions
+**AI-first Intake Contract run #38079657480 is SUCCESS** (including
+PostgreSQL integration). This is *isolated, non-production* proof only.
+Main CI remains **RED at C04**.
+
+A prior PR #325 synthetic-merge run of A2 DB integration failed during
+a concurrently updated race-test fixture; the reviewed upstream #324
+HEAD is now independently GREEN. Neither run authorizes production.
+The separately scoped PR #325 catalog-safety job was **5/5 PASS**.
+
 ## Immediate decision and next gates
 
 1. Keep **C04 = RED** and `default: deny`. Do not change snapshots or release status to mimic GREEN.
