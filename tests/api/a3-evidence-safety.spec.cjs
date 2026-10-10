@@ -33,7 +33,7 @@ assert.deepEqual(x.candidates[0].source_anchor,{sheet:'Sheet1',row:2,column:1});
 // Invisible Unicode prefixes and compatibility signs must not bypass the
 // spreadsheet formula guard when the extracted value is later exported.
 test('A3 blocks Unicode-disguised spreadsheet formulas in CSV cells',()=>{
- for(const value of ['\u200B=HYPERLINK("bad","click")','\u2060+CMD','\uFF1D1+1','\u202E=SUM(A1)']){
+ for(const value of ['\u200B=SUM(1)','\u2060+CMD','\uFF1D1+1','\u202E=SUM(A1)']){
   const out=m.extractCsvDocument({source:src,file:file('company\n'+value)});
   assert.equal(out.candidates.length,0,value);
   assert.equal(out.issues[0]?.code,'UNSAFE_OR_INVALID_CELL',value);
