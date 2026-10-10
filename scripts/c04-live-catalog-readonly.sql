@@ -26,9 +26,11 @@ SELECT t.name, p.oid IS NOT NULL AS exists_in_db,
        CASE WHEN p.oid IS NOT NULL THEN has_function_privilege('authenticated',p.oid,'EXECUTE') END AS authenticated_execute,
        CASE WHEN p.oid IS NOT NULL THEN md5(pg_get_functiondef(p.oid)) END AS definition_md5_diagnostic_only
 FROM targets t
-LEFT JOIN pg_proc p ON p.proname=t.name
-LEFT JOIN pg_namespace n ON n.oid=p.pronamespace AND n.nspname='public'
-WHERE p.oid IS NULL OR n.oid IS NOT NULL
+LEFT JOIN LATERAL (
+  SELECT p.oid,p.prosecdef,p.proname
+  FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+  WHERE n.nspname='public' AND p.proname=t.name
+) p ON true
 ORDER BY t.name,signature;
 
 -- Query 2: names of required A2 tables only; no access to their contents.
