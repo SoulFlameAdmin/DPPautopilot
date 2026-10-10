@@ -1,0 +1,21 @@
+name: QR Reprint Fresh State Regression
+on:
+  pull_request:
+    paths:
+      - 'assets/csp/manufacturer-ops-inline-1.js'
+      - 'tests/ui/qr-reprint-fresh-state.test.cjs'
+      - '.github/workflows/qr-reprint-fresh-state.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qr-reprint-fresh-state:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Run isolated QR reprint regression
+        run: node --test tests/ui/qr-reprint-fresh-state.test.cjs

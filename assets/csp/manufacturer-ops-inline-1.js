@@ -272,11 +272,35 @@ function renderCarriers(rows){
   actions.append(copy);
   if(c.carrier_kind==="qr"&&c.status==="active"){
    const reprint=button("Reprint");reprint.addEventListener("click",async()=>{
-    const p=passportByItem(c.battery_item_id);
+    reprint.disabled=true;
     try{
-     if(!p||p.status!=="active")throw new Error("Reprint requires an ACTIVE passport.");
+     // Cached state is only a hint. Never synthesize ACTIVE from an item row.
+     const matching=passports.filter(p=>p.battery_item_id===c.battery_item_id&&p.status==="active");
+     if(matching.length!==1)throw new Error("Reprint requires exactly one ACTIVE passport.");
+     const p=matching[0];
+     if(!p.passport_id||!c.id)throw new Error("Reprint requires existing passport and carrier IDs.");
+     // Verify the exact passport, public identifier and QR carrier against fresh
+     // backend reads. All three must still be ACTIVE before opening print UI.
+     const [freshPassport,freshCarriers,freshPublic]=await Promise.all([
+      api("/api/passport?id="+encodeURIComponent(p.passport_id)),
+      api("/api/carriers?battery_item_id="+encodeURIComponent(c.battery_item_id)),
+      api("/api/passport?identifier="+encodeURIComponent(p.unique_identifier))
+     ]);
+     const latest=freshPassport.data,publicRecord=freshPublic.data;
+     const liveCarrier=(freshCarriers.data||[]).find(row=>row.id===c.id);
+     if(!latest||latest.passport_id!==p.passport_id||latest.battery_item_id!==c.battery_item_id||latest.status!=="active"){
+      throw new Error("Passport is not ACTIVE anymore. Refresh before reprint.");
+     }
+     if(!liveCarrier||liveCarrier.carrier_kind!=="qr"||liveCarrier.status!=="active"||liveCarrier.battery_item_id!==c.battery_item_id){
+      throw new Error("QR carrier is no longer ACTIVE. Refresh before reprint.");
+     }
+     if(!publicRecord||publicRecord.kind!=="active"||publicRecord.status!=="active"||
+      publicRecord.passport_id!==p.passport_id||publicRecord.unique_identifier!==p.unique_identifier){
+      throw new Error("Public QR no longer resolves to the selected ACTIVE passport.");
+     }
      await printPassports([p],{bind:false});
     }catch(e){setText($("#carrierResult"),e.message,"bad")}
+    finally{reprint.disabled=false}
    });actions.append(reprint);
   }
   if(c.status==="active"&&canWrite()){
