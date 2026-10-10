@@ -35,6 +35,8 @@ jobs:
 
       - name: Run Stage 5 API tests
         run: node --test tests/api/batch-provision.test.cjs
+      - name: Run Manufacturer production flow contract
+        run: node --test tests/api/manufacturer-production-flow.test.cjs
 
       - name: Replay migrations and run Stage 5 DB acceptance
         env:
@@ -57,5 +59,14 @@ jobs:
           "${PSQL[@]}" <<'SQL'
           begin;
           \i tests/db/test_scooter_batch_provisioning_subset.sql
+          rollback;
+          begin;
+          \i tests/db/test_manufacturer_onboarding_subset.sql
+          rollback;
+          begin;
+          \i tests/db/test_generic_battery_provisioning_subset.sql
+          rollback;
+          begin;
+          \i tests/db/test_technical_pilot_draft_activation_subset.sql
           rollback;
           SQL

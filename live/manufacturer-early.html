@@ -5,13 +5,77 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow">
-  <title>SOULFLAME DPP AUTOPILOT · Early Access Dashboard</title>
+  <title>SOULFLAME DPP AUTOPILOT · Manufacturer Onboarding</title>
   <link rel="stylesheet" href="/assets/csp/manufacturer.css">
   <link rel="stylesheet" href="/assets/csp/manufacturer-ops.css">
   <link rel="stylesheet" href="/assets/csp/manufacturer-early.css">
 </head>
 <body data-manufacturer-ready="true" data-manufacturer-auth="early-access" data-manufacturer-tenant="pending" data-manufacturer-mode="early-access">
-  <aside class="app-sidebar" aria-label="Company navigation">
+
+  <section class="intake-screen" id="intakeScreen" aria-label="DPP manufacturer onboarding">
+    <header class="intake-top">
+      <a class="intake-brand" href="/">
+        <span class="intake-logo">SF</span>
+        <span><strong>SOULFLAME</strong><small>DPP AUTOPILOT</small></span>
+      </a>
+      <div class="intake-account">
+        <span class="account-dot"></span>
+        <span><small>GOOGLE ACCOUNT</small><strong id="intakeEmail">Проверяваме достъпа…</strong></span>
+      </div>
+    </header>
+
+    <div class="intake-progress-shell" aria-label="Onboarding progress">
+      <div class="intake-progress-meta">
+        <span id="progressLabel">ВЪПРОС 1 ОТ 8</span>
+        <strong id="progressPercent">12%</strong>
+      </div>
+      <div class="intake-progress"><i id="progressBar"></i></div>
+    </div>
+
+    <main class="intake-stage" id="questionStage">
+      <div class="question-number" id="questionNumber">01</div>
+      <div class="question-copy">
+        <p class="intake-kicker" id="questionKicker">КОМПАНИЯ</p>
+        <h1 id="questionText">В коя държава е регистрирана фирмата?</h1>
+        <p class="question-help" id="questionHelp">Отговорете свободно. Не е нужно да използвате определен формат.</p>
+
+        <label class="answer-shell" for="answerInput">
+          <span>ВАШИЯТ ОТГОВОР</span>
+          <textarea id="answerInput" rows="7" maxlength="5000" placeholder="Напишете отговора си тук…"></textarea>
+          <small><b id="answerState">НЕЗАПИСАНО</b><span id="answerCount">0 / 5000</span></small>
+        </label>
+
+        <div class="intake-actions">
+          <button class="intake-btn secondary" id="backQuestion" type="button">← Назад</button>
+          <button class="intake-btn primary" id="nextQuestion" type="button">Запази и продължи →</button>
+        </div>
+
+        <div class="intake-message" id="intakeMessage" role="status" aria-live="polite">
+          Всеки отговор се записва защитено. Можете да затворите страницата и да продължите по-късно.
+        </div>
+      </div>
+    </main>
+
+    <main class="configure-stage" id="configureStage" hidden>
+      <div class="configure-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p class="intake-kicker">AUTO CONFIGURATION</p>
+      <h1>Настройваме вашия DPP workspace.</h1>
+      <p>Използваме отговорите ви, за да подготвим правилния pilot workflow. Не измисляме технически данни за продуктите ви.</p>
+
+      <div class="configure-list" id="configureList">
+        <div data-step="company"><i></i><span><strong>Company workspace</strong><small>Фирма и пазар</small></span><b>WAITING</b></div>
+        <div data-step="workflow"><i></i><span><strong>Workflow</strong><small>Работен процес и потребители</small></span><b>WAITING</b></div>
+        <div data-step="product"><i></i><span><strong>Product model</strong><small>SKU / модел структура</small></span><b>WAITING</b></div>
+        <div data-step="batch"><i></i><span><strong>Batch layer</strong><small>Партиди и серийни единици</small></span><b>WAITING</b></div>
+        <div data-step="dpp"><i></i><span><strong>DPP Passport</strong><small>Паспортен workflow</small></span><b>WAITING</b></div>
+        <div data-step="qr"><i></i><span><strong>QR Carrier</strong><small>Public passport access</small></span><b>WAITING</b></div>
+        <div data-step="ready"><i></i><span><strong>Workspace ready</strong><small>Отваряме dashboard-а</small></span><b>WAITING</b></div>
+      </div>
+      <div class="intake-message" id="configureMessage">Запазваме отговорите и създаваме pilot конфигурацията…</div>
+    </main>
+  </section>
+
+  <aside class="app-sidebar" id="appSidebar" aria-label="Company navigation" hidden>
     <a class="sidebar-brand" href="/manufacturer-early"><span class="flame" aria-hidden="true">◒</span><span><strong>SOULFLAME</strong><small>DPP AUTOPILOT</small></span></a>
     <nav class="side-nav">
       <a class="active" href="#dashboardHome"><span class="ico">⌂</span>Dashboard</a>
@@ -27,59 +91,40 @@
     <div class="sidebar-foot"><span class="leaf">♧</span><span>CLEAN ENERGY<br>LONGER LIFE<br>BRIGHTER TOMORROW</span><small>EARLY ACCESS</small></div>
   </aside>
 
-  <main class="shell early-shell" id="dashboardHome">
+  <main class="shell early-shell" id="dashboardHome" hidden>
     <header class="topbar">
       <label class="top-search" aria-label="Search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search passports, battery ID, client…" disabled></label>
-      <div class="top-actions"><span class="notification" aria-hidden="true">♟<i></i></span><div class="profile"><span class="avatar">SF</span><span><strong>Early Access</strong><small>Manufacturer Applicant</small></span></div></div>
+      <div class="top-actions"><span class="notification" aria-hidden="true">♟<i></i></span><div class="profile"><span class="avatar">SF</span><span><strong id="profileCompany">Configured</strong><small>Manufacturer Pilot</small></span></div></div>
     </header>
 
     <div id="dashboard">
-      <div class="early-layout">
-        <section class="early-main">
-          <div class="welcome">
-            <p class="eyebrow">DPP EARLY ACCESS</p>
-            <span class="state ok">NEW CLIENT · INTAKE</span>
-            <h1>Welcome to SOULFLAME DPP AUTOPILOT</h1>
-            <p>Влезли сте с вашия email. Този достъп се пази на устройството, за да не се регистрирате отново всеки път.</p>
-            <div class="tenant-line"><strong id="clientEmailTop">—</strong><span id="tenantMeta">Login saved on this device</span></div>
-          </div>
+      <section class="welcome configured-welcome">
+        <p class="eyebrow">DPP PILOT WORKSPACE</p>
+        <span class="state ok">AUTO-CONFIGURED</span>
+        <h1>Вашият DPP workspace е готов.</h1>
+        <p>Конфигурацията е създадена от вашите onboarding отговори. Следващата реална стъпка е Product / SKU → Batch → Serial units → DPP → QR.</p>
+        <div class="tenant-line"><strong id="clientEmailTop">—</strong><span id="tenantMeta">Configured workspace</span></div>
+      </section>
 
-          <section class="stats" aria-label="Early Access status">
-            <article class="metric blue"><span class="metric-icon">▤</span><div><small>Total Passports</small><strong>0</strong><em>Ще се активира след одобрение</em></div></article>
-            <article class="metric green"><span class="metric-icon">✓</span><div><small>Status</small><strong id="statusMetric">Intake</strong><em>Първо минаваме през въпросите</em></div></article>
-            <article class="metric amber"><span class="metric-icon">◷</span><div><small>Next Step</small><strong>AI Chat</strong><em>Отговорете на въпросите вдясно</em></div></article>
-            <article class="metric purple"><span class="metric-icon">▦</span><div><small>Payment</small><strong>Locked</strong><em>До индивидуална оферта</em></div></article>
-          </section>
+      <section class="stats" aria-label="Configured pilot status">
+        <article class="metric blue"><span class="metric-icon">▤</span><div><small>Total Passports</small><strong>0</strong><em>Готово за първия реален модел</em></div></article>
+        <article class="metric green"><span class="metric-icon">✓</span><div><small>Status</small><strong>Configured</strong><em>Onboarding 8/8 завършен</em></div></article>
+        <a class="metric amber metric-link preparing" id="productSkuEntry" href="#" aria-disabled="true"><span class="metric-icon">＋</span><div><small>Next Step</small><strong>Product / SKU</strong><em id="productSkuEntryState">Подготвяме фирмения workspace…</em></div><span class="metric-go" aria-hidden="true">→</span></a>
+        <article class="metric purple"><span class="metric-icon">▦</span><div><small>QR</small><strong>Ready</strong><em>След DPP създаване</em></div></article>
+      </section>
 
-          <section class="passport-table card">
-            <div class="section-head"><div><p class="eyebrow">EARLY ACCESS STATUS</p><h2>Вашият достъп е активен</h2></div><span class="state ok" id="reviewBadge">INTAKE</span></div>
-            <div class="result" id="earlyStatus" role="status" aria-live="polite">Проверяваме достъпа…</div>
-            <div class="early-info-grid">
-              <div class="access-box"><span class="shield">◇</span><div><strong>Влезли сте с email</strong><p id="clientEmail">—</p><small>Login-ът се пази локално на това устройство.</small></div></div>
-              <div class="access-box"><span class="shield">✓</span><div><strong>Какво следва</strong><p>Завършете въпросите в 24/7 AI Support. След това SoulFlame ще прегледа реалния ви бизнес и ще подготви точния dashboard, услуги и оферта.</p></div></div>
-            </div>
-          </section>
-        </section>
-
-        <aside class="ai-panel card" aria-label="24/7 AI Support">
-          <div class="ai-head">
-            <div><p class="eyebrow">24/7 AI SUPPORT</p><h2>DPP Intake Assistant</h2></div>
-            <span class="ai-live"><i></i> ONLINE</span>
-          </div>
-          <p class="ai-note">Това е автоматизиран помощник за първоначалните въпроси. Не е свободен AI агент. Ако зададете въпрос извън този процес, ще го изпратим към SoulFlame.</p>
-          <div class="chat-log" id="chatLog" aria-live="polite"></div>
-          <form class="chat-form" id="chatForm">
-            <textarea id="chatInput" rows="3" maxlength="1800" placeholder="Напишете отговора си…"></textarea>
-            <div class="chat-actions">
-              <span id="chatProgress">0 / 10</span>
-              <button class="btn primary" id="chatSend" type="submit">Изпрати →</button>
-            </div>
-          </form>
-          <div class="result" id="chatResult">Отговорите не се записват към фирмата, докато не завършите целия въпросник.</div>
-        </aside>
-      </div>
+      <section class="passport-table card">
+        <div class="section-head"><div><p class="eyebrow">PILOT CONFIGURATION</p><h2>Настройката е завършена</h2></div><span class="state ok">READY FOR PRODUCT</span></div>
+        <div class="result ok" id="earlyStatus" role="status" aria-live="polite">Зареждаме конфигурацията…</div>
+        <div class="early-info-grid">
+          <div class="access-box"><span class="shield">◇</span><div><strong>Google access</strong><p id="clientEmail">—</p><small>Сесията се пази на устройството.</small></div></div>
+          <div class="access-box"><span class="shield">✓</span><div><strong>Следваща реална стъпка</strong><p>Добавете реалния Product / SKU. После създаваме Batch, серийни единици, DPP и QR.</p><a class="btn primary early-product-cta" id="productSkuButton" href="#" aria-disabled="true">Отвори Product / SKU →</a></div></div>
+        </div>
+        <div class="configuration-summary" id="configurationSummary"></div>
+      </section>
     </div>
   </main>
+
   <script src="/assets/csp/manufacturer-early.js"></script>
 </body>
 </html>

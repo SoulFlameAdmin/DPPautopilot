@@ -48,15 +48,24 @@ for line in env.splitlines():
         key,value=line.split("=",1)
         require("REPLACE" in value or "YOUR_PROJECT" in value,f"R01 .env.example contains non-placeholder value for {key}")
 
+# The runtime may read Supabase env names directly in each API module or through the
+# shared server-only helper. Validate the helper once, then accept either form.
+helper=(ROOT/"api/_supabase_config.js").read_text(encoding="utf-8")
+require("DPP_SUPABASE_URL" in helper,"R01 shared Supabase config helper must accept canonical DPP_SUPABASE_URL")
+require("DPP_SUPABASE_PUBLISHABLE_KEY" in helper,"R01 shared Supabase config helper must accept canonical DPP_SUPABASE_PUBLISHABLE_KEY")
+require("SUPABASE_URL" in helper and "SUPABASE_ANON_KEY" in helper,"R01 shared Supabase config helper must retain legacy env fallback during migration")
+
 api_names=["models","items","passport","export","imports","tenant","organizations","members"]
 for name in api_names:
     text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
-    require("DPP_SUPABASE_URL" in text,f"R01 {name} API must accept canonical DPP_SUPABASE_URL")
-    require("DPP_SUPABASE_PUBLISHABLE_KEY" in text,f"R01 {name} API must accept canonical DPP_SUPABASE_PUBLISHABLE_KEY")
-    require("SUPABASE_URL" in text and "SUPABASE_ANON_KEY" in text,f"R01 {name} API must retain legacy env fallback during migration")
+    uses_helper="getSupabaseConfig" in text and "_supabase_config.js" in text
+    if not uses_helper:
+        require("DPP_SUPABASE_URL" in text,f"R01 {name} API must accept canonical DPP_SUPABASE_URL directly or via shared helper")
+        require("DPP_SUPABASE_PUBLISHABLE_KEY" in text,f"R01 {name} API must accept canonical DPP_SUPABASE_PUBLISHABLE_KEY directly or via shared helper")
+        require("SUPABASE_URL" in text and "SUPABASE_ANON_KEY" in text,f"R01 {name} API must retain legacy env fallback during migration")
 
 doc=(ROOT/"docs/R01_ENV_SECRET_MANAGEMENT.md").read_text(encoding="utf-8")
 for phrase in ["service-role key","server-only secret store","publishable key","frhletkiuupgksmgxoxc","DPP_SUPABASE_URL","DPP_SUPABASE_PUBLISHABLE_KEY","DPP_SHARED_RATE_LIMIT_ENABLED","DPP_EXPORT_MANIFEST_SIGNING_KEY"]:
     require(phrase.lower() in doc.lower(),f"R01 documentation missing: {phrase}")
 
-print("R01_ENV_SECRET_PASS: client assets are secret-safe; canonical DPP Supabase runtime env names are enforced across all serverless API surfaces with explicit placeholders and legacy fallback")
+print("R01_ENV_SECRET_PASS: client assets are secret-safe; canonical DPP Supabase runtime env names are enforced across direct and shared-helper serverless API surfaces with explicit placeholders and legacy fallback")

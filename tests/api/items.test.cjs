@@ -32,7 +32,7 @@ function itemFixture(overrides={}) {
 function withEnv() {
   const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.SUPABASE_ANON_KEY='sb_publishable_test_key';
   return () => {
     if(oldUrl===undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL=oldUrl;
     if(oldKey===undefined) delete process.env.SUPABASE_ANON_KEY; else process.env.SUPABASE_ANON_KEY=oldKey;
@@ -287,7 +287,7 @@ test('stale item delete maps DP309 to stable 409', async () => {
 
 
 test('M18 item RPC network failure maps to stable 502 without leaking transport detail',async()=>{
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_key'};
   await assert.rejects(
     ()=>handler._test.rpc('dpp_api_items_list',{},'Bearer item-token',env,async()=>{throw new Error('socket reset private transport detail');},50),
     error=>{
@@ -301,7 +301,7 @@ test('M18 item RPC network failure maps to stable 502 without leaking transport 
 });
 
 test('M18 item RPC times out while upstream response body stalls', async () => {
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_key'};
   const fetchImpl=async(_url,options)=>({
     ok:true,
     json:()=>new Promise((_resolve,reject)=>{
@@ -324,7 +324,7 @@ test('M18 item RPC times out while upstream response body stalls', async () => {
 });
 
 test('M18 item RPC rejects malformed successful upstream JSON', async () => {
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_key'};
   const fetchImpl=async()=>({
     ok:true,
     async json(){throw new SyntaxError('malformed upstream json');}
@@ -343,7 +343,7 @@ test('M18 item RPC rejects malformed successful upstream JSON', async () => {
 
 
 test('M18 item RPC rejects syntactically valid but malformed success shape', async () => {
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_key'};
   const fetchImpl=async()=>({
     ok:true,
     async json(){return [{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',model_id:'not-a-uuid'}];}

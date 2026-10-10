@@ -1,11 +1,11 @@
 {
   "version": 1,
   "status": "approved_precursor",
-  "approved_at": "2026-09-19T23:42:00+03:00",
-  "source_run_id": 35468111629,
-  "source_artifact_id": 10592210955,
-  "source_artifact_digest": "sha256:7695ed7d4f44f81a0a25c8b3c474f2762b4e002f587fff68ab7ee0223db6be9c",
-  "source_commit": "2ec2f8886442259f6f0027b622aab9ed8d3007f5",
+  "approved_at": "2026-10-08T02:24:33Z",
+  "source_run_id": 37717613248,
+  "source_artifact_id": 11524501598,
+  "source_artifact_digest": "sha256:b420594704821f8e0a9e1f15f474c6524f98ded52fe63fc180a7a13b29a62191",
+  "source_commit": "c813edee4ade22831452c7582fc9bbd49c61fca2",
   "browser": "chromium",
   "browser_version": "153.0.8010.12",
   "viewport": {
@@ -31,14 +31,14 @@
   },
   "review": {
     "visual_review": "pass",
-    "deterministic_repeat": "10/10 byte-identical",
-    "notes": "10 core viewport screenshots reviewed from run 35468111629; intentional dashboard-only change adds the persistent BG/EN control with no clipping, overlap, broken cards/forms, empty render or visible layout regression. Other 9 approved surface hashes remain unchanged. Gate hardening on 2026-09-20: PNG encoder bytes can vary with identical pixels; decoded RGBA SHA-256 is now the visual regression identity while PNG SHA-256 remains artifact-integrity evidence."
+    "deterministic_repeat": "pass-a/pass-b decoded RGBA identical on all 10 surfaces",
+    "notes": "2026-10-08 controlled baseline refresh: only the dashboard surface changed. Visual review confirms the intentional Battery Client Pilot v1 current-mission panel and Continue Battery Pilot CTA render without clipping, overlap, broken cards/forms or empty regions. The other 9 approved surface pixel hashes remain unchanged. Exact decoded RGBA matching remains mandatory; no tolerance weakening was introduced."
   },
   "surfaces": {
     "dashboard": {
       "route": "/",
-      "sha256": "72b9b8a1ca217cb19b9f4ebc8757d0f4ce897895eb623b797bea49115a55f650",
-      "pixel_sha256": "db4586c5fefcfdd5dc082f3c80c6564674a02409ee9c1400ae455676cfdd5616"
+      "sha256": "118377e7db8b28c52d1a397ba53224cc0f960809b968d1df56ce091f7b28d5b2",
+      "pixel_sha256": "c3034d40c381481667c762f16675247278b01e9789cf7c6e257cffab0ecc90d2"
     },
     "model": {
       "route": "/demo/model.html?sample=1",

@@ -490,6 +490,13 @@
         "code": "VALIDATION_ERROR",
         "message": "The carrier request failed validation."
       }
+    },
+    "manufacturer-onboarding": {
+      "DP501": {
+        "http_status": 422,
+        "code": "VALIDATION_ERROR",
+        "message": "The request failed validation."
+      }
     }
   },
   "local_codes": {

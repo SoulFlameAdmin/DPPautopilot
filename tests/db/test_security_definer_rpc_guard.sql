@@ -49,7 +49,8 @@ begin
     and p.oid::regprocedure::text not in (
       'dpp_api_passport_public(text)',
       'dpp_api_passport_public_resolve(text)',
-      'dpp_api_carrier_open(text,text)'
+      'dpp_api_carrier_open(text,text)',
+      'dpp_api_registration_request_create(text)'
     );
 
   if v_anon_extra is not null then
@@ -60,7 +61,8 @@ begin
     values
       ('dpp_api_passport_public(text)'),
       ('dpp_api_passport_public_resolve(text)'),
-      ('dpp_api_carrier_open(text,text)')
+      ('dpp_api_carrier_open(text,text)'),
+      ('dpp_api_registration_request_create(text)')
   )
   select string_agg(r.signature,', ' order by r.signature)
     into v_anon_missing
@@ -90,6 +92,7 @@ begin
       'dpp_api_members_list()',
       'dpp_api_members_update(uuid,text)',
       'dpp_api_organization_create(text,text)',
+      'dpp_api_organization_ensure(text,text)',
       'dpp_api_organizations_list()',
       'dpp_api_models_create(text,text,text,jsonb)',
       'dpp_api_models_delete_checked(uuid,timestamp with time zone)',
@@ -101,6 +104,15 @@ begin
       'dpp_api_passport_update_checked(uuid,text,jsonb,jsonb,timestamp with time zone)',
       'dpp_api_scooter_battery_provision(uuid,text,jsonb,jsonb,jsonb)',
       'dpp_api_scooter_battery_batch_provision(uuid,text,jsonb)',
+      'dpp_api_battery_provision(uuid,text,jsonb,jsonb,jsonb)',
+      'dpp_api_battery_batch_provision(uuid,text,jsonb)',
+      'dpp_api_manufacturer_onboarding_answer_upsert(text,text,jsonb)',
+      'dpp_api_manufacturer_onboarding_get()',
+      'dpp_api_manufacturer_onboarding_configure()',
+      'dpp_api_registration_request_verify(uuid)',
+      'dpp_api_registration_requests_mine()',
+      'dpp_api_client_application_submit(text,text,text,text,integer,integer,integer,jsonb,text,integer,bigint,text)',
+      'dpp_api_client_applications_mine()',
       'dpp_api_scooter_passport_readiness(uuid)',
       'dpp_api_scooter_passport_activate(uuid,timestamp with time zone)',
       'dpp_api_scooter_completeness_by_identifier(text)',
@@ -153,6 +165,7 @@ begin
       'dpp_api_supplier_reminders_list(uuid)',
       'dpp_api_suppliers_list()',
       'dpp_api_technical_pilot_publish(uuid,jsonb,jsonb)',
+      'dpp_api_technical_pilot_update_capacity(uuid,numeric,timestamp with time zone)',
       'dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)'
     );
 
@@ -170,6 +183,7 @@ begin
       ('dpp_api_members_list()'),
       ('dpp_api_members_update(uuid,text)'),
       ('dpp_api_organization_create(text,text)'),
+      ('dpp_api_organization_ensure(text,text)'),
       ('dpp_api_organizations_list()'),
       ('dpp_api_models_create(text,text,text,jsonb)'),
       ('dpp_api_models_delete_checked(uuid,timestamp with time zone)'),
@@ -181,6 +195,15 @@ begin
       ('dpp_api_passport_update_checked(uuid,text,jsonb,jsonb,timestamp with time zone)'),
       ('dpp_api_scooter_battery_provision(uuid,text,jsonb,jsonb,jsonb)'),
       ('dpp_api_scooter_battery_batch_provision(uuid,text,jsonb)'),
+      ('dpp_api_battery_provision(uuid,text,jsonb,jsonb,jsonb)'),
+      ('dpp_api_battery_batch_provision(uuid,text,jsonb)'),
+      ('dpp_api_manufacturer_onboarding_answer_upsert(text,text,jsonb)'),
+      ('dpp_api_manufacturer_onboarding_get()'),
+      ('dpp_api_manufacturer_onboarding_configure()'),
+      ('dpp_api_registration_request_verify(uuid)'),
+      ('dpp_api_registration_requests_mine()'),
+      ('dpp_api_client_application_submit(text,text,text,text,integer,integer,integer,jsonb,text,integer,bigint,text)'),
+      ('dpp_api_client_applications_mine()'),
       ('dpp_api_scooter_passport_readiness(uuid)'),
       ('dpp_api_scooter_passport_activate(uuid,timestamp with time zone)'),
       ('dpp_api_scooter_completeness_by_identifier(text)'),
@@ -216,6 +239,7 @@ begin
       ('dpp_api_passports_list(integer)'),
       ('dpp_api_scooter_passport_transition(uuid,text,text,text,text,timestamp with time zone)'),
       ('dpp_api_technical_pilot_publish(uuid,jsonb,jsonb)'),
+      ('dpp_api_technical_pilot_update_capacity(uuid,numeric,timestamp with time zone)'),
       ('dpp_rate_limit_consume(text,integer,integer,timestamp with time zone)')
   )
   select string_agg(r.signature,', ' order by r.signature)

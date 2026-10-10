@@ -4,52 +4,70 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>DPP Autopilot · Early Access</title>
-  <meta name="description" content="SoulFlame DPP Autopilot Early Access registration.">
+  <meta name="robots" content="noindex,nofollow">
+  <title>SoulFlame DPP · Google вход</title>
+  <meta name="description" content="Вход в SoulFlame DPP Autopilot с Google.">
   <link rel="stylesheet" href="/assets/csp/company-auth.css">
+  <link rel="stylesheet" href="/assets/csp/google-access.css">
 </head>
-<body data-company-auth-ready="true" data-company-session="anonymous">
-<main class="shell">
+<body data-company-auth-ready="true" data-company-session="google">
+<main class="shell google-shell">
   <header class="topbar">
-    <a class="brand" href="/">DPP AUTOPILOT</a>
-    <span class="badge">EARLY ACCESS · NEW CLIENT</span>
+    <a class="brand" href="/">SOULFLAME DPP</a>
+    <span class="badge">GOOGLE ACCESS · EARLY PILOT</span>
   </header>
 
-  <section class="hero">
-    <div>
-      <p class="eyebrow">SOULFLAME DPP AUTOPILOT</p>
-      <h1>Регистрирайте вашия email.</h1>
-      <p>Въведете email адреса си и натиснете <strong>Регистрирай</strong>. SoulFlame получава заявката и вие влизате директно във вашия Early Access manufacturer dashboard.</p>
+  <section class="google-hero">
+    <div class="google-copy">
+      <p class="eyebrow">DIGITAL PRODUCT PASSPORT</p>
+      <h1>Един Google акаунт.<br>Един DPP dashboard.</h1>
+      <p class="lead">За тази версия използваме само Google вход. Няма пароли, няма confirmation email и няма отделна регистрация.</p>
+
+      <div class="trust-row">
+        <span>Google OAuth</span>
+        <span>Запазена сесия</span>
+        <span>Директен dashboard</span>
+      </div>
     </div>
-    <div class="security-note">
-      <strong>EARLY ACCESS</strong>
-      <span>Няма Supabase Magic Link и не чакаме email потвърждение. След регистрацията ще се свържем с вас лично за следващите стъпки.</span>
-    </div>
+
+    <section class="google-card" aria-label="Google login">
+      <div class="google-card-head">
+        <div class="google-mark" aria-hidden="true"><span>G</span></div>
+        <div>
+          <p class="eyebrow">SECURE ACCESS</p>
+          <h2>Вход с Google</h2>
+        </div>
+      </div>
+
+      <p class="google-note">Избери Google акаунта, който фирмата ще използва за DPP. След успешния вход ще го запазим на това устройство и ще отворим manufacturer dashboard-а.</p>
+
+      <button class="google-button" id="googleLogin" type="button">
+        <span class="google-button-mark" aria-hidden="true">G</span>
+        <span>Продължи с Google</span>
+      </button>
+
+      <div class="google-user" id="googleUser" hidden>
+        <div class="google-avatar" id="googleAvatar">G</div>
+        <div>
+          <strong id="googleName">Google user</strong>
+          <small id="googleEmail">—</small>
+        </div>
+      </div>
+
+      <button class="btn primary dashboard-button" id="openDashboard" type="button" hidden>Отвори DPP dashboard →</button>
+      <button class="btn ghost switch-button" id="switchGoogle" type="button" hidden>Смени Google акаунта</button>
+
+      <div class="result" id="result" role="status" aria-live="polite">Проверяваме дали вече имате запазена Google сесия…</div>
+    </section>
   </section>
 
-  <section class="card" id="emailCard">
-    <div class="card-head">
-      <div><p class="eyebrow">1 · EMAIL</p><h2>Регистрация</h2></div>
-      <span class="state">NEW CLIENT</span>
-    </div>
-
-    <div class="form-grid single-field">
-      <label>
-        <span>Email (Gmail или друг)</span>
-        <input id="email" type="email" autocomplete="email" placeholder="voltrex@gmail.com или office@company.eu">
-      </label>
-    </div>
-
-    <div class="actions">
-      <button class="btn primary big-submit" id="registerClient" type="button">Регистрирай →</button>
-    </div>
-
-    <div class="result" id="result" role="status" aria-live="polite">
-      След клика SoulFlame ще получи вашия email и ще отворим DPP manufacturer dashboard-а.
-    </div>
+  <section class="google-flow">
+    <article><b>01</b><strong>Google</strong><span>Влизате с фирмения Google акаунт.</span></article>
+    <article><b>02</b><strong>Запазваме достъпа</strong><span>Сесията остава на устройството.</span></article>
+    <article><b>03</b><strong>DPP Dashboard</strong><span>Отваряме вашия Early Access manufacturer workspace.</span></article>
   </section>
 
-  <footer>Early Access · директен dashboard · обратна връзка от SoulFlame.</footer>
+  <footer>Google → SoulFlame DPP → Manufacturer Dashboard. Единствен вход за pilot v1.</footer>
 </main>
 <script src="/assets/csp/client-apply-inline-1.js"></script>
 </body>

@@ -28,7 +28,14 @@ request=(ROOT/"api/_request.js").read_text(encoding="utf-8")
 for token in ["MAX_BODY_BYTES = 1024 * 1024","Buffer.isBuffer","JSON.stringify(value)","PAYLOAD_TOO_LARGE","INVALID_JSON"]:
     assert token in request, f"R03 request limiter missing {token}"
 
-covered_body_files={"tenant.js","organizations.js","members.js","models.js","items.js","passport.js","provision.js","batch-provision.js","imports.js","carriers.js"}
+# Every API surface that parses a request body must use the same fail-closed
+# 1 MiB parser and typed body-error response. Keep this inventory exact so a
+# newly-added parser cannot silently bypass R03 coverage.
+covered_body_files={
+    "application.js","batch-provision.js","carriers.js","imports.js","items.js",
+    "manufacturer-onboarding.js","members.js","models.js","organizations.js",
+    "passport.js","provision.js","registration-link.js","tenant.js"
+}
 body_surface_inventory={
     path.name
     for path in (ROOT/"api").glob("*.js")
@@ -59,4 +66,4 @@ assert "upstream must not be called" in api_test
 remaining=matrix.get("remaining",[])
 assert len(remaining)==1 and "Storage API byte" in remaining[0], "R03 must retain only the real M13 Storage byte-path gap while partial"
 
-print("R03_API_INPUT_VALIDATION_CONTRACT_PASS: 1 MiB shared body limit + 26 negative API/file-policy scenarios are versioned; inventoried body surfaces including M20 imports are covered")
+print("R03_API_INPUT_VALIDATION_CONTRACT_PASS: 1 MiB shared body limit + 26 negative API/file-policy scenarios are versioned; all 13 parseBody API surfaces are fail-closed through the shared limiter")

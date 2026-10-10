@@ -55,7 +55,7 @@ test('GET forwards user bearer token to tenant-scoped list RPC', async () => {
   const oldUrl = process.env.SUPABASE_URL;
   const oldKey = process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL = 'https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY = 'anon-key';
+  process.env.SUPABASE_ANON_KEY = 'sb_publishable_test_key';
   let seen;
   global.fetch = async (url, options) => {
     seen = { url, options };
@@ -67,7 +67,7 @@ test('GET forwards user bearer token to tenant-scoped list RPC', async () => {
     assert.equal(res.statusCode, 200);
     assert.equal(seen.url, 'https://example.supabase.co/rest/v1/rpc/dpp_api_models_list');
     assert.equal(seen.options.headers.Authorization, 'Bearer test-token');
-    assert.equal(seen.options.headers.apikey, 'anon-key');
+    assert.equal(seen.options.headers.apikey, 'sb_publishable_test_key');
     assert.deepEqual(JSON.parse(seen.options.body), {});
     assert.equal(JSON.parse(res.body).data[0].model_identifier, 'A');
   } finally {
@@ -82,7 +82,7 @@ test('POST validates and forwards canonical model payload', async () => {
   const oldUrl = process.env.SUPABASE_URL;
   const oldKey = process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL = 'https://example.supabase.co/';
-  process.env.SUPABASE_ANON_KEY = 'anon-key';
+  process.env.SUPABASE_ANON_KEY = 'sb_publishable_test_key';
   let seen;
   global.fetch = async (url, options) => {
     seen = { url, options };
@@ -128,7 +128,7 @@ test('database RBAC denial maps to stable 403 response', async () => {
   const oldUrl = process.env.SUPABASE_URL;
   const oldKey = process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL = 'https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY = 'anon-key';
+  process.env.SUPABASE_ANON_KEY = 'sb_publishable_test_key';
   global.fetch = async () => ({
     ok: false,
     async json() { return { code: 'DP104', message: 'active organization role is not authorized' }; }
@@ -155,7 +155,7 @@ test('cross-tenant/not-found database response maps to 404 without detail leak',
   const oldUrl = process.env.SUPABASE_URL;
   const oldKey = process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL = 'https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY = 'anon-key';
+  process.env.SUPABASE_ANON_KEY = 'sb_publishable_test_key';
   global.fetch = async () => ({
     ok: false,
     async json() { return { code: 'DP205', message: 'internal detail should not be exposed' }; }
@@ -205,7 +205,7 @@ test('PATCH forwards optimistic concurrency token to checked model RPC', async (
   const original=global.fetch;
   const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.SUPABASE_ANON_KEY='sb_publishable_test_key';
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
@@ -232,7 +232,7 @@ test('stale model write maps DP206 to stable 409', async () => {
   const original=global.fetch;
   const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.SUPABASE_ANON_KEY='sb_publishable_test_key';
   global.fetch=async()=>({ok:false,async json(){return {code:'DP206',message:'internal stale timestamp'};}});
   try {
     const res=makeRes();
@@ -271,7 +271,7 @@ test('DELETE forwards optimistic concurrency token to checked model delete RPC',
   const original=global.fetch;
   const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.SUPABASE_ANON_KEY='sb_publishable_test_key';
   let seen;
   global.fetch=async(url,options)=>{
     seen={url,options};
@@ -300,7 +300,7 @@ test('stale model delete maps DP206 to stable 409', async () => {
   const original=global.fetch;
   const oldUrl=process.env.SUPABASE_URL, oldKey=process.env.SUPABASE_ANON_KEY;
   process.env.SUPABASE_URL='https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY='anon-key';
+  process.env.SUPABASE_ANON_KEY='sb_publishable_test_key';
   global.fetch=async()=>({ok:false,async json(){return {code:'DP206',message:'internal stale delete timestamp'};}});
   try {
     const res=makeRes();
@@ -320,7 +320,7 @@ test('stale model delete maps DP206 to stable 409', async () => {
 
 
 test('M17 model RPC network failure maps to stable 502 without leaking transport detail',async()=>{
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_key'};
   await assert.rejects(
     ()=>handler._test.rpc('dpp_api_models_list',{},'Bearer model-token',env,async()=>{throw new Error('socket reset private transport detail');},50),
     error=>{
@@ -334,7 +334,7 @@ test('M17 model RPC network failure maps to stable 502 without leaking transport
 });
 
 test('M17 model RPC times out while upstream response body stalls', async () => {
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_key'};
   const fetchImpl=async(_url,options)=>({
     ok:true,
     json:()=>new Promise((_resolve,reject)=>{
@@ -357,7 +357,7 @@ test('M17 model RPC times out while upstream response body stalls', async () => 
 });
 
 test('M17 model RPC rejects malformed successful upstream JSON', async () => {
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_key'};
   const fetchImpl=async()=>({
     ok:true,
     async json(){throw new SyntaxError('malformed upstream json');}
@@ -376,7 +376,7 @@ test('M17 model RPC rejects malformed successful upstream JSON', async () => {
 
 
 test('M17 model RPC rejects syntactically valid but malformed success shape', async () => {
-  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'anon-key'};
+  const env={SUPABASE_URL:'https://example.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_test_key'};
   const fetchImpl=async()=>({
     ok:true,
     async json(){return [{id:'not-a-uuid',model_identifier:'A'}];}

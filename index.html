@@ -10,10 +10,26 @@
 </head>
 <body>
   <header class="topbar"><div class="topbar-inner"><div class="brand"><span class="mark"></span><span>DPP AUTOPILOT</span></div><div class="top-actions"><button class="btn lang-toggle" type="button" data-lang-toggle aria-label="Change language">BG / EN</button><button class="btn" data-action="scroll-worker">DAVID</button><button class="btn burger" id="menuToggle" aria-expanded="false" aria-controls="burgerMenu" data-action="toggle-menu"><span class="burger-lines" aria-hidden="true"><i></i><i></i><i></i></span><span>Меню</span></button></div></div></header>
-  <aside class="menu" id="burgerMenu" aria-hidden="true"><button class="btn primary" id="stagesButton" data-action="open-plan-close-menu">Етапи</button><button class="btn" data-action="scroll-gates-close-menu">Граници на продукта</button><button class="btn" data-action="scroll-worker-close-menu">DAVID Worker</button><button class="btn" data-href="/demo/model.html?sample=1">Models</button><button class="btn" data-href="/demo/item.html?sample=1">Items</button><button class="btn" data-href="/demo/import.html?sample=1">Imports</button><button class="btn" data-href="/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001">Passports</button><button class="btn" data-href="/qr?identifier=BAT-SF-NFC-0001">Live QR</button><button class="btn primary" data-href="/starter-documents">DPP Starter Docs v0.1</button><button class="btn primary" data-href="/world">🌍 DPP WORLD</button><button class="btn primary" data-href="/apply">Заяви DPP</button><button class="btn" data-href="/company">Company Login</button><button class="btn" data-href="/manufacturer">Manufacturer Dashboard</button><button class="btn primary" data-href="/battery-master">Battery Master 1–100</button><button class="btn" data-href="/demo/settings.html?sample=1">Settings</button><button class="btn" data-href="/demo/autopilot.html?sample=1">DAVID Autopilot</button><button class="btn" data-href="/demo/onboarding.html?sample=1">Pilot onboarding</button><div class="menu-note">Етапи от canonical master plan: Demo → MVP/Data/Auth/API → UX → Security/Privacy/Ops → Testing → Release/Acceptance → Expansion.</div></aside>
+  <aside class="menu" id="burgerMenu" aria-hidden="true"><button class="btn primary" id="stagesButton" data-action="open-plan-close-menu">Етапи</button><button class="btn" data-action="scroll-gates-close-menu">Граници на продукта</button><button class="btn" data-action="scroll-worker-close-menu">DAVID Worker</button><button class="btn" data-href="/demo/model.html?sample=1">Models</button><button class="btn" data-href="/demo/item.html?sample=1">Items</button><button class="btn" data-href="/demo/import.html?sample=1">Imports</button><button class="btn" data-href="/demo/passport.html?id=urn%3Adpp%3Ademo%3Abattery%3ANSD-EV-82-DEMO%3A000001">Passports</button><button class="btn" data-href="/qr?identifier=BAT-SF-NFC-0001">Live QR</button><button class="btn primary" data-href="/starter-documents">DPP Starter Docs v0.1</button><button class="btn primary" data-href="/world">🌍 DPP WORLD</button><button class="btn primary" data-href="/apply">Заяви DPP</button><button class="btn" data-href="/register">Google Login</button><button class="btn" data-href="/manufacturer">Manufacturer Dashboard</button><button class="btn primary" data-href="/battery-master">Battery Master 1–100</button><button class="btn" data-href="/demo/settings.html?sample=1">Settings</button><button class="btn" data-href="/demo/autopilot.html?sample=1">DAVID Autopilot</button><button class="btn" data-href="/demo/onboarding.html?sample=1">Pilot onboarding</button><div class="menu-note">Етапи от canonical master plan: Demo → MVP/Data/Auth/API → UX → Security/Privacy/Ops → Testing → Release/Acceptance → Expansion.</div></aside>
 
   <main class="shell">
-    <section class="hero"><div class="eyebrow">Battery Digital Product Passport Automation</div><h1>От battery data до контролиран цифров продуктов паспорт.</h1><p>DPP Autopilot следва едно правило: GREEN означава реална имплементация, приложим PASS тест и конкретно evidence. DAVID Worker показва текущата задача, а „Етапи“ отваря пълния технически master plan.</p><div class="hero-actions"><button class="btn primary" data-action="open-plan">Отвори „Етапи“</button><button class="btn" data-action="scroll-gates">Виж границите</button></div></section>
+    <section class="hero"><div class="eyebrow">Battery Digital Product Passport Automation</div><h1>От battery data до контролиран цифров продуктов паспорт.</h1><p>DPP Autopilot следва едно правило: GREEN означава реална имплементация, приложим PASS тест и конкретно evidence. DAVID Worker показва текущата задача, а „Етапи“ отваря пълния технически master plan.</p><div class="hero-actions"><button class="btn primary" data-action="scroll-mission">Продължи Battery Pilot</button><button class="btn" data-action="open-plan">Отвори „Етапи“</button><button class="btn" data-action="scroll-gates">Виж границите</button></div></section>
+
+    <section class="mission" id="currentMission" aria-label="Текуща клиентска мисия">
+      <div class="mission-head">
+        <div>
+          <div class="eyebrow">Current mission</div>
+          <h2 id="missionTitle">Battery Client Pilot v1</h2>
+          <p id="missionObjective">Зареждане на текущата клиентска мисия…</p>
+        </div>
+        <div class="mission-actions">
+          <button class="btn primary" data-href="/manufacturer">Отвори Manufacturer Dashboard</button>
+          <button class="btn" data-action="open-plan">Инженерен master plan</button>
+        </div>
+      </div>
+      <div class="mission-note" id="missionRule">Техническият pilot не е регулаторна сертификация.</div>
+      <div class="mission-steps" id="missionSteps" role="status" aria-live="polite"></div>
+    </section>
 
     <section class="worker" id="worker"><div class="worker-head"><div class="worker-title"><span class="pulse" id="workerPulse"></span><span>DAVID WORKER</span></div><span id="workerStamp" class="worker-stamp">зареждане…</span></div><div class="worker-grid"><div class="worker-cell"><div class="label">Текуща задача</div><div class="value" id="currentTask">Зареждане на worker status…</div></div><div class="worker-cell"><div class="label">Последно завършена</div><div class="value" id="lastCompleted">—</div></div><div class="worker-cell"><div class="label">Следваща</div><div class="value" id="nextTask">—</div></div></div><div class="worker-msg" id="workerMessage"></div></section>
 
@@ -30,6 +46,7 @@
 
   <script src="/demo/async-state.js"></script>
   <script src="/assets/csp/index-inline-1.js"></script>
+<script src="/assets/csp/current-mission.js"></script>
 <script src="/demo/responsive-probe.js"></script>
 <script src="/demo/accessibility-probe.js"></script>
 

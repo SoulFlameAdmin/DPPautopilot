@@ -170,6 +170,7 @@ function validateRpcShape(name, data) {
   if (name === 'dpp_api_passport_private' ||
       name === 'dpp_api_passport_create' ||
       name === 'dpp_api_passport_update_checked' ||
+      name === 'dpp_api_technical_pilot_update_capacity' ||
       name === 'dpp_api_scooter_passport_activate' ||
       name === 'dpp_api_scooter_passport_transition') return validPrivatePassport(data);
   return true;
@@ -456,7 +457,7 @@ async function handler(req, res) {
     if (!validTimestamp(body.expected_updated_at)) {
       return send(res, 428, { error: { code: 'WRITE_PRECONDITION_REQUIRED', message: 'expected_updated_at must be a valid timestamp from the last read.' } });
     }
-    if (body.action != null && !['activate','submit_authority_evidence','transition'].includes(body.action)) {
+    if (body.action != null && !['activate','submit_authority_evidence','transition','update_technical_pilot'].includes(body.action)) {
       return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
     }
     if (body.action === 'submit_authority_evidence') {
@@ -470,6 +471,21 @@ async function handler(req, res) {
       }, authorization);
       return send(res, 200, { data: receipt });
     }
+    if (body.action === 'update_technical_pilot') {
+      const capacityAh = Number(body.capacity_ah);
+      if (!Number.isFinite(capacityAh) || capacityAh <= 0 || capacityAh > 100000) {
+        return send(res, 422, { error: { code: 'VALIDATION_ERROR', message: 'The request failed validation.' } });
+      }
+
+      const passport = await rpc('dpp_api_technical_pilot_update_capacity', {
+        p_id: id,
+        p_capacity_ah: capacityAh,
+        p_expected_updated_at: body.expected_updated_at
+      }, authorization);
+
+      return send(res, 200, { data: sanitizeOrganizationPrivatePassport(passport) });
+    }
+
     if (body.action === 'activate') {
       const passport = await rpc('dpp_api_scooter_passport_activate', {
         p_passport_id: id,
