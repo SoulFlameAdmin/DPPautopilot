@@ -71,7 +71,9 @@ async function refreshSession(){
   refreshing=(async()=>{
     try{
       const data=await authCall("/auth/v1/token?grant_type=refresh_token",{body:{refresh_token:session.refresh_token}});
-      saveSession(data);return !!session?.access_token&&!expiresSoon(session);
+      saveSession(data);
+      if(!session?.access_token||expiresSoon(session))throw new Error("AUTH_REFRESH_INVALID");
+      return true;
     }catch{sessionStorage.removeItem(STORAGE);localStorage.removeItem(GOOGLE_STORAGE);session=null;return false}
     finally{refreshing=null}
   })();
