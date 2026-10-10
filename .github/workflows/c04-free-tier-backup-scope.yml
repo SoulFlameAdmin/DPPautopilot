@@ -1,0 +1,22 @@
+name: C04 Free Tier Backup Scope Safety
+on:
+  pull_request:
+    paths:
+      - 'scripts/c04-storage-backup-scope-select-only.sql'
+      - 'docs/c04-free-tier-storage-recovery-evidence-20261010.md'
+      - 'tests/api/c04-free-tier-backup-scope.test.cjs'
+      - '.github/workflows/c04-free-tier-backup-scope.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-backup-scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Assert SQL is SELECT-only and backup truthfulness is preserved
+        run: node --test tests/api/c04-free-tier-backup-scope.test.cjs
