@@ -74,11 +74,7 @@ begin
       'dpp_api_ai_intake_manual_candidate_cas'
     )
     and p.prosecdef is true
-    and exists (
-      select 1
-      from unnest(coalesce(p.proconfig,array[]::text[])) as cfg
-      where cfg like 'search_path=%public%extensions%pg_temp%'
-    );
+    and coalesce(p.proconfig,'{}'::text[]) @> array['search_path=public, pg_temp']::text[];
   if secure_count<>4 then
     raise exception 'A2 CAS wrappers lost SECURITY DEFINER or locked search_path (%/4 secure)',secure_count;
   end if;
