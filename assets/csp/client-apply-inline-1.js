@@ -67,6 +67,8 @@ function clearLocalAccess(){
   localStorage.removeItem(GOOGLE_SESSION_KEY);
   localStorage.removeItem(EARLY_STORAGE);
   localStorage.removeItem(TOKEN_KEY);
+  // A company session is tab-scoped and must not survive Google account switching.
+  sessionStorage.removeItem("dpp_company_session_v1");
 }
 function userView(user){
   const meta=user?.user_metadata||{};
