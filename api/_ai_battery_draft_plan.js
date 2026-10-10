@@ -76,8 +76,12 @@ function planBatteryDraft({context,facts=[],approval=null,applicability={}}={}){
   if(p.access==='authority_only'){authority.push(p.number);continue;}
   if(p.number===2){policyReview.push(p.number);continue;}
   // Fail closed on nested public/private values until typed schemas and access checks exist.
-  if(['object','array','document_ref_array'].includes(p.valueType)){
+  if(['object','array','document_ref','document_ref_array'].includes(p.valueType)){
    schemaReview.push(p.number);continue;
+  }
+  // A generic string is not a validated enum. Wait for a canonical allowlist.
+  if(p.valueType==='enum'){
+   policyReview.push(p.number);continue;
   }
   const isPublic=p.access==='public'||p.number===1;
   const isPrivate=['legitimate_interest','legitimate_interest_and_authorities'].includes(p.access);
