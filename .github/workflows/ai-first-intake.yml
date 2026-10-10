@@ -77,3 +77,4 @@ jobs:
           \i tests/db/test_ai_actor_bound_rpc_surface_subset.sql
           rollback;
           SQL
+          bash tests/db/test_ai_actor_bound_race.sh
