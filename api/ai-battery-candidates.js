@@ -4,6 +4,7 @@ const {parseBody,bodyErrorResponse}=require('./_request.js');
 const {enforceRateLimit,enforceSharedRateLimit,sharedRateLimitUnavailableBody,rateLimitBody}=require('./_rate_limit.js');
 const {startRequestObservability}=require('./_observability.js');
 const {LMTAuthError,validateBearerSupabase}=require('./_ai_lmt_auth.js');
+const {LMTTenantError,validateManufacturerTenant}=require('./_ai_lmt_tenant_gate.js');
 const {BatteryGPTError,MAX_PROMPT_CHARS,extractBatteryCandidates}=require('./_ai_lmt_candidate_extractor.js');
 function send(res,status,body){
  res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');
@@ -45,10 +46,14 @@ function createHandler({env=process.env,fetchImpl=globalThis.fetch}={}){
   try{
    // Authenticates the USER, not tenant/product membership. No DB read or write here.
    await validateBearerSupabase(auth,{env,fetchImpl});
+   // A valid user token is not permission to spend on behalf of a manufacturer.
+   // Derive active org and writable role ONLY from the server-side tenant context RPC.
+   await validateManufacturerTenant(auth,{env,fetchImpl});
    const data=await extractBatteryCandidates({prompt:body.prompt,env,fetchImpl});
    return send(res,200,{data});
   }catch(error){
    if(error instanceof LMTAuthError)return send(res,error.status,{error:{code:error.code,message:'Authentication failed.'}});
+   if(error instanceof LMTTenantError)return send(res,error.status,{error:{code:error.code,message:'Active manufacturer authorization required.'}});
    if(error instanceof BatteryGPTError)return send(res,error.status,{error:{code:error.code,message:'Candidate preview failed.'}});
    if(Number.isInteger(error?.status)&&error?.publicCode)
     return send(res,error.status,{error:{code:error.publicCode,message:error.publicMessage||'Request failed.'}});

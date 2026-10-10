@@ -2,8 +2,8 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 const src=fs.readFileSync(path.resolve(__dirname,'../../api/ai-battery-candidates.js'),'utf8');
-function harness({feature=true,distributed=true,authorized=true,modelError=null,limit='allowed'}={}){
- const calls={auth:0,ai:0,rate:0};
+function harness({feature=true,distributed=true,authorized=true,tenantRole='owner',modelError=null,limit='allowed'}={}){
+ const calls={auth:0,tenant:0,ai:0,rate:0};
  class GPTError extends Error{constructor(code,status=502){super(code);this.code=code;this.status=status;}}
  const mocks={
   './_request.js':{parseBody:req=>req.body,bodyErrorResponse:()=>({status:400,body:{error:{code:'BAD_BODY'}}})},
@@ -17,6 +17,15 @@ function harness({feature=true,distributed=true,authorized=true,modelError=null,
   './_ai_lmt_auth.js':(()=>{
    class LMTAuthError extends Error{constructor(code,status=401){super(code);this.code=code;this.status=status;}}
    return {LMTAuthError,validateBearerSupabase:async()=>{calls.auth++;if(!authorized)throw new LMTAuthError('AUTH_INVALID',401);return {user_id:'test-user'};}};
+  })(),
+  './_ai_lmt_tenant_gate.js':(()=>{
+    class LMTTenantError extends Error{constructor(code,status=403){super(code);this.code=code;this.status=status;}}
+    return {LMTTenantError,validateManufacturerTenant:async()=>{
+      calls.tenant++;
+      if(!['owner','admin','editor'].includes(tenantRole))
+        throw new LMTTenantError('MANUFACTURER_WRITE_ROLE_REQUIRED',403);
+      return {organization_id:'00000000-0000-4000-8000-000000000002',role:tenantRole};
+    }};
   })(),
   './_ai_lmt_candidate_extractor.js':{
    BatteryGPTError:GPTError,MAX_PROMPT_CHARS:10000,
@@ -82,4 +91,23 @@ test('paid GPT call denied unless distributed rate limiter is enabled',async()=>
  const h=harness({distributed:false}),res=h.res();await h.handler(h.req(),res);
  assert.equal(res.statusCode,503);assert.equal(res.data.error.code,'AI_RATE_GUARD_REQUIRED');
  assert.equal(h.calls.ai,0);assert.equal(h.calls.auth,0);assert.equal(h.calls.rate,0);
+});
+
+test('no active manufacturer or viewer role cannot trigger paid GPT inference',async()=>{
+ for(const tenantRole of ['viewer','missing']){
+  const h=harness({tenantRole}),res=h.res();await h.handler(h.req(),res);
+  assert.equal(res.statusCode,403);assert.equal(h.calls.tenant,1);
+  assert.equal(h.calls.ai,0);
+ }
+});
+test('verified manufacturer editor/owner/admin can request a candidate-only preview',async()=>{
+ for(const tenantRole of ['owner','admin','editor']){
+  const h=harness({tenantRole}),res=h.res();await h.handler(h.req(),res);
+  assert.equal(res.statusCode,200);assert.equal(h.calls.tenant,1);
+  assert.equal(h.calls.ai,1);assert.equal(res.data.data.can_publish,false);
+ }
+});
+test('expired JWT never reaches the tenant DB gate or AI provider',async()=>{
+ const h=harness({authorized:false}),res=h.res();await h.handler(h.req(),res);
+ assert.equal(h.calls.tenant,0);assert.equal(h.calls.ai,0);
 });
