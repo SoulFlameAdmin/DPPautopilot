@@ -1,0 +1,23 @@
+name: DPP GPT LMT Candidate Safety
+on:
+  pull_request:
+    paths:
+      - 'api/_ai_lmt_auth.js'
+      - 'api/_ai_lmt_candidate_extractor.js'
+      - 'api/ai-battery-candidates.js'
+      - 'tests/api/ai-battery-*.test.cjs'
+      - '.github/workflows/dpp-gpt-lmt-candidate-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-draft-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Run LMT candidate extraction and HTTP authorization regression
+        run: node --test tests/api/ai-battery-auth.test.cjs tests/api/ai-battery-candidates.test.cjs tests/api/ai-battery-route.test.cjs
