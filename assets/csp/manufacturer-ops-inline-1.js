@@ -216,6 +216,7 @@ function buildPrintSheet(rows){
 }
 async function printPassports(rows,{bind=true}={}){
  if(!rows.length)throw new Error("Избери поне един ACTIVE passport.");
+ if(rows.some(p=>!p||p.status!=="active"||!p.battery_item_id||!p.unique_identifier))throw new Error("QR print requires a real ACTIVE passport.");
  setText($("#printResult"),"Подготовка на "+rows.length+" QR labels…");
  if(bind){for(const p of rows)await ensureQrCarrier(p.battery_item_id)}
  const images=buildPrintSheet(rows);
@@ -269,10 +270,13 @@ function renderCarriers(rows){
   const actions=document.createElement("div");actions.className="ops-actions";
   const copy=button("Copy URL");copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(c.public_url);copy.textContent="Copied ✓"}catch{copy.textContent="Copy failed"}});
   actions.append(copy);
-  if(c.carrier_kind==="qr"){
+  if(c.carrier_kind==="qr"&&c.status==="active"){
    const reprint=button("Reprint");reprint.addEventListener("click",async()=>{
-    const item=itemById(c.battery_item_id),p=passportByItem(c.battery_item_id);
-    try{await printPassports([p||{battery_item_id:item.id,unique_identifier:item.unique_identifier,status:"active"}],{bind:false})}catch(e){setText($("#carrierResult"),e.message,"bad")}
+    const p=passportByItem(c.battery_item_id);
+    try{
+     if(!p||p.status!=="active")throw new Error("Reprint requires an ACTIVE passport.");
+     await printPassports([p],{bind:false});
+    }catch(e){setText($("#carrierResult"),e.message,"bad")}
    });actions.append(reprint);
   }
   if(c.status==="active"&&canWrite()){
