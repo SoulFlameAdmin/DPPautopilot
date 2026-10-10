@@ -97,7 +97,7 @@ const observer=new MutationObserver(()=>queueMicrotask(syncPassportSpecificDetai
 if(statusNode)observer.observe(statusNode,{childList:true,subtree:true});
 if(batteryNode)observer.observe(batteryNode,{childList:true,subtree:true});
 document.addEventListener("click",event=>{
-  if(event.target.closest(".passport-rows .ops-row")){dirtyCapacityPassportId="";trackedPassportId=selectedPassportId();setTimeout(syncPassportSpecificDetail,0);}
+  if(event.target.closest(".passport-rows .ops-row")){trackPassportSelection();setTimeout(syncPassportSpecificDetail,0);}
 });
 document.addEventListener("change",event=>{
   if(event.target.matches(".passport-print-check"))setTimeout(syncPassportSpecificDetail,0);
