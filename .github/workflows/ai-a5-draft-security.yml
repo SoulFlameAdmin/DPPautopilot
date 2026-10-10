@@ -1,0 +1,21 @@
+name: AI A5 Draft Security
+on:
+  pull_request:
+    paths:
+      - "api/_ai_battery_draft_plan.js"
+      - "tests/api/ai-a5-draft-security.test.cjs"
+      - ".github/workflows/ai-a5-draft-security.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  a5-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify Node A5 draft/security tests
+        run: node --test tests/api/ai-a5-draft-security.test.cjs
