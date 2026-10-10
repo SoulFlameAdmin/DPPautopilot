@@ -88,3 +88,19 @@ test('malformed JSON or missing server state fails closed',async()=>{
  await assert.rejects(validateManufacturerTenant('Bearer test-token',{fetchImpl:mock.fetchImpl,env:{}}),
   rejects('TENANT_CONTEXT_INVALID'));
 });
+test('timeout remains active while RPC response body is read',async()=>{
+ let aborted=false;
+ const fetchImpl=async(_url,request)=>{
+  request.signal.addEventListener('abort',()=>{aborted=true;},{once:true});
+  return {status:200,ok:true,json:()=>new Promise((resolve,reject)=>{
+   const fail=()=>{const e=new Error('aborted');e.name='AbortError';reject(e);};
+   if(request.signal.aborted)return fail();
+   request.signal.addEventListener('abort',fail,{once:true});
+  })};
+ };
+ await assert.rejects(
+  validateManufacturerTenant('Bearer test-token',{fetchImpl,env:{},timeoutMs:20}),
+  rejects('TENANT_CONTEXT_TIMEOUT')
+ );
+ assert.equal(aborted,true);
+});
