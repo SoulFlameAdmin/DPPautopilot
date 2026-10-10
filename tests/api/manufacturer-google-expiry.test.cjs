@@ -21,8 +21,8 @@ function sandbox({google=null,company=null,refreshResponse=null}={}){
   calls.push({url,opts,googleAtCall:ls.getItem(GOOGLE)});
   if(url==='/data/auth-config.json')return {ok:true,json:async()=>({supabaseUrl:project,publishableKey:'sb_publishable_demo'})};
   if(url.startsWith(project+'/auth/v1/token')){
-   if(refreshResponse===null)return {ok:false,status:401,json:async()=>({})};
-   return {ok:true,status:200,json:async()=>refreshResponse};
+   if(refreshResponse===null)return {ok:false,status:401,json:async()=>({}),text:async()=>'{"error":"invalid_grant"}'};
+   return {ok:true,status:200,json:async()=>refreshResponse,text:async()=>JSON.stringify(refreshResponse)};
   }
   if(url.startsWith(project+'/auth/v1/user'))return {ok:false,status:401,json:async()=>({})};
   return {ok:false,status:404,json:async()=>({})};
@@ -34,7 +34,7 @@ function entrySession(env){
  const start=entry.indexOf('async function companySession(){');
  const end=entry.indexOf('async function ensureOnboardingConfigured(){',start);
  assert.ok(start>0&&end>start);
- const source=entry.slice(start,end)+'\ncompanySession;';
+ const source=`const GOOGLE_SESSION_KEY="${GOOGLE}",COMPANY_SESSION_KEY="${COMPANY}";\n`+entry.slice(start,end)+'\ncompanySession;';
  return vm.runInNewContext(source,env);
 }
 function inlineSession(env){
