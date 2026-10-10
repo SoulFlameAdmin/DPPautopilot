@@ -29,7 +29,10 @@ function safeValue(value) {
  if(typeof value!=='string'||!value.trim()||value.length>5000||
     /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u202a-\u202e\u2066-\u2069]/i.test(value))
   return false;
- return !/^[\s\uFEFF\u200B-\u200F\u2060-\u206F]*[=+\-@]/.test(value.normalize('NFKC'));
+ const normalized=value.normalize('NFKC');
+ // Skip ANY leading Unicode format chars (Cf), not just a short blacklist.
+ // Otherwise U+00AD/U+061C/U+180E can hide a spreadsheet formula prefix.
+ return !/^[=+\-@]/.test(normalized.replace(/^[\s\p{Cf}]+/gu,''));
 }
 function validAnchor(a) {
  if(!isObject(a)) return false;
@@ -95,7 +98,7 @@ function buildDocumentReviewProjection({extraction}={}) {
   can_generate_battery_passport:false,
   can_publish:false,
   // This exact shape is consumable by A4 questionPlan after trusted binding.
-  question_plan_input:{facts,conflicts},
+  question_plan_input:{facts,conflicts,choices},
   requires_server_authorization:true,
   requires_source_integrity_check:true
  };
