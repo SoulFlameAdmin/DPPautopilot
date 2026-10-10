@@ -54,12 +54,16 @@ function walkFiles(root) {
   return out.sort();
 }
 
+function normalizeRelative(base, file) {
+  return path.relative(base, file).split(path.sep).join('/');
+}
+
 function buildDirectoryManifest(root) {
   const base = path.resolve(root);
   const files = walkFiles(base).map(file => {
     const stat = fs.statSync(file);
     return {
-      relativePath: path.relative(base, file).split(path.sep).join('/'),
+      relativePath: normalizeRelative(base, file),
       bytes: stat.size,
       sha256: sha256File(file)
     };
@@ -67,8 +71,8 @@ function buildDirectoryManifest(root) {
   return {
     schemaVersion: 'C04_LOCAL_BYTES_MANIFEST_V1',
     generatedAtUtc: utcNow(),
-    sourceRootLocalOnly: base,
-    warning: 'PRIVATE LOCAL EVIDENCE. Do not commit this manifest if paths reveal sensitive names.',
+    sourceRootNotRecorded: true,
+    warning: 'PRIVATE LOCAL EVIDENCE. Relative paths may still be sensitive; do not commit or email this manifest.',
     fileCount: files.length,
     totalBytes: files.reduce((sum, f) => sum + f.bytes, 0),
     files
@@ -98,6 +102,8 @@ function verifyManifest(manifestFile, root) {
   }
   const base = path.resolve(root);
   const failures = [];
+  const expectedPaths = new Set();
+
   for (const expected of manifest.files) {
     const file = path.resolve(base, expected.relativePath);
     const relative = path.relative(base, file);
@@ -105,6 +111,8 @@ function verifyManifest(manifestFile, root) {
       failures.push({ relativePath: expected.relativePath, reason: 'path escapes root' });
       continue;
     }
+    const normalized = normalizeRelative(base, file);
+    expectedPaths.add(normalized);
     if (!fs.existsSync(file) || !fs.statSync(file).isFile()) {
       failures.push({ relativePath: expected.relativePath, reason: 'missing' });
       continue;
@@ -115,10 +123,17 @@ function verifyManifest(manifestFile, root) {
       failures.push({ relativePath: expected.relativePath, reason: 'size-or-sha256-mismatch' });
     }
   }
+
+  const actualPaths = walkFiles(base).map(file => normalizeRelative(base, file));
+  for (const actual of actualPaths) {
+    if (!expectedPaths.has(actual)) failures.push({ relativePath: actual, reason: 'unexpected-extra-file' });
+  }
+
   return {
     schemaVersion: 'C04_LOCAL_BYTES_VERIFY_V1',
     verifiedAtUtc: utcNow(),
     expectedFiles: manifest.files.length,
+    actualFiles: actualPaths.length,
     failures,
     pass: failures.length === 0
   };
