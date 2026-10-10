@@ -71,8 +71,8 @@ async function refreshSession(){
   refreshing=(async()=>{
     try{
       const data=await authCall("/auth/v1/token?grant_type=refresh_token",{body:{refresh_token:session.refresh_token}});
-      saveSession(data);return true;
-    }catch{sessionStorage.removeItem(STORAGE);session=null;return false}
+      saveSession(data);return !!session?.access_token&&!expiresSoon(session);
+    }catch{sessionStorage.removeItem(STORAGE);localStorage.removeItem(GOOGLE_STORAGE);session=null;return false}
     finally{refreshing=null}
   })();
   return refreshing;
@@ -100,7 +100,14 @@ function setMode(){
   $("#createModel").disabled=!write;
   $("#provisionBattery").disabled=!write;
   $("#batchProvision").disabled=!write;
-  const activateBatchPilot=$("#activateBatchPilot");if(activateBatchPilot)activateBatchPilot.disabled=!write;
+  window.addEventListener("storage",event=>{
+  if(event.key===GOOGLE_STORAGE&&event.storageArea===localStorage){
+    session=null;sessionStorage.removeItem(STORAGE);
+    // Reload so another tab's logout/refresh cannot leave an old token active.
+    if(document.body.dataset.manufacturerAuth==="authenticated")location.reload();
+  }
+});
+const activateBatchPilot=$("#activateBatchPilot");if(activateBatchPilot)activateBatchPilot.disabled=!write;
   $("#modelIdentifier").disabled=!write;
   $("#manufacturerName").disabled=!write;
   $("#modelCategory").disabled=!write;
