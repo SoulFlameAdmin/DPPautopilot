@@ -174,6 +174,7 @@ begin
   where organization_id=v_org and session_id=p_session_id and request_id=p_request_id;
   if found then
     if v_existing.request_kind='turn.extract'
+       and v_existing.created_by=v_user
        and v_existing.expected_revision=p_expected_revision
        and v_existing.request_sha256=v_request_hash then
       return v_existing.response_json || jsonb_build_object('idempotent_retry',true);
@@ -330,6 +331,7 @@ begin
   where organization_id=v_org and session_id=p_session_id and request_id=p_request_id;
   if found then
     if v_existing.request_kind='candidate.review'
+       and v_existing.created_by=v_user
        and v_existing.expected_revision=p_expected_revision
        and v_existing.request_sha256=v_request_hash then
       return v_existing.response_json || jsonb_build_object('idempotent_retry',true);
@@ -468,6 +470,7 @@ begin
   where organization_id=v_org and session_id=p_session_id and request_id=p_request_id;
   if found then
     if v_existing.request_kind='session.approve'
+       and v_existing.created_by=v_user
        and v_existing.expected_revision=p_expected_revision
        and v_existing.request_sha256=v_request_hash then
       return v_existing.response_json || jsonb_build_object('idempotent_retry',true);
