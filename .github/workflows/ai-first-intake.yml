@@ -70,4 +70,10 @@ jobs:
           begin;
           \i tests/db/test_ai_actor_bound_idempotency_subset.sql
           rollback;
+          begin;
+          \i tests/db/test_ai_actor_bound_same_actor_retry_subset.sql
+          rollback;
+          begin;
+          \i tests/db/test_ai_actor_bound_rpc_surface_subset.sql
+          rollback;
           SQL
