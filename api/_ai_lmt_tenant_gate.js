@@ -49,22 +49,28 @@ async function validateManufacturerTenant(authorization,{
   throw new LMTTenantError('AUTH_REQUIRED',401);
  const {base,key}=getSupabaseConfig(env);
  const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeoutMs);
- let response;
  try{
-  response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/dpp_api_tenant_context`,{
+  const response=await fetchImpl(`${base.replace(/\/$/,'')}/rest/v1/rpc/dpp_api_tenant_context`,{
    method:'POST',headers:{apikey:key,Authorization:authorization,
     'Content-Type':'application/json',Accept:'application/json'},
    body:'{}',cache:'no-store',signal:ctrl.signal
   });
+  if([401,403].includes(response?.status))
+   throw new LMTTenantError('TENANT_CONTEXT_DENIED',403);
+  if(!response?.ok)throw new LMTTenantError('TENANT_CONTEXT_UNAVAILABLE',503);
+  let ctx;
+  try{ctx=await response.json();}
+  catch(e){
+   if(ctrl.signal.aborted||e?.name==='AbortError')
+    throw new LMTTenantError('TENANT_CONTEXT_TIMEOUT',503);
+   ctx=null;
+  }
+  return readContext(ctx);
  }catch(e){
+  if(e instanceof LMTTenantError)throw e;
   if(ctrl.signal.aborted||e?.name==='AbortError')
    throw new LMTTenantError('TENANT_CONTEXT_TIMEOUT',503);
   throw new LMTTenantError('TENANT_CONTEXT_UNAVAILABLE',503);
  }finally{clearTimeout(timer);}
- if([401,403].includes(response?.status))
-  throw new LMTTenantError('TENANT_CONTEXT_DENIED',403);
- if(!response?.ok)throw new LMTTenantError('TENANT_CONTEXT_UNAVAILABLE',503);
- const ctx=await response.json().catch(()=>null);
- return readContext(ctx);
 }
 module.exports={LMTTenantError,readContext,validateManufacturerTenant,TIMEOUT_MS};
