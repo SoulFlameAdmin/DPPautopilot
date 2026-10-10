@@ -23,3 +23,6 @@ __pycache__/
 .vercel/
 .DS_Store
 Thumbs.db
+
+# C04 private recovery evidence — never commit backup manifests/artifacts
+.c04-private/
