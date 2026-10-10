@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 const src=fs.readFileSync(path.resolve(__dirname,'../../api/ai-battery-candidates.js'),'utf8');
-function harness({feature=true,authorized=true,modelError=null,limit='allowed'}={}){
+function harness({feature=true,distributed=true,authorized=true,modelError=null,limit='allowed'}={}){
  const calls={auth:0,ai:0,rate:0};
  class GPTError extends Error{constructor(code,status=502){super(code);this.code=code;this.status=status;}}
  const mocks={
@@ -28,7 +28,7 @@ function harness({feature=true,authorized=true,modelError=null,limit='allowed'}=
   if(!(name in mocks))throw Error('Unexpected dependency '+name);
   return mocks[name];
  }},{filename:'ai-battery-candidates.js'});
- const env={AI_BATTERY_CANDIDATE_API_ENABLED:feature?'true':'false'};
+ const env={AI_BATTERY_CANDIDATE_API_ENABLED:feature?'true':'false',DPP_SHARED_RATE_LIMIT_ENABLED:distributed?'true':'false'};
  const handler=mod.exports._test.createHandler({env,fetchImpl:async()=>{throw Error('Unexpected external request');}});
  const res=()=>{let body='';return {statusCode:200,headers:{},setHeader(k,v){this.headers[k]=v;},end(v){body=v;},get data(){return JSON.parse(body);}}};
  const req=(body={prompt:'capacity 12 Ah'})=>({method:'POST',headers:{authorization:'Bearer token'},body,socket:{remoteAddress:'127.0.0.1'}});
@@ -76,4 +76,10 @@ test('shared rate-limit denial 429 fails closed',async()=>{
 test('shared rate service unavailable 503 fails closed',async()=>{
  const h=harness({limit:'shared_error'}),res=h.res();await h.handler(h.req(),res);
  assert.equal(res.statusCode,503);assert.equal(h.calls.ai,0);
+});
+
+test('paid GPT call denied unless distributed rate limiter is enabled',async()=>{
+ const h=harness({distributed:false}),res=h.res();await h.handler(h.req(),res);
+ assert.equal(res.statusCode,503);assert.equal(res.data.error.code,'AI_RATE_GUARD_REQUIRED');
+ assert.equal(h.calls.ai,0);assert.equal(h.calls.auth,0);assert.equal(h.calls.rate,0);
 });
