@@ -1,0 +1,96 @@
+name: C04 Isolated PostgreSQL 17 Full Replay (NON RELEASE)
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'tests/db/**'
+      - '.github/workflows/c04-isolated-pg17-full-replay.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay-on-isolated-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dpp_replay
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dpp_replay"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGPASSWORD: postgres
+    steps:
+      - name: Checkout exact proposed SHA
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Bootstrap isolated PG17 exactly as main CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          create extension if not exists pgcrypto;
+          create role anon nologin;
+          create role authenticated nologin;
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          SQL
+      - name: Replay ALL repository migrations in fresh isolated PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSQL=(psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1)
+          count=0
+          for file in supabase/migrations/*.sql; do
+            echo "ISOLATED MIGRATION: $file"
+            "${PSQL[@]}" -f "$file"
+            count=$((count+1))
+          done
+          echo "ISOLATED_FULL_MIGRATION_REPLAY_PASS count=$count"
+      - name: Assert latest C04 pending SQL objects and anonymous grants
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 <<'SQL'
+          DO $verify$
+          BEGIN
+            IF to_regprocedure('public.dpp_api_organization_ensure(text,text)') IS NULL THEN
+              RAISE EXCEPTION 'Missing DPP organization ensure RPC';
+            END IF;
+            IF to_regclass('public.dpp_ai_intake_sessions') IS NULL OR
+               to_regclass('public.dpp_ai_intake_events') IS NULL OR
+               to_regclass('public.dpp_ai_intake_requests') IS NULL THEN
+              RAISE EXCEPTION 'Missing AI intake A2 persistence tables';
+            END IF;
+            IF to_regprocedure('public.dpp_api_ai_intake_manual_candidate_cas(uuid,text,text,integer,uuid)') IS NULL THEN
+              RAISE EXCEPTION 'Missing manual candidate CAS RPC';
+            END IF;
+            IF has_function_privilege('anon', 'public.dpp_api_organization_ensure(text,text)', 'EXECUTE') THEN
+              RAISE EXCEPTION 'Anonymous role can execute organization ensure';
+            END IF;
+            IF has_function_privilege('anon', 'public.dpp_api_technical_pilot_update_capacity(uuid,numeric,timestamptz)', 'EXECUTE') THEN
+              RAISE EXCEPTION 'Anonymous role can execute pilot capacity update';
+            END IF;
+            IF has_function_privilege('anon', 'public.dpp_api_ai_intake_manual_candidate_cas(uuid,text,text,integer,uuid)', 'EXECUTE') THEN
+              RAISE EXCEPTION 'Anonymous role can execute manual AI candidate CAS';
+            END IF;
+          END $verify$;
+          SQL
+          echo "ISOLATED_C04_SQL_SECURITY_SMOKE_PASS"
+      - name: Existing green DB integration subset
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_green_database_integrations.sql
+      - name: Existing DPP security RPC surface subset
+        run: psql -h 127.0.0.1 -U postgres -d dpp_replay -v ON_ERROR_STOP=1 -f tests/db/test_internal_rpc_surface_subset.sql
