@@ -29,3 +29,23 @@ test('xlsx rows keep sheet and exact row references',()=>{
 const x=m.extractRows({source:src,rows:[['country'],['Bulgaria']],format:'xlsx',sheet:'Sheet1'});
 assert.deepEqual(x.candidates[0].source_anchor,{sheet:'Sheet1',row:2,column:1});
 });
+
+// Invisible Unicode prefixes and compatibility signs must not bypass the
+// spreadsheet formula guard when the extracted value is later exported.
+test('A3 blocks Unicode-disguised spreadsheet formulas in CSV cells',()=>{
+ for(const value of ['\u200B=HYPERLINK("bad","click")','\u2060+CMD','\uFF1D1+1','\u202E=SUM(A1)']){
+  const out=m.extractCsvDocument({source:src,file:file('company\n'+value)});
+  assert.equal(out.candidates.length,0,value);
+  assert.equal(out.issues[0]?.code,'UNSAFE_OR_INVALID_CELL',value);
+ }
+});
+test('A3 blocks invisible formula prefixes in decoded PDF pages',()=>{
+ const out=m.extractPdfPages({source:src,pages:[{number:1,text:'Company: \u200B=1+1'}]});
+ assert.equal(out.candidates.length,0);
+ assert.equal(out.issues[0]?.code,'UNSAFE_OR_INVALID_CELL');
+});
+test('A3 continues accepting ordinary Cyrillic and Latin names',()=>{
+ const out=m.extractCsvDocument({source:src,file:file('company\nСофия Батерии')});
+ assert.equal(out.candidates[0]?.value,'София Батерии');
+ assert.equal(out.candidates[0]?.verified,false);
+});
