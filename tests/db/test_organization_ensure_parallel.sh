@@ -69,7 +69,7 @@ if [[ -z "$ORG1" || -z "$ORG2" || "$ORG1" != "$ORG2" ]]; then
 fi
 
 MEMBERSHIPS="$("${PSQL[@]}" -c "select count(*) from public.dpp_organization_members where user_id='$USER_ID';")"
-ACTIVE="$("${PSQL[@]}" -c "select organization_id from public.dpp_user_tenant_context where user_id='$USER_ID';")"
+ACTIVE="$("${PSQL[@]}" -c "select active_organization_id from public.dpp_user_tenant_context where user_id='$USER_ID';")"
 MATCHING_ORGS="$("${PSQL[@]}" -c "select count(*) from public.dpp_organizations where slug in ('parallel-org-a','parallel-org-b');")"
 
 if [[ "$MEMBERSHIPS" != "1" ]]; then
