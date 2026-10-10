@@ -88,3 +88,24 @@ test('review projections contain no fabricated PASS, publication or server auth'
  assert.equal(p.question_plan_input.facts.company.verified,false);
  assert.equal(p.can_publish,false);
 });
+
+test('all leading Unicode format characters cannot cloak spreadsheet formula syntax',()=>{
+ for(const prefix of ['\u00AD','\u061C','\u180E','\u2063','\uFEFF','\u200D']){
+  for(const marker of ['=','+','-','@']){
+   assert.throws(()=>project({extraction:{candidates:[make(prefix+marker+'2+2')]}}),{code:'UNSAFE_CANDIDATE_VALUE'});
+  }
+ }
+});
+test('ordinary Unicode manufacturer names remain allowed',()=>{
+ const p=project({extraction:{candidates:[make('София Батерии ООД')]}});
+ assert.equal(p.facts.company.value,'София Батерии ООД');
+ assert.equal(p.facts.company.verified,false);
+});
+test('A3-to-A4 handoff retains exact alternatives with provenance for conflict review',()=>{
+ const p=project({extraction:csv('company\nAlpha\nBeta')});
+ assert.deepEqual(p.question_plan_input.conflicts,['company']);
+ assert.equal(p.question_plan_input.choices.company.length,2);
+ assert.ok(p.question_plan_input.choices.company.every(x=>x.source_ref&&x.source_digest&&x.source_anchor));
+ assert.equal(p.question_plan_input.facts.company,undefined);
+ assert.equal(p.can_publish,false);
+});
