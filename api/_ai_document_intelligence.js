@@ -49,8 +49,12 @@ function validEvidenceId(v) { return typeof v==='string' && UUID.test(v); }
 function textCell(v) {
   if(typeof v!=='string' || !v.trim() || v.length>MAX_CELL || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(v))
     return false;
-  // Do not export formula-like strings as DPP candidate values.
-  return !/^[\s\uFEFF]*[=+\-@]/.test(v);
+  // Unicode invisible prefixes and compatibility glyphs can disguise a
+  // spreadsheet formula until a consumer normalizes or exports the cell.
+  // Fail closed; never promote a disguised formula to an evidence candidate.
+  const normalized=v.normalize('NFKC');
+  if(/[\u202A-\u202E\u2066-\u2069]/.test(normalized))return false;
+  return !/^[\s\uFEFF\u200B-\u200F\u2060-\u206F]*[=+\-@]/.test(normalized);
 }
 function uploadKind({filename,mime,bytes}={}) {
   if(typeof filename!=='string' || filename.length<5 || filename.length>255 ||
