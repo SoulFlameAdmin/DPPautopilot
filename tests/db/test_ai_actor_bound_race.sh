@@ -19,9 +19,11 @@ from (select public.dpp_api_ai_intake_resume_or_create() x) s \gset
 SQL
 )"
 
-IFS='|' read -r ORG_ID SESSION_ID REVISION <<<"$setup"
+fixture_line="$(printf '%s\n' "$setup" | grep -E '^[0-9a-f-]{36}\|[0-9a-f-]{36}\|[0-9]+$' | tail -n1 || true)"
+IFS='|' read -r ORG_ID SESSION_ID REVISION <<<"$fixture_line"
 if [[ -z "${ORG_ID:-}" || -z "${SESSION_ID:-}" || -z "${REVISION:-}" ]]; then
-  echo "Failed to create actor-race fixture: $setup" >&2
+  echo "Failed to create actor-race fixture. Raw setup output:" >&2
+  printf '%s\n' "$setup" >&2
   exit 1
 fi
 
