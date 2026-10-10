@@ -1,0 +1,21 @@
+name: AI A3 Review Projection Contract
+on:
+  pull_request:
+    paths:
+      - 'api/_ai_document_review_projection.js'
+      - 'tests/api/a3-document-review-projection.test.cjs'
+      - '.github/workflows/ai-a3-review-projection.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  review-projection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Run real A3 extraction to manufacturer intake review tests
+        run: node --test tests/api/a3-document-review-projection.test.cjs tests/api/a3-evidence-safety.spec.cjs
