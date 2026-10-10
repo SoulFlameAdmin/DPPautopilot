@@ -86,6 +86,9 @@ jobs:
           tests/api/conflicts.test.cjs
 
       - name: Run API security and resilience contracts
+        env:
+          DPP_SUPABASE_URL: https://example.supabase.co
+          DPP_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_fixture
         run: >-
           node --test
           tests/api/tenant-isolation.test.cjs
