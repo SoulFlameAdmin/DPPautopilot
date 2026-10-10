@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "C04_OWNER_RECOVERY_EVIDENCE_V1",
+  "generatedForProject": "frhletkiuupgksmgxoxc",
+  "status": "NOT_EXECUTED",
+  "noProductionChangesAuthorized": true,
+  "sourceInventory": {
+    "capturedAtUtc": null,
+    "readOnlyMigrationExportProtectedRef": null,
+    "migrationCount": null,
+    "pendingC04MigrationCount": null,
+    "liveCatalogAclEvidenceProtectedRef": null
+  },
+  "sourceBackup": {
+    "providerTierVerified": false,
+    "method": null,
+    "restorePointUtc": null,
+    "backupStartUtc": null,
+    "backupEndUtc": null,
+    "encryptedArtifactProtectedRef": null,
+    "sha256": null,
+    "bytes": null,
+    "dependenciesAndRolesChecked": false
+  },
+  "storageBytesBackup": {
+    "sourceInventoryCapturedAtUtc": null,
+    "encryptedArtifactProtectedRef": null,
+    "protectedChecksumManifestRef": null,
+    "relevantBucketCount": null,
+    "relevantObjectCount": null,
+    "relevantObjectBytes": null,
+    "zeroObjectsSourceIndependentlyVerified": false,
+    "consistencyDeltaExplainedRef": null
+  },
+  "phaseA": {
+    "status": "NOT_EXECUTED",
+    "isolatedTargetProtectedRef": null,
+    "dbRestoreStartUtc": null,
+    "dbRestoreEndUtc": null,
+    "storageRestoreStartUtc": null,
+    "storageRestoreEndUtc": null,
+    "dbFkAndCountsVerified": false,
+    "baselineRlsRbacRpcVerified": false,
+    "storageObjectBytesAndAclVerified": false,
+    "reviewEvidenceProtectedRef": null
+  },
+  "phaseB": {
+    "status": "NOT_EXECUTED",
+    "isolatedCloneProtectedRef": null,
+    "candidateGitSha": null,
+    "migrationSha256ManifestProtectedRef": null,
+    "tenMigrationsAppliedOnlyToIsolatedClone": false,
+    "a2ActorBoundDp409Pass": false,
+    "apiRoleAccessAndSecurityDefinerPass": false,
+    "tenantRlsRbacPass": false,
+    "passportQrIdentityPass": false,
+    "exactShaRegressionRunRef": null,
+    "reviewEvidenceProtectedRef": null
+  },
+  "recoveryObjectives": {
+    "measuredRpoMinutes": null,
+    "measuredRtoMinutes": null,
+    "baselineConsistencyWindowExplainedRef": null,
+    "rollbackOrForwardFixPlanProtectedRef": null
+  },
+  "independentReview": {
+    "reviewer": null,
+    "reviewTimeUtc": null,
+    "reviewOutcome": "NOT_REVIEWED",
+    "reviewProtectedRef": null
+  },
+  "productionApproval": {
+    "owner": "Mitko",
+    "status": "NOT_REQUESTED",
+    "specificCandidateSha": null,
+    "explicitApprovalRef": null,
+    "approvedWindowUtc": null
+  },
+  "warning": "EMPTY TEMPLATE ONLY: not proof of backup, restore, migration or production readiness. Never put secrets, private object contents or PII in this file."
+}
