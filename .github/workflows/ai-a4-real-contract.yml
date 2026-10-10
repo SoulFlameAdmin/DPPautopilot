@@ -1,0 +1,22 @@
+name: AI A4 Real Intake Contract
+on:
+  pull_request:
+    paths:
+      - 'api/_ai_question_planner.js'
+      - 'tests/api/a4-contract-integration.test.cjs'
+      - 'tests/api/a4-question-planner.spec.cjs'
+      - '.github/workflows/ai-a4-real-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  a4-question-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact PR SHA
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Run A4 tests against real intake contract
+        run: node --test tests/api/a4-contract-integration.test.cjs tests/api/a4-question-planner.spec.cjs
