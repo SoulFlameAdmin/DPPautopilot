@@ -1,0 +1,27 @@
+name: C04 Read-only Inventory Preflight
+on:
+  pull_request:
+    paths:
+      - "scripts/c04-readonly-delta.cjs"
+      - "tests/api/c04-readonly-delta.test.cjs"
+      - ".github/workflows/c04-readonly-preflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-c04-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Verify preflight is fail-closed
+        run: node --test tests/api/c04-readonly-delta.test.cjs
+      - name: Report informational migration delta
+        run: |
+          node scripts/c04-readonly-delta.cjs > c04-readonly-delta.json || status=$?
+          cat c04-readonly-delta.json
+          echo "Read-only diagnostic: NOT an approved C04 release attestation."
+          test "${status:-0}" -eq 2 -o "${status:-0}" -eq 0
