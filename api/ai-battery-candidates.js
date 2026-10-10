@@ -19,6 +19,9 @@ function validateBody(body){
   body.prompt.trim()&&body.prompt.length<=MAX_PROMPT_CHARS);
 }
 const enabled=env=>String(env.AI_BATTERY_CANDIDATE_API_ENABLED||'').toLowerCase()==='true';
+// Paid GPT calls require the distributed per-network and per-credential budget,
+// not merely the process-local limiter of one serverless isolate.
+const distributedBudgetEnabled=env=>String(env.DPP_SHARED_RATE_LIMIT_ENABLED||'').toLowerCase()==='true';
 function createHandler({env=process.env,fetchImpl=globalThis.fetch}={}){
  return async function aiBatteryCandidates(req,res){
   startRequestObservability(req,res,'ai-battery-candidates');
@@ -35,6 +38,7 @@ function createHandler({env=process.env,fetchImpl=globalThis.fetch}={}){
   }
   if(!validateBody(body))return send(res,422,{error:{code:'INVALID_REQUEST',message:'Exactly one bounded prompt is required.'}});
   if(!enabled(env))return send(res,503,{error:{code:'FEATURE_DISABLED',message:'LMT candidate preview is disabled.'}});
+  if(!distributedBudgetEnabled(env))return send(res,503,{error:{code:'AI_RATE_GUARD_REQUIRED',message:'Distributed request protection is required.'}});
   const shared=await enforceSharedRateLimit(req,res,'ai-battery-candidates',auth,{env,fetchImpl});
   if(shared.error)return send(res,503,sharedRateLimitUnavailableBody());
   if(!shared.allowed)return send(res,429,rateLimitBody());
@@ -54,4 +58,4 @@ function createHandler({env=process.env,fetchImpl=globalThis.fetch}={}){
 }
 const handler=createHandler();
 module.exports=handler;
-module.exports._test={bearer,validateBody,enabled,createHandler};
+module.exports._test={bearer,validateBody,enabled,distributedBudgetEnabled,createHandler};
