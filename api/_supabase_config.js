@@ -27,7 +27,7 @@ function getSupabaseConfig(env=process.env){
   let normalizedBase;
   try{
     const url=new URL(base);
-    if(url.protocol!=='https:') throw new Error('invalid protocol');
+    if(url.protocol!=='https:' || url.username || url.password || url.search || url.hash || url.pathname!=='/') throw new Error('invalid Supabase origin');
     normalizedBase=url.origin;
   }catch{
     const error=new Error('SERVER_CONFIGURATION_INVALID');
