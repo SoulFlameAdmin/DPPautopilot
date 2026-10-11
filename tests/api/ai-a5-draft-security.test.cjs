@@ -93,3 +93,43 @@ test('invalid LMT point is rejected', () => {
   assert.throws(() => plan([fact(100,12.5)]),
     e => e instanceof A5Error && e.code === 'INVALID_FACT');
 });
+
+test('verified percentage outside matrix 0..100 domain is rejected before draft mapping', () => {
+  assert.throws(() => plan([fact(52,120)]),
+    e => e instanceof A5Error && e.code === 'INVALID_FACT');
+  assert.throws(() => plan([fact(24,-1)]),
+    e => e instanceof A5Error && e.code === 'INVALID_FACT');
+});
+
+test('negative cycle value is rejected even before conditional applicability mapping', () => {
+  assert.throws(() => plan([fact(68,-1)]),
+    e => e instanceof A5Error && e.code === 'INVALID_FACT');
+});
+
+test('authority document_ref_array requires concrete non-empty string references', () => {
+  assert.throws(() => plan([fact(50,[{ref:'not-a-string-ref'}])]),
+    e => e instanceof A5Error && e.code === 'INVALID_FACT');
+  assert.throws(() => plan([fact(50,[''])]),
+    e => e instanceof A5Error && e.code === 'INVALID_FACT');
+});
+
+test('verified ordered voltage group must satisfy minimum <= nominal <= maximum', () => {
+  assert.throws(() => plan([
+    fact(26,55), fact(27,48), fact(28,54.6)
+  ]), e => e instanceof A5Error && e.code === 'INVALID_FACT');
+
+  const p=plan([fact(26,39),fact(27,48),fact(28,54.6)]);
+  assert.equal(p.draft_body.public_payload.model.voltage.minimum_v,39);
+  assert.equal(p.draft_body.public_payload.model.voltage.nominal_v,48);
+  assert.equal(p.draft_body.public_payload.model.voltage.maximum_v,54.6);
+});
+
+test('unverified partial voltage facts do not become authoritative ordering claims', () => {
+  const p=plan([
+    fact(26,55,{verified:false}),
+    fact(27,48,{verified:false}),
+    fact(28,54.6,{verified:false})
+  ]);
+  assert.deepEqual(p.unverified.filter(n=>[26,27,28].includes(n)),[26,27,28]);
+  assert.equal(p.mapped,0);
+});
