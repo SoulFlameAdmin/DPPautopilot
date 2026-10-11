@@ -13,6 +13,7 @@ on:
       - 'tests/api/imports.test.cjs'
       - 'tests/api/import-normalized-row-validation.test.cjs'
       - 'tests/api/import-batch-invariants.test.cjs'
+      - 'tests/api/import-mapping-safety.test.cjs'
       - 'tests/api/import-trust-boundary-contract.test.cjs'
       - '.github/workflows/e23-import-trust-boundary.yml'
   workflow_dispatch:
@@ -30,4 +31,4 @@ jobs:
         with:
           node-version: '20'
       - name: Run normalized import trust-boundary suite
-        run: node --test tests/api/import-normalized-row-validation.test.cjs tests/api/import-batch-invariants.test.cjs tests/api/import-trust-boundary-contract.test.cjs tests/api/imports.test.cjs
+        run: node --test tests/api/import-normalized-row-validation.test.cjs tests/api/import-batch-invariants.test.cjs tests/api/import-mapping-safety.test.cjs tests/api/import-trust-boundary-contract.test.cjs tests/api/imports.test.cjs
