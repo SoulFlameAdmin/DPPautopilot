@@ -6,12 +6,10 @@ const catalog=require('../data/dpp-field-catalog.json');
 const CATEGORIES=new Set(['portable','light_means_of_transport','starting_lighting_ignition','industrial','electric_vehicle','other']);
 const LIFECYCLES=new Set(['original','repurposed','remanufactured','second_life','waste','retired']);
 const MONTH=/^\d{4}-(0[1-9]|1[0-2])$/;
-const KNOWN_MAPPING_TARGETS=new Set([
-  '',
-  ...catalog.fields.map(field=>field.path),
-  ...matrix.points.map(point=>point.valuePath)
-]);
+const KNOWN_MAPPING_TARGETS=new Set(['',...catalog.fields.map(field=>field.path),...matrix.points.map(point=>point.valuePath)]);
 const POINT_BY_PATH=new Map(matrix.points.map(point=>[point.valuePath,point]));
+const POINT_PATHS=[...POINT_BY_PATH.keys()];
+const UNTYPED_COMPLEX=new Set(['object','array']);
 
 function isObject(value){return !!value&&typeof value==='object'&&!Array.isArray(value);}
 function nonEmptyString(value){return typeof value==='string'&&value.trim().length>0;}
@@ -40,11 +38,13 @@ function error(code,path){return {code,path};}
 function validatePoint(point,value){
   const errors=[];
   if(!valueTypeValid(point.valueType,value))return [error('VALUE_TYPE_INVALID',point.valuePath)];
+  // Complex arrays/objects need field-specific typed schemas before an import may persist them.
+  // This mirrors A5's fail-closed quarantine and prevents arbitrary nested JSON from crossing
+  // the import boundary under a merely-known top-level path.
+  if(UNTYPED_COMPLEX.has(point.valueType))return [error('COMPLEX_SCHEMA_UNREVIEWED',point.valuePath)];
   if(point.unit==='%'&&!(value>=0&&value<=100))errors.push(error('PERCENT_OUT_OF_RANGE',point.valuePath));
   if(point.unit==='cycles'&&value<0)errors.push(error('CYCLES_NEGATIVE',point.valuePath));
-  if(['model.physical.weight_kg','model.rated_capacity_ah','model.c_rate_test'].includes(point.valuePath)&&value<=0){
-    errors.push(error('NON_POSITIVE_VALUE',point.valuePath));
-  }
+  if(['model.physical.weight_kg','model.rated_capacity_ah','model.c_rate_test'].includes(point.valuePath)&&value<=0)errors.push(error('NON_POSITIVE_VALUE',point.valuePath));
   if(point.valuePath.startsWith('model.voltage.')&&value<=0)errors.push(error('NON_POSITIVE_VALUE',point.valuePath));
   if(point.valuePath==='item.unique_identifier'&&!printableIdentifier(value))errors.push(error('IDENTIFIER_INVALID',point.valuePath));
   return errors;
@@ -52,21 +52,38 @@ function validatePoint(point,value){
 function canonicalValue(row,point){
   const path=point.valuePath;
   if(path.startsWith('model.')){
-    const data=row.normalized_model.canonical_data;
-    if(!isObject(data))return {exists:false,value:undefined};
+    const data=row.normalized_model.canonical_data;if(!isObject(data))return {exists:false,value:undefined};
     return getPath(data,path.slice('model.'.length));
   }
   if(path.startsWith('item.')){
-    const data=row.normalized_item.canonical_data;
-    if(!isObject(data))return {exists:false,value:undefined};
+    const data=row.normalized_item.canonical_data;if(!isObject(data))return {exists:false,value:undefined};
     return getPath(data,path.slice('item.'.length));
   }
   return {exists:false,value:undefined};
 }
 function compareIfPresent(errors,root,path,expected,code){
-  if(!isObject(root))return;
-  const found=getPath(root,path);
-  if(found.exists&&found.value!==expected)errors.push(error(code,path));
+  if(!isObject(root))return;const found=getPath(root,path);if(found.exists&&found.value!==expected)errors.push(error(code,path));
+}
+function hasPointDescendant(path){return POINT_PATHS.some(candidate=>candidate.startsWith(path+'.'));}
+function validateCanonicalTree(root,prefix){
+  if(root==null)return [];
+  if(!isObject(root))return [error('CANONICAL_OBJECT_REQUIRED',prefix)];
+  const errors=[];
+  for(const [key,value] of Object.entries(root)){
+    const path=prefix+'.'+key;
+    const hasDescendant=hasPointDescendant(path);
+    const point=POINT_BY_PATH.get(path);
+    // Prefer walking a container when it owns more specific locked point paths. This is
+    // important for model.composition, which is also a deferred aggregate point.
+    if(hasDescendant){
+      if(!isObject(value))errors.push(error('CANONICAL_CONTAINER_INVALID',path));
+      else errors.push(...validateCanonicalTree(value,path));
+      continue;
+    }
+    if(point){errors.push(...validatePoint(point,value));continue;}
+    errors.push(error('UNKNOWN_CANONICAL_PATH',path));
+  }
+  return errors;
 }
 function validateNormalizedRow(row){
   const errors=[];
@@ -93,27 +110,19 @@ function validateNormalizedRow(row){
 
   if(model.category!=='light_means_of_transport')return errors;
 
-  for(const point of matrix.points){
-    const found=canonicalValue(row,point);
-    if(found.exists)errors.push(...validatePoint(point,found.value));
-  }
+  errors.push(...validateCanonicalTree(model.canonical_data,'model'));
+  errors.push(...validateCanonicalTree(item.canonical_data,'item'));
 
   // Top-level identity fields are commit-authoritative even if canonical_data omits duplicates.
   errors.push(...validatePoint(POINT_BY_PATH.get('item.unique_identifier'),item.unique_identifier));
 
   for(const group of matrix.validation?.orderedGroups||[]){
-    const values=[];
-    let complete=true;
+    const values=[];let complete=true;
     for(const path of group){
-      const point=POINT_BY_PATH.get(path);
-      if(!point){complete=false;break;}
-      const found=canonicalValue(row,point);
-      if(!found.exists||!valueTypeValid(point.valueType,found.value)){complete=false;break;}
-      values.push(found.value);
+      const point=POINT_BY_PATH.get(path);if(!point){complete=false;break;}
+      const found=canonicalValue(row,point);if(!found.exists||!valueTypeValid(point.valueType,found.value)){complete=false;break;}values.push(found.value);
     }
-    if(complete&&values.some((value,index)=>index>0&&values[index-1]>value)){
-      errors.push(error('ORDERED_GROUP_INVALID',group.join(' <= ')));
-    }
+    if(complete&&values.some((value,index)=>index>0&&values[index-1]>value))errors.push(error('ORDERED_GROUP_INVALID',group.join(' <= ')));
   }
   return errors;
 }
@@ -124,7 +133,7 @@ function validateNormalizedRows(rows){
 function validMappingTarget(value){return typeof value==='string'&&KNOWN_MAPPING_TARGETS.has(value.trim());}
 
 module.exports={
-  CATEGORIES,LIFECYCLES,KNOWN_MAPPING_TARGETS,
-  isObject,getPath,valueTypeValid,printableIdentifier,
-  validatePoint,validateNormalizedRow,validateNormalizedRows,validMappingTarget
+  CATEGORIES,LIFECYCLES,KNOWN_MAPPING_TARGETS,POINT_BY_PATH,
+  isObject,getPath,valueTypeValid,printableIdentifier,validatePoint,validateCanonicalTree,
+  validateNormalizedRow,validateNormalizedRows,validMappingTarget
 };
