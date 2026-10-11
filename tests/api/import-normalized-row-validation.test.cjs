@@ -73,6 +73,18 @@ test('battery identifier rejects control characters and overlength values',()=>{
   assert.ok(codes(row).includes('IDENTIFIER_INVALID'));
 });
 
+test('unknown LMT canonical paths fail closed instead of being persisted as freeform JSON',()=>{
+  const row=lmtRow();
+  row.normalized_model.canonical_data.identification.internal_secret='DO_NOT_PERSIST';
+  assert.ok(codes(row).includes('UNKNOWN_CANONICAL_PATH'));
+});
+
+test('known complex LMT path stays quarantined until a field-specific typed schema exists',()=>{
+  const row=lmtRow();
+  row.normalized_model.canonical_data.storage_temperature={minimum_c:-20,maximum_c:45,freeform:'DO_NOT_PERSIST'};
+  assert.ok(codes(row).includes('COMPLEX_SCHEMA_UNREVIEWED'));
+});
+
 test('new saved mapping targets are restricted to known catalog or 71-point paths',()=>{
   assert.equal(validator.validMappingTarget('model.rated_capacity_ah'),true);
   assert.equal(validator.validMappingTarget('item.performance.capacity_fade_pct'),true);
