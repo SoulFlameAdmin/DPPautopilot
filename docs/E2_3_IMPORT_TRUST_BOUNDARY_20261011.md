@@ -12,6 +12,8 @@ The current import chain treats caller-provided normalized JSON and caller-provi
 
 The same browser code sends a caller-built `validation_errors` array. It also still exposes the legacy mapping target `item.state_of_health.percent`, while the locked LMT 71-point matrix represents state-of-health through specific fields such as remaining capacity, remaining power capability, remaining round-trip efficiency, self-discharge and ohmic resistance.
 
+The browser's generic nested-path helper also means stored mapping paths are part of the client trust boundary. The saved-mapping RPC currently accepts arbitrary string values. A path containing prototype-chain segments such as `__proto__` must therefore never be allowed to flow from a tenant-shared stored mapping into the browser helper. This Draft keeps harmless legacy paths readable but rejects stored profiles containing `__proto__`, `prototype` or `constructor` path segments at the HTTP response-shape boundary. This is a source-level defense-in-depth finding, not a claim that such a malicious profile exists in production.
+
 ### HTTP boundary
 
 At locked Stage-2 base SHA `0ecc7e4bb76aad55f97ef3536d003e0ac2a172ec`, `api/imports.js` only required object-shaped `normalized_model` / `normalized_item` and an optional array-shaped `validation_errors`. It forwarded those rows to `dpp_api_import_create`.
@@ -24,7 +26,12 @@ This Draft adds defense-in-depth validation before that forwarding step:
 - positive weight/capacity/C-rate/voltage checks when supplied;
 - matrix-defined voltage ordering when the full ordered group is supplied;
 - battery identifier printable/length checks;
-- saved mapping targets restricted to current catalog or locked 71-point paths.
+- unknown LMT canonical paths rejected instead of persisted as free-form JSON;
+- known complex array/object paths quarantined until field-specific schemas exist;
+- duplicate battery identifiers rejected inside one staged batch;
+- same model identifier with conflicting model data rejected instead of allowing row-order-dependent last-write-wins upserts;
+- new saved mapping targets restricted to current catalog or locked 71-point paths;
+- harmless retired legacy mapping targets remain readable, while prototype-chain path segments fail closed.
 
 Partial imports remain partial: this validator does **not** require all 50 mandatory launch points before staging a model/item import.
 
@@ -36,6 +43,7 @@ The database path is still independently callable by an authenticated Supabase u
 2. `dpp_validate_import` counts the stored `validation_errors`; it does not derive semantic validation from canonical JSON.
 3. A run is marked `validated` when that caller-originated error count is zero.
 4. `dpp_commit_import` then writes `normalized_model.canonical_data` and `normalized_item.canonical_data` to the model/item tables after identity checks.
+5. `dpp_api_import_mapping_save` is also granted to `authenticated` and currently checks mapping keys/values only as strings, not against the locked canonical path set.
 
 Therefore the new Vercel/API guard is **defense in depth, not authoritative closure**. A client that calls the Supabase RPC directly can bypass `api/imports.js`.
 
@@ -43,7 +51,7 @@ Therefore the new Vercel/API guard is **defense in depth, not authoritative clos
 
 One of these trust models must be selected and independently reviewed:
 
-1. **Database-derived validation.** Keep authenticated tenant-scoped RPCs, but make PostgreSQL derive structural/canonical validation itself and treat caller error arrays as advisory only. This requires a new migration or a revision to the migration plan.
+1. **Database-derived validation.** Keep authenticated tenant-scoped RPCs, but make PostgreSQL derive structural/canonical validation itself and treat caller error arrays as advisory only. The mapping-save RPC should validate canonical target paths at the same authoritative boundary. This requires a new migration or a revision to the migration plan.
 2. **Server-only staging RPC.** Revoke direct authenticated execution of write/import RPCs and let a trusted server call them after validating the end-user actor/tenant. This changes the auth/secrets architecture and requires a separate security review.
 
 Do not add a production migration casually. The locked C04 rehearsal currently names exactly 10 pending migrations. An additional import-hardening migration would change that set and invalidate the current rehearsal manifest until the owner explicitly accepts the new scope.
@@ -70,6 +78,7 @@ The server must recompute or verify deterministic conversions. Ambiguous or unkn
 
 - HTTP/browser defense-in-depth: testable in this Draft.
 - Database authoritative semantic validation: **BLOCKED / owner architecture decision required**.
+- Database authoritative mapping-path validation: **BLOCKED / owner architecture decision required**.
 - Source-unit normalization evidence: **BLOCKED / implementation required**.
 - E2.3 overall: **not PASS**.
 - C04: unchanged and RED; no production SQL, snapshot refresh, merge or deploy is authorized by this work.
