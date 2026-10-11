@@ -8,7 +8,7 @@ An exported Storage folder can have correct hashes while missing some buckets or
 
 ## Private input contract
 
-The owner obtains per-bucket totals through the existing read-only `scripts/c04-storage-backup-scope-select-only.sql`, at a known UTC timestamp. Store the independently captured inventory ONLY in `.c04-private/storage-inventory.json`. Example **synthetic** data:
+The owner obtains per-bucket totals through the new read-only `scripts/c04-export-storage-inventory-select-only.sql`, at a known UTC timestamp. Store the independently captured inventory ONLY in `.c04-private/storage-inventory.json`. Example **synthetic** data:
 
 ```json
 {
