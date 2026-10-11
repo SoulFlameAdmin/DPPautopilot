@@ -30,6 +30,7 @@ This Draft adds defense-in-depth validation before that forwarding step:
 - known complex array/object paths quarantined until field-specific schemas exist;
 - duplicate battery identifiers rejected inside one staged batch;
 - same model identifier with conflicting model data rejected instead of allowing row-order-dependent last-write-wins upserts;
+- canonical fingerprinting bounded by depth/node limits so malformed nested JSON cannot recurse indefinitely inside the application validator;
 - new saved mapping targets restricted to current catalog or locked 71-point paths;
 - harmless retired legacy mapping targets remain readable, while prototype-chain path segments fail closed.
 
@@ -50,6 +51,8 @@ Therefore the new Vercel/API guard is **defense in depth, not authoritative clos
 ## Existing-model overwrite and concurrency gap
 
 `dpp_commit_import` uses `ON CONFLICT (organization_id, model_identifier) DO UPDATE` and replaces `manufacturer_name`, `category` and the entire `canonical_data` document with the incoming row. There is no expected-version / `updated_at` compare-and-swap on this import path.
+
+The normal model PATCH path already requires `expected_updated_at` and calls `dpp_api_models_update_checked`, so imports currently bypass an optimistic-concurrency rule that the product already enforces for direct model edits.
 
 That creates two source-level integrity risks that are not closed by per-row validation:
 
