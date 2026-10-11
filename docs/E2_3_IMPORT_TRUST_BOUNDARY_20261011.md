@@ -47,12 +47,23 @@ The database path is still independently callable by an authenticated Supabase u
 
 Therefore the new Vercel/API guard is **defense in depth, not authoritative closure**. A client that calls the Supabase RPC directly can bypass `api/imports.js`.
 
+## Existing-model overwrite and concurrency gap
+
+`dpp_commit_import` uses `ON CONFLICT (organization_id, model_identifier) DO UPDATE` and replaces `manufacturer_name`, `category` and the entire `canonical_data` document with the incoming row. There is no expected-version / `updated_at` compare-and-swap on this import path.
+
+That creates two source-level integrity risks that are not closed by per-row validation:
+
+- a partial import for an already-existing model can replace a richer existing model document with a smaller incoming canonical document, dropping fields that were not present in the import;
+- two concurrent imports targeting the same model can race, with the later commit winning even when the earlier writer changed the model after the other import was prepared.
+
+The Draft can prevent conflicting rows inside one submitted batch, but it cannot authoritatively protect the existing database row without a database-side compare/merge policy. E2.3 update/version testing therefore remains BLOCKED until import update semantics are explicitly defined and enforced.
+
 ## Required closure decision
 
 One of these trust models must be selected and independently reviewed:
 
-1. **Database-derived validation.** Keep authenticated tenant-scoped RPCs, but make PostgreSQL derive structural/canonical validation itself and treat caller error arrays as advisory only. The mapping-save RPC should validate canonical target paths at the same authoritative boundary. This requires a new migration or a revision to the migration plan.
-2. **Server-only staging RPC.** Revoke direct authenticated execution of write/import RPCs and let a trusted server call them after validating the end-user actor/tenant. This changes the auth/secrets architecture and requires a separate security review.
+1. **Database-derived validation.** Keep authenticated tenant-scoped RPCs, but make PostgreSQL derive structural/canonical validation itself and treat caller error arrays as advisory only. The mapping-save RPC should validate canonical target paths at the same authoritative boundary. Import commit also needs an explicit existing-model policy, for example immutable model-on-import, merge-only with field provenance, or CAS-protected replacement. This requires a new migration or a revision to the migration plan.
+2. **Server-only staging RPC.** Revoke direct authenticated execution of write/import RPCs and let a trusted server call them after validating the end-user actor/tenant. The trusted server would still need an authoritative existing-model concurrency policy; moving the call boundary alone does not solve lost updates. This changes the auth/secrets architecture and requires a separate security review.
 
 Do not add a production migration casually. The locked C04 rehearsal currently names exactly 10 pending migrations. An additional import-hardening migration would change that set and invalidate the current rehearsal manifest until the owner explicitly accepts the new scope.
 
@@ -79,6 +90,7 @@ The server must recompute or verify deterministic conversions. Ambiguous or unkn
 - HTTP/browser defense-in-depth: testable in this Draft.
 - Database authoritative semantic validation: **BLOCKED / owner architecture decision required**.
 - Database authoritative mapping-path validation: **BLOCKED / owner architecture decision required**.
+- Existing-model update/CAS policy: **BLOCKED / owner architecture decision required**.
 - Source-unit normalization evidence: **BLOCKED / implementation required**.
 - E2.3 overall: **not PASS**.
 - C04: unchanged and RED; no production SQL, snapshot refresh, merge or deploy is authorized by this work.
