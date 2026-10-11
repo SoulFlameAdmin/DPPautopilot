@@ -1,0 +1,28 @@
+name: E2.3 Import Trust Boundary
+
+on:
+  pull_request:
+    paths:
+      - 'api/imports.js'
+      - 'api/_import_normalized_row_validation.js'
+      - 'data/dpp-field-catalog.json'
+      - 'data/lmt-battery-71-v2.json'
+      - 'tests/api/imports.test.cjs'
+      - 'tests/api/import-normalized-row-validation.test.cjs'
+      - '.github/workflows/e23-import-trust-boundary.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run normalized import trust-boundary suite
+        run: node --test tests/api/import-normalized-row-validation.test.cjs tests/api/imports.test.cjs
