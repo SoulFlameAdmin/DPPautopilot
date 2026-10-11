@@ -20,6 +20,7 @@ These are defense-in-depth properties only.
 - The authenticated Supabase import RPC remains directly callable and therefore can bypass the Vercel validator.
 - Database `dpp_validate_import` still derives status from stored caller-originated `validation_errors` instead of deriving canonical semantic errors itself.
 - The authenticated saved-mapping RPC still accepts arbitrary string target paths; authoritative canonical-path validation is not yet in PostgreSQL.
+- `dpp_commit_import` replaces the entire existing model `canonical_data` on model-ID conflict and has no expected-version/CAS guard; partial imports can therefore clobber richer existing model state and concurrent imports can lose updates.
 - Source units and deterministic conversion evidence are not represented by the current mapping contract.
 - Complex nested field schemas remain incomplete, so such values are intentionally quarantined by this Draft rather than accepted loosely.
 - The manufacturer import UI still contains the legacy `item.state_of_health.percent` target and has no source-unit selection/review step.
