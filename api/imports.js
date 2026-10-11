@@ -5,6 +5,7 @@ const { parseBody, bodyErrorResponse } = require('./_request.js');
 const { enforceRateLimit, enforceSharedRateLimit, sharedRateLimitUnavailableBody, rateLimitBody } = require('./_rate_limit.js');
 const { startRequestObservability } = require('./_observability.js');
 const { getSupabaseConfig } = require('./_supabase_config.js');
+const { validateNormalizedRows, validMappingTarget } = require('./_import_normalized_row_validation.js');
 
 function send(res,status,body){
   res.statusCode=status;
@@ -105,7 +106,7 @@ function validMappingHeaders(value){
 }
 function validFieldMapping(value){
   return value&&typeof value==='object'&&!Array.isArray(value)&&
-    Object.entries(value).every(([k,v])=>k.trim().length>0&&typeof v==='string');
+    Object.entries(value).every(([k,v])=>k.trim().length>0&&validMappingTarget(v));
 }
 function validMappingProfile(value){
   return value&&typeof value==='object'&&!Array.isArray(value)&&
@@ -198,7 +199,6 @@ async function handler(req,res){
   if(sharedRateLimit.error) return send(res,503,sharedRateLimitUnavailableBody());
   if(!sharedRateLimit.allowed) return send(res,429,rateLimitBody());
 
-
   const method=String(req.method||'GET').toUpperCase();
   if(!['GET','POST','PATCH'].includes(method)){
     res.setHeader('Allow','GET, POST, PATCH');
@@ -241,7 +241,7 @@ async function handler(req,res){
           p_name:body.name.trim(),
           p_source_format:body.source_format,
           p_source_headers:body.source_headers.map(v=>v.trim()),
-          p_field_mapping:body.field_mapping
+          p_field_mapping:Object.fromEntries(Object.entries(body.field_mapping).map(([key,target])=>[key.trim(),target.trim()]))
         },authorization);
         return send(res,200,{data:value});
       }
@@ -250,6 +250,14 @@ async function handler(req,res){
       }
       if(body.mapping_id!=null&&!validUuid(body.mapping_id)){
         return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'The import payload is invalid.'}});
+      }
+      const normalizedFailures=validateNormalizedRows(body.rows);
+      if(normalizedFailures.length){
+        return send(res,422,{error:{
+          code:'INVALID_NORMALIZED_IMPORT',
+          message:'Normalized import data failed server-side validation.',
+          invalid_rows:normalizedFailures.length
+        }});
       }
       const value=await rpc('dpp_api_import_create',{
         p_rows:body.rows,
@@ -287,4 +295,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validUuid,validTimestamp,validNullableTimestamp,validNonNegativeInteger,validImportCreate,validImportGet,validImportValidate,validImportCommit,validMappingName,validMappingFormat,validMappingHeaders,validFieldMapping,validMappingProfile,validMappingDelete,validateRpcShape,validRows,mapDatabaseError,rpc,IMPORT_STATUSES,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,validUuid,validTimestamp,validNullableTimestamp,validNonNegativeInteger,validImportCreate,validImportGet,validImportValidate,validImportCommit,validMappingName,validMappingFormat,validMappingHeaders,validFieldMapping,validMappingProfile,validMappingDelete,validateRpcShape,validRows,validateNormalizedRows,validMappingTarget,mapDatabaseError,rpc,IMPORT_STATUSES,DEFAULT_RPC_TIMEOUT_MS};
