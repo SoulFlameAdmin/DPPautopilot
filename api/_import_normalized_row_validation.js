@@ -38,9 +38,6 @@ function error(code,path){return {code,path};}
 function validatePoint(point,value){
   const errors=[];
   if(!valueTypeValid(point.valueType,value))return [error('VALUE_TYPE_INVALID',point.valuePath)];
-  // Complex arrays/objects need field-specific typed schemas before an import may persist them.
-  // This mirrors A5's fail-closed quarantine and prevents arbitrary nested JSON from crossing
-  // the import boundary under a merely-known top-level path.
   if(UNTYPED_COMPLEX.has(point.valueType))return [error('COMPLEX_SCHEMA_UNREVIEWED',point.valuePath)];
   if(point.unit==='%'&&!(value>=0&&value<=100))errors.push(error('PERCENT_OUT_OF_RANGE',point.valuePath));
   if(point.unit==='cycles'&&value<0)errors.push(error('CYCLES_NEGATIVE',point.valuePath));
@@ -70,11 +67,7 @@ function validateCanonicalTree(root,prefix){
   if(!isObject(root))return [error('CANONICAL_OBJECT_REQUIRED',prefix)];
   const errors=[];
   for(const [key,value] of Object.entries(root)){
-    const path=prefix+'.'+key;
-    const hasDescendant=hasPointDescendant(path);
-    const point=POINT_BY_PATH.get(path);
-    // Prefer walking a container when it owns more specific locked point paths. This is
-    // important for model.composition, which is also a deferred aggregate point.
+    const path=prefix+'.'+key,hasDescendant=hasPointDescendant(path),point=POINT_BY_PATH.get(path);
     if(hasDescendant){
       if(!isObject(value))errors.push(error('CANONICAL_CONTAINER_INVALID',path));
       else errors.push(...validateCanonicalTree(value,path));
@@ -109,11 +102,8 @@ function validateNormalizedRow(row){
   compareIfPresent(errors,item.canonical_data,'lifecycle_status',lifecycle,'LIFECYCLE_IDENTITY_MISMATCH');
 
   if(model.category!=='light_means_of_transport')return errors;
-
   errors.push(...validateCanonicalTree(model.canonical_data,'model'));
   errors.push(...validateCanonicalTree(item.canonical_data,'item'));
-
-  // Top-level identity fields are commit-authoritative even if canonical_data omits duplicates.
   errors.push(...validatePoint(POINT_BY_PATH.get('item.unique_identifier'),item.unique_identifier));
 
   for(const group of matrix.validation?.orderedGroups||[]){
@@ -126,14 +116,51 @@ function validateNormalizedRow(row){
   }
   return errors;
 }
+function stableValue(value){
+  if(Array.isArray(value))return value.map(stableValue);
+  if(isObject(value))return Object.fromEntries(Object.keys(value).sort().map(key=>[key,stableValue(value[key])]));
+  return value;
+}
+function stableJson(value){return JSON.stringify(stableValue(value));}
+function pushBoth(results,first,current,entry){
+  if(!results[first].errors.some(e=>e.code===entry.code&&e.path===entry.path))results[first].errors.push(entry);
+  if(!results[current].errors.some(e=>e.code===entry.code&&e.path===entry.path))results[current].errors.push(entry);
+}
 function validateNormalizedRows(rows){
   if(!Array.isArray(rows))return [{row:null,errors:[error('ROWS_ARRAY_REQUIRED','$')]}];
-  return rows.map((row,index)=>({row:index+1,errors:validateNormalizedRow(row)})).filter(result=>result.errors.length>0);
+  const results=rows.map((row,index)=>({row:index+1,errors:validateNormalizedRow(row)}));
+  const identifiers=new Map(),models=new Map();
+
+  rows.forEach((row,index)=>{
+    if(!isObject(row)||!isObject(row.normalized_item)||!isObject(row.normalized_model))return;
+    const itemId=row.normalized_item.unique_identifier;
+    if(nonEmptyString(itemId)){
+      if(identifiers.has(itemId))pushBoth(results,identifiers.get(itemId),index,error('DUPLICATE_IDENTIFIER_IN_BATCH','normalized_item.unique_identifier'));
+      else identifiers.set(itemId,index);
+    }
+
+    const model=row.normalized_model;
+    if(nonEmptyString(model.model_identifier)){
+      const fingerprint=stableJson({
+        manufacturer_name:model.manufacturer_name,
+        category:model.category,
+        canonical_data:model.canonical_data||{}
+      });
+      const previous=models.get(model.model_identifier);
+      if(previous&&previous.fingerprint!==fingerprint){
+        pushBoth(results,previous.index,index,error('MODEL_CONFLICT_IN_BATCH','normalized_model.model_identifier'));
+      }else if(!previous){
+        models.set(model.model_identifier,{index,fingerprint});
+      }
+    }
+  });
+
+  return results.filter(result=>result.errors.length>0);
 }
 function validMappingTarget(value){return typeof value==='string'&&KNOWN_MAPPING_TARGETS.has(value.trim());}
 
 module.exports={
   CATEGORIES,LIFECYCLES,KNOWN_MAPPING_TARGETS,POINT_BY_PATH,
   isObject,getPath,valueTypeValid,printableIdentifier,validatePoint,validateCanonicalTree,
-  validateNormalizedRow,validateNormalizedRows,validMappingTarget
+  validateNormalizedRow,validateNormalizedRows,validMappingTarget,stableJson
 };
