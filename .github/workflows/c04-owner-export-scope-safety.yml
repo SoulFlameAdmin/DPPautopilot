@@ -1,0 +1,22 @@
+name: C04 Owner Export Scope Safety
+on:
+  pull_request:
+    paths:
+      - 'scripts/c04-owner-export-scope-verify.mjs'
+      - 'tests/api/c04-owner-export-scope-verify.test.cjs'
+      - '.github/workflows/c04-owner-export-scope-safety.yml'
+      - 'docs/c04-owner-export-scope-20261011.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic-fixtures-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify offline owner-export scope and fail-closed security
+        run: node --test tests/api/c04-owner-export-scope-verify.test.cjs
