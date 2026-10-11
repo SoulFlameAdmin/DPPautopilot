@@ -9,14 +9,39 @@ class A5Error extends Error{constructor(code){super(code);this.code=code;}}
 const fail=c=>{throw new A5Error(c);};
 const validUUID=x=>typeof x==='string'&&UUID.test(x);
 const registry=new Map(matrix.points.map(x=>[x.number,x]));
+const byValuePath=new Map(matrix.points.map(x=>[x.valuePath,x]));
 function typeValid(t,v){
  if(t==='number')return typeof v==='number'&&Number.isFinite(v);
  if(t==='integer')return Number.isSafeInteger(v);
  if(t==='month')return typeof v==='string'&&/^\d{4}-(0[1-9]|1[0-2])$/.test(v);
  if(['string','enum','document_ref'].includes(t))return typeof v==='string'&&!!v.trim()&&v.length<=5000;
  if(t==='object')return isObj(v)&&Object.keys(v).length>0;
- if(t==='array'||t==='document_ref_array')return Array.isArray(v)&&v.length>0;
+ if(t==='array')return Array.isArray(v)&&v.length>0;
+ if(t==='document_ref_array')return Array.isArray(v)&&v.length>0&&v.every(x=>typeof x==='string'&&!!x.trim()&&x.length<=5000);
  return false;
+}
+function valueValid(m,v){
+ if(!typeValid(m.valueType,v))return false;
+ if(m.unit==='%'&&!(v>=0&&v<=100))return false;
+ if(m.unit==='cycles'&&v<0)return false;
+ if(m.number===1){
+  if(typeof v!=='string'||v.trim().length<1||v.trim().length>300||/[\u0000-\u001f\u007f]/.test(v))return false;
+ }
+ return true;
+}
+function orderedGroupsValid(byNumber){
+ const groups=matrix.validation?.orderedGroups||[];
+ for(const paths of groups){
+  const points=paths.map(path=>byValuePath.get(path));
+  if(points.some(p=>!p))return false;
+  const facts=points.map(p=>byNumber.get(p.number));
+  // Ordering becomes draft-authoritative only once all members were human-verified.
+  if(facts.some(f=>!f||f.verified!==true))continue;
+  const values=facts.map(f=>f.value);
+  if(values.some(v=>typeof v!=='number'||!Number.isFinite(v)))return false;
+  for(let i=0;i<values.length-1;i++)if(values[i]>values[i+1])return false;
+ }
+ return true;
 }
 function put(target,path,value){
  const segments=path.split('.');
@@ -48,9 +73,10 @@ function planBatteryDraft({context,facts=[],approval=null,applicability={}}={}){
   if(!m||byNumber.has(m.number)||!isObj(f)||
    !TYPES.has(f.source_type)||typeof f.source_ref!=='string'||!f.source_ref.trim()||
    !validUUID(f.reviewer_id)||!validUUID(f.review_event_id)||
-   typeof f.verified!=='boolean'||!typeValid(m.valueType,f.value))fail('INVALID_FACT');
+   typeof f.verified!=='boolean'||!valueValid(m,f.value))fail('INVALID_FACT');
   byNumber.set(m.number,f);
  }
+ if(!orderedGroupsValid(byNumber))fail('INVALID_FACT');
  for(const [k,v] of Object.entries(applicability)){
   const p=registry.get(Number(k));
   if(!p||p.lmtStatusAt2027_02_18!=='if_applicable'||
