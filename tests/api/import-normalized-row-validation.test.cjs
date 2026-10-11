@@ -108,6 +108,10 @@ test('legacy stored mappings remain readable but cannot be newly saved unchanged
 
 test('row validator reports per-row failures without treating missing optional import data as completeness failure',()=>{
   const good=lmtRow(),bad=lmtRow();
+  bad.normalized_model.model_identifier='M2';
+  bad.normalized_model.canonical_data.identification.model_id='M2';
+  bad.normalized_item.unique_identifier='urn:dpp:import:2';
+  bad.normalized_item.canonical_data.unique_identifier='urn:dpp:import:2';
   bad.normalized_model.canonical_data.rated_capacity_ah='20 Ah';
   const result=validator.validateNormalizedRows([good,bad]);
   assert.equal(result.length,1);
