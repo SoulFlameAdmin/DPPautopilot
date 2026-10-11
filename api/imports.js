@@ -7,85 +7,41 @@ const { startRequestObservability } = require('./_observability.js');
 const { getSupabaseConfig } = require('./_supabase_config.js');
 const { validateNormalizedRows, validMappingTarget } = require('./_import_normalized_row_validation.js');
 
-function send(res,status,body){
-  res.statusCode=status;
-  res.setHeader('Content-Type','application/json; charset=utf-8');
-  res.setHeader('Cache-Control','no-store');
-  res.end(JSON.stringify(body));
-}
-
-function bearer(req){
-  const value=req.headers&&(req.headers.authorization||req.headers.Authorization);
-  return typeof value==='string'&&/^Bearer\s+\S+$/i.test(value)?value:null;
-}
-
-function validUuid(value){
-  return typeof value==='string'&&
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-}
+function send(res,status,body){res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(body));}
+function bearer(req){const value=req.headers&&(req.headers.authorization||req.headers.Authorization);return typeof value==='string'&&/^Bearer\s+\S+$/i.test(value)?value:null;}
+function validUuid(value){return typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);}
 
 const IMPORT_STATUSES=new Set(['staged','validated','invalid','committed']);
+const FORBIDDEN_MAPPING_SEGMENTS=new Set(['__proto__','prototype','constructor']);
 
-function validTimestamp(value){
-  return typeof value==='string'&&value.trim().length>0&&Number.isFinite(Date.parse(value));
-}
+function validTimestamp(value){return typeof value==='string'&&value.trim().length>0&&Number.isFinite(Date.parse(value));}
 function validNullableTimestamp(value){return value===null||validTimestamp(value);}
 function validNonNegativeInteger(value){return Number.isInteger(value)&&value>=0;}
-
-function validImportCreate(value){
-  return value&&typeof value==='object'&&!Array.isArray(value)&&
-    validUuid(value.import_id)&&value.status==='staged'&&
-    Number.isInteger(value.staged_rows)&&value.staged_rows>=1&&value.staged_rows<=1000;
-}
-function validImportGet(value){
-  return value&&typeof value==='object'&&!Array.isArray(value)&&
-    validUuid(value.import_id)&&(value.mapping_id===null||validUuid(value.mapping_id))&&
-    IMPORT_STATUSES.has(value.status)&&validNonNegativeInteger(value.row_count)&&
-    validNonNegativeInteger(value.error_count)&&validNullableTimestamp(value.validated_at)&&
-    validNullableTimestamp(value.committed_at)&&validTimestamp(value.created_at)&&validTimestamp(value.updated_at);
-}
-function validImportValidate(value){
-  return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.import_id)&&
-    (value.status==='validated'||value.status==='invalid')&&Number.isInteger(value.row_count)&&value.row_count>=1&&
-    validNonNegativeInteger(value.error_count)&&((value.status==='validated'&&value.error_count===0)||(value.status==='invalid'&&value.error_count>0));
-}
-function validImportCommit(value){
-  return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.import_id)&&value.status==='committed'&&
-    Number.isInteger(value.committed_rows)&&value.committed_rows>=1&&typeof value.already_committed==='boolean';
-}
+function validImportCreate(value){return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.import_id)&&value.status==='staged'&&Number.isInteger(value.staged_rows)&&value.staged_rows>=1&&value.staged_rows<=1000;}
+function validImportGet(value){return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.import_id)&&(value.mapping_id===null||validUuid(value.mapping_id))&&IMPORT_STATUSES.has(value.status)&&validNonNegativeInteger(value.row_count)&&validNonNegativeInteger(value.error_count)&&validNullableTimestamp(value.validated_at)&&validNullableTimestamp(value.committed_at)&&validTimestamp(value.created_at)&&validTimestamp(value.updated_at);}
+function validImportValidate(value){return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.import_id)&&(value.status==='validated'||value.status==='invalid')&&Number.isInteger(value.row_count)&&value.row_count>=1&&validNonNegativeInteger(value.error_count)&&((value.status==='validated'&&value.error_count===0)||(value.status==='invalid'&&value.error_count>0));}
+function validImportCommit(value){return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.import_id)&&value.status==='committed'&&Number.isInteger(value.committed_rows)&&value.committed_rows>=1&&typeof value.already_committed==='boolean';}
 
 function validRows(rows){
   if(!Array.isArray(rows)||rows.length<1||rows.length>1000)return false;
-  return rows.every(row=>row&&typeof row==='object'&&!Array.isArray(row)&&
-    row.normalized_model&&typeof row.normalized_model==='object'&&!Array.isArray(row.normalized_model)&&
-    row.normalized_item&&typeof row.normalized_item==='object'&&!Array.isArray(row.normalized_item)&&
-    (row.validation_errors==null||Array.isArray(row.validation_errors)));
+  return rows.every(row=>row&&typeof row==='object'&&!Array.isArray(row)&&row.normalized_model&&typeof row.normalized_model==='object'&&!Array.isArray(row.normalized_model)&&row.normalized_item&&typeof row.normalized_item==='object'&&!Array.isArray(row.normalized_item)&&(row.validation_errors==null||Array.isArray(row.validation_errors)));
 }
 
 function validMappingName(value){return typeof value==='string'&&value.trim().length>=1&&value.trim().length<=160;}
 function validMappingFormat(value){return value==='csv'||value==='xlsx';}
-function validMappingHeaders(value){
-  return Array.isArray(value)&&value.length>=1&&value.length<=100&&
-    value.every(v=>typeof v==='string'&&v.trim().length>0)&&new Set(value.map(v=>v.trim().toLowerCase())).size===value.length;
+function validMappingHeaders(value){return Array.isArray(value)&&value.length>=1&&value.length<=100&&value.every(v=>typeof v==='string'&&v.trim().length>0)&&new Set(value.map(v=>v.trim().toLowerCase())).size===value.length;}
+function safeStoredMappingTarget(value){
+  if(typeof value!=='string'||value.length>500)return false;
+  if(value==='')return true;
+  const parts=value.split('.');
+  return parts.every(part=>part.length>0&&!FORBIDDEN_MAPPING_SEGMENTS.has(part));
 }
 // Strict for NEW/UPDATED mapping profiles. Unknown or retired canonical paths cannot be saved.
-function validFieldMapping(value){
-  return value&&typeof value==='object'&&!Array.isArray(value)&&
-    Object.entries(value).every(([k,v])=>typeof k==='string'&&k.trim().length>0&&validMappingTarget(v));
-}
-// Read compatibility for profiles that predate the locked 71-point contract. We must not turn a
-// legacy stored profile into a 502 response merely because one target has since been retired.
-// Applying/resaving it still goes through the strict validator above.
-function validStoredFieldMapping(value){
-  return value&&typeof value==='object'&&!Array.isArray(value)&&
-    Object.entries(value).every(([k,v])=>typeof k==='string'&&k.trim().length>0&&typeof v==='string'&&v.length<=500);
-}
-function validMappingProfile(value){
-  return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.id)&&
-    validMappingName(value.name)&&validMappingFormat(value.source_format)&&validMappingHeaders(value.source_headers)&&
-    validStoredFieldMapping(value.field_mapping)&&Number.isInteger(value.revision)&&value.revision>=1&&
-    validTimestamp(value.created_at)&&validTimestamp(value.updated_at);
-}
+function validFieldMapping(value){return value&&typeof value==='object'&&!Array.isArray(value)&&Object.entries(value).every(([k,v])=>typeof k==='string'&&k.trim().length>0&&validMappingTarget(v));}
+// Legacy profiles may contain retired but harmless paths. Dangerous prototype-chain segments fail closed
+// so a tenant-shared profile cannot reach the browser's generic setPath helper with __proto__-style input.
+function validStoredFieldMapping(value){return value&&typeof value==='object'&&!Array.isArray(value)&&Object.entries(value).every(([k,v])=>typeof k==='string'&&k.trim().length>0&&safeStoredMappingTarget(v));}
+function validMappingProfile(value){return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.id)&&validMappingName(value.name)&&validMappingFormat(value.source_format)&&validMappingHeaders(value.source_headers)&&validStoredFieldMapping(value.field_mapping)&&Number.isInteger(value.revision)&&value.revision>=1&&validTimestamp(value.created_at)&&validTimestamp(value.updated_at);}
 function validMappingDelete(value){return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.id)&&value.deleted===true;}
 
 function validateRpcShape(name,data){
@@ -99,10 +55,7 @@ function validateRpcShape(name,data){
   return true;
 }
 
-function mapDatabaseError(data){
-  const mapped=mapSharedDatabaseError('imports',data);
-  return [mapped.status,mapped.code,mapped.message];
-}
+function mapDatabaseError(data){const mapped=mapSharedDatabaseError('imports',data);return [mapped.status,mapped.code,mapped.message];}
 const DEFAULT_RPC_TIMEOUT_MS=8000;
 function upstreamTimeoutError(){const error=new Error('UPSTREAM_TIMEOUT');error.status=504;error.publicCode='UPSTREAM_TIMEOUT';error.publicMessage='Database request timed out.';return error;}
 function upstreamInvalidJsonError(){const error=new Error('UPSTREAM_ERROR');error.status=502;error.publicCode='UPSTREAM_ERROR';error.publicMessage='Database request failed.';return error;}
@@ -169,4 +122,4 @@ async function handler(req,res){
 }
 
 module.exports=handler;
-module.exports._test={bearer,validUuid,validTimestamp,validNullableTimestamp,validNonNegativeInteger,validImportCreate,validImportGet,validImportValidate,validImportCommit,validMappingName,validMappingFormat,validMappingHeaders,validFieldMapping,validStoredFieldMapping,validMappingProfile,validMappingDelete,validateRpcShape,validRows,validateNormalizedRows,validMappingTarget,mapDatabaseError,rpc,IMPORT_STATUSES,DEFAULT_RPC_TIMEOUT_MS};
+module.exports._test={bearer,validUuid,validTimestamp,validNullableTimestamp,validNonNegativeInteger,validImportCreate,validImportGet,validImportValidate,validImportCommit,validMappingName,validMappingFormat,validMappingHeaders,validFieldMapping,safeStoredMappingTarget,validStoredFieldMapping,validMappingProfile,validMappingDelete,validateRpcShape,validRows,validateNormalizedRows,validMappingTarget,mapDatabaseError,rpc,IMPORT_STATUSES,FORBIDDEN_MAPPING_SEGMENTS,DEFAULT_RPC_TIMEOUT_MS};
