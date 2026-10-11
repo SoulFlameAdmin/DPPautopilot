@@ -6,6 +6,7 @@ on:
       - 'tests/api/c04-owner-export-scope-verify.test.cjs'
       - '.github/workflows/c04-owner-export-scope-safety.yml'
       - 'docs/c04-owner-export-scope-20261011.md'
+      - 'scripts/c04-export-storage-inventory-select-only.sql'
   workflow_dispatch:
 permissions:
   contents: read
