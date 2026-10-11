@@ -73,7 +73,7 @@ test('battery identifier rejects control characters and overlength values',()=>{
   assert.ok(codes(row).includes('IDENTIFIER_INVALID'));
 });
 
-test('saved mapping targets are restricted to known catalog or 71-point paths',()=>{
+test('new saved mapping targets are restricted to known catalog or 71-point paths',()=>{
   assert.equal(validator.validMappingTarget('model.rated_capacity_ah'),true);
   assert.equal(validator.validMappingTarget('item.performance.capacity_fade_pct'),true);
   assert.equal(validator.validMappingTarget(''),true);
@@ -81,6 +81,17 @@ test('saved mapping targets are restricted to known catalog or 71-point paths',(
   assert.equal(validator.validMappingTarget('model.__proto__.polluted'),false);
   assert.equal(imports._test.validFieldMapping({capacity:'model.rated_capacity_ah',unused:''}),true);
   assert.equal(imports._test.validFieldMapping({bad:'model.unknown_field'}),false);
+});
+
+test('legacy stored mappings remain readable but cannot be newly saved unchanged',()=>{
+  const legacy={
+    id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',name:'legacy SOH',source_format:'csv',
+    source_headers:['state_of_health_percent'],field_mapping:{state_of_health_percent:'item.state_of_health.percent'},
+    revision:1,created_at:'2026-09-19T00:00:00.000Z',updated_at:'2026-09-19T00:00:00.000Z'
+  };
+  assert.equal(imports._test.validStoredFieldMapping(legacy.field_mapping),true);
+  assert.equal(imports._test.validMappingProfile(legacy),true);
+  assert.equal(imports._test.validFieldMapping(legacy.field_mapping),false);
 });
 
 test('row validator reports per-row failures without treating missing optional import data as completeness failure',()=>{
