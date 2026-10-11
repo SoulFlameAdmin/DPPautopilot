@@ -21,9 +21,14 @@ function lmtRow(identifier='urn:dpp:batch:1',capacity=20){
     validation_errors:[]
   };
 }
-function rowCodes(result,rowNumber){
-  return result.find(x=>x.row===rowNumber)?.errors.map(x=>x.code)||[];
+function portableRowWithCanonical(canonicalData){
+  return {
+    normalized_model:{model_identifier:'PORTABLE-1',manufacturer_name:'Maker',category:'portable',canonical_data:canonicalData},
+    normalized_item:{unique_identifier:'urn:dpp:portable:1',lifecycle_status:'original',canonical_data:{}},
+    validation_errors:[]
+  };
 }
+function rowCodes(result,rowNumber){return result.find(x=>x.row===rowNumber)?.errors.map(x=>x.code)||[];}
 
 test('same battery identifier cannot appear twice in one staged batch',()=>{
   const result=validateNormalizedRows([lmtRow('urn:dpp:same'),lmtRow('urn:dpp:same')]);
@@ -43,4 +48,11 @@ test('same model id with identical model data is allowed for different battery i
   const result=validateNormalizedRows([lmtRow('urn:dpp:one'),lmtRow('urn:dpp:two')]);
   assert.equal(result.some(x=>x.errors.some(e=>e.code==='MODEL_CONFLICT_IN_BATCH')),false);
   assert.equal(result.some(x=>x.errors.some(e=>e.code==='DUPLICATE_IDENTIFIER_IN_BATCH')),false);
+});
+
+test('canonical fingerprinting is depth-bounded instead of recursing until stack exhaustion',()=>{
+  const root={};let current=root;
+  for(let i=0;i<80;i+=1){current.next={};current=current.next;}
+  const result=validateNormalizedRows([portableRowWithCanonical(root)]);
+  assert.ok(rowCodes(result,1).includes('CANONICAL_COMPLEXITY_EXCEEDED'));
 });
