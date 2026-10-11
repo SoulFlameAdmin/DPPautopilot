@@ -1,0 +1,23 @@
+name: LMT 71 Value Validation
+on:
+  pull_request:
+    paths:
+      - 'data/lmt-battery-71-v2.json'
+      - 'data/scooter-battery-launch-sample-v2.json'
+      - 'scripts/lmt_71_completeness.py'
+      - 'scripts/validate_lmt_71_completeness.py'
+      - '.github/workflows/lmt-71-value-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lmt-value-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact PR SHA
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Validate 71-point LMT launch values fail closed
+        run: python scripts/validate_lmt_71_completeness.py
