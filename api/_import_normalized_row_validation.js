@@ -10,6 +10,8 @@ const KNOWN_MAPPING_TARGETS=new Set(['',...catalog.fields.map(field=>field.path)
 const POINT_BY_PATH=new Map(matrix.points.map(point=>[point.valuePath,point]));
 const POINT_PATHS=[...POINT_BY_PATH.keys()];
 const UNTYPED_COMPLEX=new Set(['object','array']);
+const MAX_CANONICAL_DEPTH=64;
+const MAX_CANONICAL_NODES=20000;
 
 function isObject(value){return !!value&&typeof value==='object'&&!Array.isArray(value);}
 function nonEmptyString(value){return typeof value==='string'&&value.trim().length>0;}
@@ -116,12 +118,14 @@ function validateNormalizedRow(row){
   }
   return errors;
 }
-function stableValue(value){
-  if(Array.isArray(value))return value.map(stableValue);
-  if(isObject(value))return Object.fromEntries(Object.keys(value).sort().map(key=>[key,stableValue(value[key])]));
+function stableValue(value,state,depth){
+  state.nodes+=1;
+  if(state.nodes>MAX_CANONICAL_NODES||depth>MAX_CANONICAL_DEPTH)throw new Error('CANONICAL_COMPLEXITY_EXCEEDED');
+  if(Array.isArray(value))return value.map(item=>stableValue(item,state,depth+1));
+  if(isObject(value))return Object.fromEntries(Object.keys(value).sort().map(key=>[key,stableValue(value[key],state,depth+1)]));
   return value;
 }
-function stableJson(value){return JSON.stringify(stableValue(value));}
+function stableJson(value){return JSON.stringify(stableValue(value,{nodes:0},0));}
 function pushBoth(results,first,current,entry){
   if(!results[first].errors.some(e=>e.code===entry.code&&e.path===entry.path))results[first].errors.push(entry);
   if(!results[current].errors.some(e=>e.code===entry.code&&e.path===entry.path))results[current].errors.push(entry);
@@ -141,11 +145,13 @@ function validateNormalizedRows(rows){
 
     const model=row.normalized_model;
     if(nonEmptyString(model.model_identifier)){
-      const fingerprint=stableJson({
-        manufacturer_name:model.manufacturer_name,
-        category:model.category,
-        canonical_data:model.canonical_data||{}
-      });
+      let fingerprint;
+      try{
+        fingerprint=stableJson({manufacturer_name:model.manufacturer_name,category:model.category,canonical_data:model.canonical_data||{}});
+      }catch(errorValue){
+        results[index].errors.push(error('CANONICAL_COMPLEXITY_EXCEEDED','normalized_model.canonical_data'));
+        return;
+      }
       const previous=models.get(model.model_identifier);
       if(previous&&previous.fingerprint!==fingerprint){
         pushBoth(results,previous.index,index,error('MODEL_CONFLICT_IN_BATCH','normalized_model.model_identifier'));
@@ -160,7 +166,7 @@ function validateNormalizedRows(rows){
 function validMappingTarget(value){return typeof value==='string'&&KNOWN_MAPPING_TARGETS.has(value.trim());}
 
 module.exports={
-  CATEGORIES,LIFECYCLES,KNOWN_MAPPING_TARGETS,POINT_BY_PATH,
+  CATEGORIES,LIFECYCLES,KNOWN_MAPPING_TARGETS,POINT_BY_PATH,MAX_CANONICAL_DEPTH,MAX_CANONICAL_NODES,
   isObject,getPath,valueTypeValid,printableIdentifier,validatePoint,validateCanonicalTree,
   validateNormalizedRow,validateNormalizedRows,validMappingTarget,stableJson
 };
