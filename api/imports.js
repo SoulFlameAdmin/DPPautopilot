@@ -36,10 +36,7 @@ function safeStoredMappingTarget(value){
   const parts=value.split('.');
   return parts.every(part=>part.length>0&&!FORBIDDEN_MAPPING_SEGMENTS.has(part));
 }
-// Strict for NEW/UPDATED mapping profiles. Unknown or retired canonical paths cannot be saved.
 function validFieldMapping(value){return value&&typeof value==='object'&&!Array.isArray(value)&&Object.entries(value).every(([k,v])=>typeof k==='string'&&k.trim().length>0&&validMappingTarget(v));}
-// Legacy profiles may contain retired but harmless paths. Dangerous prototype-chain segments fail closed
-// so a tenant-shared profile cannot reach the browser's generic setPath helper with __proto__-style input.
 function validStoredFieldMapping(value){return value&&typeof value==='object'&&!Array.isArray(value)&&Object.entries(value).every(([k,v])=>typeof k==='string'&&k.trim().length>0&&safeStoredMappingTarget(v));}
 function validMappingProfile(value){return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.id)&&validMappingName(value.name)&&validMappingFormat(value.source_format)&&validMappingHeaders(value.source_headers)&&validStoredFieldMapping(value.field_mapping)&&Number.isInteger(value.revision)&&value.revision>=1&&validTimestamp(value.created_at)&&validTimestamp(value.updated_at);}
 function validMappingDelete(value){return value&&typeof value==='object'&&!Array.isArray(value)&&validUuid(value.id)&&value.deleted===true;}
@@ -101,7 +98,7 @@ async function handler(req,res){
       if(!validRows(body.rows))return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'The import payload is invalid.'}});
       if(body.mapping_id!=null&&!validUuid(body.mapping_id))return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'The import payload is invalid.'}});
       const normalizedFailures=validateNormalizedRows(body.rows);
-      if(normalizedFailures.length)return send(res,422,{error:{code:'INVALID_NORMALIZED_IMPORT',message:'Normalized import data failed server-side validation.',invalid_rows:normalizedFailures.length}});
+      if(normalizedFailures.length)return send(res,422,{error:{code:'INVALID_IMPORT_PAYLOAD',message:'The import payload is invalid.',invalid_rows:normalizedFailures.length}});
       const value=await rpc('dpp_api_import_create',{p_rows:body.rows,p_mapping_id:body.mapping_id==null?null:body.mapping_id},authorization);
       return send(res,201,{data:value});
     }
