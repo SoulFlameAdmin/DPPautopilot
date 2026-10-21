@@ -1,10 +1,10 @@
 {
-  "version": 2,
+  "version": 3,
   "task": "R13",
   "status": "partial",
   "runbook": "docs/INCIDENT_RUNBOOK.md",
   "dependencies": {
-    "R09": "partial structured request correlation/logging",
+    "R09": "partial structured request correlation/logging with deployed production ingestion evidence",
     "R10": "partial monitoring thresholds/owners",
     "R11": "green backup policy",
     "R12": "green isolated restore drill"
@@ -69,7 +69,7 @@
     "Treat suspected tenant isolation or data disclosure as a privacy/security incident immediately."
   ],
   "runtime_gaps": [
-    "R09 deployed log ingestion/correlation evidence is still unavailable while F08/runtime acceptance remains blocked.",
+    "R09 structured production event ingestion is evidenced, but R09 is not GREEN until production logging retention/backend ownership and full runtime acceptance are complete.",
     "R10 has no approved live notification destination; the CI fire/recover drill is synthetic and does not count as human acknowledgement evidence.",
     "C05 production rollback procedure is not accepted yet.",
     "A deployed incident drill using production-like runtime evidence has not been executed.",
@@ -85,5 +85,12 @@
     "required_phases_exercised": true,
     "live_notification_claimed": false,
     "deployed_runtime_claimed": false
+  },
+  "runtime_evidence": {
+    "source": "Vercel runtime error aggregation",
+    "structured_event_observed": true,
+    "observed_at": "2026-09-21T21:49:22Z",
+    "deployment_id": "dpl_EiGGtCSHLr18wArzAsjQpje63zDu",
+    "scope_note": "Production structured-log ingestion is evidenced only; live paging, human acknowledgement, current production health and production rollback remain unproven."
   }
 }
