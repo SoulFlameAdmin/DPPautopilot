@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow">
+<title>DAVID · Вашият DPP асистент</title>
+<link rel="stylesheet" href="/assets/csp/david-setup.css">
+</head>
+<body class="david-setup">
+<main class="wizard-shell">
+  <header class="wizard-header"><a href="/start">SOULFLAME <span>DPP</span></a><span>DAVID · Gemini-assisted setup</span></header>
+  <div class="wizard-progress"><div id="progressBar"></div></div>
+  <div id="status" class="status" role="status" aria-live="polite">Проверявам фирмения достъп…</div>
+  <section id="authView" class="wizard-card" hidden>
+    <p class="eyebrow">СТЪПКА 1</p><h1>Влезте с фирмения си имейл</h1>
+    <p>За да запазим настройките само във вашата фирма, първо потвърдете имейла си.</p>
+    <a id="signinLink" class="primary-link" href="/company?flow=setup">Вход / регистрация →</a>
+  </section>
+  <section id="companyView" class="wizard-card" hidden>
+    <p class="eyebrow">СТЪПКА 1 · ФИРМА</p>
+    <h1>Как се казва вашата фирма?</h1>
+    <p>Тя ще получи собствено защитено DPP пространство.</p>
+    <label class="field"><span>Име на фирмата</span><input id="companyName" maxlength="200" autocomplete="organization" placeholder="Например: Voltrex Batteries"></label>
+    <button id="createCompany" class="primary-link button-link" type="button">Създай фирменото пространство →</button>
+    <p id="companyMessage" class="small" role="status"></p>
+  </section>
+  <section id="questionView" class="wizard-card" hidden>
+    <p class="eyebrow" id="questionIndex">DAVID · ВЪПРОС 1 ОТ 8</p>
+    <h1 id="questionTitle">Вашите продукти</h1>
+    <p id="questionText">Зареждам въпроса…</p>
+    <p class="ai-caption" id="questionHelp"></p>
+    <label class="field"><span>Вашият отговор</span><textarea id="answerText" maxlength="1800" rows="4" placeholder="Отговорете с ваши думи. Може и кратко."></textarea></label>
+    <div class="wizard-actions">
+      <button class="secondary-button" id="backQuestion" type="button">Назад</button>
+      <button class="primary-link button-link" id="nextQuestion" type="button">Продължи →</button>
+    </div>
+    <label class="privacy-choice"><input type="checkbox" id="aiConsent"><span>Съгласен съм отговорите ми да се изпращат към Gemini за персонализирани въпроси. Без отметка DAVID използва локалните шаблонни въпроси.</span></label>
+  </section>
+  <section id="reviewView" class="wizard-card" hidden>
+    <p class="eyebrow">СТЪПКА 3 · ПОТВЪРЖДЕНИЕ</p>
+    <h1>Това е вашата DPP система</h1>
+    <p>Проверете отговорите. DAVID ще ги превърне в настройка за вашата фирма, без да добавя непотвърдени технически данни.</p>
+    <div id="reviewAnswers" class="review-answers"></div>
+    <label class="privacy-choice"><input id="approveCheckbox" type="checkbox"><span>Проверих данните и одобрявам DAVID да ги запази като фирмена конфигурация.</span></label>
+    <div class="wizard-actions"><button id="backReview" class="secondary-button" type="button">Редактирай</button><button id="approveButton" class="primary-link button-link" type="button">Одобрявам и създай системата →</button></div>
+  </section>
+  <section id="readyView" class="wizard-card" hidden>
+    <p class="eyebrow">СТЪПКА 4 · ВАШАТА СИСТЕМА</p>
+    <h1>Фирменото ви DPP пространство е конфигурирано!</h1>
+    <p id="readySummary">Настройките са запазени в защитената ви фирмена база.</p>
+    <div class="ready-grid"><div><strong>Продукти и модели</strong><span>Управлявайте каталога</span></div><div><strong>Данни и импорти</strong><span>Excel, CSV и производствени системи</span></div><div><strong>QR паспорти</strong><span>Генерират се след потвърждение на нужните полета</span></div></div>
+    <section class="first-passport">
+      <h2>Създайте първия си чернови паспорт</h2>
+      <p>Въведете реалните идентификатори. DAVID няма да измисля данни или да публикува недовършен паспорт.</p>
+      <label class="field"><span>Идентификатор на модел</span><input id="modelCode" maxlength="128" placeholder="MODEL-001"></label>
+      <label class="field"><span>Уникален идентификатор / сериен номер</span><input id="serialCode" maxlength="220" placeholder="SERIAL-001"></label>
+      <label class="field"><span>Батерийна категория</span><select id="batteryCategory">
+      <option value="">Изберете</option><option value="light_means_of_transport">Е-скутер / LMT</option>
+      <option value="electric_vehicle">Електрически автомобил</option><option value="industrial">Индустриална батерия</option>
+      <option value="portable">Преносима батерия</option><option value="starting_lighting_ignition">Стартерна / SLI</option><option value="other">Друга батерия</option></select></label>
+      <button id="createDraft" class="primary-link button-link" type="button">Създай чернови паспорт →</button>
+      <p id="draftResult" role="status" class="small"></p>
+    </section>
+    <a class="secondary-link" href="/manufacturer">Отвори фирменото DPP табло →</a>
+  </section>
+</main>
+<script src="/assets/csp/david-setup.js"></script>
+</body></html>
