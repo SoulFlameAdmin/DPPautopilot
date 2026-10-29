@@ -114,14 +114,15 @@ async function geminiQuestion(index,answers,{env=process.env,fetchImpl=fetch}={}
 async function configureAnswers(answers,referral,auth,options){
   // User approved all data. Save through tenant-bound SECURITY DEFINER RPCs;
   // never let the model write SQL, deploy code, activate passports or set prices.
-  for(const [index,topic] of TOPICS.entries()){
+  await Promise.all(TOPICS.map((topic,index)=>{
     const raw=answers[topic.key].trim();
     const structured={topic:topic.title,source:'manufacturer_approved',answer:raw};
     if(index===0&&referral)structured.referral_hint=referral; // untrusted campaign hint, not commission evidence
-    await rpc('dpp_api_manufacturer_onboarding_answer_upsert',{
+    return rpc('dpp_api_manufacturer_onboarding_answer_upsert',{
       p_question_key:topic.key,p_raw_answer:raw,p_structured_value:structured
     },auth,options);
-  }
+  }));
+  // Configure only after every answer was durably acknowledged.
   return rpc('dpp_api_manufacturer_onboarding_configure',{},auth,options);
 }
 async function handler(req,res){
