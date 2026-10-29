@@ -1,6 +1,8 @@
 # R02 Security Headers / TLS — production acceptance
 
-R02 is **GREEN**. The strict CSP implementation is deployed to canonical production and the live production hostname has been verified against the committed security-header policy.
+R02 is **PARTIAL for the current release**. The September 23 hardening below is historical evidence, **not** current release acceptance. The deployed CSP policy now includes a narrowly scoped additional API origin (`https://soulflame-twins.vercel.app`) used for manufacturer Early Access. This newer policy must be rechecked on the exact preview/prod deployment with a full browser email-link journey before R02 can return to GREEN.
+
+**Safety boundary:** `script-src 'self'`, `style-src 'self'`, no `unsafe-inline`, no `unsafe-eval`, no wildcard source, and no secret-bearing browser assets are permitted. Preserve historical evidence without altering its timestamp or deployment SHA.
 
 ## Implemented hardening
 
