@@ -32,7 +32,7 @@ assert len(repo)==len(set(repo))
 assert snapshot.get('repository_migrations_at_observation')==len(repo),'C04 snapshot does not cover this repository version'
 observed_rows=snapshot.get('applied_migrations')
 assert isinstance(observed_rows,list) and observed_rows,'C04 applied migrations empty'
-assert all(isinstance(m,dict) and re.fullmatch(r'\\d{14}',m.get('version','')) and
+assert all(isinstance(m,dict) and re.fullmatch(r'\d{14}',m.get('version','')) and
            isinstance(m.get('name'),str) and m['name'] for m in observed_rows),'C04 invalid migration rows'
 assert snapshot.get('observed_migrations_total',0)>=len(observed_rows),'C04 invalid observation scope count'
 assert snapshot.get('observed_distinct_migration_names',0)>=len(repo),'C04 observation incomplete'
