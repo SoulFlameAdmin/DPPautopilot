@@ -51,14 +51,13 @@ for line in env.splitlines():
 api_names=["models","items","passport","export","imports","tenant","organizations","members"]
 shared_config=(ROOT/"api/_supabase_config.js").read_text(encoding="utf-8")
 for token in ["DPP_SUPABASE_URL","DPP_SUPABASE_PUBLISHABLE_KEY","SUPABASE_URL","SUPABASE_ANON_KEY"]:
-    require(re.search(r"\\benv\\."+token+r"\\b",shared_config) is not None,f"R01 shared config missing explicit env source: {token}")
+    require("env."+token in shared_config,f"R01 shared config missing explicit env source: {token}")
 require("bundled.supabaseUrl" in shared_config,"R01 shared config missing public URL fallback")
 require("bundled.publishableKey" in shared_config,"R01 shared config missing public key fallback")
 require("SERVER_CONFIGURATION_INVALID" in shared_config,"R01 shared config must reject invalid runtime configuration")
 for name in api_names:
     text=(ROOT/f"api/{name}.js").read_text(encoding="utf-8")
-    uses_shared=(re.search(r"require\\(['\\\"]\\./_supabase_config\\.js['\\\"]\\)",text) is not None
-                 and re.search(r"\\bgetSupabaseConfig\\s*\\(",text) is not None)
+    uses_shared=("_supabase_config.js" in text and "getSupabaseConfig(" in text)
     if uses_shared:
         continue
     require("DPP_SUPABASE_URL" in text,f"R01 {name} API must accept canonical DPP_SUPABASE_URL")
