@@ -2,6 +2,25 @@
 
 **Status: PROVEN SCHEMA PRESENCE, NOT PROVEN MIGRATION PROVENANCE. DO NOT PROMOTE OR REAPPLY SQL.**
 
+## Latest authoritative connector recheck — 2026-10-30 (supersedes the old "missing" conclusion)
+
+**The old migration-absence statement below is obsolete.** A fresh **Supabase `list_migrations` connector** returned **470 versioned records (469 distinct names)**. Every one of the **67 canonical migration names in the current DPP repository is present**. The prior `data/bound-supabase-migration-snapshot.json` was dated 2026-10-06 and captured only 63 names; that stale snapshot, not verified migration absence, produced the earlier C04 CI failure. The previous SELECT-only query against `supabase_migrations.schema_migrations` should **not** be used as evidence that the four migrations are missing, given the contradictory authoritative connector output.
+
+The old snapshot has been preserved unchanged in `data/archive/bound-supabase-migration-snapshot_2026-10-06.json`. The refreshed bound snapshot captures **68 matching registry records / 67 unique DPP repo names**, with unfiltered connector totals recorded separately. It intentionally excludes unrelated project-wide migration identifiers so the R01 client-asset security scan cannot be confused by terms present in unrelated migration titles.
+
+The four questioned migrations are **confirmed applied by canonical name**, at registry versions different from the Git filenames:
+
+| Canonical name | Git file version | Supabase registry version |
+| --- | --- | --- |
+| `dpp_client_application_onboarding` | `20261007023500` | `20261006233214` |
+| `dpp_specific_registration_link_flow` | `20261007031500` | `20261006235507` |
+| `dpp_early_access_dashboard_details` | `20261007032500` | `20261007001855` |
+| `dpp_gmail_dashboard_link_sessions` | `20261007035000` | `20261007004858` |
+
+**57 of 67 canonical DPP migrations** have a version-number mismatch. This is consistent with different naming/timestamp conventions but is not proof of SQL equivalence. The database registry also contains one duplicate canonical name (`dpp_items_delete_checked`) across separate versions, preserved in the observation and requiring provenance review if it affects release.
+
+**C04 now has two separate checks**: (1) authoritative migration **name coverage** (67/67); (2) deployed **function-body fingerprints** compared with version-controlled effective SQL. A new read-only observation in `data/c04-live-function-fingerprints_2026-10-30.json` and `scripts/validate_c04_live_function_fingerprints.py` fail closed on unreviewed drift. The existing difference in `dpp_api_client_application_submit` means schema parity is **NOT GREEN**, even though registry name coverage now passes. Full release still requires actual staging schema acceptance, backup/restore, and owner approval.
+
 ## Scope / evidence
 
 - Database connection: canonical `frhletkiuupgksmgxoxc` (EU-west-1); Supabase SQL connector, strictly SELECT-only.
