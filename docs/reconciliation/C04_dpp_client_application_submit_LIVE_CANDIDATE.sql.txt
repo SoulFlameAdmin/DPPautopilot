@@ -1,0 +1,127 @@
+-- NON-DEPLOYABLE REVIEW CANDIDATE — DO NOT AUTO-EXECUTE OR APPLY.
+-- Captured from read-only pg_get_functiondef() for production DPP project.
+-- This is NOT an applied, approved or canonical migration.
+-- Preserves currently deployed lower(email) plus registration -> application transition.
+-- Before a real migration: owner review, verify tenant checks/permissions,
+-- take and restore backups in isolation, stage and test exact SQL, then apply via
+-- approved migration workflow with new canonical version and evidence.
+--
+CREATE OR REPLACE FUNCTION public.dpp_api_client_application_submit(p_company_name text, p_contact_name text DEFAULT ''::text, p_country text DEFAULT ''::text, p_website text DEFAULT NULL::text, p_employees_count integer DEFAULT NULL::integer, p_dpp_users_count integer DEFAULT NULL::integer, p_production_sites_count integer DEFAULT NULL::integer, p_systems jsonb DEFAULT '[]'::jsonb, p_product_categories text DEFAULT ''::text, p_sku_count integer DEFAULT NULL::integer, p_annual_units bigint DEFAULT NULL::bigint, p_notes text DEFAULT ''::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+declare
+  v_user uuid;
+  v_email text;
+  v_id uuid;
+  v_created_at timestamptz;
+  v_updated_at timestamptz;
+begin
+  v_user := public.dpp_request_user_id();
+  if v_user is null then
+    raise exception 'authenticated user context is required' using errcode='DP101';
+  end if;
+
+  select lower(email) into v_email from auth.users where id=v_user;
+  if v_email is null or length(v_email) > 320 then
+    raise exception 'verified email is required' using errcode='DP101';
+  end if;
+
+  if p_company_name is null or length(btrim(p_company_name)) < 1 or length(btrim(p_company_name)) > 200 then
+    raise exception 'company name is invalid' using errcode='DP501';
+  end if;
+  if coalesce(length(p_contact_name),0) > 200 or coalesce(length(p_country),0) > 120 or
+     coalesce(length(p_product_categories),0) > 2000 or coalesce(length(p_notes),0) > 5000 then
+    raise exception 'application text is invalid' using errcode='DP501';
+  end if;
+  if p_website is not null and length(p_website) > 500 then
+    raise exception 'website is invalid' using errcode='DP501';
+  end if;
+  if p_employees_count is not null and (p_employees_count < 1 or p_employees_count > 1000000) then
+    raise exception 'employees count is invalid' using errcode='DP501';
+  end if;
+  if p_dpp_users_count is not null and (p_dpp_users_count < 1 or p_dpp_users_count > 1000000) then
+    raise exception 'DPP users count is invalid' using errcode='DP501';
+  end if;
+  if p_production_sites_count is not null and (p_production_sites_count < 0 or p_production_sites_count > 100000) then
+    raise exception 'production sites count is invalid' using errcode='DP501';
+  end if;
+  if p_sku_count is not null and (p_sku_count < 0 or p_sku_count > 100000000) then
+    raise exception 'SKU count is invalid' using errcode='DP501';
+  end if;
+  if p_annual_units is not null and (p_annual_units < 0 or p_annual_units > 1000000000000) then
+    raise exception 'annual units count is invalid' using errcode='DP501';
+  end if;
+  if p_systems is null or jsonb_typeof(p_systems) <> 'array' or jsonb_array_length(p_systems) > 30 then
+    raise exception 'systems list is invalid' using errcode='DP501';
+  end if;
+  if exists (
+    select 1 from jsonb_array_elements(p_systems) x
+    where jsonb_typeof(x) <> 'string' or length(trim(both '"' from x::text)) > 120
+  ) then
+    raise exception 'systems list is invalid' using errcode='DP501';
+  end if;
+
+  select id into v_id
+  from public.dpp_client_applications
+  where user_id=v_user
+    and lower(company_name)=lower(btrim(p_company_name))
+    and status in ('submitted','reviewing')
+  order by created_at desc
+  limit 1;
+
+  if v_id is null then
+    insert into public.dpp_client_applications(
+      user_id,email,company_name,contact_name,country,website,employees_count,dpp_users_count,
+      production_sites_count,systems,product_categories,sku_count,annual_units,notes,status
+    ) values (
+      v_user,v_email,btrim(p_company_name),btrim(coalesce(p_contact_name,'')),btrim(coalesce(p_country,'')),
+      nullif(btrim(coalesce(p_website,'')),''),
+      p_employees_count,p_dpp_users_count,p_production_sites_count,p_systems,
+      btrim(coalesce(p_product_categories,'')),p_sku_count,p_annual_units,btrim(coalesce(p_notes,'')),'submitted'
+    )
+    returning id,created_at,updated_at into v_id,v_created_at,v_updated_at;
+  else
+    update public.dpp_client_applications
+    set email=v_email,
+        contact_name=btrim(coalesce(p_contact_name,'')),
+        country=btrim(coalesce(p_country,'')),
+        website=nullif(btrim(coalesce(p_website,'')),''),
+        employees_count=p_employees_count,
+        dpp_users_count=p_dpp_users_count,
+        production_sites_count=p_production_sites_count,
+        systems=p_systems,
+        product_categories=btrim(coalesce(p_product_categories,'')),
+        sku_count=p_sku_count,
+        annual_units=p_annual_units,
+        notes=btrim(coalesce(p_notes,'')),
+        updated_at=now()
+    where id=v_id
+    returning created_at,updated_at into v_created_at,v_updated_at;
+  end if;
+
+  update public.dpp_registration_requests
+  set status='application_submitted',
+      application_id=v_id,
+      completed_at=coalesce(completed_at,now()),
+      updated_at=now()
+  where id=(
+    select id
+    from public.dpp_registration_requests
+    where user_id=v_user and lower(email)=v_email
+    order by verified_at desc nulls last, requested_at desc
+    limit 1
+  );
+
+  return jsonb_build_object(
+    'application_id',v_id,
+    'email',v_email,
+    'company_name',btrim(p_company_name),
+    'status','submitted',
+    'created_at',v_created_at,
+    'updated_at',v_updated_at
+  );
+end
+$function$
