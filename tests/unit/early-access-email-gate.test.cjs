@@ -19,3 +19,14 @@ test('public Early Access application requires email proof before dashboard entr
   assert.match(html,/Достъпът се активира само след потвърждение/);
   assert.doesNotMatch(html,/не чакаме email потвърждение|влизате директно/);
 });
+
+
+test('legacy manufacturer early access does not treat an email in localStorage as login',()=>{
+  const entry=read('assets/csp/manufacturer-entry.js');
+  const real=read('assets/csp/manufacturer-inline-1.js');
+  assert.match(entry,/params\.get\("early"\)==="1"/);
+  assert.match(entry,/location\.replace\("\/apply"\)/);
+  assert.doesNotMatch(entry,/readEarlyClient|showEarlyAccess|localStorage\.getItem|dpp_early_access_client_v1/);
+  assert.match(entry,/loadProductionDashboard/);
+  assert.match(real,/sessionStorage\.getItem/);
+});
