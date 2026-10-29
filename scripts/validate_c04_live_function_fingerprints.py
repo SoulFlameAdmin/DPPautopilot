@@ -25,9 +25,9 @@ REQUIRED = {
 
 def normalize_pg_body(body: str) -> str:
     # Match the read-only SQL snapshot normalization exactly:
-    # lower(regexp_replace(btrim(body), E'\\s+', ' ', 'g')).
+    # lower(regexp_replace(btrim(body), E'\s+', ' ', 'g')).
     # PostgreSQL btrim removes literal spaces, not linefeeds or tabs.
-    return re.sub(r"\\s+", " ", body.strip(" ")).lower()
+    return re.sub(r"\s+", " ", body.strip(" ")).lower()
 
 def effective_repo_bodies(root: Path, names: set[str]) -> dict[str, str]:
     """Last CREATE OR REPLACE definition in filename order wins."""
@@ -39,13 +39,13 @@ def effective_repo_bodies(root: Path, names: set[str]) -> dict[str, str]:
         sql = sql_path.read_text(encoding="utf-8")
         for name in names:
             expr = re.compile(
-                r"create\\s+or\\s+replace\\s+function\\s+public\\."
-                + re.escape(name) + r"\\s*\\(",
+                r"create\s+or\s+replace\s+function\s+public\."
+                + re.escape(name) + r"\s*\(",
                 re.IGNORECASE,
             )
             for match in expr.finditer(sql):
                 tail = sql[match.start():]
-                body_match = re.search(r"\\$function\\$([\\s\\S]*?)\\$function\\$", tail, re.IGNORECASE)
+                body_match = re.search(r"\$function\$([\s\S]*?)\$function\$", tail, re.IGNORECASE)
                 if not body_match:
                     raise AssertionError(f"C04: cannot extract {name} from {sql_path.name}")
                 found[name] = body_match.group(1)
