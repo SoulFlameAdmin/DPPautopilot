@@ -73,5 +73,25 @@ class C04FingerprintTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "exactly five|names/duplicates"):
             c04.compare(self.root, bad)
 
+class C04LiveCandidateReviewTests(unittest.TestCase):
+    def test_review_only_live_candidate_matches_observed_fingerprint(self):
+        """Review fixture preserves deployed code; does NOT constitute an applied migration."""
+        source = (c04.ROOT / "docs/reconciliation/"
+                  "C04_dpp_client_application_submit_LIVE_CANDIDATE.sql.txt").read_text(encoding="utf-8")
+        self.assertIn("NON-DEPLOYABLE REVIEW CANDIDATE", source)
+        self.assertIn("DO NOT AUTO-EXECUTE", source)
+        self.assertIn("security definer", source.lower())
+        self.assertIn("search_path", source.lower())
+        self.assertIn("application_submitted", source)
+        match = __import__("re").search(
+            r"\$function\$([\s\S]*?)\$function\$", source, __import__("re").IGNORECASE
+        )
+        self.assertIsNotNone(match)
+        digest = hashlib.md5(c04.normalize_pg_body(match.group(1)).encode("utf-8")).hexdigest()
+        evidence = __import__("json").loads(c04.EVIDENCE_PATH.read_text(encoding="utf-8"))
+        expected = next(item for item in evidence["functions"]
+                        if item["name"] == "dpp_api_client_application_submit")
+        self.assertEqual(digest, expected["normalized_body_md5"])
+
 if __name__ == "__main__":
     unittest.main()
