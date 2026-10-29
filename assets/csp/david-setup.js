@@ -18,7 +18,7 @@ const params=new URLSearchParams(location.search);
 const referral=/^[a-z0-9][a-z0-9_-]{0,31}$/i.test(params.get('ref')||'')?(params.get('ref')||'').toLowerCase():'';
 function status(text,kind=''){$('status').textContent=text;$('status').className='status '+kind}
 function show(id){for(const name of ['authView','companyView','questionView','reviewView','readyView'])$(name).hidden=name!==id}
-function progress(percent){$('progressBar').style.width=Math.max(0,Math.min(100,percent))+'%'}
+function progress(percent){$('progressBar').value=Math.max(0,Math.min(100,percent))}
 function getSession(){
   try{const stored=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
     return stored&&typeof stored.access_token==='string'&&stored.access_token?stored:null;
