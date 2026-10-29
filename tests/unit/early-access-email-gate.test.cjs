@@ -30,3 +30,10 @@ test('legacy manufacturer early access does not treat an email in localStorage a
   assert.match(entry,/loadProductionDashboard/);
   assert.match(real,/sessionStorage\.getItem/);
 });
+
+test('scripted Early Access support must not pretend failed delivery was stored',()=>{
+  const js=read('assets/csp/manufacturer-early.js');
+  assert.match(js,/въпроса\. Не е записан за преглед/);
+  assert.match(js,/\$\("chatInput"\)\.value=text/);
+  assert.doesNotMatch(js,/SoulFlame ще го види при прегледа/);
+});
