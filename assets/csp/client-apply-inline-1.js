@@ -1,8 +1,6 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
 const ENDPOINT="https://soulflame-twins.vercel.app/api/dpp-dashboard-link";
-const EARLY_STORAGE="dpp_early_access_client_v1";
-const TOKEN_KEY="dpp_early_access_token_v1";
 
 function show(message,kind=""){
   const node=$("#result");
@@ -32,15 +30,15 @@ $("#registerClient").addEventListener("click",async()=>{
   }
 
   $("#registerClient").disabled=true;
-  show("Регистрираме email-а и отваряме вашия dashboard…");
+  show("Изпращаме линк за потвърждение на имейла…");
 
   try{
     const data=await registerClient(email);
-    localStorage.setItem(EARLY_STORAGE,JSON.stringify({email,requestId:data.requestId||null,registeredAt:new Date().toISOString(),status:"reviewing"}));
-    if(data.accessToken)localStorage.setItem(TOKEN_KEY,data.accessToken);
-    window.location.assign(data.dashboardUrl||"/manufacturer-early");
+    if(data.status!=="email_sent")throw new Error("Не успяхме да потвърдим изпращането на линка.");
+    show("Изпратихме ви личен линк. Проверете входящата поща (и Spam), отворете линка и чак тогава ще влезете в Early Access dashboard.","ok");
   }catch(error){
     show(error.message,"bad");
+  }finally{
     $("#registerClient").disabled=false;
   }
 });

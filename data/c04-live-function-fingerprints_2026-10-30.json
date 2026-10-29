@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "task": "C04_FUNCTION_DEF",
+  "project_id": "frhletkiuupgksmgxoxc",
+  "observed_at": "2026-10-29T23:21:07.591Z",
+  "source": "Supabase execute_sql read-only pg_get_functiondef",
+  "normalization": "SQL lower(regexp_replace(btrim(split_part(pg_get_functiondef(oid),'$function$',2)), E'\\\\s+', ' ', 'g'))",
+  "review_status": "unaccepted",
+  "functions": [
+    {
+      "name": "dpp_api_client_application_submit",
+      "normalized_body_md5": "a5b94440520f24dd7bb24a5cb4ae71b4",
+      "full_definition_md5": "ab77f8b554e2b10e378a5f88499f5ef0",
+      "signature": "p_company_name text, p_contact_name text, p_country text, p_website text, p_employees_count integer, p_dpp_users_count integer, p_production_sites_count integer, p_systems jsonb, p_product_categories text, p_sku_count integer, p_annual_units bigint, p_notes text"
+    },
+    {
+      "name": "dpp_api_client_applications_mine",
+      "normalized_body_md5": "755662c7ade181034ea4bb7ceff29310",
+      "full_definition_md5": "524a1a313ff0286ad5dbb80f8ee5d399",
+      "signature": ""
+    },
+    {
+      "name": "dpp_api_registration_request_create",
+      "normalized_body_md5": "71675e6c9fc78540b64101f1cb148bee",
+      "full_definition_md5": "4f7eaa2b7b21792001ab405ecdff8a8d",
+      "signature": "p_email text"
+    },
+    {
+      "name": "dpp_api_registration_request_verify",
+      "normalized_body_md5": "6e88397d62adb1bcc781915d503f23ac",
+      "full_definition_md5": "ac25ef7d30a692badcc377c749476443",
+      "signature": "p_request_id uuid"
+    },
+    {
+      "name": "dpp_api_registration_requests_mine",
+      "normalized_body_md5": "92d3c0cdf9fccbc12ba213f4726fcdee",
+      "full_definition_md5": "10b99085d0a715a33ad3b6dcc8db4a8f",
+      "signature": ""
+    }
+  ]
+}
