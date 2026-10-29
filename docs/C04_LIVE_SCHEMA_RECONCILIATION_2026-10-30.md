@@ -45,6 +45,25 @@ Reference live function-definition MD5 values (Postgres `md5(pg_get_functiondef(
 
 Live query showed 3 Early Access records with status `reviewing`, and zero rows in each of `dpp_registration_requests`, `dpp_client_applications` and `dpp_registry_submissions` at read time. No email addresses, personal data, registration tokens, or secret keys are included in this document.
 
+## Definition-body comparison (read-only follow-up)
+
+Compared live `pg_get_functiondef` function bodies to the effective expected definitions in the four repo migrations (normalizing whitespace only). Results:
+
+| Function | Live body vs repository | Interpretation |
+| --- | --- | --- |
+| `dpp_api_client_applications_mine` | Exact normalized match to `20261007032500` | Source body is present |
+| `dpp_api_registration_request_create` | Exact normalized match to `20261007031500` | Source body is present |
+| `dpp_api_registration_request_verify` | Exact normalized match to `20261007031500` | Source body is present |
+| `dpp_api_registration_requests_mine` | Exact normalized match to `20261007031500` | Source body is present |
+| `dpp_api_client_application_submit` | **DRIFT: 2 additions in the live definition** | Requires provenance review |
+
+The deployed `dpp_api_client_application_submit` body differs from the repo migration in exactly two token-level hunks after whitespace normalization:
+
+1. `select email into v_email` (repo) became `select lower(email) into v_email` (live).
+2. The live function additionally updates the matching `dpp_registration_requests` row to `status='application_submitted'` and sets `application_id`, `completed_at` and `updated_at` after creating an application. This update is **not present** in the canonical `20261007023500` repo migration source. It may reflect an intentional improvement performed out-of-band; its migration provenance and full authorization behavior are not documented.
+
+Consequently, **do not reapply the old client-application migration**: replacing the function with the older definition could silently remove the registration-to-application state transition. Investigate committed history/other SQL scripts and capture exact current function text in protected engineering evidence before making a change. Body equality of the other four functions is **not** full table/trigger migration acceptance.
+
 ## Next mandatory gate
 
 1. Compare the **full deployed SQL definitions**, constraints, column types, grants, function `search_path`, and triggers against each repository migration and any later migrations overriding them. Do not confuse a same-name function with the same definition.
