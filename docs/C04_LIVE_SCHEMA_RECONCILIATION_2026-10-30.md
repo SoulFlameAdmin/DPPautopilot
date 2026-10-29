@@ -83,6 +83,12 @@ The deployed `dpp_api_client_application_submit` body differs from the repo migr
 
 Consequently, **do not reapply the old client-application migration**: replacing the function with the older definition could silently remove the registration-to-application state transition. Investigate committed history/other SQL scripts and capture exact current function text in protected engineering evidence before making a change. Body equality of the other four functions is **not** full table/trigger migration acceptance.
 
+## Review-only reconciliation candidate — NOT A MIGRATION
+
+The exact current live source of `dpp_api_client_application_submit` has been copied by read-only `pg_get_functiondef` to `docs/reconciliation/C04_dpp_client_application_submit_LIVE_CANDIDATE.sql.txt`. This file is intentionally **outside** `supabase/migrations/`: it is a code-review artifact, **not** approved to execute or registered as applied. A unit test checks its body against the live read-only fingerprint snapshot without exposing customer information or server credentials.
+
+The current source preserves two behaviors missing in the older repo migration: normalized login email (`lower(email)`) and verified-registration-to-application status transitions (`application_submitted`). An explicit schema migration should be authored only after reviewing the business invariants, ensuring user/tenant permissions and idempotence, validating it on a restored test database and receiving owner approval. Copying this candidate into migrations without that process is **not** an accepted reconciliation.
+
 ## Next mandatory gate
 
 1. Compare the **full deployed SQL definitions**, constraints, column types, grants, function `search_path`, and triggers against each repository migration and any later migrations overriding them. Do not confuse a same-name function with the same definition.
