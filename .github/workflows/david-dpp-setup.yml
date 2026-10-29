@@ -1,0 +1,47 @@
+name: DAVID DPP Guided Setup
+
+on:
+  pull_request:
+    paths:
+      - "api/david-setup.js"
+      - "assets/csp/david-setup.js"
+      - "assets/csp/david-start.js"
+      - "assets/csp/david-continuation.js"
+      - "assets/csp/david-setup.css"
+      - "live/start.html"
+      - "live/setup.html"
+      - "live/company.html"
+      - "vercel.json"
+      - "tests/api/david-setup.test.cjs"
+      - ".github/workflows/david-dpp-setup.yml"
+  push:
+    branches: [main]
+    paths:
+      - "api/david-setup.js"
+      - "assets/csp/david-setup.js"
+      - "assets/csp/david-start.js"
+      - "assets/csp/david-setup.css"
+      - "live/start.html"
+      - "live/setup.html"
+      - "live/company.html"
+      - "vercel.json"
+      - "tests/api/david-setup.test.cjs"
+      - ".github/workflows/david-dpp-setup.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  guided-setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --check api/david-setup.js
+      - run: node --check assets/csp/david-setup.js
+      - run: node --check assets/csp/david-start.js
+      - run: node --check assets/csp/david-continuation.js
+      - run: node --test tests/api/david-setup.test.cjs
