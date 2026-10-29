@@ -114,6 +114,8 @@ jobs:
         run: python scripts/validate_production_promotion_policy.py
       - name: Validate C04 migration deployment gate
         run: python scripts/validate_migration_deployment_gate.py
+      - name: Validate C04 deployed function fingerprint parity
+        run: python scripts/validate_c04_live_function_fingerprints.py
       - name: Validate C05 rollback policy
         run: python scripts/validate_rollback_policy.py
       - name: Validate C06 staging acceptance policy
