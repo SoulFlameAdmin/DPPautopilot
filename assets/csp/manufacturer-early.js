@@ -67,8 +67,9 @@ async function escalateQuestion(text){
     addMsg("Този въпрос е извън автоматичния intake. Изпратих го към SoulFlame и ще получите човешки отговор.","system");
     setText("chatResult",r.notification==="sent"?"Въпросът е изпратен към SoulFlame.":"Въпросът е записан за SoulFlame review.");
   }catch(error){
-    addMsg("Не успях да препратя въпроса в момента. Продължете с intake въпросите, а SoulFlame ще го види при прегледа.","system");
-    setText("chatResult",error.message);
+    addMsg("Не успях да изпратя въпроса. Не е записан за преглед. Опитайте отново по-късно.","system");
+    $("chatInput").value=text;
+    setText("chatResult",error.message||"Въпросът не е доставен.");
   }
   renderQuestion();
 }
