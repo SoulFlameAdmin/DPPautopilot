@@ -1,0 +1,31 @@
+name: DPP Early Access Email Gate
+
+on:
+  pull_request:
+    paths:
+      - "live/apply.html"
+      - "assets/csp/client-apply-inline-1.js"
+      - "tests/unit/early-access-email-gate.test.cjs"
+      - ".github/workflows/dpp-early-access-email.yml"
+  push:
+    branches: [main]
+    paths:
+      - "live/apply.html"
+      - "assets/csp/client-apply-inline-1.js"
+      - "tests/unit/early-access-email-gate.test.cjs"
+      - ".github/workflows/dpp-early-access-email.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verified-email-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --check assets/csp/client-apply-inline-1.js
+      - run: node --test tests/unit/early-access-email-gate.test.cjs
