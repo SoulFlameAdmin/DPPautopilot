@@ -6,6 +6,7 @@ on:
       - "api/david-setup.js"
       - "assets/csp/david-setup.js"
       - "assets/csp/david-start.js"
+      - "assets/csp/david-continuation.js"
       - "assets/csp/david-setup.css"
       - "live/start.html"
       - "live/setup.html"
@@ -42,4 +43,5 @@ jobs:
       - run: node --check api/david-setup.js
       - run: node --check assets/csp/david-setup.js
       - run: node --check assets/csp/david-start.js
+      - run: node --check assets/csp/david-continuation.js
       - run: node --test tests/api/david-setup.test.cjs
