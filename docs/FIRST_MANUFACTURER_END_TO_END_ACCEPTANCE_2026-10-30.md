@@ -15,6 +15,14 @@ The owner read-only audited `frhletkiuupgksmgxoxc`:
 - There are zero records in `dpp_client_applications`, `dpp_registration_requests` and `dpp_registry_submissions` at audit time; this is not evidence that real customers have been activated.
 - There is a separate functioning tenant/model/item/passport system with synthetic tests, but it is **not wired into the Early Access approval step**. Its principal database security boundaries must remain separate.
 
+## Update: identity/tenant correlation from live read-only audit
+
+The three pre-existing `reviewing` Early Access rows are **not three separate prospects**. They have **one distinct email and one distinct `supabase_user_id`**, which matches a confirmed `auth.users` email in all three rows. That user is a member of **one tenant** holding **2 battery models, 12 battery items and 12 passports** (11 active, 1 draft). This demonstrates existing technical entities associated with the account, **not evidence they belong to an independently paying customer or satisfy the new applicant's legal ownership/QR proof requirements**.
+
+Do not create duplicate tenants based on `dpp_early_access_sessions.id`, and do not infer a unique manufacturer count from session count. A verified account with membership is still not sufficient to auto-assign a company's Early Access application to a tenant; owner must verify company ownership and assess existing products.
+
+The SoulFlame PR #171 now includes an owner-only, read-only identity/tenant evidence check on individual applicant detail. It must fail closed on Auth/admin API failure or mismatched emails. The API returns only summary evidence, not raw `supabase_user_id` or organization IDs. No tenant is created or activated by this operation.
+
 ## Acceptance gates
 
 | Gate | Single concrete outcome | Security/compliance proof | Current evidence |
